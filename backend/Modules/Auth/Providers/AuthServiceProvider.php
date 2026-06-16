@@ -14,9 +14,10 @@ class AuthServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Use our UUID-keyed token model and skip Sanctum's default migration.
+        // Sanctum 4 no longer auto-loads its migrations (they are published via
+        // install:api), so there is nothing to "ignore". We only swap the token
+        // model for our UUID-keyed one; our own migration creates the table.
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
-        Sanctum::ignoreMigrations();
     }
 
     public function boot(): void

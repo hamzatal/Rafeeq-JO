@@ -6,8 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Sanctum personal access tokens — customised to use uuidMorphs because
- * the User model uses UUID primary keys. Sanctum's own migration is
- * disabled via Sanctum::ignoreMigrations() in AuthServiceProvider.
+ * the User model uses UUID primary keys. Sanctum 4 does not auto-load its
+ * own migration (it is published via install:api), so this is the single
+ * source of truth for the table. The custom token model is registered via
+ * Sanctum::usePersonalAccessTokenModel() in AuthServiceProvider.
  */
 return new class extends Migration
 {
