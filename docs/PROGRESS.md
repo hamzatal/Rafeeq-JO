@@ -7,7 +7,7 @@
 |---|---|
 | آخر تحديث | Phase 1 backend مكتمل + Frontend foundation (student auth) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-016 |
+| آخر Commit | RFQ-018 |
 | المرحلة الحالية | **Frontend foundation جارٍ → التالي: Driver app + Admin، ثم Phase 2** |
 
 ---
@@ -82,5 +82,7 @@
 | 014 | feat(api-client): typed REST client + auth API + error handling |
 | 015 | feat(student-app): Expo scaffold (RTL/Tajawal/monorepo) + auth flow + home |
 | 016 | docs: frontend setup guide + progress update |
+| 017 | fix(cors+web): allow Expo dev origins (8081) + inline error banners (Alert fails on web) |
+| 018 | docs: code map (navigation guide) for clearer structure |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
