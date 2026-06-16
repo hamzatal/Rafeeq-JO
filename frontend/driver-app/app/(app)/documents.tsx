@@ -11,8 +11,6 @@ import { theme } from '../../src/theme';
 const DOCS: { type: DocumentType; label: string }[] = [
   { type: 'national_id', label: 'الهوية الوطنية' },
   { type: 'license', label: 'رخصة القيادة' },
-  { type: 'vehicle_registration', label: 'دفتر المركبة' },
-  { type: 'insurance', label: 'التأمين' },
   { type: 'photo', label: 'صورة شخصية' },
 ];
 
@@ -52,7 +50,7 @@ export default function Documents() {
 
   return (
     <ScrollView style={styles.safe} contentContainerStyle={styles.content}>
-      <Text style={styles.hint}>ارفع وثائقك الرسمية ليتم اعتماد حسابك. الصيغ المقبولة: صورة أو PDF.</Text>
+      <Text style={styles.hint}>ارفع الهوية ورخصة القيادة لاعتماد حسابك. الصيغ المقبولة: صورة أو PDF.</Text>
       <Banner message={error} variant="error" />
 
       {DOCS.map((doc) => {

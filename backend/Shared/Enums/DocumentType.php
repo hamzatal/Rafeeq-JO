@@ -26,7 +26,7 @@ enum DocumentType: string
     /** Documents required before a driver can be approved. */
     public static function requiredForApproval(): array
     {
-        return [self::NationalId, self::License, self::VehicleRegistration, self::Insurance];
+        return [self::NationalId, self::License];
     }
 
     /** @return array<int, string> */
