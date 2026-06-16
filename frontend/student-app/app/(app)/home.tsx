@@ -1,17 +1,19 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { theme } from '../../src/theme';
 
 export default function Home() {
   const { t } = useI18n();
+  const router = useRouter();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
 
-  const services: { key: string; label: string }[] = [
-    { key: 'subscriptions', label: t('home.subscriptions') },
-    { key: 'trips', label: t('home.trips') },
+  const services: { key: string; label: string; href?: string }[] = [
+    { key: 'subscriptions', label: t('home.subscriptions'), href: '/(app)/subscriptions' },
+    { key: 'trips', label: t('home.trips'), href: '/(app)/trips' },
     { key: 'parcels', label: t('home.parcels') },
     { key: 'lostFound', label: t('home.lostFound') },
     { key: 'rewards', label: t('home.rewards') },
@@ -35,9 +37,14 @@ export default function Home() {
 
         <View style={styles.grid}>
           {services.map((s) => (
-            <View key={s.key} style={styles.card}>
+            <Pressable
+              key={s.key}
+              style={({ pressed }) => [styles.card, pressed && s.href ? styles.pressed : null]}
+              onPress={() => s.href && router.push(s.href as never)}
+            >
               <Text style={styles.cardLabel}>{s.label}</Text>
-            </View>
+              {!s.href && <Text style={styles.soon}>قريباً</Text>}
+            </Pressable>
           ))}
         </View>
       </ScrollView>
@@ -70,4 +77,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardLabel: { fontFamily: theme.fontFamily.bold, fontSize: 16, color: theme.colors.text },
+  soon: { fontFamily: theme.fontFamily.regular, fontSize: 11, color: theme.colors.textSecondary, marginTop: 4 },
+  pressed: { opacity: 0.7, borderColor: theme.colors.primary },
 });
