@@ -9,6 +9,7 @@ enum OtpPurpose: string
     case ResetPassword = 'reset_password';
     case Trip = 'trip';
     case Payment = 'payment';
+    case ChangePhone = 'change_phone';
 
     /** @return array<int, string> */
     public static function values(): array
