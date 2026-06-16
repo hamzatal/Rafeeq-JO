@@ -7,20 +7,25 @@
 |---|---|
 | آخر تحديث | تطبيق الطالب + تطبيق الكابتن جاهزين (مصادقة + توثيق الكابتن) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-026 |
-| المرحلة الحالية | **أُعيدت هيكلة الجذر (frontend/ + backend/) → التالي: Admin dashboard، ثم Phase 2** |
+| آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
+| الفرع الحالي | `foundation/phase-0-1` |
+| آخر Commit | RFQ-030 |
+| المرحلة الحالية | **Phase 0/1 مكتملة (backend + 3 واجهات) → التالي: Phase 2 (النقل)** |
 
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-أُنجز: تطبيق الطالب (مصادقة + رئيسية) + تطبيق الكابتن (مصادقة + رفع وثائق + إضافة مركبة + إرسال للمراجعة + متابعة حالة التوثيق). وُسّع shared (validators موحّدة) و api-client (ProfileApi + DriverApi).
+أُنجز: الواجهات الثلاث (طالب + كابتن + **لوحة إدارة Next.js**). لوحة الإدارة فيها: دخول الموظفين، الرئيسية، قائمة الكباتن + صفحة مراجعة (عرض الوثائق + قبول/رفض كل وثيقة + اعتماد/رفض/إيقاف الكابتن)، وقائمة المستخدمين. أُضيف endpoint قائمة المستخدمين بالـ backend و AdminApi في api-client.
 
-**التالي بالترتيب:**
-1. **لوحة الإدارة (admin-dashboard)**: Next.js + Tailwind + تسجيل دخول الموظفين + صفحات (المستخدمون، الكباتن: عرض/مراجعة الوثائق/اعتماد/رفض/إيقاف).
-2. شاشات الطالب الإضافية: الملف الشخصي + onboarding (اختيار الجامعة).
-3. ثم **Phase 2 (النقل)** في الـ backend: Universities → Areas → PickupPoints → Routes → Subscriptions → Trips (+ Reverb).
+**التالي: Phase 2 — النقل (في الـ backend):**
+1. موديول Universities (CRUD + قائمة عامة) + إضافة FK لـ `student_profiles.university_id`.
+2. Areas + PickupPoints (PostGIS — يتطلب PostgreSQL؛ ملاحظة: SQLite ما بيدعم PostGIS، فننتقل لـ Postgres عبر docker لهالمرحلة).
+3. Routes + RouteStops.
+4. Subscriptions (+ plans) → ربط بالدفع لاحقاً.
+5. Trips + TripPassengers + Trip OTP + التتبّع (Reverb).
+ثم واجهات النقل في التطبيقات.
 
-> تشغيل تطبيق الكابتن: `cd frontend` ثم `npm install` ثم `npm run driver` (أو `cd frontend/driver-app && npm start`).
+> تشغيل لوحة الإدارة: `cd frontend` ثم `npm install` ثم `npm run admin` (على http://localhost:3000). دخول بحساب الأدمن المزروع.
 
 ---
 
@@ -39,7 +44,7 @@
 - ✅ frontend/student-app (Expo: RTL + Tajawal + monorepo metro + auth flow + home)
 - ✅ frontend/driver-app (Expo Navy: auth + documents upload + vehicle + submit-for-review + status)
 - ✅ **إعادة هيكلة:** الجذر صار frontend/ (workspace JS) + backend/ (Laravel)
-- ⏳ frontend/admin-dashboard (Next.js)
+- ✅ frontend/admin-dashboard (Next.js + Tailwind: دخول موظفين + مراجعة/اعتماد الكباتن + قائمة المستخدمين)
 - ⏳ CI (GitHub Actions)
 
 ### Phase 1 — الهوية والأمان ✅ (Backend)
@@ -93,5 +98,9 @@
 | 024 | fix(storage): secure disk defaults to local (fixes flysystem S3 crash) + admin document download stream |
 | 025 | change(drivers): require only national ID + driving license (dropped vehicle reg & insurance) |
 | 026 | chore: remove empty scaffolding dirs (monitoring/deployment/storage) — declutter root |
+| 027 | feat(backend): admin users listing endpoint (Users module) |
+| 028 | feat(api-client): AdminApi (drivers review, users, secure document preview) |
+| 029 | feat(admin-dashboard): Next.js admin — login + drivers review/approve + users list |
+| 030 | docs: admin dashboard setup + progress update |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
