@@ -7,7 +7,7 @@
 |---|---|
 | آخر تحديث | تطبيق الطالب + تطبيق الكابتن جاهزين (مصادقة + توثيق الكابتن) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-023 |
+| آخر Commit | RFQ-026 |
 | المرحلة الحالية | **أُعيدت هيكلة الجذر (frontend/ + backend/) → التالي: Admin dashboard، ثم Phase 2** |
 
 ---
@@ -90,5 +90,8 @@
 | 021 | feat(driver-app): Expo driver app (Navy) — auth + document upload + vehicle + review status |
 | 022 | docs: driver app setup + progress update |
 | 023 | refactor: restructure root into frontend/ (JS workspace) + backend/ (Laravel) |
+| 024 | fix(storage): secure disk defaults to local (fixes flysystem S3 crash) + admin document download stream |
+| 025 | change(drivers): require only national ID + driving license (dropped vehicle reg & insurance) |
+| 026 | chore: remove empty scaffolding dirs (monitoring/deployment/storage) — declutter root |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
