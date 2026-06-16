@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-042 |
-| المرحلة الحالية | **Phase 2: كل الـ backend جاهز (جامعات→رحلات) → التالي: واجهات النقل + صفحات الإدارة** |
+| آخر Commit | RFQ-046 |
+| المرحلة الحالية | **Phase 2: backend + واجهات النقل (طالب+كابتن) ✅ → التالي: صفحات الإدارة للنقل + Reverb** |
 
 ---
 
@@ -64,7 +64,10 @@
 - ✅ **Subscriptions** (backend): خطط (weekly/monthly/term + سعر + عدد رحلات/غير محدود + مدة) + اشتراك الطالب (pending→active→expired/cancelled) + تفعيل (بعد الدفع) + استهلاك رحلة. CRUD خطط للإدارة + اشتراكاتي للطالب + إدارة.
 - ✅ **Trips** (backend - قلب النظام): جدولة رحلة (كابتن معتمد) + بدء/إنهاء/إلغاء + حجز الطالب (يتطلب اشتراك فعّال + فحص السعة) + **Trip OTP** (كود صعود لكل راكب) + تأكيد الصعود من الكابتن (يستهلك رحلة) + تتبّع الموقع (trip_tracking, polling الآن).
 - ⏳ Reverb (بث لحظي) — لاحقاً (حالياً polling عبر `/trips/{id}/location`)
-- ⏳ واجهات النقل في تطبيقي الطالب والكابتن + صفحات الإدارة (Areas/PickupPoints/Routes/Plans/Subscriptions/Trips)
+- ✅ **واجهة الطالب للنقل:** شاشة الاشتراكات (تصفّح الخطط + اشتراك + اشتراكاتي) + شاشة الرحلات (رحلاتي مع كود الصعود + رحلات متاحة + حجز + تتبّع الموقع) + ربط من الرئيسية.
+- ✅ **واجهة الكابتن للنقل:** شاشة رحلاتي (جدولة باختيار مسار + وقت) + تفاصيل الرحلة (بدء/إنهاء/إلغاء + قائمة ركاب + تأكيد صعود بالكود Trip OTP).
+- ✅ توسعة api-client: TransportApi + DriverTripsApi + catalog.listRoutes + الأنواع المشتركة.
+- ⏳ صفحات الإدارة للنقل (Routes/Plans/Subscriptions/Trips) في لوحة Next.js
 - ملاحظة: نستخدم lat/lng (decimal) بدل PostGIS حالياً ليبقى SQLite شغّال؛ PostGIS لاحقاً للاستعلامات المكانية المتقدّمة.
 
 ### Phase 3..7 ⏳
@@ -125,5 +128,9 @@
 | 040 | feat(subscriptions): plans + student subscriptions (pending/active) + activate/consume ride |
 | 041 | feat(trips): trips + passengers + Trip OTP boarding + live tracking (driver & student APIs) |
 | 042 | docs: progress update — subscriptions + trips (Phase 2 backend complete) |
+| 043 | feat(shared+api): transport types + TransportApi + DriverTripsApi + catalog routes |
+| 044 | feat(student-app): subscriptions + trips screens (book, boarding code, live location) + home nav |
+| 045 | feat(driver-app): trips list + scheduling + trip detail (start/end + Trip OTP boarding) |
+| 046 | docs: progress update — transport UIs (student + driver) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
