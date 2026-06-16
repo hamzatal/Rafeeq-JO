@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-039 |
-| المرحلة الحالية | **Phase 2: جامعات+مناطق+نقاط+مسارات ✅ → التالي: Subscriptions** |
+| آخر Commit | RFQ-042 |
+| المرحلة الحالية | **Phase 2: كل الـ backend جاهز (جامعات→رحلات) → التالي: واجهات النقل + صفحات الإدارة** |
 
 ---
 
@@ -61,9 +61,10 @@
 - ✅ **Areas** (backend): CRUD admin + قائمة عامة (name_ar/en, governorate, lat/lng).
 - ✅ **PickupPoints** (backend): CRUD admin + قائمة عامة + فلترة بالمنطقة/الجامعة (FK لـ areas + universities).
 - ✅ **Routes + RouteStops** (backend): مسار (جامعة + منطقة + سعر بالفلس + سعة + أيام + وقت) مع محطات مرتّبة (نقاط تجمّع) — CRUD admin (مع مزامنة المحطات في transaction) + قائمة/تفاصيل للطلاب.
-- ⏳ Subscriptions (+ plans) — التالي
-- ⏳ Trips + TripPassengers + Trip OTP + التتبّع (Reverb)
-- ⏳ واجهات النقل + صفحات الإدارة (Areas/PickupPoints/Routes)
+- ✅ **Subscriptions** (backend): خطط (weekly/monthly/term + سعر + عدد رحلات/غير محدود + مدة) + اشتراك الطالب (pending→active→expired/cancelled) + تفعيل (بعد الدفع) + استهلاك رحلة. CRUD خطط للإدارة + اشتراكاتي للطالب + إدارة.
+- ✅ **Trips** (backend - قلب النظام): جدولة رحلة (كابتن معتمد) + بدء/إنهاء/إلغاء + حجز الطالب (يتطلب اشتراك فعّال + فحص السعة) + **Trip OTP** (كود صعود لكل راكب) + تأكيد الصعود من الكابتن (يستهلك رحلة) + تتبّع الموقع (trip_tracking, polling الآن).
+- ⏳ Reverb (بث لحظي) — لاحقاً (حالياً polling عبر `/trips/{id}/location`)
+- ⏳ واجهات النقل في تطبيقي الطالب والكابتن + صفحات الإدارة (Areas/PickupPoints/Routes/Plans/Subscriptions/Trips)
 - ملاحظة: نستخدم lat/lng (decimal) بدل PostGIS حالياً ليبقى SQLite شغّال؛ PostGIS لاحقاً للاستعلامات المكانية المتقدّمة.
 
 ### Phase 3..7 ⏳
@@ -121,5 +122,8 @@
 | 037 | docs: progress update — areas + pickup points |
 | 038 | feat(routes): backend module — routes + ordered stops, CRUD admin + public list/show |
 | 039 | docs: progress update — routes |
+| 040 | feat(subscriptions): plans + student subscriptions (pending/active) + activate/consume ride |
+| 041 | feat(trips): trips + passengers + Trip OTP boarding + live tracking (driver & student APIs) |
+| 042 | docs: progress update — subscriptions + trips (Phase 2 backend complete) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
