@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "رفيق كابتن",
+    "slug": "rafeeq-driver",
+    "scheme": "rafeeqdriver",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "jo.rafeeq.driver"
+    },
+    "android": {
+      "package": "jo.rafeeq.driver",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F172A"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker"],
+    "extra": {
+      "apiUrl": "http://localhost:8000"
+    }
+  }
+}
