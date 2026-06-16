@@ -3,6 +3,7 @@
 namespace Rafeeq\Modules\Auth\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -74,5 +75,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canLogin(): bool
     {
         return $this->status->canLogin();
+    }
+
+    public function studentProfile(): HasOne
+    {
+        return $this->hasOne(\Rafeeq\Modules\Students\Models\StudentProfile::class);
+    }
+
+    public function driverProfile(): HasOne
+    {
+        return $this->hasOne(\Rafeeq\Modules\Drivers\Models\DriverProfile::class);
     }
 }
