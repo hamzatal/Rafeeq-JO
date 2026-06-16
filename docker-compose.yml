@@ -1,0 +1,64 @@
+# Local development infrastructure for Rafeeq
+# Usage: docker compose up -d
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: rafeeq_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-rafeeq}
+      POSTGRES_USER: ${DB_USERNAME:-rafeeq}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - rafeeq_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-rafeeq}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: rafeeq_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - rafeeq_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Local S3-compatible storage for documents, payment proofs, parcels, etc.
+  minio:
+    image: minio/minio:latest
+    container_name: rafeeq_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-rafeeq}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-secret123}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - rafeeq_miniodata:/data
+
+  # Mailpit for local email testing (OTP fallback, notifications)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: rafeeq_mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  rafeeq_pgdata:
+  rafeeq_redisdata:
+  rafeeq_miniodata:
