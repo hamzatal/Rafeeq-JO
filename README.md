@@ -76,7 +76,7 @@ npm run dev
 ## خطة التنفيذ (Phases)
 
 - [x] **Phase 0** — الأساس (Monorepo + Backend foundation + Design system)
-- [~] **Phase 1** — الهوية والأمان (Auth / OTP / RBAC)
+- [x] **Phase 1** — الهوية والأمان (Auth / OTP / RBAC / Users / Students / Drivers)
 - [ ] **Phase 2** — النقل (Universities / Routes / Subscriptions / Trips)
 - [ ] **Phase 3** — الدفع (CliQ + GPT Vision)
 - [ ] **Phase 4** — الخدمات (Parcels / Lost & Found / Rewards)
