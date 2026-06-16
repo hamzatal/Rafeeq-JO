@@ -5,23 +5,22 @@
 
 | | |
 |---|---|
-| آخر تحديث | Phase 1 backend مكتمل + Frontend foundation (student auth) |
+| آخر تحديث | تطبيق الطالب + تطبيق الكابتن جاهزين (مصادقة + توثيق الكابتن) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-018 |
-| المرحلة الحالية | **Frontend foundation جارٍ → التالي: Driver app + Admin، ثم Phase 2** |
+| آخر Commit | RFQ-022 |
+| المرحلة الحالية | **Frontend: student + driver جاهزين → التالي: Admin dashboard، ثم Phase 2** |
 
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-أُنجز: تطبيق الطالب (Expo) — نظام التصميم المشترك + عميل API + تدفّق المصادقة (welcome/register/OTP/login) + الرئيسية.
+أُنجز: تطبيق الطالب (مصادقة + رئيسية) + تطبيق الكابتن (مصادقة + رفع وثائق + إضافة مركبة + إرسال للمراجعة + متابعة حالة التوثيق). وُسّع shared (validators موحّدة) و api-client (ProfileApi + DriverApi).
 
 **التالي بالترتيب:**
-1. **تطبيق الكابتن (driver-app)**: نفس بنية student-app + ثيم Navy الداكن + شاشات (تسجيل/OTP، رفع الوثائق، إضافة مركبة، شاشة "قيد المراجعة"، حالة التوثيق).
-2. **لوحة الإدارة (admin-dashboard)**: Next.js + Tailwind + تسجيل دخول الموظفين + صفحات (المستخدمون، الكباتن + مراجعة الوثائق/الاعتماد).
-3. شاشات الطالب الإضافية: الملف الشخصي + onboarding (اختيار الجامعة).
-4. ثم **Phase 2 (النقل)** في الـ backend.
+1. **لوحة الإدارة (admin-dashboard)**: Next.js + Tailwind + تسجيل دخول الموظفين + صفحات (المستخدمون، الكباتن: عرض/مراجعة الوثائق/اعتماد/رفض/إيقاف).
+2. شاشات الطالب الإضافية: الملف الشخصي + onboarding (اختيار الجامعة).
+3. ثم **Phase 2 (النقل)** في الـ backend: Universities → Areas → PickupPoints → Routes → Subscriptions → Trips (+ Reverb).
 
-> ملاحظة تشغيل: من جذر المشروع `npm install` ثم `npm run student` (تفاصيل في docs/deployment/frontend-setup.md).
+> تشغيل تطبيق الكابتن: `npm install` (جذر) ثم `npm run --workspace=apps/driver-app start` أو `cd apps/driver-app && npm start`.
 
 ---
 
@@ -38,7 +37,9 @@
 - ✅ packages/shared (design tokens + i18n ar/en + types + utils + constants)
 - ✅ packages/api-client (typed REST client + auth API + RafeeqApiError)
 - ✅ apps/student-app (Expo: RTL + Tajawal + monorepo metro + auth flow + home)
-- ⏳ apps/driver-app + apps/admin-dashboard
+- ✅ apps/driver-app (Expo Navy theme: auth + documents upload + vehicle + submit-for-review + status dashboard)
+- ✅ shared validators (modern form validation) + api-client (ProfileApi + DriverApi)
+- ⏳ apps/admin-dashboard (Next.js)
 - ⏳ CI (GitHub Actions)
 
 ### Phase 1 — الهوية والأمان ✅ (Backend)
@@ -84,5 +85,9 @@
 | 016 | docs: frontend setup guide + progress update |
 | 017 | fix(cors+web): allow Expo dev origins (8081) + inline error banners (Alert fails on web) |
 | 018 | docs: code map (navigation guide) for clearer structure |
+| 019 | fix(db): sqlite database path fallback when DB_DATABASE is a Postgres name |
+| 020 | feat(shared+api): modern validators + ProfileApi/DriverApi + driver i18n + payloads |
+| 021 | feat(driver-app): Expo driver app (Navy) — auth + document upload + vehicle + review status |
+| 022 | docs: driver app setup + progress update |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
