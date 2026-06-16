@@ -7,7 +7,7 @@
 |---|---|
 | آخر تحديث | Phase 1 — مكتمل (Backend) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-010 |
+| آخر Commit | RFQ-012 |
 | المرحلة الحالية | **Phase 1 منتهٍ (backend) → التالي: Frontend foundation ثم Phase 2** |
 
 ---
@@ -76,5 +76,7 @@
 | 008 | feat(students): student profile module |
 | 009 | feat(drivers): driver profiles + vehicles + documents + admin review/approval |
 | 010 | docs: update progress for Users/Students/Drivers modules |
+| 011 | fix(auth): Sanctum 4 compatibility — remove removed ignoreMigrations() call |
+| 012 | docs: Windows/PowerShell + SQLite no-Docker quick-start guide |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
