@@ -31,6 +31,14 @@ export const ENDPOINTS = {
     submit: '/driver/submit',
     vehicles: '/driver/vehicles',
   },
+  admin: {
+    users: '/admin/users',
+    drivers: '/admin/drivers',
+    driver: (id: string) => `/admin/drivers/${id}`,
+    reviewDriver: (id: string) => `/admin/drivers/${id}/review`,
+    reviewDocument: (docId: string) => `/admin/drivers/documents/${docId}/review`,
+    documentFile: (docId: string) => `/admin/drivers/documents/${docId}/file`,
+  },
 } as const;
 
 export const OTP_LENGTH = 6;
