@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-034 |
-| المرحلة الحالية | **Phase 2 — النقل (بدأت): الجامعات ✅ → التالي Areas/PickupPoints/Routes** |
+| آخر Commit | RFQ-037 |
+| المرحلة الحالية | **Phase 2: الجامعات + المناطق + نقاط التجمّع ✅ → التالي: Routes** |
 
 ---
 
@@ -58,11 +58,12 @@
 
 ### Phase 2 — النقل 🔄
 - ✅ **Universities** (backend): migration + model + service + CRUD admin + public list + 7 جامعات أردنية مزروعة. شامل: shared type + api-client (catalog + admin CRUD) + صفحة الجامعات في لوحة الإدارة.
-- ⏳ Areas + PickupPoints (lat/lng) — التالي
-- ⏳ Routes + RouteStops
+- ✅ **Areas** (backend): CRUD admin + قائمة عامة (name_ar/en, governorate, lat/lng).
+- ✅ **PickupPoints** (backend): CRUD admin + قائمة عامة + فلترة بالمنطقة/الجامعة (FK لـ areas + universities).
+- ⏳ Routes + RouteStops — التالي
 - ⏳ Subscriptions (+ plans)
 - ⏳ Trips + TripPassengers + Trip OTP + التتبّع (Reverb)
-- ⏳ واجهات النقل في تطبيقي الطالب والكابتن
+- ⏳ واجهات النقل + صفحات الإدارة (Areas/PickupPoints/Routes)
 - ملاحظة: نستخدم lat/lng (decimal) بدل PostGIS حالياً ليبقى SQLite شغّال؛ PostGIS لاحقاً للاستعلامات المكانية المتقدّمة.
 
 ### Phase 3..7 ⏳
@@ -115,5 +116,8 @@
 | 032 | feat(universities): backend module — CRUD + public list + seed 7 Jordanian universities |
 | 033 | feat(frontend): University type + api-client (catalog + admin CRUD) + admin universities page |
 | 034 | docs: progress update — Phase 2 started (universities) |
+| 035 | feat(areas): backend module — CRUD admin + public list |
+| 036 | feat(pickup-points): backend module — CRUD + public list + area/university filters |
+| 037 | docs: progress update — areas + pickup points |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
