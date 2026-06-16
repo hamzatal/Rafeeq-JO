@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-030 |
-| المرحلة الحالية | **Phase 0/1 مكتملة (backend + 3 واجهات) → التالي: Phase 2 (النقل)** |
+| آخر Commit | RFQ-034 |
+| المرحلة الحالية | **Phase 2 — النقل (بدأت): الجامعات ✅ → التالي Areas/PickupPoints/Routes** |
 
 ---
 
@@ -56,8 +56,17 @@
 - ⏳ شاشات Frontend للمصادقة (مع تأسيس الـ frontend)
 - ⏳ Face/Liveness verification (تكامل فعلي في Phase 5 — الأعمدة جاهزة)
 
-### Phase 2..7 ⏳
-انظر `docs/ROADMAP.md` (لم تبدأ بعد).
+### Phase 2 — النقل 🔄
+- ✅ **Universities** (backend): migration + model + service + CRUD admin + public list + 7 جامعات أردنية مزروعة. شامل: shared type + api-client (catalog + admin CRUD) + صفحة الجامعات في لوحة الإدارة.
+- ⏳ Areas + PickupPoints (lat/lng) — التالي
+- ⏳ Routes + RouteStops
+- ⏳ Subscriptions (+ plans)
+- ⏳ Trips + TripPassengers + Trip OTP + التتبّع (Reverb)
+- ⏳ واجهات النقل في تطبيقي الطالب والكابتن
+- ملاحظة: نستخدم lat/lng (decimal) بدل PostGIS حالياً ليبقى SQLite شغّال؛ PostGIS لاحقاً للاستعلامات المكانية المتقدّمة.
+
+### Phase 3..7 ⏳
+انظر `docs/ROADMAP.md`.
 
 ---
 
@@ -102,5 +111,9 @@
 | 028 | feat(api-client): AdminApi (drivers review, users, secure document preview) |
 | 029 | feat(admin-dashboard): Next.js admin — login + drivers review/approve + users list |
 | 030 | docs: admin dashboard setup + progress update |
+| 031 | fix(auth): disable stateful API mode (fixes "CSRF token mismatch" on admin login) |
+| 032 | feat(universities): backend module — CRUD + public list + seed 7 Jordanian universities |
+| 033 | feat(frontend): University type + api-client (catalog + admin CRUD) + admin universities page |
+| 034 | docs: progress update — Phase 2 started (universities) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
