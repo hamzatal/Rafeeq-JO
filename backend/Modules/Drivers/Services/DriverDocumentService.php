@@ -76,9 +76,9 @@ class DriverDocumentService extends BaseService
         return $document->fresh();
     }
 
-    /** Generate a temporary signed URL to view a private document. */
-    public function temporaryUrl(DriverDocument $document, int $minutes = 5): string
+    /** Stream a private document for authorized admins (disk-agnostic). */
+    public function download(DriverDocument $document): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        return Storage::disk(self::DISK)->temporaryUrl($document->file_path, now()->addMinutes($minutes));
+        return Storage::disk(self::DISK)->download($document->file_path);
     }
 }

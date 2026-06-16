@@ -28,7 +28,7 @@ Route::prefix('v1/driver')->middleware(['auth:sanctum', 'role:driver'])->group(f
 Route::prefix('v1/admin/drivers')->middleware(['auth:sanctum', 'permission:drivers.view'])->group(function () {
     Route::get('/', [DriverAdminController::class, 'index']);
     Route::get('{driver}', [DriverAdminController::class, 'show']);
-    Route::get('documents/{document}/url', [DriverAdminController::class, 'documentUrl'])
+    Route::get('documents/{document}/file', [DriverAdminController::class, 'downloadDocument'])
         ->middleware('permission:drivers.review');
     Route::post('documents/{document}/review', [DriverAdminController::class, 'reviewDocument'])
         ->middleware('permission:drivers.review');

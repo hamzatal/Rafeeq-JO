@@ -39,12 +39,9 @@ class DriverAdminController extends Controller
         return $this->ok(new DriverProfileResource($driver->load(['user', 'documents', 'vehicles'])));
     }
 
-    public function documentUrl(DriverDocument $document): JsonResponse
+    public function downloadDocument(DriverDocument $document)
     {
-        return $this->ok([
-            'url' => $this->documents->temporaryUrl($document),
-            'expires_in' => 300,
-        ]);
+        return $this->documents->download($document);
     }
 
     public function reviewDocument(ReviewDocumentRequest $request, DriverDocument $document): JsonResponse
