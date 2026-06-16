@@ -30,3 +30,11 @@ export type OtpPurpose =
   | 'trip'
   | 'payment'
   | 'change_phone';
+
+export type SubscriptionType = 'weekly' | 'monthly' | 'term';
+
+export type SubscriptionStatus = 'pending' | 'active' | 'expired' | 'cancelled';
+
+export type TripStatus = 'scheduled' | 'started' | 'completed' | 'cancelled';
+
+export type TripPassengerStatus = 'booked' | 'onboard' | 'dropped' | 'no_show' | 'cancelled';
