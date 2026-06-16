@@ -7,7 +7,7 @@
 |---|---|
 | آخر تحديث | Phase 1 backend مكتمل + Frontend foundation (student auth) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-018 |
+| آخر Commit | RFQ-019 |
 | المرحلة الحالية | **Frontend foundation جارٍ → التالي: Driver app + Admin، ثم Phase 2** |
 
 ---
@@ -84,5 +84,6 @@
 | 016 | docs: frontend setup guide + progress update |
 | 017 | fix(cors+web): allow Expo dev origins (8081) + inline error banners (Alert fails on web) |
 | 018 | docs: code map (navigation guide) for clearer structure |
+| 019 | fix(db): sqlite database path fallback when DB_DATABASE is a Postgres name |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
