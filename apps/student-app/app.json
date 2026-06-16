@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "رفيق",
+    "slug": "rafeeq-student",
+    "scheme": "rafeeq",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#2563EB"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "jo.rafeeq.student"
+    },
+    "android": {
+      "package": "jo.rafeeq.student",
+      "adaptiveIcon": {
+        "backgroundColor": "#2563EB"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router", "expo-secure-store", "expo-font"],
+    "extra": {
+      "apiUrl": "http://localhost:8000"
+    }
+  }
+}
