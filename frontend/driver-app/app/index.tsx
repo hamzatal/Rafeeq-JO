@@ -1,17 +1,19 @@
+import { useEffect, useState } from 'react';
 import { Redirect } from 'expo-router';
-import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../src/store/auth';
-import { theme } from '../src/theme';
+import { BrandSplash } from '../src/components/BrandSplash';
 
 export default function Index() {
   const status = useAuth((s) => s.status);
+  const [minTimePassed, setMinTimePassed] = useState(false);
 
-  if (status === 'idle') {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: theme.colors.background }}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
+  useEffect(() => {
+    const timer = setTimeout(() => setMinTimePassed(true), 1600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (status === 'idle' || !minTimePassed) {
+    return <BrandSplash />;
   }
 
   return <Redirect href={status === 'authenticated' ? '/(app)/dashboard' : '/(auth)/welcome'} />;

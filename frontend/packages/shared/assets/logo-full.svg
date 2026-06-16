@@ -1,0 +1,18 @@
+<svg width="760" height="240" viewBox="0 0 760 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <!-- Mark -->
+  <g transform="translate(540,20)">
+    <rect width="200" height="200" rx="48" fill="url(#bg2)"/>
+    <path d="M58 154 C 58 118, 142 118, 142 82 C 142 58, 114 58, 100 58"
+          stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 16" fill="none" opacity="0.85"/>
+    <path d="M100 36 C 122 36, 140 54, 140 76 C 140 104, 100 142, 100 142 C 100 142, 60 104, 60 76 C 60 54, 78 36, 100 36 Z" fill="#D4A017"/>
+    <circle cx="100" cy="74" r="17" fill="#0F172A"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="500" y="150" font-family="Tajawal, sans-serif" font-size="150" font-weight="800" fill="#0F172A" text-anchor="end">رفيق</text>
+</svg>
