@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-046 |
-| المرحلة الحالية | **Phase 2: backend + واجهات النقل (طالب+كابتن) ✅ → التالي: صفحات الإدارة للنقل + Reverb** |
+| آخر Commit | RFQ-049 |
+| المرحلة الحالية | **Phase 2: backend + واجهات النقل + جامعات إربد + شعار/Splash ✅ → التالي: Seeder تجريبي + صفحات إدارة النقل** |
 
 ---
 
@@ -132,5 +132,8 @@
 | 044 | feat(student-app): subscriptions + trips screens (book, boarding code, live location) + home nav |
 | 045 | feat(driver-app): trips list + scheduling + trip detail (start/end + Trip OTP boarding) |
 | 046 | docs: progress update — transport UIs (student + driver) |
+| 047 | feat(universities): seed Irbid universities (Yarmouk, JUST, INU, Jadara) |
+| 048 | feat(brand): Rafeeq logo (SVG) + branded splash screens (student + driver) |
+| 049 | docs: progress update — Irbid universities + branding |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
