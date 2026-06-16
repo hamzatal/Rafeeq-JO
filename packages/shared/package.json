@@ -1,0 +1,15 @@
+{
+  "name": "@rafeeq/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rafeeq shared design system, i18n, and TypeScript types",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
