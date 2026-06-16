@@ -16,4 +16,6 @@ return [
     Rafeeq\Modules\Areas\Providers\AreasServiceProvider::class,
     Rafeeq\Modules\PickupPoints\Providers\PickupPointsServiceProvider::class,
     Rafeeq\Modules\Routes\Providers\RoutesServiceProvider::class,
+    Rafeeq\Modules\Subscriptions\Providers\SubscriptionsServiceProvider::class,
+    Rafeeq\Modules\Trips\Providers\TripsServiceProvider::class,
 ];
