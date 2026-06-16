@@ -1,9 +1,10 @@
 // Monorepo-aware Metro config so the app can import @rafeeq/* workspace packages.
+// Workspace root is the `frontend/` folder (one level up from this app).
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
 const projectRoot = __dirname;
-const workspaceRoot = path.resolve(projectRoot, '../..');
+const workspaceRoot = path.resolve(projectRoot, '..');
 
 const config = getDefaultConfig(projectRoot);
 

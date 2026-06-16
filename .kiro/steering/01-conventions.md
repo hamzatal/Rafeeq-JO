@@ -36,7 +36,7 @@ inclusion: always
 
 ## معايير الكود (Frontend)
 - TypeScript صارم. مكوّنات قابلة لإعادة الاستخدام. RTL + ثنائي اللغة من البداية.
-- design tokens والأنواع من `packages/shared` (لا تكرار).
+- design tokens والأنواع من `frontend/packages/shared` (لا تكرار).
 
 ## التشغيل المحلي
 طريقة التشغيل محدّثة دائماً في `README.md` و`docs/deployment/local-setup.md`.

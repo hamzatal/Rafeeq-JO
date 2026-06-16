@@ -36,7 +36,7 @@ OTP → توثيق السائق → الوثائق الرسمية → Face Verif
 - Auth: Laravel Sanctum (tokens بـ UUID).
 - تطبيق الطالب + الكابتن: Expo (React Native + TypeScript) — iOS + Android + Web.
 - لوحة الإدارة: Next.js + TypeScript + Tailwind.
-- مشترك: `packages/shared` (design system + types + api client).
+- مشترك: `frontend/packages/shared` (design system + types + api client).
 - AI: OpenAI GPT + Vision. الدفع: CliQ. الإشعارات: Firebase FCM. الخرائط: Google/Mapbox.
 - عربي أولاً + RTL + ثنائي اللغة (ar/en).
 

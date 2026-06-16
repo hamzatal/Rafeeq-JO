@@ -7,8 +7,8 @@
 |---|---|
 | آخر تحديث | تطبيق الطالب + تطبيق الكابتن جاهزين (مصادقة + توثيق الكابتن) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-022 |
-| المرحلة الحالية | **Frontend: student + driver جاهزين → التالي: Admin dashboard، ثم Phase 2** |
+| آخر Commit | RFQ-023 |
+| المرحلة الحالية | **أُعيدت هيكلة الجذر (frontend/ + backend/) → التالي: Admin dashboard، ثم Phase 2** |
 
 ---
 
@@ -20,7 +20,7 @@
 2. شاشات الطالب الإضافية: الملف الشخصي + onboarding (اختيار الجامعة).
 3. ثم **Phase 2 (النقل)** في الـ backend: Universities → Areas → PickupPoints → Routes → Subscriptions → Trips (+ Reverb).
 
-> تشغيل تطبيق الكابتن: `npm install` (جذر) ثم `npm run --workspace=apps/driver-app start` أو `cd apps/driver-app && npm start`.
+> تشغيل تطبيق الكابتن: `cd frontend` ثم `npm install` ثم `npm run driver` (أو `cd frontend/driver-app && npm start`).
 
 ---
 
@@ -34,12 +34,12 @@
 - ✅ Shared (Enums + HasUuid + Phone helper)
 - ✅ Infrastructure (SMS gateways + provider)
 - ✅ RBAC (Role/Permission/HasRoles) + Audit (model+logger) + migrations
-- ✅ packages/shared (design tokens + i18n ar/en + types + utils + constants)
-- ✅ packages/api-client (typed REST client + auth API + RafeeqApiError)
-- ✅ apps/student-app (Expo: RTL + Tajawal + monorepo metro + auth flow + home)
-- ✅ apps/driver-app (Expo Navy theme: auth + documents upload + vehicle + submit-for-review + status dashboard)
-- ✅ shared validators (modern form validation) + api-client (ProfileApi + DriverApi)
-- ⏳ apps/admin-dashboard (Next.js)
+- ✅ frontend/packages/shared (design tokens + i18n ar/en + types + utils + validators)
+- ✅ frontend/packages/api-client (typed REST client + auth/profile/driver APIs + RafeeqApiError)
+- ✅ frontend/student-app (Expo: RTL + Tajawal + monorepo metro + auth flow + home)
+- ✅ frontend/driver-app (Expo Navy: auth + documents upload + vehicle + submit-for-review + status)
+- ✅ **إعادة هيكلة:** الجذر صار frontend/ (workspace JS) + backend/ (Laravel)
+- ⏳ frontend/admin-dashboard (Next.js)
 - ⏳ CI (GitHub Actions)
 
 ### Phase 1 — الهوية والأمان ✅ (Backend)
@@ -89,5 +89,6 @@
 | 020 | feat(shared+api): modern validators + ProfileApi/DriverApi + driver i18n + payloads |
 | 021 | feat(driver-app): Expo driver app (Navy) — auth + document upload + vehicle + review status |
 | 022 | docs: driver app setup + progress update |
+| 023 | refactor: restructure root into frontend/ (JS workspace) + backend/ (Laravel) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

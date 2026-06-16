@@ -14,11 +14,11 @@
 
 | التطبيق | الوصف | التقنية | المنصات |
 |---------|--------|---------|----------|
-| `apps/student-app` | تطبيق الطالب | Expo (React Native + TS) | iOS · Android · Web |
-| `apps/driver-app` | تطبيق الكابتن | Expo (React Native + TS) | iOS · Android · Web |
-| `apps/admin-dashboard` | لوحة الإدارة | Next.js + TS + Tailwind | Web |
+| `frontend/student-app` | تطبيق الطالب | Expo (React Native + TS) | iOS · Android · Web |
+| `frontend/driver-app` | تطبيق الكابتن | Expo (React Native + TS) | iOS · Android · Web |
+| `frontend/admin-dashboard` | لوحة الإدارة | Next.js + TS + Tailwind | Web |
 | `backend` | الـ API والمنطق | Laravel 11 (PHP 8.4) | — |
-| `packages/shared` | نظام التصميم والأنواع المشتركة | TypeScript | — |
+| `frontend/packages/shared` | نظام التصميم والأنواع المشتركة | TypeScript | — |
 
 ## البنية التقنية
 
@@ -52,15 +52,12 @@ php artisan key:generate
 php artisan migrate --seed
 php artisan serve
 
-# 3) تطبيق الطالب
-cd apps/student-app
+# 3) الـ Frontend (كل التطبيقات — workspace واحد تحت frontend/)
+cd frontend
 npm install
-npm run start   # ثم اختر iOS / Android / Web
-
-# 4) لوحة الإدارة
-cd apps/admin-dashboard
-npm install
-npm run dev
+npm run student   # تطبيق الطالب (ثم اختر iOS / Android / Web)
+npm run driver    # تطبيق الكابتن
+# npm run admin   # لوحة الإدارة (قادم)
 ```
 
 ## التوثيق

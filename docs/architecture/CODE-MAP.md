@@ -6,13 +6,13 @@
 ```
 Rafeeq-JO/
 ├── backend/        ← الـ API (Laravel). كل المنطق هنا.
-├── apps/           ← الواجهات (3 تطبيقات)
-│   ├── student-app/   تطبيق الطالب (Expo)
-│   ├── driver-app/    تطبيق الكابتن (لاحقاً)
-│   └── admin-dashboard/ لوحة الإدارة (لاحقاً)
-├── packages/       ← كود مشترك بين التطبيقات
-│   ├── shared/        ألوان/خطوط/ترجمة/أنواع
-│   └── api-client/    عميل الاتصال بالـ API
+├── frontend/       ← كل الواجهات + الكود المشترك (workspace واحد)
+│   ├── student-app/      تطبيق الطالب (Expo)
+│   ├── driver-app/       تطبيق الكابتن (Expo)
+│   ├── admin-dashboard/  لوحة الإدارة (قادم)
+│   └── packages/
+│       ├── shared/       ألوان/خطوط/ترجمة/أنواع/فاليديشن
+│       └── api-client/   عميل الاتصال بالـ API
 └── docs/           ← كل التوثيق + الخطة + الحالة
 ```
 
@@ -53,18 +53,21 @@ Rafeeq-JO/
 
 ---
 
-## الـ Frontend (تطبيق الطالب)
+## الـ Frontend (مثال: تطبيق الطالب)
 ```
-apps/student-app/
-├── app/            ← الشاشات (التوجيه تلقائي حسب اسم الملف - expo-router)
-│   ├── (auth)/        شاشات قبل الدخول (welcome, register, otp, login)
-│   └── (app)/         شاشات بعد الدخول (home, ...)
-└── src/
-    ├── components/    أزرار/حقول/عناصر واجهة (Button, Input, Banner, Screen)
-    ├── lib/           api (الاتصال) + storage (حفظ التوكن)
-    ├── store/         الحالة العامة (auth) — zustand
-    ├── i18n.tsx       اللغة + RTL
-    └── theme.ts       الألوان والخطوط
+frontend/
+├── package.json    ← جذر الـ workspace (هون بتعمل npm install)
+├── packages/       ← مشترك (shared: تصميم/ترجمة/أنواع · api-client)
+└── student-app/    (ومثلها driver-app / admin-dashboard)
+    ├── app/            ← الشاشات (توجيه تلقائي حسب اسم الملف - expo-router)
+    │   ├── (auth)/        شاشات قبل الدخول (welcome, register, otp, login)
+    │   └── (app)/         شاشات بعد الدخول (home/dashboard, ...)
+    └── src/
+        ├── components/    عناصر واجهة (Button, Input, Banner, Screen)
+        ├── lib/           api (الاتصال) + storage (حفظ التوكن)
+        ├── store/         الحالة العامة (auth) — zustand
+        ├── i18n.tsx       اللغة + RTL
+        └── theme.ts       الألوان والخطوط
 ```
 > ملاحظة: الأقواس `(auth)` و`(app)` مجرّد **تجميع** ولا تظهر في الرابط. هي ميزة expo-router لتنظيم الشاشات حسب الحالة.
 

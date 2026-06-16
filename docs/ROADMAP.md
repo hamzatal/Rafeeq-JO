@@ -12,13 +12,13 @@
 ```
 Rafeeq-JO/
 ├── backend/                 Laravel 11 modular monolith (API)
-├── apps/
+├── frontend/                JS workspace (npm)
 │   ├── student-app/         Expo RN (iOS/Android/Web)
 │   ├── driver-app/          Expo RN (iOS/Android/Web)
-│   └── admin-dashboard/     Next.js
-├── packages/
-│   ├── shared/              design tokens + TS types + utils
-│   └── api-client/          typed REST client مشترك
+│   ├── admin-dashboard/     Next.js
+│   └── packages/
+│       ├── shared/          design tokens + TS types + utils + validators
+│       └── api-client/      typed REST client مشترك
 ├── docs/                    توثيق
 ├── monitoring/ · deployment/
 ```
@@ -39,8 +39,8 @@ Rafeeq-JO/
 - ⏳ CI (GitHub Actions): lint (Pint) + test (PHPUnit)
 
 **Frontend**
-- ⏳ `packages/shared`: design tokens (ألوان الطالب/الكابتن، Tajawal، spacing، radii)، i18n (ar/en)، أنواع TS أساسية
-- ⏳ `packages/api-client`: عميل REST نوعي (axios) + معالجة التوكن + أخطاء موحّدة
+- ⏳ `frontend/packages/shared`: design tokens (ألوان الطالب/الكابتن، Tajawal، spacing، radii)، i18n (ar/en)، أنواع TS أساسية
+- ⏳ `frontend/packages/api-client`: عميل REST نوعي (axios) + معالجة التوكن + أخطاء موحّدة
 - ⏳ تهيئة الثلاث تطبيقات (Expo x2 + Next.js) مع RTL + Tajawal + ثيم
 
 ---

@@ -1,0 +1,24 @@
+{
+  "name": "rafeeq-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rafeeq frontend workspace (student, driver, admin + shared packages)",
+  "workspaces": [
+    "student-app",
+    "driver-app",
+    "admin-dashboard",
+    "packages/*"
+  ],
+  "scripts": {
+    "student": "npm run start --workspace=student-app",
+    "driver": "npm run start --workspace=driver-app",
+    "admin": "npm run dev --workspace=admin-dashboard",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.0.0",
+  "license": "UNLICENSED"
+}
