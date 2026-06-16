@@ -75,6 +75,13 @@ export default function Dashboard() {
           <Text style={styles.cardMeta}>{driver?.vehicles?.length ?? 0} مركبة</Text>
         </Pressable>
 
+        {status === 'approved' && (
+          <Pressable style={styles.card} onPress={() => router.push('/(app)/trips')}>
+            <Text style={styles.cardTitle}>{t('driver.myTrips')}</Text>
+            <Text style={styles.cardMeta}>جدولة وإدارة رحلاتك</Text>
+          </Pressable>
+        )}
+
         <Banner message={error} variant="error" />
         {canSubmit ? (
           <Button title={t('driver.submitReview')} onPress={onSubmit} loading={submitting} style={styles.submit} />
