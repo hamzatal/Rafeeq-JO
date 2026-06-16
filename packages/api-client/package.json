@@ -1,0 +1,19 @@
+{
+  "name": "@rafeeq/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typed REST client for the Rafeeq API",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rafeeq/shared": "*",
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
