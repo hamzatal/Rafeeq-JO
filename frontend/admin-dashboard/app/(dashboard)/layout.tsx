@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../src/lib/auth';
 import { Sidebar } from '../../src/components/Sidebar';
+import { BrandSplash } from '../../src/components/BrandSplash';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { status } = useAuth();
@@ -14,7 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [status, router]);
 
   if (status !== 'authenticated') {
-    return <div className="min-h-screen flex items-center justify-center text-muted">جارٍ التحميل...</div>;
+    return <BrandSplash />;
   }
 
   return (

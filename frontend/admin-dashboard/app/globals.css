@@ -41,3 +41,20 @@ body {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
 }
+
+/* ── Branded splash animations ── */
+@keyframes rafeeqBar {
+  0%, 100% { transform: scaleY(0.35); opacity: 0.6; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+@keyframes rafeeqPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+.splash-bar {
+  transform-origin: bottom;
+  animation: rafeeqBar 1.1s ease-in-out infinite;
+}
+.splash-badge {
+  animation: rafeeqPulse 1.8s ease-in-out infinite;
+}

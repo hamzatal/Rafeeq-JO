@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../src/lib/auth';
+import { BrandSplash } from '../src/components/BrandSplash';
 
 export default function Home() {
   const { status } = useAuth();
@@ -13,7 +14,5 @@ export default function Home() {
     else if (status === 'unauthenticated') router.replace('/login');
   }, [status, router]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center text-muted">جارٍ التحميل...</div>
-  );
+  return <BrandSplash />;
 }
