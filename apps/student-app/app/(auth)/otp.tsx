@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Screen } from '../../src/components/Screen';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
+import { Banner } from '../../src/components/Banner';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { theme } from '../../src/theme';
@@ -17,9 +18,14 @@ export default function Otp() {
 
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const onVerify = async () => {
-    if (code.trim().length < 4) return;
+    setFormError(null);
+    if (code.trim().length < 4) {
+      setFormError(t('validation.required'));
+      return;
+    }
     setLoading(true);
     try {
       await verifyOtp({
@@ -29,8 +35,7 @@ export default function Otp() {
       });
       router.replace('/(app)/home');
     } catch (e) {
-      const msg = e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error');
-      Alert.alert(t('common.error'), msg);
+      setFormError(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -44,6 +49,7 @@ export default function Otp() {
         <Text style={styles.phone}>{params.phone}</Text>
         {params.debug ? <Text style={styles.debug}>كود التجربة: {params.debug}</Text> : null}
       </View>
+      <Banner message={formError} />
       <Input
         value={code}
         onChangeText={setCode}

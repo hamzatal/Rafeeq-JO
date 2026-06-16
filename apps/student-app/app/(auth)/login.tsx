@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { isValidJordanPhone, normalizeJordanPhone } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Screen } from '../../src/components/Screen';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
+import { Banner } from '../../src/components/Banner';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { theme } from '../../src/theme';
@@ -18,10 +19,16 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const onSubmit = async () => {
-    if (!isValidJordanPhone(phone) || password.length < 1) {
-      Alert.alert(t('common.error'), t('validation.invalidPhone'));
+    setFormError(null);
+    if (!isValidJordanPhone(phone)) {
+      setFormError(t('validation.invalidPhone'));
+      return;
+    }
+    if (password.length < 1) {
+      setFormError(t('validation.required'));
       return;
     }
     setLoading(true);
@@ -29,8 +36,7 @@ export default function Login() {
       await login({ phone: normalizeJordanPhone(phone)!, password });
       router.replace('/(app)/home');
     } catch (e) {
-      const msg = e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error');
-      Alert.alert(t('common.error'), msg);
+      setFormError(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -41,6 +47,7 @@ export default function Login() {
       <View style={styles.header}>
         <Text style={styles.title}>{t('auth.login')}</Text>
       </View>
+      <Banner message={formError} />
       <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
       <Input label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry />
       <Button title={t('auth.login')} onPress={onSubmit} loading={loading} />
