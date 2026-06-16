@@ -13,4 +13,6 @@ return [
     Rafeeq\Modules\Students\Providers\StudentsServiceProvider::class,
     Rafeeq\Modules\Drivers\Providers\DriversServiceProvider::class,
     Rafeeq\Modules\Universities\Providers\UniversitiesServiceProvider::class,
+    Rafeeq\Modules\Areas\Providers\AreasServiceProvider::class,
+    Rafeeq\Modules\PickupPoints\Providers\PickupPointsServiceProvider::class,
 ];
