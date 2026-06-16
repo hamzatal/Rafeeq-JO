@@ -7,6 +7,7 @@ import { useAuth } from '../lib/auth';
 const LINKS = [
   { href: '/dashboard', label: 'الرئيسية' },
   { href: '/drivers', label: 'الكباتن' },
+  { href: '/universities', label: 'الجامعات' },
   { href: '/users', label: 'المستخدمون' },
 ];
 

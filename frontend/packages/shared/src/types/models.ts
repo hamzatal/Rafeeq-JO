@@ -24,6 +24,19 @@ export interface User {
   created_at: string | null;
 }
 
+export interface University {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  code: string;
+  city: string | null;
+  lat: number | null;
+  lng: number | null;
+  logo_url: string | null;
+  contact_phone: string | null;
+  is_active: boolean;
+}
+
 export interface StudentProfile {
   id: string;
   university_id: string | null;

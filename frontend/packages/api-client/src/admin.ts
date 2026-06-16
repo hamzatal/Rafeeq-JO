@@ -4,6 +4,7 @@ import {
   type ApiSuccess,
   type DriverDocument,
   type DriverProfile,
+  type University,
   type User,
 } from '@rafeeq/shared';
 import { unwrap } from './client';
@@ -55,5 +56,25 @@ export class AdminApi {
   async documentObjectUrl(docId: string): Promise<string> {
     const res = await this.http.get(ENDPOINTS.admin.documentFile(docId), { responseType: 'blob' });
     return URL.createObjectURL(res.data as Blob);
+  }
+
+  // ── Universities management ──────────────────────────────────────
+  async listUniversities(params: ListParams = {}): Promise<{ items: University[]; meta: ApiSuccess<University[]>['meta'] }> {
+    const { data } = await this.http.get<ApiSuccess<University[]>>(ENDPOINTS.admin.universities, { params });
+    return { items: data.data, meta: data.meta };
+  }
+
+  async createUniversity(payload: Partial<University>): Promise<University> {
+    const { data } = await this.http.post<ApiSuccess<University>>(ENDPOINTS.admin.universities, payload);
+    return unwrap(data);
+  }
+
+  async updateUniversity(id: string, payload: Partial<University>): Promise<University> {
+    const { data } = await this.http.patch<ApiSuccess<University>>(ENDPOINTS.admin.university(id), payload);
+    return unwrap(data);
+  }
+
+  async deleteUniversity(id: string): Promise<void> {
+    await this.http.delete(ENDPOINTS.admin.university(id));
   }
 }

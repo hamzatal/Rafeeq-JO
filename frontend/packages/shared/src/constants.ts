@@ -25,6 +25,10 @@ export const ENDPOINTS = {
   student: {
     profile: '/student/profile',
   },
+  universities: {
+    list: '/universities',
+    one: (id: string) => `/universities/${id}`,
+  },
   driver: {
     profile: '/driver/profile',
     documents: '/driver/documents',
@@ -38,6 +42,8 @@ export const ENDPOINTS = {
     reviewDriver: (id: string) => `/admin/drivers/${id}/review`,
     reviewDocument: (docId: string) => `/admin/drivers/documents/${docId}/review`,
     documentFile: (docId: string) => `/admin/drivers/documents/${docId}/file`,
+    universities: '/admin/universities',
+    university: (id: string) => `/admin/universities/${id}`,
   },
 } as const;
 
