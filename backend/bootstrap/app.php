@@ -28,7 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'audit' => \Rafeeq\Core\Http\Middleware\AuditRequest::class,
         ]);
 
-        $middleware->statefulApi();
+        // NOTE: We use stateless token auth (Sanctum personal access tokens / Bearer)
+        // for ALL clients (mobile + web admin). We deliberately do NOT enable
+        // statefulApi() — otherwise browser clients on "stateful" domains would be
+        // forced into SPA cookie/CSRF mode, causing "CSRF token mismatch" on login.
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Render all API exceptions as a unified JSON envelope
