@@ -5,25 +5,23 @@
 
 | | |
 |---|---|
-| آخر تحديث | Phase 1 — مكتمل (Backend) |
+| آخر تحديث | Phase 1 backend مكتمل + Frontend foundation (student auth) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-012 |
-| المرحلة الحالية | **Phase 1 منتهٍ (backend) → التالي: Frontend foundation ثم Phase 2** |
+| آخر Commit | RFQ-016 |
+| المرحلة الحالية | **Frontend foundation جارٍ → التالي: Driver app + Admin، ثم Phase 2** |
 
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-خياران (يُفضّل تنفيذهما بالترتيب):
+أُنجز: تطبيق الطالب (Expo) — نظام التصميم المشترك + عميل API + تدفّق المصادقة (welcome/register/OTP/login) + الرئيسية.
 
-**أ) تأسيس الـ Frontend (إكمال Phase 0 frontend):**
-1. `packages/shared`: design tokens (ألوان الطالب/الكابتن، Tajawal، spacing) + i18n (ar/en) + أنواع TS.
-2. `packages/api-client`: عميل REST نوعي + إدارة توكن Sanctum + أخطاء موحّدة.
-3. تهيئة `apps/student-app` و`apps/driver-app` (Expo + RTL + Tajawal) + `apps/admin-dashboard` (Next.js).
-4. شاشات المصادقة (تسجيل/OTP/دخول) للطالب والكابتن + دخول الأدمن.
+**التالي بالترتيب:**
+1. **تطبيق الكابتن (driver-app)**: نفس بنية student-app + ثيم Navy الداكن + شاشات (تسجيل/OTP، رفع الوثائق، إضافة مركبة، شاشة "قيد المراجعة"، حالة التوثيق).
+2. **لوحة الإدارة (admin-dashboard)**: Next.js + Tailwind + تسجيل دخول الموظفين + صفحات (المستخدمون، الكباتن + مراجعة الوثائق/الاعتماد).
+3. شاشات الطالب الإضافية: الملف الشخصي + onboarding (اختيار الجامعة).
+4. ثم **Phase 2 (النقل)** في الـ backend.
 
-**ب) أو ابدأ Phase 2 (النقل) في الـ backend:**
-موديولات Universities → Areas → PickupPoints → Routes → Subscriptions → Trips (+ Reverb realtime).
-أضف FKs لـ `student_profiles.university_id` و`default_pickup_point_id` عند إنشاء جداول Phase 2.
+> ملاحظة تشغيل: من جذر المشروع `npm install` ثم `npm run student` (تفاصيل في docs/deployment/frontend-setup.md).
 
 ---
 
@@ -37,8 +35,10 @@
 - ✅ Shared (Enums + HasUuid + Phone helper)
 - ✅ Infrastructure (SMS gateways + provider)
 - ✅ RBAC (Role/Permission/HasRoles) + Audit (model+logger) + migrations
-- ⏳ packages/shared + packages/api-client
-- ⏳ تهيئة Expo x2 + Next.js
+- ✅ packages/shared (design tokens + i18n ar/en + types + utils + constants)
+- ✅ packages/api-client (typed REST client + auth API + RafeeqApiError)
+- ✅ apps/student-app (Expo: RTL + Tajawal + monorepo metro + auth flow + home)
+- ⏳ apps/driver-app + apps/admin-dashboard
 - ⏳ CI (GitHub Actions)
 
 ### Phase 1 — الهوية والأمان ✅ (Backend)
@@ -78,5 +78,9 @@
 | 010 | docs: update progress for Users/Students/Drivers modules |
 | 011 | fix(auth): Sanctum 4 compatibility — remove removed ignoreMigrations() call |
 | 012 | docs: Windows/PowerShell + SQLite no-Docker quick-start guide |
+| 013 | feat(shared): design system + i18n (ar/en) + types + utils + constants |
+| 014 | feat(api-client): typed REST client + auth API + error handling |
+| 015 | feat(student-app): Expo scaffold (RTL/Tajawal/monorepo) + auth flow + home |
+| 016 | docs: frontend setup guide + progress update |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
