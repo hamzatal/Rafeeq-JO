@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-101 |
-| نسبة الإنجاز | ~71% (الأساس/القلب التشغيلي ~93%) |
-| المرحلة الحالية | **M6 (الدعم L1–L4 + الشكاوى مع التجميد الحرج) + عميل التتبّع الحيّ (Echo). التالي: الخرائط + الخدمات الإضافية (Parcels/LostFound/Rewards)** |
+| آخر Commit | RFQ-110 |
+| نسبة الإنجاز | ~80% (الأساس/القلب التشغيلي ~95%) |
+| المرحلة الحالية | **M8 (الخدمات الإضافية: طرود/مفقودات/نقاط/تبادل) منجزة backend + شاشات الطالب. التالي: طبقة AI (M7) + الخرائط + الإدارة المتبقية** |
 
 ---
 
@@ -212,5 +212,13 @@
 | 099 | feat(student-app): support tickets screen (open + list) + i18n + home nav |
 | 100 | feat(realtime): Laravel Echo (Reverb) client + live trip tracking on student trips screen |
 | 101 | docs: progress update — support/complaints + live tracking client (M6 + M3 realtime) |
+| 102 | feat(parcels): parcel delivery module — two-OTP chain of custody (pickup + delivery codes) + courier flow + events |
+| 103 | feat(rewards): Rafeeq Rewards — points/tiers + earn on completed rides + redeem |
+| 104 | feat(lostfound): lost & found board + keyword/category candidate matching |
+| 105 | feat(exchange): campus exchange (books/notes/tools) + reserve flow + register all extra-service providers |
+| 106 | feat(shared+api-client): types + ENDPOINTS + Parcels/Rewards/LostFound/Exchange API clients |
+| 108 | feat(student-app): Rewards + Parcels screens + i18n |
+| 109 | feat(student-app): Lost & Found + Exchange screens + home navigation |
+| 110 | docs: progress update — extra services (M8) complete (backend + student UIs) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
