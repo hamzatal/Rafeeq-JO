@@ -11,6 +11,8 @@ const LINKS = [
   { href: '/users', label: 'المستخدمون' },
   { href: '/payments', label: 'المدفوعات' },
   { href: '/ride-requests', label: 'طلبات الرحلات' },
+  { href: '/support', label: 'الدعم' },
+  { href: '/complaints', label: 'الشكاوى' },
 ];
 
 export function Sidebar() {
