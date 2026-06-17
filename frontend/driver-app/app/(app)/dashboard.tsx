@@ -74,6 +74,18 @@ export default function Dashboard() {
             <Text style={s.cardMeta}>جدولة وإدارة رحلاتك</Text>
           </Pressable>
         )}
+        {status === 'approved' && (
+          <Pressable style={s.card} onPress={() => router.push('/(app)/offers')}>
+            <Text style={s.cardTitle}>{t('driver.offers')}</Text>
+            <Text style={s.cardMeta}>{t('driver.noOffers')}</Text>
+          </Pressable>
+        )}
+        {status === 'approved' && (
+          <Pressable style={s.card} onPress={() => router.push('/(app)/earnings')}>
+            <Text style={s.cardTitle}>{t('driver.earnings')}</Text>
+            <Text style={s.cardMeta}>{t('driver.balance')}</Text>
+          </Pressable>
+        )}
 
         <Banner message={error} variant="error" />
         {canSubmit ? <Button title={t('driver.submitReview')} onPress={onSubmit} loading={submitting} style={s.submit} /> : null}

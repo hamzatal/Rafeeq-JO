@@ -23,6 +23,8 @@ export default function AppLayout() {
       <Stack.Screen name="documents" options={{ title: 'الوثائق' }} />
       <Stack.Screen name="vehicle" options={{ title: 'المركبة' }} />
       <Stack.Screen name="trips" options={{ title: 'رحلاتي' }} />
+      <Stack.Screen name="offers" options={{ title: 'عروض الرحلات' }} />
+      <Stack.Screen name="earnings" options={{ title: 'أرباحي' }} />
       <Stack.Screen name="trip/[id]" options={{ title: 'تفاصيل الرحلة' }} />
       <Stack.Screen name="settings" options={{ title: 'الإعدادات' }} />
     </Stack>
