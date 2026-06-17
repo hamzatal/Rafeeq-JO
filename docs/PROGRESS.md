@@ -1,16 +1,14 @@
 # حالة المشروع — رفيق (Rafeeq)
 
-> **اقرأ هذا الملف أولاً في أي جلسة جديدة.** ثم `docs/ROADMAP.md` و`.kiro/steering/`.
+> **اقرأ هذا الملف أولاً في أي جلسة جديدة.** ثم `docs/HANDOFF.md` (ملخّص شامل) و`docs/ROADMAP.md` و`.kiro/steering/`.
 > لا تطلب من المستخدم إعادة شرح المشروع — استأنف من قسم "الخطوة التالية".
 
 | | |
 |---|---|
-| آخر تحديث | تطبيق الطالب + تطبيق الكابتن جاهزين (مصادقة + توثيق الكابتن) |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
-| الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-070 |
-| المرحلة الحالية | **دورة المال + التتبّع الحيّ + أساس مكافحة الاحتيال ✅ → التالي: صفحات إدارة النقل + AI + الإشعارات** |
+| آخر Commit | RFQ-073 |
+| نسبة الإنجاز | ~43% (الأساس/القلب التشغيلي ~85–90%) |
+| المرحلة الحالية | **انظر `docs/HANDOFF.md` — التالي: Payments (CliQ+Vision) ثم Ratings/Notifications/صفحات الإدارة** |
 
 ---
 
@@ -172,5 +170,8 @@
 | 068 | feat(realtime): Reverb broadcasting events (trip location + status) |
 | 069 | feat(safety): anti-fraud foundation — risk flags + cancellation logs + detection + admin |
 | 070 | docs: progress update — money loop + realtime + anti-fraud |
+| 071 | feat(brand): brand-new circular emblem logo (ر lettermark + orbit ring) everywhere |
+| 072 | feat(safety/sos): emergency SOS button + incidents + admin handling + critical flag |
+| 073 | docs: full HANDOFF summary (done + remaining + integrations) for session continuity |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
