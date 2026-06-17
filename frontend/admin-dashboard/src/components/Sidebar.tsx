@@ -9,6 +9,8 @@ const LINKS = [
   { href: '/drivers', label: 'الكباتن' },
   { href: '/universities', label: 'الجامعات' },
   { href: '/users', label: 'المستخدمون' },
+  { href: '/payments', label: 'المدفوعات' },
+  { href: '/ride-requests', label: 'طلبات الرحلات' },
 ];
 
 export function Sidebar() {
