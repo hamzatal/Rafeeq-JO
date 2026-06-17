@@ -1,59 +1,46 @@
+import { useMemo } from 'react';
 import { Link, useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { Screen } from '../../src/components/Screen';
 import { Button } from '../../src/components/Button';
 import { useI18n } from '../../src/i18n';
-import { theme } from '../../src/theme';
+import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Welcome() {
   const { t } = useI18n();
   const router = useRouter();
+  const theme = useTheme();
+  const s = useMemo(() => makeStyles(theme), [theme]);
 
   return (
     <Screen center>
-      <View style={styles.brandWrap}>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>رفيق</Text>
+      <View style={s.brandWrap}>
+        <View style={s.logo}>
+          <View style={s.pin}><View style={s.dot} /></View>
         </View>
-        <Text style={styles.title}>{t('auth.welcomeTitle')}</Text>
-        <Text style={styles.subtitle}>{t('auth.welcomeSubtitle')}</Text>
+        <Text style={s.title}>{t('auth.welcomeTitle')}</Text>
+        <Text style={s.subtitle}>{t('auth.welcomeSubtitle')}</Text>
       </View>
 
-      <View style={styles.actions}>
+      <View style={s.actions}>
         <Button title={t('auth.register')} onPress={() => router.push('/(auth)/register')} />
-        <Link href="/(auth)/login" style={styles.link}>
-          <Text style={styles.linkText}>{t('auth.haveAccount')}</Text>
+        <Link href="/(auth)/login" style={s.link}>
+          <Text style={s.linkText}>{t('auth.haveAccount')}</Text>
         </Link>
       </View>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  brandWrap: { alignItems: 'center', flex: 1, justifyContent: 'center' },
-  logo: {
-    width: 96,
-    height: 96,
-    borderRadius: 24,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  logoText: { color: '#FFFFFF', fontFamily: theme.fontFamily.extrabold, fontSize: 28 },
-  title: {
-    fontFamily: theme.fontFamily.extrabold,
-    fontSize: 26,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
-  },
-  subtitle: {
-    fontFamily: theme.fontFamily.regular,
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    textAlign: 'center',
-  },
-  actions: { gap: theme.spacing.base, paddingBottom: theme.spacing.xl },
-  link: { alignSelf: 'center', padding: theme.spacing.sm },
-  linkText: { color: theme.colors.primary, fontFamily: theme.fontFamily.medium, fontSize: 15 },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    brandWrap: { alignItems: 'center', flex: 1, justifyContent: 'center' },
+    logo: { width: 104, height: 104, borderRadius: 28, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.xl },
+    pin: { width: 52, height: 52, borderRadius: 26, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
+    dot: { width: 18, height: 18, borderRadius: 9, backgroundColor: '#0F2A6B' },
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, marginBottom: t.spacing.sm },
+    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 16, color: t.colors.textSecondary, textAlign: 'center' },
+    actions: { gap: t.spacing.base, paddingBottom: t.spacing.xl },
+    link: { alignSelf: 'center', padding: t.spacing.sm },
+    linkText: { color: t.colors.primary, fontFamily: t.fontFamily.medium, fontSize: 15 },
+  });

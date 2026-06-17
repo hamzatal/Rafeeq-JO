@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
-import { theme } from '../theme';
+import { useTheme, type AppTheme } from '../theme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -8,46 +8,38 @@ interface InputProps extends TextInputProps {
 }
 
 export function Input({ label, error, style, ...props }: InputProps) {
+  const theme = useTheme();
+  const s = useMemo(() => makeStyles(theme), [theme]);
+
   return (
-    <View style={styles.wrapper}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+    <View style={s.wrapper}>
+      {label ? <Text style={s.label}>{label}</Text> : null}
       <TextInput
-        placeholderTextColor={theme.colors.textSecondary}
-        style={[styles.input, error ? styles.inputError : null, style]}
+        placeholderTextColor={theme.colors.muted}
+        style={[s.input, error ? s.inputError : null, style]}
         {...props}
       />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={s.error}>{error}</Text> : null}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: { marginBottom: theme.spacing.base, width: '100%' },
-  label: {
-    fontFamily: theme.fontFamily.medium,
-    fontSize: 14,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-    textAlign: 'right',
-  },
-  input: {
-    height: 52,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    paddingHorizontal: theme.spacing.base,
-    fontFamily: theme.fontFamily.regular,
-    fontSize: 16,
-    color: theme.colors.text,
-    backgroundColor: theme.colors.surface,
-    textAlign: 'right',
-  },
-  inputError: { borderColor: theme.colors.danger },
-  error: {
-    color: theme.colors.danger,
-    fontSize: 12,
-    marginTop: 4,
-    fontFamily: theme.fontFamily.regular,
-    textAlign: 'right',
-  },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    wrapper: { marginBottom: t.spacing.base, width: '100%' },
+    label: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text, marginBottom: t.spacing.xs, textAlign: 'right' },
+    input: {
+      height: 52,
+      borderWidth: 1,
+      borderColor: t.colors.border,
+      borderRadius: t.radius.md,
+      paddingHorizontal: t.spacing.base,
+      fontFamily: t.fontFamily.regular,
+      fontSize: 16,
+      color: t.colors.text,
+      backgroundColor: t.colors.surface,
+      textAlign: 'right',
+    },
+    inputError: { borderColor: t.colors.danger },
+    error: { color: t.colors.danger, fontSize: 12, marginTop: 4, fontFamily: t.fontFamily.regular, textAlign: 'right' },
+  });

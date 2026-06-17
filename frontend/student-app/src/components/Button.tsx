@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, type ViewStyle } from 'react-native';
-import { theme } from '../theme';
+import { useTheme, type AppTheme } from '../theme';
 
 interface ButtonProps {
   title: string;
@@ -11,14 +11,9 @@ interface ButtonProps {
   style?: ViewStyle;
 }
 
-export function Button({
-  title,
-  onPress,
-  loading = false,
-  disabled = false,
-  variant = 'primary',
-  style,
-}: ButtonProps) {
+export function Button({ title, onPress, loading = false, disabled = false, variant = 'primary', style }: ButtonProps) {
+  const theme = useTheme();
+  const s = useMemo(() => makeStyles(theme), [theme]);
   const isOutline = variant === 'outline';
   const isDisabled = disabled || loading;
 
@@ -27,37 +22,30 @@ export function Button({
       onPress={onPress}
       disabled={isDisabled}
       style={({ pressed }) => [
-        styles.base,
-        isOutline ? styles.outline : styles.primary,
-        isDisabled && styles.disabled,
-        pressed && !isDisabled && styles.pressed,
+        s.base,
+        isOutline ? s.outline : s.primary,
+        isDisabled && s.disabled,
+        pressed && !isDisabled && s.pressed,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isOutline ? theme.colors.primary : theme.colors.text} />
+        <ActivityIndicator color={isOutline ? theme.colors.primary : theme.colors.onPrimary} />
       ) : (
-        <Text style={[styles.label, isOutline ? styles.outlineLabel : styles.primaryLabel]}>
-          {title}
-        </Text>
+        <Text style={[s.label, isOutline ? s.outlineLabel : s.primaryLabel]}>{title}</Text>
       )}
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    height: 52,
-    borderRadius: theme.radius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: theme.spacing.lg,
-  },
-  primary: { backgroundColor: theme.colors.primary },
-  outline: { borderWidth: 1.5, borderColor: theme.colors.primary, backgroundColor: 'transparent' },
-  disabled: { opacity: 0.5 },
-  pressed: { opacity: 0.85 },
-  label: { fontFamily: theme.fontFamily.bold, fontSize: 16 },
-  primaryLabel: { color: '#FFFFFF' },
-  outlineLabel: { color: theme.colors.primary },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    base: { height: 52, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.lg },
+    primary: { backgroundColor: t.colors.primary },
+    outline: { borderWidth: 1.5, borderColor: t.colors.primary, backgroundColor: 'transparent' },
+    disabled: { opacity: 0.5 },
+    pressed: { opacity: 0.85 },
+    label: { fontFamily: t.fontFamily.bold, fontSize: 16 },
+    primaryLabel: { color: t.colors.onPrimary },
+    outlineLabel: { color: t.colors.primary },
+  });
