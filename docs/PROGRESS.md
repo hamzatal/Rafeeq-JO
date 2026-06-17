@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-110 |
+| آخر Commit | RFQ-111 |
 | نسبة الإنجاز | ~80% (الأساس/القلب التشغيلي ~95%) |
-| المرحلة الحالية | **M8 (الخدمات الإضافية: طرود/مفقودات/نقاط/تبادل) منجزة backend + شاشات الطالب. التالي: طبقة AI (M7) + الخرائط + الإدارة المتبقية** |
+| المرحلة الحالية | **تدقيق أمني/جودة شامل + CI. التالي المتّفق عليه: إعادة تصميم شاملة للواجهات (Design System v2)** |
 
 ---
 
@@ -220,5 +220,6 @@
 | 108 | feat(student-app): Rewards + Parcels screens + i18n |
 | 109 | feat(student-app): Lost & Found + Exchange screens + home navigation |
 | 110 | docs: progress update — extra services (M8) complete (backend + student UIs) |
+| 111 | chore(ci+audit): GitHub Actions CI (backend boot smoke + frontend typecheck) + full static security audit report |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
