@@ -1,0 +1,17 @@
+<?php
+
+namespace Rafeeq\Infrastructure\Push\Contracts;
+
+interface PushGateway
+{
+    /**
+     * Send a push notification to a device token.
+     *
+     * @param  array<string, mixed>  $data  optional data payload
+     * @return string provider message reference
+     */
+    public function send(string $deviceToken, string $title, string $body, array $data = []): string;
+
+    /** Whether a real push provider is configured. */
+    public function isEnabled(): bool;
+}
