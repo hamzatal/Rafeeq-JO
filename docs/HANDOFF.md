@@ -1,8 +1,8 @@
 # 📦 ملف التسليم الشامل — رفيق (Rafeeq)
 
 > **للمحادثة الجديدة: اقرأ هذا الملف + `docs/PROGRESS.md` + `docs/ROADMAP.md` + `.kiro/steering/` قبل أي عمل.**
-> آخر commit: **RFQ-079**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز التقديرية: **~58%** (الأساس والقلب التشغيلي ~90%).
-> **محدّث (M1+M2):** اكتمل backend لموديولات **Payments (CliQ+GPT Vision)** و**Notifications (FCM+SMS fallback)** و**Ratings** + بنية **Gpt** و**Push**. راجع `docs/EXECUTION_PLAN.md` للخطة الكاملة M1–M10.
+> آخر commit: **RFQ-094**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز التقديرية: **~66%** (الأساس والقلب التشغيلي ~92%).
+> **محدّث (M3 + UIs):** Express dynamic pricing + min-fill، وعميل API كامل (محفظة/دفع/إشعارات/تقييم/طلبات/عروض)، وواجهات الطالب (محفظة/دفع/إشعارات/طلب باب-لباب/تقييم) والكابتن (أرباح/عروض) والإدارة (مراجعة مدفوعات/مراقبة طلبات).
 > القواعد: لا اختصار، لا حذف مزايا، لا ديمو داتا. commits مرقّمة `[RFQ-###]`. حدّث PROGRESS + README مع كل push.
 
 ---
@@ -109,6 +109,6 @@ npm run admin     # http://localhost:3000
 
 ## ⏭️ الخطوة التالية المقترحة (للمحادثة الجديدة)
 **اكتمل (backend):** Payments (CliQ + GPT Vision)، Notifications (FCM + SMS fallback)، Ratings، وبنية Gpt + Push. التالي حسب `docs/EXECUTION_PLAN.md`:
-**M3** — عميل **Echo/Reverb** + شاشات الخريطة الحيّة (طالب/كابتن/إدارة) + **Express** (تسعير ديناميكي + min-fill)، ثم **واجهات Frontend** للدفع/الإشعارات/التقييم، ثم **صفحات إدارة النقل**، ثم Support/Complaints، ثم باقي الخدمات (Parcels/LostFound/Rewards) ثم **طبقة AI**. آخر رقم commit مستخدم: **RFQ-079** (التالي RFQ-080).
+**M3** — **الخرائط الحيّة** (عميل Echo/Reverb + شاشات الخريطة للطالب/الكابتن/الإدارة) لإكمال التتبّع اللحظي، ثم **Support/Complaints** (مركز النزاعات)، ثم باقي الخدمات (Parcels/LostFound/Rewards) ثم **طبقة AI**. آخر رقم commit مستخدم: **RFQ-094** (التالي RFQ-095).
 
 رسالة الانتقال: "أكمل مشروع رفيق (hamzatal/Rafeeq-JO، فرع foundation/phase-0-1). اقرأ docs/HANDOFF.md و docs/EXECUTION_PLAN.md و docs/PROGRESS.md و docs/ROADMAP.md و .kiro/steering/ وكمّل من M3 — آخر commit RFQ-079، التالي RFQ-080. بدون اختصار أو حذف مزايا."

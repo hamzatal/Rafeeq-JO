@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-085 |
-| نسبة الإنجاز | ~59% (الأساس/القلب التشغيلي ~90%) |
-| المرحلة الحالية | **إصلاحات frontend (لوجو أردني/سبلاش سيارة/لغة/راوتنج الأدمن/مشكلة فتح الكابتن) — التالي: M3** |
+| آخر Commit | RFQ-094 |
+| نسبة الإنجاز | ~66% (الأساس/القلب التشغيلي ~92%) |
+| المرحلة الحالية | **M3 (Express pricing) + ربط واجهات الدفع/المحفظة/الإشعارات/التقييم/الطلبات (طالب+كابتن+إدارة). التالي: الخرائط الحيّة (Echo) ثم Support/Complaints** |
 
 ---
 
@@ -196,5 +196,14 @@
 | 083 | feat(splash): car driving along the road (student + driver + admin) replacing the moving dot |
 | 084 | fix(i18n): wire hardcoded Arabic strings to dictionary (home/welcome/subscriptions/trips) + expand ar/en — fixes mixed-language UI |
 | 085 | chore(security+deps): SECURITY.md review + align TypeScript ~5.3.3 + admin Accept-Language from prefs |
+| 086 | feat(pricing): Express dynamic pricing + min-fill economics (PricingService) + fare estimate endpoint + config |
+| 087 | feat(shared): types + ENDPOINTS for wallet/payments/notifications/ratings/ride-requests/driver-offers |
+| 088 | feat(api-client): WalletApi + PaymentsApi + NotificationsApi + RatingsApi + RideRequestsApi + driver offers |
+| 089 | feat(student-app): Wallet + Payments screens (CliQ top-up, proof upload, status) |
+| 090 | feat(student-app): Notifications (+ preferences) + door-to-door Ride Request (with fare estimate) screens |
+| 091 | feat(student-app): two-way rating on completed trips + home nav + i18n keys |
+| 092 | feat(driver-app): Earnings (wallet) + Ride Offers (accept) screens + dashboard cards |
+| 093 | feat(admin): Payments review queue (approve/reject/view proof) + Ride Requests monitor + matching trigger |
+| 094 | docs: progress update — M3 pricing + payments/notifications/ratings UIs across all apps |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
