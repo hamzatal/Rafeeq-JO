@@ -7,6 +7,11 @@ import { AdminApi } from './admin';
 import { CatalogApi } from './catalog';
 import { TransportApi } from './transport';
 import { DriverTripsApi } from './driverTrips';
+import { WalletApi } from './wallet';
+import { PaymentsApi } from './payments';
+import { NotificationsApi } from './notifications';
+import { RatingsApi } from './ratings';
+import { RideRequestsApi } from './rideRequests';
 
 export * from './client';
 export * from './auth';
@@ -16,6 +21,11 @@ export * from './admin';
 export * from './catalog';
 export * from './transport';
 export * from './driverTrips';
+export * from './wallet';
+export * from './payments';
+export * from './notifications';
+export * from './ratings';
+export * from './rideRequests';
 
 /** Aggregated API surface. Extend with more domains as modules land. */
 export class RafeeqApi {
@@ -27,6 +37,11 @@ export class RafeeqApi {
   readonly catalog: CatalogApi;
   readonly transport: TransportApi;
   readonly driverTrips: DriverTripsApi;
+  readonly wallet: WalletApi;
+  readonly payments: PaymentsApi;
+  readonly notifications: NotificationsApi;
+  readonly ratings: RatingsApi;
+  readonly rideRequests: RideRequestsApi;
 
   constructor(options: RafeeqClientOptions) {
     this.http = createHttp(options);
@@ -37,6 +52,11 @@ export class RafeeqApi {
     this.catalog = new CatalogApi(this.http);
     this.transport = new TransportApi(this.http);
     this.driverTrips = new DriverTripsApi(this.http);
+    this.wallet = new WalletApi(this.http);
+    this.payments = new PaymentsApi(this.http);
+    this.notifications = new NotificationsApi(this.http);
+    this.ratings = new RatingsApi(this.http);
+    this.rideRequests = new RideRequestsApi(this.http);
   }
 }
 

@@ -49,4 +49,15 @@ export class DriverTripsApi {
   async pushLocation(id: string, lat: number, lng: number, speed?: number): Promise<void> {
     await this.http.post(ENDPOINTS.driverTrips.location(id), { lat, lng, speed });
   }
+
+  /** Pooled trip offers awaiting a captain. */
+  async offers(): Promise<Trip[]> {
+    const { data } = await this.http.get<ApiSuccess<Trip[]>>(ENDPOINTS.driverOffers.list);
+    return unwrap(data);
+  }
+
+  async acceptOffer(tripId: string): Promise<Trip> {
+    const { data } = await this.http.post<ApiSuccess<Trip>>(ENDPOINTS.driverOffers.accept(tripId));
+    return unwrap(data);
+  }
 }
