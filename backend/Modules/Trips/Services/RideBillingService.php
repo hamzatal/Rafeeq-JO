@@ -8,6 +8,7 @@ use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Wallet\Services\WalletService;
+use Rafeeq\Modules\Rewards\Services\RewardService;
 use Rafeeq\Shared\Enums\WalletTxnType;
 
 /**
@@ -22,6 +23,7 @@ class RideBillingService extends BaseService
     public function __construct(
         private readonly WalletService $wallets,
         private readonly AuditLogger $audit,
+        private readonly RewardService $rewards,
     ) {}
 
     public function chargeForBoarding(TripPassenger $passenger, Trip $trip): void
@@ -73,6 +75,12 @@ class RideBillingService extends BaseService
                 'captain_share_fils' => $captainShare,
                 'paid_at' => now(),
             ])->save();
+
+            // Loyalty: reward the student for completing a ride.
+            $student = $student ?? User::find($passenger->student_id);
+            if ($student) {
+                $this->rewards->earn($student, RewardService::POINTS_PER_RIDE, 'رحلة مكتملة', $trip->id);
+            }
 
             $this->audit->log('ride.charged', auditable: $passenger, changes: [
                 'fare' => $fare, 'commission' => $commission, 'captain_share' => $captainShare,
