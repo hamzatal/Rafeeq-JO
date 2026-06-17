@@ -325,3 +325,60 @@ export interface FareQuote {
   expected_captain_earnings_fils: number;
   below_min_fill: boolean;
 }
+
+
+
+// ── Support & Complaints (Phase 6) ───────────────────────────────────
+export type TicketStatus = 'open' | 'pending' | 'escalated' | 'resolved' | 'closed';
+export type TicketPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type TicketCategory =
+  | 'subscription' | 'trip' | 'payment' | 'driver' | 'student'
+  | 'parcel' | 'pickup' | 'technical' | 'other';
+
+export interface TicketMessage {
+  id: string;
+  body: string;
+  is_staff: boolean;
+  sender_id: string | null;
+  created_at: string | null;
+}
+
+export interface SupportTicket {
+  id: string;
+  number: string;
+  category: TicketCategory;
+  category_label: string;
+  subject: string;
+  status: TicketStatus;
+  status_label: string;
+  priority: TicketPriority;
+  priority_label: string;
+  level: number;
+  assigned_to: string | null;
+  last_reply_at: string | null;
+  created_at: string | null;
+  messages?: TicketMessage[];
+  user?: { id: string; name: string; phone: string };
+}
+
+export type ComplaintSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type ComplaintStatus = 'open' | 'investigating' | 'resolved' | 'dismissed';
+
+export interface Complaint {
+  id: string;
+  number: string;
+  category: string;
+  severity: ComplaintSeverity;
+  severity_label: string;
+  status: ComplaintStatus;
+  status_label: string;
+  description: string;
+  against_type: 'driver' | 'student' | null;
+  against_user_id: string | null;
+  trip_id: string | null;
+  resolution: string | null;
+  resolved_at: string | null;
+  created_at: string | null;
+  reporter?: { id: string; name: string };
+  against?: { id: string; name: string; status: string } | null;
+}

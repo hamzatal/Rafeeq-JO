@@ -12,6 +12,8 @@ import { PaymentsApi } from './payments';
 import { NotificationsApi } from './notifications';
 import { RatingsApi } from './ratings';
 import { RideRequestsApi } from './rideRequests';
+import { SupportApi } from './support';
+import { ComplaintsApi } from './complaints';
 
 export * from './client';
 export * from './auth';
@@ -26,6 +28,8 @@ export * from './payments';
 export * from './notifications';
 export * from './ratings';
 export * from './rideRequests';
+export * from './support';
+export * from './complaints';
 
 /** Aggregated API surface. Extend with more domains as modules land. */
 export class RafeeqApi {
@@ -42,6 +46,8 @@ export class RafeeqApi {
   readonly notifications: NotificationsApi;
   readonly ratings: RatingsApi;
   readonly rideRequests: RideRequestsApi;
+  readonly support: SupportApi;
+  readonly complaints: ComplaintsApi;
 
   constructor(options: RafeeqClientOptions) {
     this.http = createHttp(options);
@@ -57,6 +63,8 @@ export class RafeeqApi {
     this.notifications = new NotificationsApi(this.http);
     this.ratings = new RatingsApi(this.http);
     this.rideRequests = new RideRequestsApi(this.http);
+    this.support = new SupportApi(this.http);
+    this.complaints = new ComplaintsApi(this.http);
   }
 }
 

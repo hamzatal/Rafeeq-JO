@@ -93,6 +93,22 @@ export const ENDPOINTS = {
     received: '/ratings/received',
     rate: (tripId: string) => `/trips/${tripId}/ratings`,
   },
+  support: {
+    list: '/support/tickets',
+    create: '/support/tickets',
+    one: (id: string) => `/support/tickets/${id}`,
+    reply: (id: string) => `/support/tickets/${id}/reply`,
+    adminList: '/admin/support/tickets',
+    adminEscalate: (id: string) => `/admin/support/tickets/${id}/escalate`,
+    adminStatus: (id: string) => `/admin/support/tickets/${id}/status`,
+  },
+  complaints: {
+    mine: '/complaints',
+    file: '/complaints',
+    adminList: '/admin/complaints',
+    adminOne: (id: string) => `/admin/complaints/${id}`,
+    adminStatus: (id: string) => `/admin/complaints/${id}/status`,
+  },
   rideRequests: {
     create: '/ride-requests',
     estimate: '/ride-requests/estimate',
