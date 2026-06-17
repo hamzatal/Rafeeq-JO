@@ -23,7 +23,7 @@ export default function Home() {
     { key: 'parcels', label: t('home.parcels') },
     { key: 'lostFound', label: t('home.lostFound') },
     { key: 'rewards', label: t('home.rewards') },
-    { key: 'support', label: t('home.support') },
+    { key: 'support', label: t('home.support'), href: '/(app)/support' },
     { key: 'assistant', label: t('home.assistant') },
   ];
 
