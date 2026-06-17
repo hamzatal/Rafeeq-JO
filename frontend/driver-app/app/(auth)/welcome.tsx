@@ -15,10 +15,10 @@ export default function Welcome() {
   return (
     <Screen center>
       <View style={s.brandWrap}>
-        <View style={s.logo}><Text style={s.glyph}>ر</Text></View>
+        <View style={s.logo}><Text style={s.glyph}>R</Text></View>
         <Text style={s.badge}>كابتن</Text>
         <Text style={s.title}>{t('auth.welcomeTitle')}</Text>
-        <Text style={s.subtitle}>انضم كشريك نقل معتمد في رفيق</Text>
+        <Text style={s.subtitle}>{t('driver.joinSubtitle')}</Text>
       </View>
       <View style={s.actions}>
         <Button title={t('auth.register')} onPress={() => router.push('/(auth)/register')} />

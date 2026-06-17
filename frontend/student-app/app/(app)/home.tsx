@@ -29,7 +29,7 @@ export default function Home() {
       <ScrollView contentContainerStyle={s.content}>
         <View style={s.header}>
           <View>
-            <Text style={s.greeting}>أهلاً 👋</Text>
+            <Text style={s.greeting}>{t('home.hello')}</Text>
             <Text style={s.name}>{user?.full_name ?? ''}</Text>
           </View>
           <Pressable onPress={() => router.push('/(app)/settings')} style={s.iconBtn}>
@@ -45,7 +45,7 @@ export default function Home() {
               onPress={() => item.href && router.push(item.href as never)}
             >
               <Text style={s.cardLabel}>{item.label}</Text>
-              {!item.href && <Text style={s.soon}>قريباً</Text>}
+              {!item.href && <Text style={s.soon}>{t('common.soon')}</Text>}
             </Pressable>
           ))}
         </View>

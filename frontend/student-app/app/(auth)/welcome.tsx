@@ -16,7 +16,7 @@ export default function Welcome() {
     <Screen center>
       <View style={s.brandWrap}>
         <View style={s.logo}>
-          <Text style={s.glyph}>ر</Text>
+          <Text style={s.glyph}>R</Text>
         </View>
         <Text style={s.title}>{t('auth.welcomeTitle')}</Text>
         <Text style={s.subtitle}>{t('auth.welcomeSubtitle')}</Text>

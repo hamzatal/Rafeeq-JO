@@ -5,10 +5,12 @@ import type { Subscription, SubscriptionPlan } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
+import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Subscriptions() {
+  const { t, locale } = useI18n();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -35,10 +37,10 @@ export default function Subscriptions() {
     setBusy(planId);
     try {
       await api.transport.subscribe(planId);
-      setMsg({ text: 'تم إنشاء الاشتراك. أكمل الدفع لتفعيله.', ok: true });
+      setMsg({ text: t('subscriptions.created'), ok: true });
       await load();
     } catch (e) {
-      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : 'فشل', ok: false });
+      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('subscriptions.failed'), ok: false });
     } finally {
       setBusy(null);
     }
@@ -47,41 +49,41 @@ export default function Subscriptions() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content}>
-        <Text style={s.h1}>الاشتراكات</Text>
+        <Text style={s.h1}>{t('subscriptions.title')}</Text>
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {subs.length > 0 && (
           <>
-            <Text style={s.section}>اشتراكاتي</Text>
+            <Text style={s.section}>{t('subscriptions.mine')}</Text>
             {subs.map((sub) => (
               <View key={sub.id} style={s.card}>
                 <View style={s.row}>
-                  <Text style={s.cardTitle}>{sub.plan?.name ?? 'اشتراك'}</Text>
+                  <Text style={s.cardTitle}>{sub.plan?.name ?? t('subscriptions.defaultName')}</Text>
                   <Text style={[s.badge, { color: sub.usable ? theme.colors.success : theme.colors.warning }]}>{sub.status_label}</Text>
                 </View>
                 <Text style={s.meta}>
-                  {sub.remaining_rides === null ? 'غير محدود' : `${sub.remaining_rides} رحلة متبقية`}
-                  {sub.ends_at ? ` · ينتهي ${new Date(sub.ends_at).toLocaleDateString('ar')}` : ''}
+                  {sub.remaining_rides === null ? t('common.unlimited') : `${sub.remaining_rides} ${t('subscriptions.rideUnit')}`}
+                  {sub.ends_at ? ` · ${t('subscriptions.endsAt')} ${new Date(sub.ends_at).toLocaleDateString(locale)}` : ''}
                 </Text>
               </View>
             ))}
           </>
         )}
 
-        <Text style={s.section}>الخطط المتاحة</Text>
+        <Text style={s.section}>{t('subscriptions.available')}</Text>
         {loading ? (
-          <Text style={s.meta}>جارٍ التحميل...</Text>
+          <Text style={s.meta}>{t('common.loading')}</Text>
         ) : plans.length === 0 ? (
-          <Text style={s.meta}>لا توجد خطط متاحة حالياً</Text>
+          <Text style={s.meta}>{t('subscriptions.none')}</Text>
         ) : (
           plans.map((p) => (
             <View key={p.id} style={s.card}>
               <View style={s.row}>
                 <Text style={s.cardTitle}>{p.name}</Text>
-                <Text style={s.price}>{p.price_jod} د.أ</Text>
+                <Text style={s.price}>{p.price_jod} {t('subscriptions.currency')}</Text>
               </View>
-              <Text style={s.meta}>{p.type_label} · {p.unlimited ? 'غير محدود' : `${p.rides_count} رحلة`} · {p.duration_days} يوم</Text>
-              <Button title="اشترك" onPress={() => subscribe(p.id)} loading={busy === p.id} style={s.btn} />
+              <Text style={s.meta}>{p.type_label} · {p.unlimited ? t('common.unlimited') : `${p.rides_count} ${t('subscriptions.rideWord')}`} · {p.duration_days} {t('subscriptions.dayUnit')}</Text>
+              <Button title={t('subscriptions.subscribe')} onPress={() => subscribe(p.id)} loading={busy === p.id} style={s.btn} />
             </View>
           ))
         )}

@@ -4,10 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Trip, TripPassenger } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
+import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Trips() {
+  const { t, locale } = useI18n();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const [mine, setMine] = useState<TripPassenger[]>([]);
@@ -34,67 +36,67 @@ export default function Trips() {
     setMsg(null); setBusy(tripId);
     try {
       await api.transport.bookTrip(tripId);
-      setMsg({ text: 'تم الحجز! احتفظ بكود الصعود.', ok: true });
+      setMsg({ text: t('trips.booked'), ok: true });
       await load();
     } catch (e) {
-      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : 'فشل الحجز', ok: false });
+      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('trips.bookFailed'), ok: false });
     } finally { setBusy(null); }
   };
 
   const track = async (tripId: string) => {
     try {
       const loc = await api.transport.tripLocation(tripId);
-      setLocation((p) => ({ ...p, [tripId]: loc ? `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}` : 'لا يوجد موقع بعد' }));
+      setLocation((p) => ({ ...p, [tripId]: loc ? `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}` : t('trips.noLocation') }));
     } catch {
-      setLocation((p) => ({ ...p, [tripId]: 'تعذّر جلب الموقع' }));
+      setLocation((p) => ({ ...p, [tripId]: t('trips.locationError') }));
     }
   };
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content}>
-        <Text style={s.h1}>رحلاتي</Text>
+        <Text style={s.h1}>{t('trips.title')}</Text>
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {mine.length === 0 ? (
-          <Text style={s.meta}>لا يوجد حجوزات بعد</Text>
+          <Text style={s.meta}>{t('trips.noBookings')}</Text>
         ) : (
           mine.map((p) => (
             <View key={p.id} style={s.card}>
               <View style={s.row}>
-                <Text style={s.cardTitle}>{p.trip?.route?.name ?? 'رحلة'}</Text>
+                <Text style={s.cardTitle}>{p.trip?.route?.name ?? t('trips.defaultName')}</Text>
                 <Text style={s.badge}>{p.status_label}</Text>
               </View>
-              {p.trip?.scheduled_at && <Text style={s.meta}>{new Date(p.trip.scheduled_at).toLocaleString('ar')}</Text>}
+              {p.trip?.scheduled_at && <Text style={s.meta}>{new Date(p.trip.scheduled_at).toLocaleString(locale)}</Text>}
               {p.boarding_code && (
                 <View style={s.codeBox}>
-                  <Text style={s.codeLabel}>كود الصعود</Text>
+                  <Text style={s.codeLabel}>{t('trips.boardingCode')}</Text>
                   <Text style={s.code}>{p.boarding_code}</Text>
                 </View>
               )}
               <Pressable onPress={() => p.trip && track(p.trip_id)} style={s.trackBtn}>
-                <Text style={s.trackText}>تتبّع الكابتن</Text>
+                <Text style={s.trackText}>{t('trips.track')}</Text>
               </Pressable>
               {location[p.trip_id] && <Text style={s.meta}>📍 {location[p.trip_id]}</Text>}
             </View>
           ))
         )}
 
-        <Text style={s.section}>رحلات متاحة</Text>
+        <Text style={s.section}>{t('trips.available')}</Text>
         {loading ? (
-          <Text style={s.meta}>جارٍ التحميل...</Text>
+          <Text style={s.meta}>{t('common.loading')}</Text>
         ) : available.length === 0 ? (
-          <Text style={s.meta}>لا توجد رحلات مجدولة حالياً</Text>
+          <Text style={s.meta}>{t('trips.none')}</Text>
         ) : (
           available.map((trip) => (
             <View key={trip.id} style={s.card}>
               <View style={s.row}>
-                <Text style={s.cardTitle}>{trip.route?.name ?? 'رحلة'}</Text>
+                <Text style={s.cardTitle}>{trip.route?.name ?? t('trips.defaultName')}</Text>
                 <Text style={s.meta}>{trip.booked_count ?? 0}/{trip.capacity}</Text>
               </View>
-              {trip.scheduled_at && <Text style={s.meta}>{new Date(trip.scheduled_at).toLocaleString('ar')}</Text>}
+              {trip.scheduled_at && <Text style={s.meta}>{new Date(trip.scheduled_at).toLocaleString(locale)}</Text>}
               <Pressable onPress={() => book(trip.id)} disabled={busy === trip.id} style={s.bookBtn}>
-                <Text style={s.bookText}>{busy === trip.id ? '...' : 'احجز مقعد'}</Text>
+                <Text style={s.bookText}>{busy === trip.id ? '...' : t('trips.book')}</Text>
               </Pressable>
             </View>
           ))
