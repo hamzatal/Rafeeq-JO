@@ -119,7 +119,10 @@ class DriverTripController extends Controller
 
     public function cancel(Request $request, Trip $trip): JsonResponse
     {
-        return $this->ok(new TripResource($this->service->cancel($this->ownedTrip($request, $trip))), 'أُلغيت الرحلة.');
+        $this->ownedTrip($request, $trip);
+        $result = $this->service->cancel($trip, $request->user(), 'driver', $request->input('reason'));
+
+        return $this->ok(new TripResource($result), 'أُلغيت الرحلة.');
     }
 
     public function passengers(Request $request, Trip $trip): JsonResponse
