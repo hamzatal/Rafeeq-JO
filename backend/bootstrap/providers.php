@@ -27,5 +27,9 @@ return [
     Rafeeq\Modules\Ratings\Providers\RatingsServiceProvider::class,
     Rafeeq\Modules\Support\Providers\SupportServiceProvider::class,
     Rafeeq\Modules\Complaints\Providers\ComplaintsServiceProvider::class,
+    Rafeeq\Modules\Parcels\Providers\ParcelsServiceProvider::class,
+    Rafeeq\Modules\Rewards\Providers\RewardsServiceProvider::class,
+    Rafeeq\Modules\LostFound\Providers\LostFoundServiceProvider::class,
+    Rafeeq\Modules\Exchange\Providers\ExchangeServiceProvider::class,
     Rafeeq\Modules\Safety\Providers\SafetyServiceProvider::class,
 ];
