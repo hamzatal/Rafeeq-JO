@@ -53,6 +53,7 @@ class MatchingService extends BaseService
                 'type' => 'pooled',
                 'zone_id' => $first->zone_id,
                 'university_id' => $first->university_id,
+                'fare_fils' => (int) config('rafeeq.default_fare_fils', 1000),
                 'scheduled_at' => $first->desired_time,
                 'status' => TripStatus::PendingDriver,
                 'capacity' => self::SEAT_CAPACITY,

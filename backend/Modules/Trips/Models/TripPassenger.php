@@ -24,6 +24,7 @@ class TripPassenger extends Model
         'trip_id', 'student_id', 'subscription_id', 'pickup_point_id',
         'pickup_lat', 'pickup_lng', 'pickup_order',
         'status', 'boarding_code', 'dropoff_code', 'boarded_at', 'dropoff_confirmed_at',
+        'fare_fils', 'commission_fils', 'captain_share_fils', 'paid_at',
     ];
 
     protected $hidden = ['boarding_code', 'dropoff_code'];
@@ -34,8 +35,12 @@ class TripPassenger extends Model
             'status' => TripPassengerStatus::class,
             'boarded_at' => 'datetime',
             'dropoff_confirmed_at' => 'datetime',
+            'paid_at' => 'datetime',
             'pickup_lat' => 'float',
             'pickup_lng' => 'float',
+            'fare_fils' => 'integer',
+            'commission_fils' => 'integer',
+            'captain_share_fils' => 'integer',
         ];
     }
 

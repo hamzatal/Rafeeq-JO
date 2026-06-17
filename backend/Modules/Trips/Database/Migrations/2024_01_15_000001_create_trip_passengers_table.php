@@ -22,6 +22,10 @@ return new class extends Migration
             $table->enum('status', TripPassengerStatus::values())->default(TripPassengerStatus::Booked->value);
             $table->string('boarding_code', 8); // Trip OTP at boarding (security layer 6)
             $table->string('dropoff_code', 8)->nullable(); // OTP at drop-off (anti-fraud)
+            $table->unsignedInteger('fare_fils')->default(0);
+            $table->unsignedInteger('commission_fils')->default(0);
+            $table->unsignedInteger('captain_share_fils')->default(0);
+            $table->timestamp('paid_at')->nullable();
             $table->timestamp('boarded_at')->nullable();
             $table->timestamp('dropoff_confirmed_at')->nullable();
             $table->timestamps();

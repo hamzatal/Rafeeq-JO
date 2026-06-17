@@ -7,9 +7,12 @@ use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Safety\Services\FraudService;
 use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Services\SubscriptionService;
+use Rafeeq\Modules\Trips\Events\TripLocationUpdated;
+use Rafeeq\Modules\Trips\Events\TripStatusChanged;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Models\TripTracking;
@@ -21,6 +24,8 @@ class TripService extends BaseService
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly SubscriptionService $subscriptions,
+        private readonly RideBillingService $billing,
+        private readonly FraudService $fraud,
     ) {}
 
     public function schedule(DriverProfile $driver, Route $route, string $scheduledAt, ?string $vehicleId = null): Trip
@@ -33,6 +38,7 @@ class TripService extends BaseService
             'route_id' => $route->id,
             'driver_id' => $driver->id,
             'vehicle_id' => $vehicleId,
+            'fare_fils' => $route->price_fils,
             'scheduled_at' => $scheduledAt,
             'status' => TripStatus::Scheduled,
             'capacity' => $route->capacity,
@@ -47,6 +53,7 @@ class TripService extends BaseService
     {
         $this->assertStatus($trip, TripStatus::Scheduled, 'لا يمكن بدء هذه الرحلة.');
         $trip->forceFill(['status' => TripStatus::Started, 'started_at' => now()])->save();
+        TripStatusChanged::dispatch($trip->id, $trip->status->value);
         $this->audit->log('trip.started', auditable: $trip);
 
         return $trip;
@@ -61,21 +68,32 @@ class TripService extends BaseService
         $trip->passengers()->where('status', TripPassengerStatus::Onboard->value)
             ->update(['status' => TripPassengerStatus::Dropped->value]);
 
+        TripStatusChanged::dispatch($trip->id, $trip->status->value);
         $this->audit->log('trip.completed', auditable: $trip);
 
         return $trip;
     }
 
-    public function cancel(Trip $trip): Trip
+    public function cancel(Trip $trip, ?User $actor = null, string $role = 'driver', ?string $reason = null): Trip
     {
         if ($trip->status === TripStatus::Completed) {
             throw new BusinessRuleException('لا يمكن إلغاء رحلة مكتملة.', 'TRIP_COMPLETED');
         }
+
+        $passengersCount = $trip->passengers()
+            ->whereIn('status', [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value])
+            ->count();
+
         $trip->forceFill(['status' => TripStatus::Cancelled])->save();
         $trip->passengers()->where('status', TripPassengerStatus::Booked->value)
             ->update(['status' => TripPassengerStatus::Cancelled->value]);
 
-        $this->audit->log('trip.cancelled', auditable: $trip);
+        TripStatusChanged::dispatch($trip->id, $trip->status->value);
+
+        // Anti-fraud: log the cancellation and evaluate suspicious patterns.
+        $this->fraud->logCancellation($trip->id, $actor?->id, $role, $reason, $passengersCount);
+
+        $this->audit->log('trip.cancelled', $actor, auditable: $trip);
 
         return $trip;
     }
@@ -144,6 +162,9 @@ class TripService extends BaseService
                 }
             }
 
+            // Charge the fare / pay the captain through the platform wallet.
+            $this->billing->chargeForBoarding($passenger, $trip);
+
             $this->audit->log('trip.boarded', auditable: $passenger);
 
             return $passenger;
@@ -152,13 +173,17 @@ class TripService extends BaseService
 
     public function pushLocation(Trip $trip, float $lat, float $lng, ?float $speed = null): TripTracking
     {
-        return TripTracking::create([
+        $tracking = TripTracking::create([
             'trip_id' => $trip->id,
             'lat' => $lat,
             'lng' => $lng,
             'speed' => $speed,
             'recorded_at' => now(),
         ]);
+
+        TripLocationUpdated::dispatch($trip->id, $lat, $lng, $speed, $tracking->recorded_at->toIso8601String());
+
+        return $tracking;
     }
 
     private function assertStatus(Trip $trip, TripStatus $expected, string $message): void
