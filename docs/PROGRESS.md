@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-052 |
-| المرحلة الحالية | **Phase 2 + branding/splash + بورتات منفصلة ✅ → التالي: Seeder تجريبي + صفحات إدارة النقل** |
+| آخر Commit | RFQ-057 |
+| المرحلة الحالية | **Phase 2 + ملحق A (Zone Pooling): Zones + RideRequests + سيارات ✅ → التالي: محرّك التجميع + المحفظة** |
 
 ---
 
@@ -72,6 +72,17 @@
 
 ### Phase 3..7 ⏳
 انظر `docs/ROADMAP.md`.
+
+### ملحق A — Zone Pooling + مكافحة الاحتيال (مُعتمد، قيد التنفيذ) 🔄
+- ✅ سيارات لا باصات: السعات أصبحت 4 (افتراضي) / 7 (أقصى) لكل من vehicles/routes/trips.
+- ✅ **Zones** (backend): جدول + نموذج + أقرب-منطقة (Haversine) + CRUD + بذور 6 مناطق إربد.
+- ✅ **RideRequests** (backend): طلب باب لباب (إحداثيات البيت → الجامعة) + تعيين الزون تلقائياً + علم express + APIs (طالب: إنشاء/طلباتي/إلغاء، إدارة: قائمة).
+- ✅ توسعة `trip_passengers`: pickup_lat/lng + pickup_order + dropoff_code + dropoff_confirmed_at (OTP إنزال).
+- ⏳ **محرّك التجميع (Pooling/Matching)** — التالي
+- ⏳ المحفظة مسبقة الدفع (CliQ top-up) + احتساب العمولة
+- ⏳ التتبّع الحيّ (Reverb) + Express dynamic pricing + min-fill
+- ⏳ AI Fraud Monitor + Risk Score + مركز النزاعات
+- ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
 
 ---
 
@@ -138,5 +149,10 @@
 | 050 | fix(frontend): distinct dev ports (student 8081, driver 8082) — fixes cache/origin collision |
 | 051 | feat(splash): animated branded splash per app (student road, driver map, admin analytics) + admin splash |
 | 052 | docs: ports + splash notes + progress update |
+| 053 | docs: roadmap appendix — zone pooling, express, realtime, anti-fraud, wallet |
+| 054 | chore(transport): car-sized capacities (default 4, max 7) for vehicles/routes/trips |
+| 055 | feat(zones): zones module + nearest-zone matching (Haversine) + seed 6 Irbid zones |
+| 056 | feat(ride-requests): door-to-door requests (auto zone + express) + passenger pickup coords + drop-off OTP |
+| 057 | docs: progress update — Zone Pooling foundation (appendix A) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
