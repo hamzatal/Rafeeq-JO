@@ -6,6 +6,7 @@ import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
+import { subscribeToTrip } from '../../src/lib/realtime';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Trips() {
@@ -33,6 +34,19 @@ export default function Trips() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+
+  // Live tracking via Reverb (auto-updates the location field when configured).
+  useEffect(() => {
+    const unsubs = mine
+      .filter((p) => p.trip)
+      .map((p) =>
+        subscribeToTrip(p.trip_id, {
+          onLocation: (e) =>
+            setLocation((prev) => ({ ...prev, [p.trip_id]: `${e.lat.toFixed(5)}, ${e.lng.toFixed(5)}` })),
+        }),
+      );
+    return () => unsubs.forEach((u) => u());
+  }, [mine]);
 
   const book = async (tripId: string) => {
     setMsg(null); setBusy(tripId);
