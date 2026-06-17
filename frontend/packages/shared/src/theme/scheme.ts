@@ -1,10 +1,10 @@
-import { palette } from './colors';
-
 export type ColorScheme = 'light' | 'dark';
 export type ThemeRole = 'student' | 'driver' | 'admin';
 
 export interface ThemeColors {
   primary: string;
+  primaryDark: string;
+  primarySoft: string;
   accent: string;
   onPrimary: string;
   background: string;
@@ -23,37 +23,37 @@ export interface ThemeColors {
 
 const status = {
   success: '#16A34A',
-  warning: '#D97706',
-  danger: '#DC2626',
+  warning: '#E0930C',
+  danger: '#CE1126', // Jordan red
   info: '#0EA5E9',
 };
 
-// Role accent (brand) per app.
-const roleAccent: Record<ThemeRole, { primary: string; accent: string; onPrimary: string }> = {
-  student: { primary: '#2563EB', accent: palette.gold, onPrimary: '#FFFFFF' },
-  driver: { primary: palette.gold, accent: palette.gold, onPrimary: '#0F172A' },
-  admin: { primary: '#2563EB', accent: palette.gold, onPrimary: '#FFFFFF' },
+// Role accent (brand) per app — Jordan-inspired: deep green + heritage gold.
+const roleAccent: Record<ThemeRole, { primary: string; primaryDark: string; accent: string; onPrimary: string }> = {
+  student: { primary: '#0B7A43', primaryDark: '#075C32', accent: '#E6B23E', onPrimary: '#FFFFFF' },
+  driver: { primary: '#E6B23E', primaryDark: '#C7951F', accent: '#E6B23E', onPrimary: '#0E261C' },
+  admin: { primary: '#0B7A43', primaryDark: '#075C32', accent: '#E6B23E', onPrimary: '#FFFFFF' },
 };
 
 const neutralsLight = {
-  background: '#F6F8FC',
+  background: '#F4F7F5',
   surface: '#FFFFFF',
   card: '#FFFFFF',
-  text: '#0F172A',
-  textSecondary: '#475569',
-  muted: '#94A3B8',
-  border: '#E2E8F0',
-  overlay: 'rgba(15,23,42,0.45)',
+  text: '#0E261C',
+  textSecondary: '#516159',
+  muted: '#9AA8A0',
+  border: '#E4EAE6',
+  overlay: 'rgba(14,38,28,0.45)',
 };
 
 const neutralsDark = {
-  background: '#0B1220',
-  surface: '#131C2E',
-  card: '#1B2840',
-  text: '#F1F5F9',
-  textSecondary: '#9FB0C7',
-  muted: '#64748B',
-  border: '#26344B',
+  background: '#08130D',
+  surface: '#0F2017',
+  card: '#142A1E',
+  text: '#ECF4EF',
+  textSecondary: '#9FB3A8',
+  muted: '#5E7268',
+  border: '#214034',
   overlay: 'rgba(0,0,0,0.6)',
 };
 
@@ -62,12 +62,14 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   const accent = roleAccent[role];
   const neutrals = scheme === 'dark' ? neutralsDark : neutralsLight;
 
-  // In dark mode, lift the student blue slightly for contrast.
-  const primary =
-    scheme === 'dark' && role !== 'driver' ? '#3B82F6' : accent.primary;
+  // Lift the brand green slightly in dark mode for contrast.
+  const primary = scheme === 'dark' && role !== 'driver' ? '#15A05A' : accent.primary;
+  const primarySoft = scheme === 'dark' ? 'rgba(21,160,90,0.16)' : 'rgba(11,122,67,0.10)';
 
   return {
     primary,
+    primaryDark: accent.primaryDark,
+    primarySoft,
     accent: accent.accent,
     onPrimary: accent.onPrimary,
     ...neutrals,

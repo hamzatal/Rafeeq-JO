@@ -5,11 +5,13 @@
 
 // Shared semantic colors used across both apps.
 export const palette = {
-  // Brand
-  primary: '#2563EB', // Primary Blue
-  gold: '#D4A017', // Royal Gold
-  navy: '#0F172A', // Navy
-  navySurface: '#1E293B', // Driver cards / dark surfaces
+  // Brand — Jordan-inspired
+  primary: '#0B7A43', // Jordan green
+  primaryDark: '#075C32',
+  gold: '#E6B23E', // Heritage gold
+  red: '#CE1126', // Jordan red
+  navy: '#0E261C', // Deep green-black (driver/dark surfaces)
+  navySurface: '#163524', // Driver cards / dark surfaces
 
   // Neutrals
   white: '#FFFFFF',
