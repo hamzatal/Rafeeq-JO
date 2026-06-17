@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-079 |
-| نسبة الإنجاز | ~58% (الأساس/القلب التشغيلي ~90%) |
-| المرحلة الحالية | **M2 منجزة (backend). التالي: M3 — عميل التتبّع الحيّ + الخرائط + Express، ثم واجهات الدفع/الإشعارات/التقييم** |
+| آخر Commit | RFQ-085 |
+| نسبة الإنجاز | ~59% (الأساس/القلب التشغيلي ~90%) |
+| المرحلة الحالية | **إصلاحات frontend (لوجو أردني/سبلاش سيارة/لغة/راوتنج الأدمن/مشكلة فتح الكابتن) — التالي: M3** |
 
 ---
 
@@ -190,5 +190,11 @@
 | 077 | feat(payments): controller + requests + resources + routes + provider (payer + admin review queue) |
 | 078 | feat(notifications): FCM push infra + notifications/preferences/device-tokens + SMS fallback service & API |
 | 079 | feat(ratings): two-way ratings + driver average + wire notifications into payment/trip/SOS flows |
+| 080 | fix(frontend): isolate Metro cache per app (cacheVersion + EXPO_ROUTER_APP_ROOT) — student no longer opens driver app |
+| 081 | fix(admin): dashboard routing — home at `/` + remove duplicate root page + correct redirects/links (fixes 404) |
+| 082 | feat(brand): brand-new Jordan-inspired logo (uppercase R + رفيق + seven-pointed star + flag colors) across mark/wordmark/full/favicon |
+| 083 | feat(splash): car driving along the road (student + driver + admin) replacing the moving dot |
+| 084 | fix(i18n): wire hardcoded Arabic strings to dictionary (home/welcome/subscriptions/trips) + expand ar/en — fixes mixed-language UI |
+| 085 | chore(security+deps): SECURITY.md review + align TypeScript ~5.3.3 + admin Accept-Language from prefs |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

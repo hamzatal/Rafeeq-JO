@@ -15,9 +15,12 @@ export const setUnauthorizedHandler = (fn: () => void) => {
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
+const readLocale = (): 'ar' | 'en' =>
+  typeof window !== 'undefined' && localStorage.getItem('rafeeq_admin_locale') === 'en' ? 'en' : 'ar';
+
 export const api = createRafeeqApi({
   baseURL: apiUrl,
   getToken: () => tokenStore.get(),
-  getLocale: () => 'ar',
+  getLocale: readLocale,
   onUnauthorized: () => onUnauthorized?.(),
 });
