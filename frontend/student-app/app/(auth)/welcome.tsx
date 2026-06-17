@@ -16,7 +16,7 @@ export default function Welcome() {
     <Screen center>
       <View style={s.brandWrap}>
         <View style={s.logo}>
-          <View style={s.pin}><View style={s.dot} /></View>
+          <Text style={s.glyph}>ر</Text>
         </View>
         <Text style={s.title}>{t('auth.welcomeTitle')}</Text>
         <Text style={s.subtitle}>{t('auth.welcomeSubtitle')}</Text>
@@ -35,9 +35,8 @@ export default function Welcome() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     brandWrap: { alignItems: 'center', flex: 1, justifyContent: 'center' },
-    logo: { width: 104, height: 104, borderRadius: 28, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.xl },
-    pin: { width: 52, height: 52, borderRadius: 26, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
-    dot: { width: 18, height: 18, borderRadius: 9, backgroundColor: '#0F2A6B' },
+    logo: { width: 104, height: 104, borderRadius: 52, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.xl, borderWidth: 4, borderColor: t.colors.accent },
+    glyph: { fontFamily: t.fontFamily.extrabold, fontSize: 54, color: '#FFFFFF' },
     title: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, marginBottom: t.spacing.sm },
     subtitle: { fontFamily: t.fontFamily.regular, fontSize: 16, color: t.colors.textSecondary, textAlign: 'center' },
     actions: { gap: t.spacing.base, paddingBottom: t.spacing.xl },

@@ -1,39 +1,27 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rafeeq">
   <defs>
-    <linearGradient id="rfqBg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1E3A8A"/>
-      <stop offset="0.55" stop-color="#2563EB"/>
-      <stop offset="1" stop-color="#1D4ED8"/>
+    <linearGradient id="rfqCircle" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5"/>
+      <stop offset="0.5" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
     </linearGradient>
-    <linearGradient id="rfqGold" x1="160" y1="120" x2="360" y2="400" gradientUnits="userSpaceOnUse">
+    <linearGradient id="rfqArc" x1="120" y1="120" x2="392" y2="392" gradientUnits="userSpaceOnUse">
       <stop stop-color="#F2C14E"/>
       <stop offset="1" stop-color="#D4A017"/>
     </linearGradient>
-    <filter id="rfqShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#000000" flood-opacity="0.22"/>
-    </filter>
   </defs>
 
-  <!-- App badge -->
-  <rect width="512" height="512" rx="128" fill="url(#rfqBg)"/>
+  <!-- Circular emblem -->
+  <circle cx="256" cy="256" r="240" fill="url(#rfqCircle)"/>
 
-  <!-- Subtle route swoosh (negative motion) -->
-  <path d="M96 372 C 150 372, 168 300, 232 300 C 300 300, 300 232, 256 196"
-        stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="40" stroke-linecap="round" fill="none"/>
+  <!-- Orbital ring (companionship / motion) -->
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="10"/>
+  <path d="M256 60 A 196 196 0 0 1 452 256" fill="none" stroke="url(#rfqArc)" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="452" cy="256" r="16" fill="#F2C14E"/>
 
-  <!-- Navigation pin (gold) with carved road forming an 'R' stem -->
-  <g filter="url(#rfqShadow)">
-    <path d="M256 92
-             C 326 92, 382 148, 382 218
-             C 382 300, 286 392, 262 414
-             a 9 9 0 0 1 -12 0
-             C 226 392, 130 300, 130 218
-             C 130 148, 186 92, 256 92 Z" fill="url(#rfqGold)"/>
-  </g>
-
-  <!-- Inner negative-space road / pin eye -->
-  <circle cx="256" cy="210" r="58" fill="#0F2A6B"/>
-  <path d="M256 174 C 286 174, 300 196, 286 220 C 276 236, 246 236, 240 256"
-        stroke="#F2C14E" stroke-width="16" stroke-linecap="round" fill="none"/>
-  <circle cx="256" cy="210" r="14" fill="#F2C14E"/>
+  <!-- Geometric Arabic "ر" lettermark -->
+  <path d="M170 196
+           C 170 300, 250 330, 348 300"
+        fill="none" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round"/>
+  <circle cx="356" cy="356" r="20" fill="#FFFFFF"/>
 </svg>

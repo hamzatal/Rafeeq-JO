@@ -5,44 +5,32 @@ import { palette } from '@rafeeq/shared';
 const ROAD_WIDTH = 240;
 const PIN = 26;
 
-/** Animated branded launch screen — Driver (dark map/road theme). */
+/** Animated branded launch — Driver (new circular emblem + road, dark). */
 export function BrandSplash() {
   const fade = useRef(new Animated.Value(0)).current;
-  const pulse = useRef(new Animated.Value(1)).current;
+  const spin = useRef(new Animated.Value(0)).current;
   const travel = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(fade, { toValue: 1, duration: 700, useNativeDriver: true }).start();
+    Animated.loop(Animated.timing(spin, { toValue: 1, duration: 3200, easing: Easing.linear, useNativeDriver: true })).start();
+    Animated.loop(Animated.timing(travel, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true })).start();
+  }, [fade, spin, travel]);
 
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.08, duration: 850, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 850, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-      ]),
-    ).start();
-
-    Animated.loop(
-      Animated.timing(travel, { toValue: 1, duration: 2000, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-    ).start();
-  }, [fade, pulse, travel]);
-
+  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
   const pinX = travel.interpolate({ inputRange: [0, 1], outputRange: [4, ROAD_WIDTH - PIN - 4] });
   const pinLift = travel.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, -6, 0] });
 
   return (
     <Animated.View style={[styles.container, { opacity: fade }]}>
-      <Animated.View style={{ transform: [{ scale: pulse }] }}>
-        <View style={styles.badge}>
-          <View style={styles.pin}>
-            <View style={styles.dot} />
-          </View>
-        </View>
-      </Animated.View>
+      <View style={styles.emblem}>
+        <Animated.View style={[styles.ring, { transform: [{ rotate }] }]} />
+        <Text style={styles.glyph}>ر</Text>
+      </View>
 
       <Text style={styles.word}>رفيق</Text>
       <Text style={styles.tag}>كابتن</Text>
 
-      {/* Animated road with a travelling marker */}
       <View style={styles.road}>
         <View style={styles.centerLine}>
           {Array.from({ length: 9 }).map((_, i) => (
@@ -59,9 +47,9 @@ export function BrandSplash() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.navy },
-  badge: { width: 112, height: 112, borderRadius: 30, backgroundColor: palette.gold, alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
-  pin: { width: 58, height: 58, borderRadius: 29, backgroundColor: palette.navy, alignItems: 'center', justifyContent: 'center' },
-  dot: { width: 22, height: 22, borderRadius: 11, backgroundColor: palette.gold },
+  emblem: { width: 120, height: 120, borderRadius: 60, backgroundColor: palette.navySurface, alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
+  ring: { position: 'absolute', width: 104, height: 104, borderRadius: 52, borderWidth: 4, borderColor: palette.gold, borderTopColor: 'transparent', borderRightColor: 'transparent' },
+  glyph: { fontFamily: 'Tajawal_800ExtraBold', fontSize: 58, color: palette.gold },
   word: { fontFamily: 'Tajawal_800ExtraBold', fontSize: 40, color: '#FFFFFF' },
   tag: { fontFamily: 'Tajawal_700Bold', fontSize: 16, color: palette.gold, marginTop: 4, letterSpacing: 2 },
   road: { width: ROAD_WIDTH, height: 40, borderRadius: 8, backgroundColor: palette.navySurface, marginTop: 40, justifyContent: 'center', overflow: 'hidden' },
