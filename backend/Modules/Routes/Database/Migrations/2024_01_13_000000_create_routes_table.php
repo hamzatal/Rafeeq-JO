@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignUuid('from_area_id')->nullable()->constrained('areas')->nullOnDelete();
             $table->string('name', 150);
             $table->unsignedInteger('price_fils')->default(0); // price in fils
-            $table->unsignedSmallInteger('capacity')->default(14);
+            $table->unsignedSmallInteger('capacity')->default(4); // private car
             $table->json('days')->nullable();            // e.g. [0,1,2,3,4] (Sun..Thu)
             $table->string('departure_time', 5)->nullable(); // "07:30"
             $table->boolean('is_active')->default(true)->index();

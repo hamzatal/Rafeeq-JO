@@ -20,7 +20,7 @@ class RouteRequest extends FormRequest
             'from_area_id' => ['nullable', 'uuid', 'exists:areas,id'],
             'name' => [$required, 'string', 'max:150'],
             'price_fils' => [$required, 'integer', 'min:0'],
-            'capacity' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'capacity' => ['sometimes', 'integer', 'min:1', 'max:7'],
             'days' => ['sometimes', 'array'],
             'days.*' => ['integer', 'between:0,6'],
             'departure_time' => ['nullable', 'string', 'regex:/^([01]\d|2[0-3]):[0-5]\d$/'],

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('status', TripStatus::values())->default(TripStatus::Scheduled->value)->index();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
-            $table->unsignedSmallInteger('capacity')->default(14);
+            $table->unsignedSmallInteger('capacity')->default(4); // private car
             $table->timestamps();
         });
     }

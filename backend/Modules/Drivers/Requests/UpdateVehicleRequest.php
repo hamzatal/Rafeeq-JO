@@ -19,7 +19,7 @@ class UpdateVehicleRequest extends FormRequest
             'model' => ['sometimes', 'string', 'max:60'],
             'year' => ['sometimes', 'integer', 'min:1990', 'max:'.(date('Y') + 1)],
             'color' => ['sometimes', 'string', 'max:40'],
-            'seats' => ['sometimes', 'integer', 'min:1', 'max:50'],
+            'seats' => ['sometimes', 'integer', 'min:1', 'max:7'],
             'status' => ['sometimes', Rule::in(['active', 'inactive'])],
         ];
     }
