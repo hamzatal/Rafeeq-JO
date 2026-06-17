@@ -20,9 +20,10 @@ export default function Home() {
     { key: 'wallet', label: t('home.wallet'), href: '/(app)/wallet' },
     { key: 'payments', label: t('home.payments'), href: '/(app)/payments' },
     { key: 'notifications', label: t('home.notifications'), href: '/(app)/notifications' },
-    { key: 'parcels', label: t('home.parcels') },
-    { key: 'lostFound', label: t('home.lostFound') },
-    { key: 'rewards', label: t('home.rewards') },
+    { key: 'parcels', label: t('home.parcels'), href: '/(app)/parcels' },
+    { key: 'lostFound', label: t('home.lostFound'), href: '/(app)/lost-found' },
+    { key: 'rewards', label: t('home.rewards'), href: '/(app)/rewards' },
+    { key: 'exchange', label: t('home.exchange'), href: '/(app)/exchange' },
     { key: 'support', label: t('home.support'), href: '/(app)/support' },
     { key: 'assistant', label: t('home.assistant') },
   ];
