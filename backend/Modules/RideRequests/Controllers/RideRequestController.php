@@ -10,10 +10,36 @@ use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\RideRequests\Requests\CreateRideRequestRequest;
 use Rafeeq\Modules\RideRequests\Resources\RideRequestResource;
 use Rafeeq\Modules\RideRequests\Services\RideRequestService;
+use Rafeeq\Modules\Matching\Services\PricingService;
+use Rafeeq\Shared\Enums\RideType;
 
 class RideRequestController extends Controller
 {
-    public function __construct(private readonly RideRequestService $service) {}
+    public function __construct(
+        private readonly RideRequestService $service,
+        private readonly PricingService $pricing,
+    ) {}
+
+    /** Student: fare estimate (with min-fill surge preview) before requesting. */
+    public function estimate(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'type' => ['nullable', 'string', 'in:'.RideType::Scheduled->value.','.RideType::Express->value],
+            'riders' => ['nullable', 'integer', 'min:1', 'max:7'],
+            'capacity' => ['nullable', 'integer', 'min:1', 'max:7'],
+            'base_fare_fils' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $isExpress = ($data['type'] ?? null) === RideType::Express->value;
+        $quote = $this->pricing->quote(
+            $data['base_fare_fils'] ?? null,
+            $isExpress,
+            (int) ($data['riders'] ?? 1),
+            (int) ($data['capacity'] ?? 4),
+        );
+
+        return $this->ok($quote, 'تقدير الأجرة.');
+    }
 
     /** Student: create a ride request (door-to-door). */
     public function store(CreateRideRequestRequest $request): JsonResponse

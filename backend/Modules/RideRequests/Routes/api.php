@@ -7,6 +7,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Student
     Route::middleware('role:student')->group(function () {
         Route::post('ride-requests', [RideRequestController::class, 'store']);
+        Route::post('ride-requests/estimate', [RideRequestController::class, 'estimate']);
         Route::get('ride-requests/mine', [RideRequestController::class, 'mine']);
         Route::post('ride-requests/{rideRequest}/cancel', [RideRequestController::class, 'cancel']);
     });

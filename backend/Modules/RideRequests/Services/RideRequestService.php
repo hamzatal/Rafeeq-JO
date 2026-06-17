@@ -13,9 +13,6 @@ use Rafeeq\Shared\Enums\RideType;
 
 class RideRequestService extends BaseService
 {
-    /** Default express surcharge in fils (configurable later via settings). */
-    private const EXPRESS_FEE_FILS = 1500;
-
     public function __construct(
         private readonly ZoneService $zones,
         private readonly AuditLogger $audit,
@@ -50,7 +47,7 @@ class RideRequestService extends BaseService
             'desired_time' => $data['desired_time'],
             'type' => $type,
             'is_express' => $isExpress,
-            'express_fee_fils' => $isExpress ? self::EXPRESS_FEE_FILS : 0,
+            'express_fee_fils' => $isExpress ? (int) config('rafeeq.express_fee_fils', 1500) : 0,
             'status' => RideRequestStatus::Pending,
             'notes' => $data['notes'] ?? null,
         ]);

@@ -13,4 +13,10 @@ return [
 
     // Express surcharge in fils.
     'express_fee_fils' => (int) env('RAFEEQ_EXPRESS_FEE_FILS', 1500),
+
+    // Empty-seat economics: minimum riders before a pooled trip is "full enough".
+    'min_fill_riders' => (int) env('RAFEEQ_MIN_FILL_RIDERS', 3),
+
+    // Fair cap on dynamic surge applied to under-filled pooled trips.
+    'max_surge_multiplier' => (float) env('RAFEEQ_MAX_SURGE_MULTIPLIER', 1.5),
 ];
