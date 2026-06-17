@@ -18,6 +18,8 @@ export default function Trips() {
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [location, setLocation] = useState<Record<string, string>>({});
+  const [stars, setStars] = useState<Record<string, number>>({});
+  const [rated, setRated] = useState<Record<string, boolean>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,6 +54,18 @@ export default function Trips() {
     }
   };
 
+  const rate = async (tripId: string) => {
+    const value = stars[tripId];
+    if (!value) return;
+    try {
+      await api.ratings.rate(tripId, { direction: 'student_rates_driver', stars: value });
+      setRated((r) => ({ ...r, [tripId]: true }));
+      setMsg({ text: t('rating.done'), ok: true });
+    } catch (e) {
+      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'), ok: false });
+    }
+  };
+
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content}>
@@ -78,6 +92,26 @@ export default function Trips() {
                 <Text style={s.trackText}>{t('trips.track')}</Text>
               </Pressable>
               {location[p.trip_id] && <Text style={s.meta}>📍 {location[p.trip_id]}</Text>}
+
+              {p.trip?.status === 'completed' && (
+                rated[p.trip_id] ? (
+                  <Text style={[s.meta, { color: theme.colors.success }]}>{t('rating.done')}</Text>
+                ) : (
+                  <View style={s.rateBox}>
+                    <Text style={s.codeLabel}>{t('rating.title')}</Text>
+                    <View style={s.starsRow}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Pressable key={n} onPress={() => setStars((st) => ({ ...st, [p.trip_id]: n }))}>
+                          <Text style={[s.star, (stars[p.trip_id] ?? 0) >= n && s.starOn]}>★</Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                    <Pressable onPress={() => rate(p.trip_id)} style={s.rateBtn}>
+                      <Text style={s.rateText}>{t('rating.submit')}</Text>
+                    </Pressable>
+                  </View>
+                )
+              )}
             </View>
           ))
         )}
@@ -124,4 +158,10 @@ const makeStyles = (t: AppTheme) =>
     trackText: { fontFamily: t.fontFamily.medium, color: t.colors.primary, fontSize: 14 },
     bookBtn: { marginTop: t.spacing.sm, backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10, alignItems: 'center' },
     bookText: { color: t.colors.onPrimary, fontFamily: t.fontFamily.bold, fontSize: 14 },
+    rateBox: { marginTop: t.spacing.sm, borderTopWidth: 1, borderTopColor: t.colors.border, paddingTop: t.spacing.sm, alignItems: 'flex-end' },
+    starsRow: { flexDirection: 'row-reverse', gap: 4, marginVertical: 6 },
+    star: { fontSize: 28, color: t.colors.border },
+    starOn: { color: '#E6B23E' },
+    rateBtn: { backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 8, paddingHorizontal: t.spacing.lg },
+    rateText: { color: t.colors.onPrimary, fontFamily: t.fontFamily.bold, fontSize: 13 },
   });

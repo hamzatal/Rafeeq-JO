@@ -14,13 +14,16 @@ export default function Home() {
   const s = useMemo(() => makeStyles(theme), [theme]);
 
   const services: { key: string; label: string; href?: string }[] = [
+    { key: 'rideRequest', label: t('home.rideRequest'), href: '/(app)/ride-request' },
     { key: 'subscriptions', label: t('home.subscriptions'), href: '/(app)/subscriptions' },
     { key: 'trips', label: t('home.trips'), href: '/(app)/trips' },
+    { key: 'wallet', label: t('home.wallet'), href: '/(app)/wallet' },
+    { key: 'payments', label: t('home.payments'), href: '/(app)/payments' },
+    { key: 'notifications', label: t('home.notifications'), href: '/(app)/notifications' },
     { key: 'parcels', label: t('home.parcels') },
     { key: 'lostFound', label: t('home.lostFound') },
     { key: 'rewards', label: t('home.rewards') },
     { key: 'support', label: t('home.support') },
-    { key: 'wallet', label: t('home.wallet') },
     { key: 'assistant', label: t('home.assistant') },
   ];
 
