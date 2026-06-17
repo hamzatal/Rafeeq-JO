@@ -25,5 +25,7 @@ return [
     Rafeeq\Modules\Payments\Providers\PaymentsServiceProvider::class,
     Rafeeq\Modules\Notifications\Providers\NotificationsServiceProvider::class,
     Rafeeq\Modules\Ratings\Providers\RatingsServiceProvider::class,
+    Rafeeq\Modules\Support\Providers\SupportServiceProvider::class,
+    Rafeeq\Modules\Complaints\Providers\ComplaintsServiceProvider::class,
     Rafeeq\Modules\Safety\Providers\SafetyServiceProvider::class,
 ];
