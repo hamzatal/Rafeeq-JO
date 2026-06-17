@@ -1,23 +1,30 @@
-<svg width="860" height="280" viewBox="0 0 860 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="رفيق Rafeeq">
+<svg width="560" height="200" viewBox="0 0 560 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="رفيق Rafeeq">
   <defs>
-    <linearGradient id="wmCircle" x1="640" y1="40" x2="820" y2="240" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#4F46E5"/><stop offset="0.5" stop-color="#2563EB"/><stop offset="1" stop-color="#0EA5E9"/>
+    <linearGradient id="rfqBg" x1="8" y1="8" x2="192" y2="192" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E261C"/>
+      <stop offset="1" stop-color="#04120C"/>
     </linearGradient>
-    <linearGradient id="wmArc" x1="660" y1="60" x2="800" y2="220" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F2C14E"/><stop offset="1" stop-color="#D4A017"/>
+    <linearGradient id="rfqGold" x1="70" y1="40" x2="160" y2="160" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7DA84"/>
+      <stop offset="0.55" stop-color="#E6B23E"/>
+      <stop offset="1" stop-color="#B9841A"/>
     </linearGradient>
+    <clipPath id="rfqClipW"><rect x="8" y="8" width="184" height="184" rx="48"/></clipPath>
   </defs>
 
   <!-- Emblem -->
-  <g transform="translate(640,40)">
-    <circle cx="100" cy="100" r="100" fill="url(#wmCircle)"/>
-    <circle cx="100" cy="100" r="80" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="5"/>
-    <path d="M100 20 A 80 80 0 0 1 180 100" fill="none" stroke="url(#wmArc)" stroke-width="8" stroke-linecap="round"/>
-    <circle cx="180" cy="100" r="8" fill="#F2C14E"/>
-    <path d="M55 78 C 55 128, 95 142, 145 128" fill="none" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round"/>
-    <circle cx="150" cy="150" r="9" fill="#FFFFFF"/>
+  <rect x="8" y="8" width="184" height="184" rx="48" fill="url(#rfqBg)"/>
+  <g clip-path="url(#rfqClipW)">
+    <rect x="8" y="165" width="184" height="27" fill="#0B6E3B"/>
+    <rect x="8" y="165" width="184" height="9" fill="#FFFFFF" fill-opacity="0.92"/>
+    <path d="M8 8 L 98 100 L 8 192 Z" fill="#CE1126"/>
   </g>
+  <g transform="translate(44 96) scale(0.3)" fill="#FFFFFF">
+    <path d="M 0,-72 L 14.75,-30.63 L 56.29,-44.89 L 33.15,-7.57 L 70.19,16.02 L 26.58,21.2 L 31.24,64.86 L 0,34 L -31.24,64.86 L -26.58,21.2 L -70.19,16.02 L -33.15,-7.57 L -56.29,-44.89 L -14.75,-30.63 Z"/>
+  </g>
+  <text x="128" y="142" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="124" font-weight="900" fill="url(#rfqGold)">R</text>
 
-  <text x="600" y="158" font-family="Tajawal, sans-serif" font-size="150" font-weight="800" fill="#0F172A" text-anchor="end">رفيق</text>
-  <text x="600" y="216" font-family="Tajawal, Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="8" fill="#64748B" text-anchor="end">RAFEEQ</text>
+  <!-- Wordmark -->
+  <text x="370" y="108" text-anchor="middle" font-family="Tajawal, 'Segoe UI', Tahoma, Arial, sans-serif" font-size="92" font-weight="800" fill="#0E261C">رفيق</text>
+  <text x="370" y="150" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" letter-spacing="8" fill="#B9841A">RAFEEQ</text>
 </svg>

@@ -1,18 +1,32 @@
-<svg width="760" height="240" viewBox="0 0 760 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="520" height="600" viewBox="0 0 520 600" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="رفيق Rafeeq">
   <defs>
-    <linearGradient id="bg2" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2563EB"/>
-      <stop offset="1" stop-color="#1D4ED8"/>
+    <linearGradient id="rfqBg" x1="0" y1="0" x2="384" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E261C"/>
+      <stop offset="1" stop-color="#04120C"/>
     </linearGradient>
+    <linearGradient id="rfqGold" x1="150" y1="90" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7DA84"/>
+      <stop offset="0.55" stop-color="#E6B23E"/>
+      <stop offset="1" stop-color="#B9841A"/>
+    </linearGradient>
+    <clipPath id="rfqClipF"><rect x="68" width="384" height="384" rx="96"/></clipPath>
   </defs>
-  <!-- Mark -->
-  <g transform="translate(540,20)">
-    <rect width="200" height="200" rx="48" fill="url(#bg2)"/>
-    <path d="M58 154 C 58 118, 142 118, 142 82 C 142 58, 114 58, 100 58"
-          stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 16" fill="none" opacity="0.85"/>
-    <path d="M100 36 C 122 36, 140 54, 140 76 C 140 104, 100 142, 100 142 C 100 142, 60 104, 60 76 C 60 54, 78 36, 100 36 Z" fill="#D4A017"/>
-    <circle cx="100" cy="74" r="17" fill="#0F172A"/>
+
+  <!-- Emblem -->
+  <rect x="68" width="384" height="384" rx="96" fill="url(#rfqBg)"/>
+  <g clip-path="url(#rfqClipF)">
+    <rect x="68" y="327" width="384" height="57" fill="#0B6E3B"/>
+    <rect x="68" y="327" width="384" height="20" fill="#FFFFFF" fill-opacity="0.92"/>
+    <rect x="68" y="327" width="384" height="7" fill="#0A0A0A"/>
+    <path d="M68 0 L 256 192 L 68 384 Z" fill="#CE1126"/>
   </g>
+  <g transform="translate(142 188) scale(0.6)" fill="#FFFFFF">
+    <path d="M 0,-72 L 14.75,-30.63 L 56.29,-44.89 L 33.15,-7.57 L 70.19,16.02 L 26.58,21.2 L 31.24,64.86 L 0,34 L -31.24,64.86 L -26.58,21.2 L -70.19,16.02 L -33.15,-7.57 L -56.29,-44.89 L -14.75,-30.63 Z"/>
+  </g>
+  <text x="318" y="280" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="250" font-weight="900" fill="url(#rfqGold)">R</text>
+
   <!-- Wordmark -->
-  <text x="500" y="150" font-family="Tajawal, sans-serif" font-size="150" font-weight="800" fill="#0F172A" text-anchor="end">رفيق</text>
+  <text x="260" y="488" text-anchor="middle" font-family="Tajawal, 'Segoe UI', Tahoma, Arial, sans-serif" font-size="104" font-weight="800" fill="#0E261C">رفيق</text>
+  <text x="260" y="540" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" letter-spacing="10" fill="#B9841A">RAFEEQ</text>
+  <text x="260" y="578" text-anchor="middle" font-family="Tajawal, 'Segoe UI', Tahoma, Arial, sans-serif" font-size="22" font-weight="500" fill="#5B6B62">النقل والخدمات الجامعية الذكية</text>
 </svg>
