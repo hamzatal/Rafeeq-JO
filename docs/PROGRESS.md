@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-060 |
-| المرحلة الحالية | **ملحق A: Matching + Wallet ✅ → التالي: Reverb realtime + AI Fraud + ربط الدفع بالرحلات** |
+| آخر Commit | RFQ-066 |
+| المرحلة الحالية | **تميّز التصميم: لوجو جديد + Light/Dark + ar/en لكل التطبيقات ✅ → التالي: ربط الدفع بالرحلات + Reverb** |
 
 ---
 
@@ -159,5 +159,11 @@
 | 058 | feat(matching): pooling engine (zone+university) + scheduled command + admin trigger + driver offers/accept |
 | 059 | feat(wallet): prepaid wallet + transactions + CliQ top-up instructions + admin credit |
 | 060 | docs: progress update — matching + wallet |
+| 061 | feat(brand): premium world-class logo (mark + wordmark + admin favicon) |
+| 062 | feat(shared): light/dark theme system (buildTheme) + settings i18n |
+| 063 | feat(student-app): full light/dark + ar/en toggle + Settings screen |
+| 064 | feat(driver-app): full light/dark + ar/en toggle + Settings screen |
+| 065 | feat(admin): light/dark + ar/en toggle + Topbar + new logo/favicon |
+| 066 | docs: progress update — branding + theming across all apps |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
