@@ -176,3 +176,152 @@ export interface TripLocation {
   recorded_at: string | null;
   trip_status: TripStatus;
 }
+
+
+
+// ── Wallet & Payments (Phase 3) ──────────────────────────────────────
+export interface Wallet {
+  id: string;
+  balance_fils: number;
+  balance_jod: number;
+  currency: string;
+}
+
+export type WalletTxnType =
+  | 'topup' | 'ride_payment' | 'refund' | 'commission' | 'payout' | 'adjustment';
+
+export interface WalletTransaction {
+  id: string;
+  type: WalletTxnType;
+  type_label: string;
+  amount_fils: number;
+  amount_jod: number;
+  balance_after: number;
+  reference: string | null;
+  description: string | null;
+  created_at: string | null;
+}
+
+export type PaymentPurpose = 'subscription' | 'wallet_topup' | 'parcel';
+export type PaymentStatus =
+  | 'pending' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'expired';
+
+export interface Payment {
+  id: string;
+  method: string;
+  status: string;
+  ai_confidence: number | null;
+  verified_by: string | null;
+  extracted: Record<string, unknown> | null;
+  notes: string | null;
+  has_proof: boolean;
+  submitted_at: string | null;
+  created_at: string | null;
+}
+
+export interface PaymentRequest {
+  id: string;
+  number: string;
+  purpose: PaymentPurpose;
+  purpose_label: string;
+  amount_fils: number;
+  amount_jod: number;
+  currency: string;
+  method: string;
+  status: PaymentStatus;
+  status_label: string;
+  reject_reason: string | null;
+  expires_at: string | null;
+  approved_at: string | null;
+  created_at: string | null;
+  payments?: Payment[];
+  user?: { id: string; name: string; phone: string };
+}
+
+export interface CliqInstructions {
+  number?: string;
+  method: string;
+  alias: string | null;
+  beneficiary: string | null;
+  bank: string | null;
+  amount_fils: number;
+  amount_jod: number;
+  reference: string;
+  expires_at?: string | null;
+  note: string;
+}
+
+// ── Notifications (Phase 6) ──────────────────────────────────────────
+export interface AppNotification {
+  id: string;
+  type: string;
+  category: string;
+  title: string;
+  body: string;
+  data: Record<string, unknown> | null;
+  is_critical: boolean;
+  read: boolean;
+  read_at: string | null;
+  created_at: string | null;
+}
+
+export interface NotificationPreference {
+  push_enabled: boolean;
+  sms_enabled: boolean;
+  payments: boolean;
+  trips: boolean;
+  ratings: boolean;
+  safety: boolean;
+  general: boolean;
+}
+
+// ── Ratings ──────────────────────────────────────────────────────────
+export type RatingDirection = 'student_rates_driver' | 'driver_rates_student';
+
+export interface Rating {
+  id: string;
+  trip_id: string;
+  rater_id: string;
+  ratee_id: string;
+  direction: RatingDirection;
+  stars: number;
+  comment: string | null;
+  created_at: string | null;
+}
+
+// ── Ride requests (door-to-door pooling) ─────────────────────────────
+export type RideType = 'scheduled' | 'express';
+export type RideRequestStatus =
+  | 'pending' | 'grouped' | 'assigned' | 'completed' | 'cancelled';
+
+export interface RideRequest {
+  id: string;
+  zone_id: string | null;
+  university_id: string;
+  pickup_lat: number;
+  pickup_lng: number;
+  pickup_address: string | null;
+  desired_time: string | null;
+  type: RideType;
+  type_label?: string;
+  is_express: boolean;
+  express_fee_fils: number;
+  status: RideRequestStatus;
+  status_label: string;
+  zone?: { id: string; name_ar: string; name_en: string } | null;
+  created_at?: string | null;
+}
+
+export interface FareQuote {
+  base_fare_fils: number;
+  express_fee_fils: number;
+  surge_multiplier: number;
+  fare_fils: number;
+  commission_fils: number;
+  captain_share_fils: number;
+  riders: number;
+  capacity: number;
+  expected_total_fils: number;
+  expected_captain_earnings_fils: number;
+  below_min_fill: boolean;
+}

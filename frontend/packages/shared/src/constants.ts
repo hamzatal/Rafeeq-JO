@@ -59,6 +59,46 @@ export const ENDPOINTS = {
     submit: '/driver/submit',
     vehicles: '/driver/vehicles',
   },
+  driverOffers: {
+    list: '/driver/trips/offers',
+    accept: (tripId: string) => `/driver/trips/offers/${tripId}/accept`,
+  },
+  wallet: {
+    show: '/wallet',
+    transactions: '/wallet/transactions',
+    topupInstructions: '/wallet/topup-instructions',
+  },
+  payments: {
+    list: '/payments',
+    create: '/payments',
+    one: (id: string) => `/payments/${id}`,
+    instructions: (id: string) => `/payments/${id}/instructions`,
+    proof: (id: string) => `/payments/${id}/proof`,
+    adminQueue: '/admin/payments',
+    adminOne: (id: string) => `/admin/payments/${id}`,
+    adminProof: (paymentId: string) => `/admin/payments/proof/${paymentId}`,
+    adminApprove: (id: string) => `/admin/payments/${id}/approve`,
+    adminReject: (id: string) => `/admin/payments/${id}/reject`,
+  },
+  notifications: {
+    list: '/notifications',
+    unreadCount: '/notifications/unread-count',
+    readAll: '/notifications/read-all',
+    read: (id: string) => `/notifications/${id}/read`,
+    preferences: '/notifications/preferences',
+    devices: '/notifications/devices',
+  },
+  ratings: {
+    mine: '/ratings/mine',
+    received: '/ratings/received',
+    rate: (tripId: string) => `/trips/${tripId}/ratings`,
+  },
+  rideRequests: {
+    create: '/ride-requests',
+    estimate: '/ride-requests/estimate',
+    mine: '/ride-requests/mine',
+    cancel: (id: string) => `/ride-requests/${id}/cancel`,
+  },
   admin: {
     users: '/admin/users',
     drivers: '/admin/drivers',
@@ -68,6 +108,9 @@ export const ENDPOINTS = {
     documentFile: (docId: string) => `/admin/drivers/documents/${docId}/file`,
     universities: '/admin/universities',
     university: (id: string) => `/admin/universities/${id}`,
+    rideRequests: '/admin/ride-requests',
+    matchingRun: '/admin/matching/run',
+    walletCredit: '/admin/wallets/credit',
   },
 } as const;
 
