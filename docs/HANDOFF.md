@@ -1,8 +1,8 @@
 # 📦 ملف التسليم الشامل — رفيق (Rafeeq)
 
 > **للمحادثة الجديدة: اقرأ هذا الملف + `docs/PROGRESS.md` + `docs/ROADMAP.md` + `.kiro/steering/` قبل أي عمل.**
-> آخر commit: **RFQ-094**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز التقديرية: **~66%** (الأساس والقلب التشغيلي ~92%).
-> **محدّث (M3 + UIs):** Express dynamic pricing + min-fill، وعميل API كامل (محفظة/دفع/إشعارات/تقييم/طلبات/عروض)، وواجهات الطالب (محفظة/دفع/إشعارات/طلب باب-لباب/تقييم) والكابتن (أرباح/عروض) والإدارة (مراجعة مدفوعات/مراقبة طلبات).
+> آخر commit: **RFQ-101**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز التقديرية: **~71%** (الأساس والقلب التشغيلي ~93%).
+> **محدّث (M6 + realtime):** موديولات **الدعم (L1–L4)** و**الشكاوى (تجميد فوري بالحرج)** + صفحات إدارتهما + شاشة دعم الطالب + **عميل Laravel Echo (Reverb)** مع تتبّع حيّ لرحلات الطالب.
 > القواعد: لا اختصار، لا حذف مزايا، لا ديمو داتا. commits مرقّمة `[RFQ-###]`. حدّث PROGRESS + README مع كل push.
 
 ---
@@ -109,6 +109,6 @@ npm run admin     # http://localhost:3000
 
 ## ⏭️ الخطوة التالية المقترحة (للمحادثة الجديدة)
 **اكتمل (backend):** Payments (CliQ + GPT Vision)، Notifications (FCM + SMS fallback)، Ratings، وبنية Gpt + Push. التالي حسب `docs/EXECUTION_PLAN.md`:
-**M3** — **الخرائط الحيّة** (عميل Echo/Reverb + شاشات الخريطة للطالب/الكابتن/الإدارة) لإكمال التتبّع اللحظي، ثم **Support/Complaints** (مركز النزاعات)، ثم باقي الخدمات (Parcels/LostFound/Rewards) ثم **طبقة AI**. آخر رقم commit مستخدم: **RFQ-094** (التالي RFQ-095).
+**الخرائط الحيّة** (واجهة خريطة فعلية للطالب/الكابتن/الإدارة فوق عميل Echo الجاهز + بثّ GPS من تطبيق الكابتن)، ثم **الخدمات الإضافية** (Parcels/LostFound/Rewards/Exchange)، ثم **طبقة AI** (مساعد رفيق + Fraud Monitor + Route Intelligence). ملاحظة تشغيل Reverb: يتطلب `REVERB_*` + `php artisan reverb:start` + `extra.reverb*` في app.json. آخر رقم commit مستخدم: **RFQ-101** (التالي RFQ-102).
 
 رسالة الانتقال: "أكمل مشروع رفيق (hamzatal/Rafeeq-JO، فرع foundation/phase-0-1). اقرأ docs/HANDOFF.md و docs/EXECUTION_PLAN.md و docs/PROGRESS.md و docs/ROADMAP.md و .kiro/steering/ وكمّل من M3 — آخر commit RFQ-079، التالي RFQ-080. بدون اختصار أو حذف مزايا."

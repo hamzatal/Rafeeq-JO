@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-094 |
-| نسبة الإنجاز | ~66% (الأساس/القلب التشغيلي ~92%) |
-| المرحلة الحالية | **M3 (Express pricing) + ربط واجهات الدفع/المحفظة/الإشعارات/التقييم/الطلبات (طالب+كابتن+إدارة). التالي: الخرائط الحيّة (Echo) ثم Support/Complaints** |
+| آخر Commit | RFQ-101 |
+| نسبة الإنجاز | ~71% (الأساس/القلب التشغيلي ~93%) |
+| المرحلة الحالية | **M6 (الدعم L1–L4 + الشكاوى مع التجميد الحرج) + عميل التتبّع الحيّ (Echo). التالي: الخرائط + الخدمات الإضافية (Parcels/LostFound/Rewards)** |
 
 ---
 
@@ -205,5 +205,12 @@
 | 092 | feat(driver-app): Earnings (wallet) + Ride Offers (accept) screens + dashboard cards |
 | 093 | feat(admin): Payments review queue (approve/reject/view proof) + Ride Requests monitor + matching trigger |
 | 094 | docs: progress update — M3 pricing + payments/notifications/ratings UIs across all apps |
+| 095 | feat(support): tickets module (L1–L4 escalation) — migrations/enums/models/service/controller/routes |
+| 096 | feat(complaints): complaints module — severity triage + auto-freeze on critical + dispute escalation |
+| 097 | feat(shared+api-client): support/complaints types + ENDPOINTS + SupportApi + ComplaintsApi |
+| 098 | feat(admin): support tickets + complaints management pages + sidebar links |
+| 099 | feat(student-app): support tickets screen (open + list) + i18n + home nav |
+| 100 | feat(realtime): Laravel Echo (Reverb) client + live trip tracking on student trips screen |
+| 101 | docs: progress update — support/complaints + live tracking client (M6 + M3 realtime) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
