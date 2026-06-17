@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-111 |
-| نسبة الإنجاز | ~80% (الأساس/القلب التشغيلي ~95%) |
-| المرحلة الحالية | **تدقيق أمني/جودة شامل + CI. التالي المتّفق عليه: إعادة تصميم شاملة للواجهات (Design System v2)** |
+| آخر Commit | RFQ-115 |
+| نسبة الإنجاز | ~81% · **بدأ تجديد التصميم (Design System v2)** |
+| المرحلة الحالية | **إعادة تصميم شاملة — أساس DS v2 + هوية أردنية خضراء + Bottom Tabs + رئيسية الطالب. التالي: بقية شاشات الطالب** |
 
 ---
 
@@ -221,5 +221,9 @@
 | 109 | feat(student-app): Lost & Found + Exchange screens + home navigation |
 | 110 | docs: progress update — extra services (M8) complete (backend + student UIs) |
 | 111 | chore(ci+audit): GitHub Actions CI (backend boot smoke + frontend typecheck) + full static security audit report |
+| 112 | feat(design): Design System v2 tokens — Jordan-inspired green+gold+red palette (light/dark) + primaryDark/primarySoft |
+| 113 | feat(design): student component library — Icon (Feather) + Card/Header/Badge/EmptyState/ServiceTile/StatCard/ListRow + theme shadow |
+| 114 | feat(student-app): bottom tab navigation + fully redesigned Home (hero CTA + balance + icon service grid) |
+| 115 | docs: Design System v2 guide (docs/DESIGN.md) + progress update |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
