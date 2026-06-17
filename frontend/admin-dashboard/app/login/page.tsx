@@ -24,7 +24,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(normalizeJordanPhone(phone)!, password);
-      router.replace('/dashboard');
+      router.replace('/');
     } catch (err) {
       setError(err instanceof RafeeqApiError ? err.firstError() ?? err.message : 'تعذّر تسجيل الدخول');
     } finally {
