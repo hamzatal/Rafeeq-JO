@@ -22,16 +22,20 @@ class TripPassenger extends Model
 
     protected $fillable = [
         'trip_id', 'student_id', 'subscription_id', 'pickup_point_id',
-        'status', 'boarding_code', 'boarded_at',
+        'pickup_lat', 'pickup_lng', 'pickup_order',
+        'status', 'boarding_code', 'dropoff_code', 'boarded_at', 'dropoff_confirmed_at',
     ];
 
-    protected $hidden = ['boarding_code'];
+    protected $hidden = ['boarding_code', 'dropoff_code'];
 
     protected function casts(): array
     {
         return [
             'status' => TripPassengerStatus::class,
             'boarded_at' => 'datetime',
+            'dropoff_confirmed_at' => 'datetime',
+            'pickup_lat' => 'float',
+            'pickup_lng' => 'float',
         ];
     }
 

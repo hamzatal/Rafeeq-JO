@@ -15,9 +15,15 @@ return new class extends Migration
             $table->foreignUuid('student_id')->constrained('users')->cascadeOnDelete();
             $table->foreignUuid('subscription_id')->nullable()->constrained('subscriptions')->nullOnDelete();
             $table->foreignUuid('pickup_point_id')->nullable()->constrained('pickup_points')->nullOnDelete();
+            // Door-to-door pickup (student's home coordinates)
+            $table->decimal('pickup_lat', 10, 7)->nullable();
+            $table->decimal('pickup_lng', 10, 7)->nullable();
+            $table->unsignedSmallInteger('pickup_order')->nullable(); // optimized sequence
             $table->enum('status', TripPassengerStatus::values())->default(TripPassengerStatus::Booked->value);
-            $table->string('boarding_code', 8); // Trip OTP (security layer 6)
+            $table->string('boarding_code', 8); // Trip OTP at boarding (security layer 6)
+            $table->string('dropoff_code', 8)->nullable(); // OTP at drop-off (anti-fraud)
             $table->timestamp('boarded_at')->nullable();
+            $table->timestamp('dropoff_confirmed_at')->nullable();
             $table->timestamps();
 
             $table->unique(['trip_id', 'student_id']);
