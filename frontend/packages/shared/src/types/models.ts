@@ -382,3 +382,81 @@ export interface Complaint {
   reporter?: { id: string; name: string };
   against?: { id: string; name: string; status: string } | null;
 }
+
+
+
+// ── Extra services (Phase 4) ─────────────────────────────────────────
+export type ParcelStatus = 'created' | 'awaiting_pickup' | 'in_transit' | 'delivered' | 'cancelled';
+export type ParcelSize = 'small' | 'medium' | 'large';
+
+export interface Parcel {
+  id: string;
+  number: string;
+  receiver_name: string;
+  receiver_phone: string;
+  from_address: string | null;
+  to_address: string | null;
+  category: string;
+  size: ParcelSize;
+  size_label: string;
+  description: string | null;
+  fee_fils: number;
+  fee_jod: number;
+  status: ParcelStatus;
+  status_label: string;
+  picked_up_at: string | null;
+  delivered_at: string | null;
+  created_at: string | null;
+  pickup_code: string | null;
+  delivery_code: string | null;
+  events?: { type: string; at: string | null }[];
+}
+
+export interface RewardSummary {
+  points: number;
+  lifetime_points: number;
+  tier: string;
+  tier_label: string;
+  next_tier: string | null;
+  next_tier_label: string | null;
+  next_tier_at: number | null;
+}
+
+export interface RewardTransaction {
+  id: string;
+  type: 'earn' | 'redeem';
+  points: number;
+  reason: string;
+  reference: string | null;
+  created_at: string | null;
+}
+
+export type LostFoundType = 'lost' | 'found';
+export type LostFoundStatus = 'open' | 'matched' | 'resolved';
+
+export interface LostFoundItem {
+  id: string;
+  reporter_id: string;
+  type: LostFoundType;
+  category: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  status: LostFoundStatus;
+  created_at: string | null;
+}
+
+export type ExchangeType = 'book' | 'notes' | 'tool' | 'other';
+export type ExchangeStatus = 'available' | 'reserved' | 'closed';
+
+export interface ExchangeItem {
+  id: string;
+  owner_id: string;
+  type: ExchangeType;
+  title: string;
+  condition: 'new' | 'good' | 'fair';
+  description: string | null;
+  price_fils: number | null;
+  status: ExchangeStatus;
+  created_at: string | null;
+}

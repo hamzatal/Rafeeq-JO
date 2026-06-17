@@ -14,6 +14,10 @@ import { RatingsApi } from './ratings';
 import { RideRequestsApi } from './rideRequests';
 import { SupportApi } from './support';
 import { ComplaintsApi } from './complaints';
+import { ParcelsApi } from './parcels';
+import { RewardsApi } from './rewards';
+import { LostFoundApi } from './lostFound';
+import { ExchangeApi } from './exchange';
 
 export * from './client';
 export * from './auth';
@@ -30,6 +34,10 @@ export * from './ratings';
 export * from './rideRequests';
 export * from './support';
 export * from './complaints';
+export * from './parcels';
+export * from './rewards';
+export * from './lostFound';
+export * from './exchange';
 
 /** Aggregated API surface. Extend with more domains as modules land. */
 export class RafeeqApi {
@@ -48,6 +56,10 @@ export class RafeeqApi {
   readonly rideRequests: RideRequestsApi;
   readonly support: SupportApi;
   readonly complaints: ComplaintsApi;
+  readonly parcels: ParcelsApi;
+  readonly rewards: RewardsApi;
+  readonly lostFound: LostFoundApi;
+  readonly exchange: ExchangeApi;
 
   constructor(options: RafeeqClientOptions) {
     this.http = createHttp(options);
@@ -65,6 +77,10 @@ export class RafeeqApi {
     this.rideRequests = new RideRequestsApi(this.http);
     this.support = new SupportApi(this.http);
     this.complaints = new ComplaintsApi(this.http);
+    this.parcels = new ParcelsApi(this.http);
+    this.rewards = new RewardsApi(this.http);
+    this.lostFound = new LostFoundApi(this.http);
+    this.exchange = new ExchangeApi(this.http);
   }
 }
 
