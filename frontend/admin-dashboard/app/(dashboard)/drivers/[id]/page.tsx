@@ -53,17 +53,17 @@ export default function DriverReview() {
     run(() => api.admin.reviewDriver(id, action, note));
   };
 
-  if (loading) return <div className="text-muted">جارٍ التحميل...</div>;
+  if (loading) return <div className="muted-text">جارٍ التحميل...</div>;
   if (!driver) return <div className="text-danger">{error ?? 'غير موجود'}</div>;
 
   return (
     <div className="space-y-6">
-      <button onClick={() => router.push('/drivers')} className="text-sm text-muted hover:underline">← رجوع للكباتن</button>
+      <button onClick={() => router.push('/drivers')} className="text-sm muted-text hover:underline">← رجوع للكباتن</button>
 
       <div className="card flex items-center justify-between">
         <div>
-          <div className="text-xl font-extrabold text-navy">{driver.user?.full_name}</div>
-          <div className="text-sm text-muted">{driver.user?.phone}</div>
+          <div className="text-xl font-extrabold surface-text">{driver.user?.full_name}</div>
+          <div className="text-sm muted-text">{driver.user?.phone}</div>
         </div>
         <DriverStatusBadge status={driver.status} />
       </div>
@@ -73,14 +73,14 @@ export default function DriverReview() {
 
       {/* Documents */}
       <div className="card">
-        <h2 className="font-bold text-navy mb-3">الوثائق</h2>
+        <h2 className="font-bold surface-text mb-3">الوثائق</h2>
         <div className="space-y-2">
-          {(driver.documents ?? []).length === 0 && <div className="text-sm text-muted">لا توجد وثائق مرفوعة</div>}
+          {(driver.documents ?? []).length === 0 && <div className="text-sm muted-text">لا توجد وثائق مرفوعة</div>}
           {(driver.documents ?? []).map((doc) => (
             <div key={doc.id} className="flex items-center justify-between border border-line rounded-lg p-3">
               <div>
-                <div className="font-medium text-navy">{doc.type_label}</div>
-                <div className="text-xs text-muted">{doc.status_label}{doc.review_note ? ` — ${doc.review_note}` : ''}</div>
+                <div className="font-medium surface-text">{doc.type_label}</div>
+                <div className="text-xs muted-text">{doc.status_label}{doc.review_note ? ` — ${doc.review_note}` : ''}</div>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => viewDoc(doc.id)} className="btn-outline h-9 px-3 text-xs">عرض</button>
@@ -94,15 +94,15 @@ export default function DriverReview() {
 
       {/* Vehicles */}
       <div className="card">
-        <h2 className="font-bold text-navy mb-3">المركبات</h2>
+        <h2 className="font-bold surface-text mb-3">المركبات</h2>
         {(driver.vehicles ?? []).length === 0 ? (
-          <div className="text-sm text-muted">لا توجد مركبات</div>
+          <div className="text-sm muted-text">لا توجد مركبات</div>
         ) : (
           <div className="space-y-2">
             {(driver.vehicles ?? []).map((v) => (
               <div key={v.id} className="border border-line rounded-lg p-3 text-sm">
-                <span className="font-medium text-navy">{v.make} {v.model} ({v.year})</span>
-                <span className="text-muted"> — {v.plate_number} · {v.color} · {v.seats} مقاعد</span>
+                <span className="font-medium surface-text">{v.make} {v.model} ({v.year})</span>
+                <span className="muted-text"> — {v.plate_number} · {v.color} · {v.seats} مقاعد</span>
               </div>
             ))}
           </div>

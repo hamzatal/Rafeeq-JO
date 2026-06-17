@@ -37,7 +37,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm card bg-white">
         <div className="text-center mb-6">
           <div className="text-3xl font-extrabold text-primary">رفيق</div>
-          <div className="text-sm text-muted mt-1">لوحة الإدارة — دخول الموظفين</div>
+          <div className="text-sm muted-text mt-1">لوحة الإدارة — دخول الموظفين</div>
         </div>
 
         {error && (

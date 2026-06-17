@@ -46,10 +46,10 @@ export default function UniversitiesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-navy mb-4">الجامعات</h1>
+      <h1 className="text-2xl font-extrabold surface-text mb-4">الجامعات</h1>
 
       <div className="card mb-5">
-        <h2 className="font-bold text-navy mb-3">إضافة جامعة</h2>
+        <h2 className="font-bold surface-text mb-3">إضافة جامعة</h2>
         {error && <div className="mb-3 rounded-lg border border-danger/30 bg-red-50 px-3 py-2 text-sm text-danger">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <input className="input" placeholder="الاسم بالعربي" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} />
@@ -65,7 +65,7 @@ export default function UniversitiesPage() {
           <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-background text-muted">
+            <thead className="table-head">
               <tr>
                 <th className="text-right p-3 font-medium">الاسم</th>
                 <th className="text-right p-3 font-medium">الرمز</th>
@@ -76,8 +76,8 @@ export default function UniversitiesPage() {
             </thead>
             <tbody>
               {items.map((u) => (
-                <tr key={u.id} className="border-t border-line">
-                  <td className="p-3 font-medium text-navy">{u.name_ar}</td>
+                <tr key={u.id} className="row-line">
+                  <td className="p-3 font-medium surface-text">{u.name_ar}</td>
                   <td className="p-3 text-muted">{u.code}</td>
                   <td className="p-3 text-muted">{u.city ?? '—'}</td>
                   <td className="p-3">

@@ -30,14 +30,14 @@ export default function DriversPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-navy mb-4">الكباتن</h1>
+      <h1 className="text-2xl font-extrabold surface-text mb-4">الكباتن</h1>
 
       <div className="flex flex-wrap gap-2 mb-4">
         {FILTERS.map((f) => (
           <button
             key={f.value}
             onClick={() => setStatus(f.value)}
-            className={`badge border ${status === f.value ? 'bg-primary text-white border-primary' : 'bg-white text-muted border-line'}`}
+            className={`badge border ${status === f.value ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-dcard muted-text border-line dark:border-dline'}`}
           >
             {f.label}
           </button>
@@ -51,7 +51,7 @@ export default function DriversPage() {
           <div className="p-6 text-center text-muted">لا يوجد كباتن</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-background text-muted">
+            <thead className="table-head">
               <tr>
                 <th className="text-right p-3 font-medium">الاسم</th>
                 <th className="text-right p-3 font-medium">الهاتف</th>
@@ -62,8 +62,8 @@ export default function DriversPage() {
             </thead>
             <tbody>
               {drivers.map((d) => (
-                <tr key={d.id} className="border-t border-line">
-                  <td className="p-3 font-medium text-navy">{d.user?.full_name ?? '—'}</td>
+                <tr key={d.id} className="row-line">
+                  <td className="p-3 font-medium surface-text">{d.user?.full_name ?? '—'}</td>
                   <td className="p-3 text-muted">{d.user?.phone ?? '—'}</td>
                   <td className="p-3"><DriverStatusBadge status={d.status} /></td>
                   <td className="p-3 text-muted">{d.rating_avg?.toFixed(1)} ★</td>

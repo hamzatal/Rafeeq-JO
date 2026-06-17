@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../src/lib/auth';
 import { Sidebar } from '../../src/components/Sidebar';
+import { Topbar } from '../../src/components/Topbar';
 import { BrandSplash } from '../../src/components/BrandSplash';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +22,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6 max-w-6xl">{children}</main>
+      <main className="flex-1 p-6 max-w-6xl">
+        <Topbar />
+        {children}
+      </main>
     </div>
   );
 }

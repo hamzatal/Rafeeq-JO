@@ -31,7 +31,7 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-navy mb-4">المستخدمون</h1>
+      <h1 className="text-2xl font-extrabold surface-text mb-4">المستخدمون</h1>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {TYPES.map((tp) => (
@@ -58,7 +58,7 @@ export default function UsersPage() {
           <div className="p-6 text-center text-muted">لا يوجد مستخدمون</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-background text-muted">
+            <thead className="table-head">
               <tr>
                 <th className="text-right p-3 font-medium">الاسم</th>
                 <th className="text-right p-3 font-medium">الهاتف</th>
@@ -68,8 +68,8 @@ export default function UsersPage() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-t border-line">
-                  <td className="p-3 font-medium text-navy">{u.full_name}</td>
+                <tr key={u.id} className="row-line">
+                  <td className="p-3 font-medium surface-text">{u.full_name}</td>
                   <td className="p-3 text-muted">{u.phone}</td>
                   <td className="p-3 text-muted">{u.type_label}</td>
                   <td className="p-3 text-muted">{u.status_label}</td>

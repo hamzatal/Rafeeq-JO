@@ -13,14 +13,14 @@ export default function Overview() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-navy mb-1">أهلاً، {user?.full_name}</h1>
-      <p className="text-muted mb-6">نظرة عامة على المنصة</p>
+      <h1 className="text-2xl font-extrabold surface-text mb-1">أهلاً، {user?.full_name}</h1>
+      <p className="muted-text mb-6">نظرة عامة على المنصة</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {cards.map((c) => (
           <Link key={c.href} href={c.href} className="card hover:border-primary transition">
-            <div className="text-lg font-bold text-navy">{c.title}</div>
-            <div className="text-sm text-muted mt-1">{c.desc}</div>
+            <div className="text-lg font-bold surface-text">{c.title}</div>
+            <div className="text-sm muted-text mt-1">{c.desc}</div>
           </Link>
         ))}
       </div>
