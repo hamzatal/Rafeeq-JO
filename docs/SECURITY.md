@@ -29,3 +29,40 @@
 ## 🔧 إصلاحات هذه الدفعة
 - مواءمة إصدار TypeScript مع المتوقّع من Expo (`~5.3.3`) لإزالة تحذير التوافق.
 - لوحة الإدارة: `getLocale` صار يقرأ تفضيل اللغة (Accept-Language صحيح للنصوص الخادمية).
+
+
+
+---
+
+## 🔎 تدقيق شامل (Audit) — RFQ-111
+
+تدقيق ثابت (static) للمستودع كامل. النتائج:
+
+| الفحص | النتيجة |
+|---|---|
+| فحص صياغة كل ملفات PHP (`php -l` × 347 ملف) | ✅ صفر أخطاء |
+| كل دالة مذكورة في المسارات موجودة في الـ Controller | ✅ صفر مفقود |
+| كل مسارات الإدارة محميّة بـ `role:`/`permission:` | ✅ مغطّاة |
+| كل ملفات المسارات تتطلب `auth:sanctum` (عدا auth العام) | ✅ |
+| `national_id` للكباتن | ✅ مخفي (`$hidden`) + مشفّر (`encrypted` cast) |
+| أكواد الطرود (pickup/delivery) | ✅ مخفيّة افتراضياً، تُكشف لصاحبها فقط |
+| `.env` مستثنى في `.gitignore` + لا ملفات `.env` مرفوعة | ✅ |
+| كود تنقيح متروك (`dd`/`dump`/`var_dump`) | ✅ لا يوجد |
+| `console.log` في مصدر الـ frontend | ✅ لا يوجد |
+| تطابق مراجع `ENDPOINTS.*` بين api-client والثوابت | ✅ كل المجموعات معرّفة |
+
+### تشغيل آليّ مستمرّ (CI) — أضيف
+`.github/workflows/ci.yml`:
+- **Backend**: `composer install` + lint + **إقلاع Laravel وتسجيل كل الموديولات** (`route:list`) كاختبار دخان يكشف أخطاء الربط.
+- **Frontend**: `tsc --noEmit` للتطبيقات الثلاثة + lint — يكشف أي خطأ أنواع تلقائياً عند كل push.
+
+### ما لا يمكن التحقق منه داخل بيئة الإنشاء (يتطلب تشغيلاً محلياً)
+- اختبارات تكامل فعلية مع PostgreSQL/Redis (البيئة بلا `composer`/`node_modules`).
+- التحقق من تشغيل التطبيقات فعلياً على الأجهزة/المتصفح.
+- **الإجراء**: بعد `git pull` شغّل محلياً: `cd backend && composer install && php artisan migrate:fresh --seed && php artisan test`، و `cd frontend && npm install && npm run typecheck -ws`. الـ CI يقوم بهذا تلقائياً عند الرفع.
+
+## 🚀 صلابة الإنتاج (قبل الإطلاق — M10)
+- ضبط `APP_DEBUG=false` و`APP_ENV=production` + HTTPS/HSTS.
+- إدارة الأسرار عبر Secrets Manager (لا `.env` على الخوادم).
+- نقل توكن الإدارة من `localStorage` إلى كوكي httpOnly.
+- ترقية Expo SDK/Next.js لأحدث ثابت لمعالجة تنبيهات `npm audit` المتعدّية.
