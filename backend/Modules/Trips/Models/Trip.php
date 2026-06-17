@@ -24,8 +24,8 @@ class Trip extends Model
     use HasUuid;
 
     protected $fillable = [
-        'route_id', 'driver_id', 'vehicle_id', 'scheduled_at',
-        'status', 'started_at', 'ended_at', 'capacity',
+        'route_id', 'driver_id', 'vehicle_id', 'zone_id', 'university_id', 'type',
+        'scheduled_at', 'status', 'started_at', 'ended_at', 'capacity',
     ];
 
     protected function casts(): array

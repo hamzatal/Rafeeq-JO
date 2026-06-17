@@ -11,9 +11,13 @@ return new class extends Migration
     {
         Schema::create('trips', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('route_id')->constrained('routes')->cascadeOnDelete();
-            $table->foreignUuid('driver_id')->constrained('driver_profiles')->cascadeOnDelete();
+            $table->foreignUuid('route_id')->nullable()->constrained('routes')->nullOnDelete();
+            $table->foreignUuid('driver_id')->nullable()->constrained('driver_profiles')->nullOnDelete();
             $table->foreignUuid('vehicle_id')->nullable()->constrained('vehicles')->nullOnDelete();
+            // Pooled (door-to-door) trips: origin zone + destination university (no fixed route).
+            $table->uuid('zone_id')->nullable()->index();
+            $table->foreignUuid('university_id')->nullable()->constrained('universities')->nullOnDelete();
+            $table->string('type', 20)->default('scheduled'); // scheduled | pooled
             $table->timestamp('scheduled_at')->index();
             $table->enum('status', TripStatus::values())->default(TripStatus::Scheduled->value)->index();
             $table->timestamp('started_at')->nullable();

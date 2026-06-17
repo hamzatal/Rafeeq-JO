@@ -8,6 +8,7 @@ enum TripStatus: string
     case Started = 'started';
     case Completed = 'completed';
     case Cancelled = 'cancelled';
+    case PendingDriver = 'pending_driver'; // pooled trip formed, awaiting a captain to accept
 
     public function labelAr(): string
     {
@@ -16,6 +17,7 @@ enum TripStatus: string
             self::Started => 'جارية',
             self::Completed => 'مكتملة',
             self::Cancelled => 'ملغاة',
+            self::PendingDriver => 'بانتظار كابتن',
         };
     }
 

@@ -5,7 +5,9 @@ namespace Rafeeq\Modules\Trips\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Rafeeq\Core\Exceptions\AuthorizationException;
+use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Http\Controllers\Controller;
+use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Requests\ConfirmBoardingRequest;
@@ -14,6 +16,8 @@ use Rafeeq\Modules\Trips\Requests\ScheduleTripRequest;
 use Rafeeq\Modules\Trips\Resources\TripPassengerResource;
 use Rafeeq\Modules\Trips\Resources\TripResource;
 use Rafeeq\Modules\Trips\Services\TripService;
+use Rafeeq\Shared\Enums\RideRequestStatus;
+use Rafeeq\Shared\Enums\TripStatus;
 
 class DriverTripController extends Controller
 {
@@ -45,6 +49,42 @@ class DriverTripController extends Controller
             ->orderByDesc('scheduled_at')->get();
 
         return $this->ok(TripResource::collection($trips));
+    }
+
+    /** Pooled trips awaiting a captain (offers). */
+    public function offers(Request $request): JsonResponse
+    {
+        $this->driverId($request); // ensures driver profile exists
+        $offers = Trip::query()->with('university')->withCount('passengers')
+            ->where('status', TripStatus::PendingDriver->value)
+            ->whereNull('driver_id')
+            ->orderBy('scheduled_at')->get();
+
+        return $this->ok(TripResource::collection($offers));
+    }
+
+    /** Captain claims a pooled trip offer. */
+    public function acceptOffer(Request $request, Trip $trip): JsonResponse
+    {
+        $driver = $request->user()->driverProfile;
+        if (! $driver || ! $driver->status->canDrive()) {
+            throw new AuthorizationException('حسابك غير معتمد لتشغيل الرحلات.');
+        }
+        if ($trip->driver_id !== null || $trip->status !== TripStatus::PendingDriver) {
+            throw new BusinessRuleException('هذه الرحلة لم تعد متاحة.', 'OFFER_TAKEN');
+        }
+
+        $trip->forceFill([
+            'driver_id' => $driver->id,
+            'status' => TripStatus::Scheduled,
+        ])->save();
+
+        // Mark the grouped ride requests as assigned.
+        RideRequest::where('trip_id', $trip->id)
+            ->where('status', RideRequestStatus::Grouped->value)
+            ->update(['status' => RideRequestStatus::Assigned->value]);
+
+        return $this->ok(new TripResource($trip->fresh(['university', 'passengers'])), 'تم قبول الرحلة.');
     }
 
     public function store(ScheduleTripRequest $request): JsonResponse

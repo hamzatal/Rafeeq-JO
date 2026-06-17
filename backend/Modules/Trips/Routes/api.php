@@ -8,6 +8,8 @@ use Rafeeq\Modules\Trips\Controllers\StudentTripController;
 Route::prefix('v1/driver/trips')->middleware(['auth:sanctum', 'role:driver'])->group(function () {
     Route::get('/', [DriverTripController::class, 'index']);
     Route::post('/', [DriverTripController::class, 'store']);
+    Route::get('offers', [DriverTripController::class, 'offers']);
+    Route::post('offers/{trip}/accept', [DriverTripController::class, 'acceptOffer']);
     Route::get('{trip}', [DriverTripController::class, 'show']);
     Route::get('{trip}/passengers', [DriverTripController::class, 'passengers']);
     Route::post('{trip}/start', [DriverTripController::class, 'start']);

@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Clean up expired OTP codes every hour
 Schedule::command('rafeeq:prune-otps')->hourly();
+
+// Pool pending ride requests into trips every few minutes
+Schedule::command('rafeeq:match-rides')->everyFiveMinutes();

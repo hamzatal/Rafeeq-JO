@@ -20,4 +20,6 @@ return [
     Rafeeq\Modules\Trips\Providers\TripsServiceProvider::class,
     Rafeeq\Modules\Zones\Providers\ZonesServiceProvider::class,
     Rafeeq\Modules\RideRequests\Providers\RideRequestsServiceProvider::class,
+    Rafeeq\Modules\Matching\Providers\MatchingServiceProvider::class,
+    Rafeeq\Modules\Wallet\Providers\WalletServiceProvider::class,
 ];
