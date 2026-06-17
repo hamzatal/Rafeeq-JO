@@ -1,0 +1,66 @@
+# خطة التنفيذ الرئيسية — رفيق (Rafeeq) · من الوضع الحالي إلى الإطلاق الرسمي
+
+> **هذا هو المرجع الرئيسي للتقدّم.** يُحدَّث مع كل دفعة عمل.
+> اقرأه مع `docs/PROGRESS.md` (تفصيل لكل موديول) و`docs/ROADMAP.md` (الخطة الكاملة) و`docs/HANDOFF.md` (رسالة الاستئناف + التكاملات).
+
+الرموز: ✅ منجز · 🔄 جارٍ · ⏳ متبقٍ
+
+| | |
+|---|---|
+| الفرع | `foundation/phase-0-1` |
+| نقطة البداية لهذه الخطة | RFQ-073 (~43%) |
+| الهدف | 100% — جاهز للإطلاق الرسمي |
+
+---
+
+## نظرة عامة على الدفعات (Milestones)
+
+| الدفعة | المحتوى | الحالة | التقدّم بعدها |
+|---|---|---|---|
+| الدفعة | المحتوى | الحالة | التقدّم بعدها |
+|---|---|---|---|
+| **M1** | المدفوعات (CliQ + GPT Vision) + بنية الـ AI (Gpt) | ✅ backend | ~52% |
+| **M2** | الإشعارات (FCM + SMS fallback) + التقييم الثنائي | ✅ backend | ~58% |
+| **M3** | التتبّع الحيّ (عميل Echo) + الخرائط + Express (تسعير ديناميكي + min-fill) | ⏳ | ~64% |
+| **M4** | لوحة الإدارة للنقل + مركز الأمان + مراجعة CliQ + شحن المحافظ | ⏳ | ~72% |
+| **M5** | تجربة الطالب والكابتن الكاملة (طلب باب-لباب، عروض، محفظة، SOS) | ⏳ | ~78% |
+| **M6** | الدعم (L1–L4) + الشكاوى (تجميد بالحرج) + مركز النزاعات | ⏳ | ~84% |
+| **M7** | محرّك الذكاء الاصطناعي (مساعد رفيق + Fraud Monitor + Route Intelligence + Vision) | ⏳ | ~89% |
+| **M8** | الخدمات الإضافية (Parcels + Lost&Found + Rewards + Exchange) | ⏳ | ~94% |
+| **M9** | المزايا الداعمة + التشغيل المالي (نسائي، No-show، إحالات، cash-out، Settings، Analytics، Audit UI) | ⏳ | ~97% |
+| **M10** | تجهيز الإطلاق (PostGIS، اختبارات، CI، Docker، monitoring، OpenAPI، PWA، قانوني، أمان) | ⏳ | **100%** |
+
+---
+
+## M1 — المدفوعات + بنية الـ AI ✅ (backend)
+
+| # | البند | الحالة |
+|---|---|---|
+| 1.1 | `Infrastructure/Gpt` — عميل OpenAI (chat + vision) + fallback آمن بدون مفتاح + binding | ✅ |
+| 1.2 | Payments: migrations (`payment_requests` + `payments`) | ✅ |
+| 1.3 | Payments: Enums (`PaymentPurpose`, `PaymentStatus`) + Models | ✅ |
+| 1.4 | Payments: `AI/PaymentVerificationService` (استخراج المبلغ/الوقت/المرجع + درجة ثقة) | ✅ |
+| 1.5 | Payments: `PaymentService` (إنشاء طلب + رفع إشعار + تحقق + اعتماد/رفض + تفعيل تلقائي للاشتراك/شحن المحفظة) | ✅ |
+| 1.6 | Payments: Controller + Requests + Resources + Routes + Provider + تسجيل + صلاحيات | ✅ |
+| 1.7 | مركز الشفافية المالية (سجل الطالب + طابور مراجعة الإدارة) — endpoints | ✅ |
+| 1.8 | واجهات الطالب/الإدارة للدفع (Frontend) | ⏳ |
+
+## M2 — الإشعارات + التقييم ✅ (backend)
+
+| # | البند | الحالة |
+|---|---|---|
+| 2.1 | `Infrastructure/Push` — Firebase FCM gateway (OAuth2/JWT) + fallback log | ✅ |
+| 2.2 | Notifications: جدول + تفضيلات لكل مستخدم + `NotificationService` (DB + FCM + SMS fallback للحرج) | ✅ |
+| 2.3 | Notifications: Controller + Routes + Provider (قائمة/تعليم كمقروء/تفضيلات/رموز الأجهزة) | ✅ |
+| 2.4 | Ratings: جدول + `RatingService` (تقييم ثنائي + تحديث متوسط الكابتن) + Controller/Routes/Provider | ✅ |
+| 2.5 | ربط الإشعارات بالتدفقات (دفع/رحلة/أمان) + إشعار التقييم بعد الإنهاء | ✅ |
+| 2.6 | واجهات الإشعارات/التقييم (Frontend) | ⏳ |
+
+> M3–M10: التفاصيل في `docs/ROADMAP.md`. تُفصّل هنا عند بدء كل دفعة.
+
+---
+
+## سجل الدفعات المنفّذة
+| الدفعة | الـ Commits | ملخّص |
+|---|---|---|
+| M1+M2 (backend) | RFQ-074 → RFQ-079 | بنية GPT (Gpt client + fallback) · موديول Payments (CliQ + GPT Vision + اعتماد تلقائي/يدوي + تفعيل اشتراك/شحن محفظة) · بنية Push (FCM) · موديول Notifications (DB + FCM + SMS fallback + تفضيلات + أجهزة) · موديول Ratings (تقييم ثنائي + متوسط الكابتن) · ربط الإشعارات بتدفقات الدفع/الرحلة/الطوارئ |
