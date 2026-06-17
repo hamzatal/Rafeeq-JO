@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-057 |
-| المرحلة الحالية | **Phase 2 + ملحق A (Zone Pooling): Zones + RideRequests + سيارات ✅ → التالي: محرّك التجميع + المحفظة** |
+| آخر Commit | RFQ-060 |
+| المرحلة الحالية | **ملحق A: Matching + Wallet ✅ → التالي: Reverb realtime + AI Fraud + ربط الدفع بالرحلات** |
 
 ---
 
@@ -79,7 +79,9 @@
 - ✅ **RideRequests** (backend): طلب باب لباب (إحداثيات البيت → الجامعة) + تعيين الزون تلقائياً + علم express + APIs (طالب: إنشاء/طلباتي/إلغاء، إدارة: قائمة).
 - ✅ توسعة `trip_passengers`: pickup_lat/lng + pickup_order + dropoff_code + dropoff_confirmed_at (OTP إنزال).
 - ⏳ **محرّك التجميع (Pooling/Matching)** — التالي
-- ⏳ المحفظة مسبقة الدفع (CliQ top-up) + احتساب العمولة
+- ✅ **محرّك التجميع (Matching)**: يجمّع الطلبات (زون+جامعة) برحلات بحجم السيارة (4) بحالة "بانتظار كابتن" + أمر مجدول `rafeeq:match-rides` (كل 5 دقائق) + زر تشغيل للإدارة + **عروض للكابتن (offers) وقبولها (accept)**. الرحلات صارت تدعم نوعين: scheduled / pooled (مسار وكابتن اختياري).
+- ✅ **المحفظة مسبقة الدفع (Wallet)**: wallets + wallet_transactions (رصيد بالفلس، حركات موقّعة، قفل صفّي آمن) + رصيدي/حركاتي + تعليمات شحن CliQ + اعتماد شحن من الإدارة. (الكابتن يُدفع من المنصة لاحقاً عند ربط الدفع بالرحلات.)
+- ⏳ المحفظة + احتساب العمولة عند إكمال الرحلة (ربط الدفع بالرحلات)
 - ⏳ التتبّع الحيّ (Reverb) + Express dynamic pricing + min-fill
 - ⏳ AI Fraud Monitor + Risk Score + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
@@ -154,5 +156,8 @@
 | 055 | feat(zones): zones module + nearest-zone matching (Haversine) + seed 6 Irbid zones |
 | 056 | feat(ride-requests): door-to-door requests (auto zone + express) + passenger pickup coords + drop-off OTP |
 | 057 | docs: progress update — Zone Pooling foundation (appendix A) |
+| 058 | feat(matching): pooling engine (zone+university) + scheduled command + admin trigger + driver offers/accept |
+| 059 | feat(wallet): prepaid wallet + transactions + CliQ top-up instructions + admin credit |
+| 060 | docs: progress update — matching + wallet |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
