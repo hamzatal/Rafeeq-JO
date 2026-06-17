@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { useTheme, type AppTheme } from '../theme';
 
 type Variant = 'error' | 'success' | 'info' | 'warning';
 
@@ -10,6 +10,8 @@ interface BannerProps {
 }
 
 export function Banner({ message, variant = 'error' }: BannerProps) {
+  const theme = useTheme();
+  const s = useMemo(() => makeStyles(theme), [theme]);
   if (!message) return null;
 
   const color = {
@@ -20,19 +22,14 @@ export function Banner({ message, variant = 'error' }: BannerProps) {
   }[variant];
 
   return (
-    <View style={[styles.box, { borderColor: color, backgroundColor: `${color}22` }]}>
-      <Text style={[styles.text, { color }]}>{message}</Text>
+    <View style={[s.box, { borderColor: color, backgroundColor: `${color}22` }]}>
+      <Text style={[s.text, { color }]}>{message}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  box: {
-    borderWidth: 1,
-    borderRadius: theme.radius.md,
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.base,
-    marginBottom: theme.spacing.base,
-  },
-  text: { fontFamily: theme.fontFamily.medium, fontSize: 14, textAlign: 'right' },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    box: { borderWidth: 1, borderRadius: t.radius.md, paddingVertical: t.spacing.sm, paddingHorizontal: t.spacing.base, marginBottom: t.spacing.base },
+    text: { fontFamily: t.fontFamily.medium, fontSize: 14, textAlign: 'right' },
+  });

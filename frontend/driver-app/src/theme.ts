@@ -1,16 +1,28 @@
-import { driverTheme, spacing, radius, typography, fontFamily } from '@rafeeq/shared';
-
-/** The driver app uses the dark Navy + gold theme. */
-export const theme = {
-  colors: {
-    ...driverTheme,
-    // label color to place on top of the gold primary button
-    onPrimary: '#0F172A',
-  },
-  spacing,
-  radius,
-  typography,
+import { useMemo } from 'react';
+import {
+  buildTheme,
   fontFamily,
-};
+  radius,
+  spacing,
+  typography,
+  type ThemeColors,
+} from '@rafeeq/shared';
+import { usePrefs } from './store/prefs';
 
-export type Theme = typeof theme;
+export interface AppTheme {
+  colors: ThemeColors;
+  spacing: typeof spacing;
+  radius: typeof radius;
+  typography: typeof typography;
+  fontFamily: typeof fontFamily;
+  scheme: 'light' | 'dark';
+}
+
+/** Reactive theme hook for the driver app (role = driver, gold accent). */
+export function useTheme(): AppTheme {
+  const scheme = usePrefs((s) => s.scheme);
+  const colors = useMemo(() => buildTheme('driver', scheme), [scheme]);
+  return { colors, spacing, radius, typography, fontFamily, scheme };
+}
+
+export const staticColors = buildTheme('driver', 'dark');

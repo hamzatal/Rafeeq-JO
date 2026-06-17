@@ -1,9 +1,10 @@
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../src/store/auth';
-import { theme } from '../../src/theme';
+import { useTheme } from '../../src/theme';
 
 export default function AppLayout() {
   const status = useAuth((s) => s.status);
+  const theme = useTheme();
 
   if (status === 'unauthenticated') {
     return <Redirect href="/(auth)/welcome" />;
@@ -23,6 +24,7 @@ export default function AppLayout() {
       <Stack.Screen name="vehicle" options={{ title: 'المركبة' }} />
       <Stack.Screen name="trips" options={{ title: 'رحلاتي' }} />
       <Stack.Screen name="trip/[id]" options={{ title: 'تفاصيل الرحلة' }} />
+      <Stack.Screen name="settings" options={{ title: 'الإعدادات' }} />
     </Stack>
   );
 }

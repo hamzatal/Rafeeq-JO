@@ -1,7 +1,6 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { I18nManager } from 'react-native';
+import React, { createContext, useContext, useMemo } from 'react';
 import { t as translate, type Locale } from '@rafeeq/shared';
-import { setApiLocale } from './lib/api';
+import { usePrefs } from './store/prefs';
 
 interface I18nContextValue {
   locale: Locale;
@@ -13,26 +12,17 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('ar');
-
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    setApiLocale(next);
-    const rtl = next === 'ar';
-    if (I18nManager.isRTL !== rtl) {
-      I18nManager.allowRTL(rtl);
-      I18nManager.forceRTL(rtl);
-    }
-  }, []);
+  const locale = usePrefs((s) => s.locale);
+  const setLocalePref = usePrefs((s) => s.setLocale);
 
   const value = useMemo<I18nContextValue>(
     () => ({
       locale,
       isRTL: locale === 'ar',
       t: (key: string) => translate(locale, key),
-      setLocale,
+      setLocale: (l: Locale) => void setLocalePref(l),
     }),
-    [locale, setLocale],
+    [locale, setLocalePref],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

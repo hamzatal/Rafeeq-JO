@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
@@ -8,10 +8,12 @@ import { Input } from '../../../src/components/Input';
 import { Button } from '../../../src/components/Button';
 import { Banner } from '../../../src/components/Banner';
 import { api } from '../../../src/lib/api';
-import { theme } from '../../../src/theme';
+import { useTheme, type AppTheme } from '../../../src/theme';
 
 export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const theme = useTheme();
+  const s = useMemo(() => makeStyles(theme), [theme]);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [passengers, setPassengers] = useState<TripPassenger[]>([]);
   const [code, setCode] = useState('');
@@ -24,22 +26,13 @@ export default function TripDetail() {
     setPassengers(p);
   }, [id]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   const act = async (fn: () => Promise<unknown>, okText: string) => {
-    setMsg(null);
-    setBusy(true);
-    try {
-      await fn();
-      setMsg({ text: okText, ok: true });
-      await load();
-    } catch (e) {
-      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : 'فشل', ok: false });
-    } finally {
-      setBusy(false);
-    }
+    setMsg(null); setBusy(true);
+    try { await fn(); setMsg({ text: okText, ok: true }); await load(); }
+    catch (e) { setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : 'فشل', ok: false }); }
+    finally { setBusy(false); }
   };
 
   const confirmBoarding = async () => {
@@ -49,28 +42,24 @@ export default function TripDetail() {
   };
 
   if (!trip) {
-    return (
-      <SafeAreaView style={styles.safe} edges={['top']}>
-        <Text style={styles.meta}>جارٍ التحميل...</Text>
-      </SafeAreaView>
-    );
+    return <SafeAreaView style={s.safe} edges={['top']}><Text style={s.meta}>جارٍ التحميل...</Text></SafeAreaView>;
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.card}>
-          <View style={styles.row}>
-            <Text style={styles.title}>{trip.route?.name ?? 'رحلة'}</Text>
-            <Text style={styles.badge}>{trip.status_label}</Text>
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <ScrollView contentContainerStyle={s.content}>
+        <View style={s.card}>
+          <View style={s.row}>
+            <Text style={s.title}>{trip.route?.name ?? 'رحلة مجمّعة'}</Text>
+            <Text style={s.badge}>{trip.status_label}</Text>
           </View>
-          {trip.scheduled_at && <Text style={styles.meta}>{new Date(trip.scheduled_at).toLocaleString('ar')}</Text>}
+          {trip.scheduled_at && <Text style={s.meta}>{new Date(trip.scheduled_at).toLocaleString('ar')}</Text>}
         </View>
 
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {trip.status === 'scheduled' && (
-          <View style={styles.actions}>
+          <View style={s.actions}>
             <Button title="بدء الرحلة" onPress={() => act(() => api.driverTrips.start(id), 'بدأت الرحلة')} loading={busy} />
             <Button title="إلغاء" variant="outline" onPress={() => act(() => api.driverTrips.cancel(id), 'أُلغيت')} />
           </View>
@@ -78,24 +67,24 @@ export default function TripDetail() {
 
         {trip.status === 'started' && (
           <>
-            <View style={styles.card}>
-              <Text style={styles.section}>تأكيد صعود راكب</Text>
-              <Text style={styles.meta}>أدخل كود الصعود الذي يعرضه الطالب:</Text>
-              <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="----" style={styles.codeInput} />
+            <View style={s.card}>
+              <Text style={s.section}>تأكيد صعود راكب</Text>
+              <Text style={s.meta}>أدخل كود الصعود الذي يعرضه الطالب:</Text>
+              <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="----" style={s.codeInput} />
               <Button title="تأكيد" onPress={confirmBoarding} loading={busy} />
             </View>
             <Button title="إنهاء الرحلة" onPress={() => act(() => api.driverTrips.end(id), 'انتهت الرحلة')} style={{ marginBottom: theme.spacing.base }} />
           </>
         )}
 
-        <Text style={styles.section}>الركاب ({passengers.length})</Text>
+        <Text style={s.section}>الركاب ({passengers.length})</Text>
         {passengers.length === 0 ? (
-          <Text style={styles.meta}>لا يوجد ركاب محجوزون</Text>
+          <Text style={s.meta}>لا يوجد ركاب</Text>
         ) : (
           passengers.map((p) => (
-            <View key={p.id} style={styles.pax}>
-              <Text style={styles.paxId}>راكب #{p.id.slice(0, 6)}</Text>
-              <Text style={[styles.badge, p.status === 'onboard' && { color: theme.colors.success }]}>{p.status_label}</Text>
+            <View key={p.id} style={s.pax}>
+              <Text style={s.paxId}>راكب #{p.id.slice(0, 6)}</Text>
+              <Text style={[s.badge, p.status === 'onboard' && { color: theme.colors.success }]}>{p.status_label}</Text>
             </View>
           ))
         )}
@@ -104,17 +93,18 @@ export default function TripDetail() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.colors.background },
-  content: { padding: theme.spacing.lg },
-  card: { backgroundColor: theme.colors.surface, borderRadius: theme.radius.lg, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.base, marginBottom: theme.spacing.base },
-  row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  title: { fontFamily: theme.fontFamily.extrabold, fontSize: 18, color: theme.colors.text },
-  section: { fontFamily: theme.fontFamily.bold, fontSize: 15, color: theme.colors.text, textAlign: 'right', marginBottom: theme.spacing.sm },
-  meta: { fontFamily: theme.fontFamily.regular, fontSize: 13, color: theme.colors.textSecondary, textAlign: 'right', marginTop: 4 },
-  badge: { fontFamily: theme.fontFamily.medium, fontSize: 13, color: theme.colors.primary },
-  actions: { gap: theme.spacing.md, marginBottom: theme.spacing.base },
-  codeInput: { textAlign: 'center', letterSpacing: 6, fontSize: 20, marginVertical: theme.spacing.sm },
-  pax: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.base, marginBottom: theme.spacing.sm },
-  paxId: { fontFamily: theme.fontFamily.medium, fontSize: 14, color: theme.colors.text },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: t.colors.background },
+    content: { padding: t.spacing.lg },
+    card: { backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base },
+    row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text },
+    section: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm },
+    meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
+    badge: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.primary },
+    actions: { gap: t.spacing.md, marginBottom: t.spacing.base },
+    codeInput: { textAlign: 'center', letterSpacing: 6, fontSize: 20, marginVertical: t.spacing.sm },
+    pax: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.md, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
+    paxId: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text },
+  });

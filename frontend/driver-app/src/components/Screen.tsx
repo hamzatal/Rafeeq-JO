@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { theme } from '../theme';
+import { useTheme, type AppTheme } from '../theme';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -10,16 +10,14 @@ interface ScreenProps {
 }
 
 export function Screen({ children, scroll = false, center = false }: ScreenProps) {
-  const content = <View style={[styles.content, center && styles.center]}>{children}</View>;
+  const theme = useTheme();
+  const s = useMemo(() => makeStyles(theme), [theme]);
+  const content = <View style={[s.content, center && s.center]}>{children}</View>;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       {scroll ? (
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {content}
         </ScrollView>
       ) : (
@@ -29,9 +27,10 @@ export function Screen({ children, scroll = false, center = false }: ScreenProps
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.colors.background },
-  scroll: { flexGrow: 1 },
-  content: { flex: 1, padding: theme.spacing.lg },
-  center: { justifyContent: 'center' },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: t.colors.background },
+    scroll: { flexGrow: 1 },
+    content: { flex: 1, padding: t.spacing.lg },
+    center: { justifyContent: 'center' },
+  });
