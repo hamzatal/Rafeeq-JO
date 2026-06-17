@@ -9,8 +9,8 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر تحديث | الواجهات الثلاث جاهزة (طالب + كابتن + إدارة) — مراجعة الكباتن تعمل |
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-066 |
-| المرحلة الحالية | **تميّز التصميم: لوجو جديد + Light/Dark + ar/en لكل التطبيقات ✅ → التالي: ربط الدفع بالرحلات + Reverb** |
+| آخر Commit | RFQ-070 |
+| المرحلة الحالية | **دورة المال + التتبّع الحيّ + أساس مكافحة الاحتيال ✅ → التالي: صفحات إدارة النقل + AI + الإشعارات** |
 
 ---
 
@@ -82,8 +82,11 @@
 - ✅ **محرّك التجميع (Matching)**: يجمّع الطلبات (زون+جامعة) برحلات بحجم السيارة (4) بحالة "بانتظار كابتن" + أمر مجدول `rafeeq:match-rides` (كل 5 دقائق) + زر تشغيل للإدارة + **عروض للكابتن (offers) وقبولها (accept)**. الرحلات صارت تدعم نوعين: scheduled / pooled (مسار وكابتن اختياري).
 - ✅ **المحفظة مسبقة الدفع (Wallet)**: wallets + wallet_transactions (رصيد بالفلس، حركات موقّعة، قفل صفّي آمن) + رصيدي/حركاتي + تعليمات شحن CliQ + اعتماد شحن من الإدارة. (الكابتن يُدفع من المنصة لاحقاً عند ربط الدفع بالرحلات.)
 - ⏳ المحفظة + احتساب العمولة عند إكمال الرحلة (ربط الدفع بالرحلات)
-- ⏳ التتبّع الحيّ (Reverb) + Express dynamic pricing + min-fill
-- ⏳ AI Fraud Monitor + Risk Score + مركز النزاعات
+- ✅ **دورة المال**: عند تأكيد الصعود يُخصم من محفظة الطالب (إن لم يكن لديه اشتراك)، تُحجز عمولة المنصة (config: نسبة العمولة + الأجرة الافتراضية)، ويُحاسب الكابتن (يُضاف لمحفظته) — الأموال تمرّ عبر المنصة دائماً (RideBillingService).
+- ✅ **التتبّع الحيّ (Reverb)**: أحداث بث `TripLocationUpdated` + `TripStatusChanged` على قناة `trip.{id}` (تُطلق عند بثّ الموقع/بدء/إنهاء/إلغاء). الافتراضي broadcast=log (آمن بدون سيرفر)؛ يُفعّل بـ reverb.
+- ✅ **أساس مكافحة الاحتيال (Safety)**: جداول `risk_flags` + `cancellation_logs` + كشف بقواعد (كابتن يلغي رحلة فيها ركّاب، معدّل إلغاء عالٍ) → علامات خطورة، + واجهة إدارة (عرض/معالجة العلامات + سجل الإلغاءات). تسجيل الإلغاء مربوط بـ TripService.
+- ⏳ التتبّع الحيّ (Reverb) عميل Echo + الخرائط (دليل لاحقاً) + Express dynamic pricing + min-fill
+- ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
 
 ---
@@ -165,5 +168,9 @@
 | 064 | feat(driver-app): full light/dark + ar/en toggle + Settings screen |
 | 065 | feat(admin): light/dark + ar/en toggle + Topbar + new logo/favicon |
 | 066 | docs: progress update — branding + theming across all apps |
+| 067 | feat(billing): ride payment + commission + captain earnings via wallet (money loop) |
+| 068 | feat(realtime): Reverb broadcasting events (trip location + status) |
+| 069 | feat(safety): anti-fraud foundation — risk flags + cancellation logs + detection + admin |
+| 070 | docs: progress update — money loop + realtime + anti-fraud |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
