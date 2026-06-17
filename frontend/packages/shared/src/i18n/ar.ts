@@ -33,6 +33,7 @@ export const ar = {
   home: {
     title: 'الرئيسية',
     hello: 'أهلاً 👋',
+    services: 'كل الخدمات',
     subscriptions: 'الاشتراكات',
     trips: 'الرحلات',
     rideRequest: 'اطلب رحلة',
