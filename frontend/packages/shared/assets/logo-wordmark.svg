@@ -1,0 +1,23 @@
+<svg width="820" height="260" viewBox="0 0 820 260" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="رفيق Rafeeq">
+  <defs>
+    <linearGradient id="wmBg" x1="600" y1="30" x2="790" y2="230" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="wmGold" x1="650" y1="60" x2="760" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2C14E"/><stop offset="1" stop-color="#D4A017"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mark -->
+  <g transform="translate(600,30)">
+    <rect width="200" height="200" rx="52" fill="url(#wmBg)"/>
+    <path d="M100 32 C 128 32, 150 54, 150 82 C 150 116, 112 156, 102 166 a 4 4 0 0 1 -4 0 C 88 156, 50 116, 50 82 C 50 54, 72 32, 100 32 Z" fill="url(#wmGold)"/>
+    <circle cx="100" cy="80" r="23" fill="#0F2A6B"/>
+    <circle cx="100" cy="80" r="6" fill="#F2C14E"/>
+  </g>
+
+  <!-- Arabic wordmark -->
+  <text x="560" y="150" font-family="Tajawal, sans-serif" font-size="150" font-weight="800" fill="#0F172A" text-anchor="end">رفيق</text>
+  <!-- Latin wordmark -->
+  <text x="560" y="210" font-family="Tajawal, Arial, sans-serif" font-size="46" font-weight="700" letter-spacing="6" fill="#64748B" text-anchor="end">RAFEEQ</text>
+</svg>
