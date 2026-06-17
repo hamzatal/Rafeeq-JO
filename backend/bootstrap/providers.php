@@ -22,5 +22,8 @@ return [
     Rafeeq\Modules\RideRequests\Providers\RideRequestsServiceProvider::class,
     Rafeeq\Modules\Matching\Providers\MatchingServiceProvider::class,
     Rafeeq\Modules\Wallet\Providers\WalletServiceProvider::class,
+    Rafeeq\Modules\Payments\Providers\PaymentsServiceProvider::class,
+    Rafeeq\Modules\Notifications\Providers\NotificationsServiceProvider::class,
+    Rafeeq\Modules\Ratings\Providers\RatingsServiceProvider::class,
     Rafeeq\Modules\Safety\Providers\SafetyServiceProvider::class,
 ];

@@ -6,24 +6,21 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-073 |
-| نسبة الإنجاز | ~43% (الأساس/القلب التشغيلي ~85–90%) |
-| المرحلة الحالية | **انظر `docs/HANDOFF.md` — التالي: Payments (CliQ+Vision) ثم Ratings/Notifications/صفحات الإدارة** |
+| آخر Commit | RFQ-079 |
+| نسبة الإنجاز | ~58% (الأساس/القلب التشغيلي ~90%) |
+| المرحلة الحالية | **M2 منجزة (backend). التالي: M3 — عميل التتبّع الحيّ + الخرائط + Express، ثم واجهات الدفع/الإشعارات/التقييم** |
 
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-أُنجز: الواجهات الثلاث (طالب + كابتن + **لوحة إدارة Next.js**). لوحة الإدارة فيها: دخول الموظفين، الرئيسية، قائمة الكباتن + صفحة مراجعة (عرض الوثائق + قبول/رفض كل وثيقة + اعتماد/رفض/إيقاف الكابتن)، وقائمة المستخدمين. أُضيف endpoint قائمة المستخدمين بالـ backend و AdminApi في api-client.
+**أُنجز (M1+M2 backend):** موديول **Payments** (CliQ + GPT Vision)، موديول **Notifications** (FCM + SMS fallback)، موديول **Ratings** (تقييم ثنائي)، وبنية **Infrastructure/Gpt** + **Infrastructure/Push**. الإشعارات مربوطة بتدفقات الدفع/الرحلة/الطوارئ. راجع `docs/EXECUTION_PLAN.md` للخطة الكاملة M1–M10.
 
-**التالي: Phase 2 — النقل (في الـ backend):**
-1. موديول Universities (CRUD + قائمة عامة) + إضافة FK لـ `student_profiles.university_id`.
-2. Areas + PickupPoints (PostGIS — يتطلب PostgreSQL؛ ملاحظة: SQLite ما بيدعم PostGIS، فننتقل لـ Postgres عبر docker لهالمرحلة).
-3. Routes + RouteStops.
-4. Subscriptions (+ plans) → ربط بالدفع لاحقاً.
-5. Trips + TripPassengers + Trip OTP + التتبّع (Reverb).
-ثم واجهات النقل في التطبيقات.
+**التالي — M3 (التتبّع الحيّ + الخرائط + Express):**
+1. عميل **Echo/Reverb** في تطبيقي الطالب والكابتن + خريطة حيّة (الطالب يتابع الكابتن، الكابتن يبث GPS، الإدارة خريطة الرحلات).
+2. **Express**: تسعير ديناميكي ضمن سقف + min-fill + معاينة أرباح الكابتن.
+3. ثم **واجهات Frontend** للدفع (طالب/إدارة) + الإشعارات + التقييم.
 
-> تشغيل لوحة الإدارة: `cd frontend` ثم `npm install` ثم `npm run admin` (على http://localhost:3000). دخول بحساب الأدمن المزروع.
+> التكاملات اليدوية المطلوبة لتشغيل M1/M2 فعلياً: `OPENAI_API_KEY` (للـ Vision)، `FIREBASE_*` (للـ FCM)، `CLIQ_*` (تعليمات التحويل)، `SMS_*` (fallback). كلها اختيارية — بدونها يعمل النظام عبر المراجعة اليدوية + الإشعار داخل التطبيق + سجل log. التفاصيل في `docs/HANDOFF.md`.
 
 ---
 
@@ -68,7 +65,21 @@
 - ⏳ صفحات الإدارة للنقل (Routes/Plans/Subscriptions/Trips) في لوحة Next.js
 - ملاحظة: نستخدم lat/lng (decimal) بدل PostGIS حالياً ليبقى SQLite شغّال؛ PostGIS لاحقاً للاستعلامات المكانية المتقدّمة.
 
-### Phase 3..7 ⏳
+### Phase 3 — الدفع ✅ (backend)
+- ✅ **Infrastructure/Gpt**: عميل OpenAI (chat + vision) عبر `GptClient` + `OpenAiGptClient` (HTTP) + `NullGptClient` (fallback آمن بدون مفتاح → مراجعة يدوية). مربوط في `InfrastructureServiceProvider`.
+- ✅ **Payments** (backend كامل): `payment_requests` (رقم `RFQ-YYYY-#####` تسلسلي) + `payments` (إشعار التحويل + استخراج + درجة ثقة). تدفّق: إنشاء طلب → تعليمات CliQ → رفع إشعار التحويل → **تحقق GPT Vision** → اعتماد تلقائي عند تطابق واثق وإلا طابور مراجعة بشرية → **تفعيل تلقائي** (شحن المحفظة عبر `WalletService` / تفعيل الاشتراك عبر `SubscriptionService`). يعمل بالكامل بدون مفتاح AI عبر المراجعة اليدوية. صلاحيات `payments.view`/`payments.approve`.
+- ⏳ واجهات الطالب/الإدارة للدفع (Frontend) + مركز الشفافية المالية (UI)
+
+### Phase 6 (جزء) — الإشعارات + التقييم ✅ (backend)
+- ✅ **Infrastructure/Push**: `PushGateway` + `FcmPushGateway` (Firebase HTTP v1 مع OAuth2/JWT من service-account) + `LogPushGateway` (fallback).
+- ✅ **Notifications**: `rafeeq_notifications` + `notification_preferences` (تفضيلات لكل مستخدم؛ السلامة لا تُعطَّل) + `device_tokens`. `NotificationService.notify()`: **دائماً DB** + **FCM** عند التفعيل + **SMS fallback** للحرج (طوارئ/تجميد/إلغاء رحلة). لا يرمي استثناء أبداً (لا يكسر معاملة العمل).
+- ✅ **Ratings**: `ratings` (تقييم ثنائي طالب↔كابتن، نجمة لكل رحلة/مقيّم/اتجاه) + تحديث `rating_avg`/`rating_count` للكابتن تلقائياً.
+- ✅ **الربط**: الدفع (اعتماد/رفض/تفعيل) + الرحلة (اكتمال → دعوة تقييم، إلغاء → إشعار الركّاب) + الطوارئ (تأكيد للمستخدم + تنبيه فريق السلامة).
+
+### Phase 4/5/7 المتبقّية ⏳
+انظر `docs/ROADMAP.md` و`docs/EXECUTION_PLAN.md` (M3–M10).
+
+### Phase 3..7 (سابقاً) ⏳
 انظر `docs/ROADMAP.md`.
 
 ### ملحق A — Zone Pooling + مكافحة الاحتيال (مُعتمد، قيد التنفيذ) 🔄
@@ -173,5 +184,11 @@
 | 071 | feat(brand): brand-new circular emblem logo (ر lettermark + orbit ring) everywhere |
 | 072 | feat(safety/sos): emergency SOS button + incidents + admin handling + critical flag |
 | 073 | docs: full HANDOFF summary (done + remaining + integrations) for session continuity |
+| 074 | docs: master EXECUTION_PLAN (M1–M10) + feat(infra/gpt): OpenAI chat+vision client + safe null fallback |
+| 075 | feat(payments): payment_requests + payments migrations/enums/models (CliQ + RFQ-YYYY-##### numbering) |
+| 076 | feat(payments): GPT-Vision proof verification + PaymentService (auto-approve / manual review / fulfil subscription+wallet) |
+| 077 | feat(payments): controller + requests + resources + routes + provider (payer + admin review queue) |
+| 078 | feat(notifications): FCM push infra + notifications/preferences/device-tokens + SMS fallback service & API |
+| 079 | feat(ratings): two-way ratings + driver average + wire notifications into payment/trip/SOS flows |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

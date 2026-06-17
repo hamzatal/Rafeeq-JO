@@ -1,7 +1,8 @@
 # 📦 ملف التسليم الشامل — رفيق (Rafeeq)
 
 > **للمحادثة الجديدة: اقرأ هذا الملف + `docs/PROGRESS.md` + `docs/ROADMAP.md` + `.kiro/steering/` قبل أي عمل.**
-> آخر commit: **RFQ-073**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز التقديرية: **~43%** (الأساس والقلب التشغيلي ~85–90%).
+> آخر commit: **RFQ-079**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز التقديرية: **~58%** (الأساس والقلب التشغيلي ~90%).
+> **محدّث (M1+M2):** اكتمل backend لموديولات **Payments (CliQ+GPT Vision)** و**Notifications (FCM+SMS fallback)** و**Ratings** + بنية **Gpt** و**Push**. راجع `docs/EXECUTION_PLAN.md` للخطة الكاملة M1–M10.
 > القواعد: لا اختصار، لا حذف مزايا، لا ديمو داتا. commits مرقّمة `[RFQ-###]`. حدّث PROGRESS + README مع كل push.
 
 ---
@@ -107,4 +108,7 @@ npm run admin     # http://localhost:3000
 ```
 
 ## ⏭️ الخطوة التالية المقترحة (للمحادثة الجديدة)
-ابدأ بـ **Payments (CliQ + GPT Vision)** لإغلاق التفعيل التلقائي للاشتراكات/المحفظة، ثم **Ratings**، ثم **Notifications (FCM)**، ثم **صفحات إدارة النقل**، ثم **شاشات الخريطة + Echo**، ثم باقي الخدمات (Parcels/LostFound/Rewards/Support/Complaints) ثم **طبقة AI**. آخر رقم commit مستخدم: **RFQ-073** (التالي RFQ-074).
+**اكتمل (backend):** Payments (CliQ + GPT Vision)، Notifications (FCM + SMS fallback)، Ratings، وبنية Gpt + Push. التالي حسب `docs/EXECUTION_PLAN.md`:
+**M3** — عميل **Echo/Reverb** + شاشات الخريطة الحيّة (طالب/كابتن/إدارة) + **Express** (تسعير ديناميكي + min-fill)، ثم **واجهات Frontend** للدفع/الإشعارات/التقييم، ثم **صفحات إدارة النقل**، ثم Support/Complaints، ثم باقي الخدمات (Parcels/LostFound/Rewards) ثم **طبقة AI**. آخر رقم commit مستخدم: **RFQ-079** (التالي RFQ-080).
+
+رسالة الانتقال: "أكمل مشروع رفيق (hamzatal/Rafeeq-JO، فرع foundation/phase-0-1). اقرأ docs/HANDOFF.md و docs/EXECUTION_PLAN.md و docs/PROGRESS.md و docs/ROADMAP.md و .kiro/steering/ وكمّل من M3 — آخر commit RFQ-079، التالي RFQ-080. بدون اختصار أو حذف مزايا."

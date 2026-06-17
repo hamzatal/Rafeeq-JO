@@ -74,12 +74,14 @@ npm run driver    # تطبيق الكابتن
 
 - [x] **Phase 0** — الأساس (Monorepo + Backend foundation + Design system)
 - [x] **Phase 1** — الهوية والأمان (Auth / OTP / RBAC / Users / Students / Drivers + 3 واجهات)
-- [ ] **Phase 2** — النقل (Universities / Routes / Subscriptions / Trips)
-- [ ] **Phase 3** — الدفع (CliQ + GPT Vision)
+- [x] **Phase 2** — النقل (Universities / Areas / PickupPoints / Routes / Subscriptions / Trips / Zones / RideRequests / Matching / Wallet) — backend
+- [x] **Phase 3** — الدفع (CliQ + GPT Vision) — backend (Payments + بنية Gpt) ✅ · واجهات ⏳
 - [ ] **Phase 4** — الخدمات (Parcels / Lost & Found / Rewards)
-- [ ] **Phase 5** — الذكاء الاصطناعي (Rafeeq AI / Support / Safety)
-- [ ] **Phase 6** — لوحة الإدارة + التحليلات
-- [ ] **Phase 7** — الإطلاق (SOS / Notifications / Deployment)
+- [ ] **Phase 5** — الذكاء الاصطناعي (Rafeeq AI / Support / Safety / Fraud Monitor)
+- [~] **Phase 6** — لوحة الإدارة + التحليلات · **الإشعارات (FCM+SMS) ✅** · **التقييم الثنائي ✅** (backend)
+- [~] **Phase 7** — الإطلاق · **SOS ✅** · Notifications ✅ · (Deployment/CI/اختبارات ⏳)
+
+> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md`. آخر commit: **RFQ-079** (~58%).
 
 ---
 

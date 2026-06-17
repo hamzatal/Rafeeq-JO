@@ -7,6 +7,7 @@ use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Modules\Safety\Services\FraudService;
 use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
@@ -18,6 +19,7 @@ use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Models\TripTracking;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
+use Rafeeq\Shared\Enums\NotificationType;
 
 class TripService extends BaseService
 {
@@ -26,6 +28,7 @@ class TripService extends BaseService
         private readonly SubscriptionService $subscriptions,
         private readonly RideBillingService $billing,
         private readonly FraudService $fraud,
+        private readonly NotificationService $notifications,
     ) {}
 
     public function schedule(DriverProfile $driver, Route $route, string $scheduledAt, ?string $vehicleId = null): Trip
@@ -71,6 +74,31 @@ class TripService extends BaseService
         TripStatusChanged::dispatch($trip->id, $trip->status->value);
         $this->audit->log('trip.completed', auditable: $trip);
 
+        // Notify dropped passengers: trip completed + invite to rate the captain.
+        $passengers = $trip->passengers()
+            ->where('status', TripPassengerStatus::Dropped->value)
+            ->get();
+        foreach ($passengers as $passenger) {
+            $student = User::find($passenger->student_id);
+            if (! $student) {
+                continue;
+            }
+            $this->notifications->notify(
+                $student,
+                NotificationType::TripCompleted,
+                'انتهت رحلتك',
+                'وصلت بأمان. نتمنى لك يوماً موفقاً!',
+                ['trip_id' => $trip->id],
+            );
+            $this->notifications->notify(
+                $student,
+                NotificationType::RatingRequest,
+                'قيّم رحلتك',
+                'كيف كانت رحلتك مع الكابتن؟ قيّمه الآن.',
+                ['trip_id' => $trip->id],
+            );
+        }
+
         return $trip;
     }
 
@@ -84,6 +112,11 @@ class TripService extends BaseService
             ->whereIn('status', [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value])
             ->count();
 
+        // Capture affected passengers before we flip their status.
+        $affectedStudentIds = $trip->passengers()
+            ->whereIn('status', [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value])
+            ->pluck('student_id');
+
         $trip->forceFill(['status' => TripStatus::Cancelled])->save();
         $trip->passengers()->where('status', TripPassengerStatus::Booked->value)
             ->update(['status' => TripPassengerStatus::Cancelled->value]);
@@ -94,6 +127,20 @@ class TripService extends BaseService
         $this->fraud->logCancellation($trip->id, $actor?->id, $role, $reason, $passengersCount);
 
         $this->audit->log('trip.cancelled', $actor, auditable: $trip);
+
+        // Notify affected passengers (critical → SMS fallback when push is off).
+        foreach ($affectedStudentIds as $studentId) {
+            $student = User::find($studentId);
+            if ($student) {
+                $this->notifications->notify(
+                    $student,
+                    NotificationType::TripCancelled,
+                    'تم إلغاء رحلتك',
+                    'نعتذر، تم إلغاء الرحلة. يمكنك حجز رحلة بديلة الآن.',
+                    ['trip_id' => $trip->id],
+                );
+            }
+        }
 
         return $trip;
     }
