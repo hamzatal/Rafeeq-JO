@@ -13,6 +13,7 @@ const LINKS = [
   { href: '/ride-requests', label: 'طلبات الرحلات' },
   { href: '/support', label: 'الدعم' },
   { href: '/complaints', label: 'الشكاوى' },
+  { href: '/safety', label: 'مركز الأمان' },
 ];
 
 export function Sidebar() {

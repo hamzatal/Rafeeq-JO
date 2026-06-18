@@ -47,6 +47,7 @@ export default function AppLayout() {
       <Tabs.Screen name="rewards" options={{ href: null }} />
       <Tabs.Screen name="exchange" options={{ href: null }} />
       <Tabs.Screen name="support" options={{ href: null }} />
+      <Tabs.Screen name="assistant" options={{ href: null }} />
     </Tabs>
   );
 }
