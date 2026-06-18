@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import type { DriverStatus } from '@rafeeq/shared';
+import type { DriverStatus, DriverPerformance } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
 import { Button } from '../../src/components/Button';
@@ -32,11 +32,20 @@ export default function Dashboard() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [perf, setPerf] = useState<DriverPerformance | null>(null);
 
   const status = driver?.status ?? 'pending';
   const meta = statusMeta[status];
   const canSubmit = status === 'pending' || status === 'rejected';
   const approved = status === 'approved';
+
+  useEffect(() => {
+    if (approved) {
+      api.payouts.performance().then(setPerf).catch(() => undefined);
+    }
+  }, [approved]);
+
+  const jod = (fils: number) => (fils / 1000).toFixed(3);
 
   const onSubmit = async () => {
     setError(null); setSubmitting(true);
@@ -64,15 +73,35 @@ export default function Dashboard() {
         {error ? <Banner message={error} variant="error" /> : null}
 
         {approved && (
+          <View style={s.hero}>
+            <View style={s.heroGlow} />
+            <View style={s.heroTopRow}>
+              <Text style={s.heroLabel}>{t('driver.earnings')}</Text>
+              {perf ? (
+                <View style={s.tierChip}>
+                  <Icon name="award" size={13} color={theme.colors.primary} />
+                  <Text style={s.tierChipText}>{perf.tier_label}</Text>
+                </View>
+              ) : null}
+            </View>
+            <Text style={s.heroValue}>
+              {perf ? jod(perf.available_earnings_fils) : '—'}
+              <Text style={s.heroCur}> {t('subscriptions.currency')}</Text>
+            </Text>
+            <Button title={t('driver.earnings')} onPress={() => router.push('/(app)/earnings')} style={s.heroBtn} />
+          </View>
+        )}
+
+        {approved && (
           <View style={s.statsRow}>
             <View style={s.statBox}>
               <Icon name="star" size={18} color={theme.colors.accent} />
-              <Text style={s.statVal}>{driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
+              <Text style={s.statVal}>{perf?.rating?.toFixed(1) ?? driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
               <Text style={s.statLbl}>{t('driver.myRating')}</Text>
             </View>
             <View style={s.statBox}>
               <Icon name="navigation" size={18} color={theme.colors.primary} />
-              <Text style={s.statVal}>{driver?.total_trips ?? 0}</Text>
+              <Text style={s.statVal}>{perf?.total_trips ?? driver?.total_trips ?? 0}</Text>
               <Text style={s.statLbl}>{t('driver.myTrips')}</Text>
             </View>
           </View>
@@ -112,6 +141,15 @@ const makeStyles = (t: AppTheme) =>
     greeting: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
     name: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'right' },
     statsRow: { flexDirection: 'row-reverse', gap: t.spacing.base, marginBottom: t.spacing.sm },
+    hero: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.primary + '44', padding: t.spacing.lg, marginBottom: t.spacing.base, overflow: 'hidden', ...t.shadow.md },
+    heroGlow: { position: 'absolute', top: -40, left: -30, width: 150, height: 150, borderRadius: 75, backgroundColor: t.colors.primary, opacity: 0.12 },
+    heroTopRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.xs },
+    heroLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
+    tierChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, backgroundColor: t.colors.primary, paddingHorizontal: 10, paddingVertical: 3, borderRadius: t.radius.full },
+    tierChipText: { fontFamily: t.fontFamily.bold, fontSize: 11, color: t.colors.onPrimary },
+    heroValue: { fontFamily: t.fontFamily.extrabold, fontSize: 36, color: t.colors.primary, textAlign: 'right' },
+    heroCur: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.textSecondary },
+    heroBtn: { marginTop: t.spacing.md },
     statBox: { flex: 1, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, alignItems: 'center', ...t.shadow.sm },
     statVal: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, marginTop: 4 },
     statLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, marginTop: 2 },
