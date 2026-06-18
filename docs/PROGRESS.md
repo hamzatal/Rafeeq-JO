@@ -232,5 +232,6 @@
 | 120 | chore(audit+brand): full 3-app static audit (clean) + unify admin & native splash to Jordan-green identity + ARCHITECTURE.md |
 | 121 | feat(driver-app): DS v2 redesign — bottom tabs + Icon/ui components + dashboard/offers/trips/earnings/account + i18n wiring |
 | 122 | feat(driver-app): redesign Documents + Vehicle screens (DS v2) + wire all hardcoded strings to i18n — driver app fully redesigned |
+| 123 | fix(i18n): wire last hardcoded auth strings (OTP test code + captain badge) — zero hardcoded UI strings across both apps |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

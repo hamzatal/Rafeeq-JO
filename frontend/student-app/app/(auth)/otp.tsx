@@ -44,7 +44,7 @@ export default function Otp() {
         <Text style={s.title}>{t('auth.otpTitle')}</Text>
         <Text style={s.subtitle}>{t('auth.otpSubtitle')}</Text>
         <Text style={s.phone}>{params.phone}</Text>
-        {params.debug ? <Text style={s.debug}>كود التجربة: {params.debug}</Text> : null}
+        {params.debug ? <Text style={s.debug}>{t('auth.testCode')}: {params.debug}</Text> : null}
       </View>
       <Banner message={formError} />
       <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="------" style={s.codeInput} />

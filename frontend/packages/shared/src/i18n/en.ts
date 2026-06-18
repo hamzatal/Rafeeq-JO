@@ -31,6 +31,7 @@ export const en: Translations = {
     haveAccount: 'Have an account? Log in',
     noAccount: 'No account? Sign up',
     logout: 'Log out',
+    testCode: 'Test code',
   },
   home: {
     title: 'Home',
@@ -104,6 +105,7 @@ export const en: Translations = {
     uploadFailed: 'Upload failed',
     vehicleAdded: 'Vehicle added successfully',
     seatsWord: 'seats',
+    badge: 'CAPTAIN',
     documents: 'Documents',
     vehicle: 'Vehicle',
     addVehicle: 'Add vehicle',

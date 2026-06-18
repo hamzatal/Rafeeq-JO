@@ -29,6 +29,7 @@ export const ar = {
     haveAccount: 'لديك حساب؟ سجّل الدخول',
     noAccount: 'ليس لديك حساب؟ أنشئ حساباً',
     logout: 'تسجيل الخروج',
+    testCode: 'كود التجربة',
   },
   home: {
     title: 'الرئيسية',
@@ -102,6 +103,7 @@ export const ar = {
     uploadFailed: 'تعذّر الرفع',
     vehicleAdded: 'تمت إضافة المركبة بنجاح',
     seatsWord: 'مقاعد',
+    badge: 'كابتن',
     documents: 'الوثائق',
     vehicle: 'المركبة',
     addVehicle: 'إضافة مركبة',
