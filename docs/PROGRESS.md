@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-161 |
-| نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال المتقدّمة + مركز النزاعات على foundation |
-| المرحلة الحالية | **منصّة مكتملة المزايا. المتبقّي: تشغيل/اختبار فعلي محلياً + جدولة sweep + تلميع** |
+| آخر Commit | RFQ-165 |
+| نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
+| المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
 ---
 
@@ -283,5 +283,9 @@
 | 159 | feat(admin): dispute center frontend (DisputesApi + /disputes page + sidebar) |
 | 160 | docs: advanced anti-fraud + dispute center in PROGRESS.md + FEATURES.md |
 | 161 | feat(disputes): scheduled hourly fraud-sweep command (auto-freeze sweep) |
+| 162 | fix(shared): @rafeeq/shared passes strict tsc (i18n widen + dedupe keys + theme type) |
+| 163 | chore(frontend): dedupe @types/react so admin type-checks clean |
+| 164 | fix(apps): type-check clean across student/driver/guardian (login union + Echo generic) |
+| 165 | docs: frontend now fully type-checked (6 packages green) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
