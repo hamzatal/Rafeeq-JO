@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-181 |
+| آخر Commit | RFQ-183 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -303,5 +303,7 @@
 | 179 | docs: add docs/RUNNING.md (connect apps to backend + OpenAI key) |
 | 180 | feat(student): premium wallet card (navy bank-card, cyan balance) |
 | 181 | docs: student wallet Stitch redesign |
+| 182 | feat(otp): WhatsApp OTP delivery via self-hosted OpenWA gateway (+3 tests) |
+| 183 | docs: WhatsApp OTP setup |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
