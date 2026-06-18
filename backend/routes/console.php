@@ -13,3 +13,6 @@ Schedule::command('rafeeq:prune-otps')->hourly();
 
 // Pool pending ride requests into trips every few minutes
 Schedule::command('rafeeq:match-rides')->everyFiveMinutes();
+
+// Re-assess top-risk accounts and auto-freeze + open dispute cases hourly
+Schedule::command('rafeeq:fraud-sweep')->hourly();
