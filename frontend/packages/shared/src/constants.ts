@@ -75,6 +75,13 @@ export const ENDPOINTS = {
     documents: '/driver/documents',
     submit: '/driver/submit',
     vehicles: '/driver/vehicles',
+    performance: '/driver/performance',
+    withdrawals: '/driver/wallet/withdrawals',
+  },
+  adminWithdrawals: {
+    list: '/admin/withdrawals',
+    approve: (id: string) => `/admin/withdrawals/${id}/approve`,
+    reject: (id: string) => `/admin/withdrawals/${id}/reject`,
   },
   driverOffers: {
     list: '/driver/trips/offers',

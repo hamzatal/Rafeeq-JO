@@ -586,3 +586,33 @@ export interface ChatMessage {
   read: boolean;
   created_at: string | null;
 }
+
+
+/** ── Captain payouts & performance ────────────────────────────────── */
+
+export interface PayoutRequest {
+  id: string;
+  amount_fils: number;
+  method: string;
+  destination: string | null;
+  status: 'pending' | 'paid' | 'rejected';
+  note: string | null;
+  admin_note: string | null;
+  processed_at: string | null;
+  created_at: string | null;
+  captain?: { id: string; name: string; phone: string };
+}
+
+export interface DriverPerformance {
+  tier: string;
+  tier_label: string;
+  points: number;
+  lifetime_points: number;
+  next_tier: string | null;
+  next_tier_label: string | null;
+  points_to_next: number;
+  progress_percent: number;
+  available_earnings_fils: number;
+  rating: number;
+  total_trips: number;
+}

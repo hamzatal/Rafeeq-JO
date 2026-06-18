@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-140 |
+| آخر Commit | RFQ-142 |
 | نسبة الإنجاز | ~95% · AI + خرائط حيّة مبنية |
 | المرحلة الحالية | **AI + الخرائط جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + توسيع الاختبارات + تلميع** |
 
@@ -101,6 +101,7 @@
 - ✅ **بوابة ولي الأمر (Guardian Portal)** (RFQ-137): وحدة جديدة `Modules/Guardians` + نوع مستخدم `guardian` + دور `guardian`. الطالب يدير أولياء أمره (إضافة برقم الهاتف/العلاقة + إلغاء) — الحساب يُنشأ تلقائياً ويُسجَّل دخوله بالهاتف+OTP. ولي الأمر يرى: **أبناءه المرتبطين**، **تتبع الرحلة الحيّ** (الكابتن/المركبة/آخر موقع GPS/نسبة الإنجاز)، **سجل الوصول الآمن** (انطلاق/وصول)، **اتصال مُقنّع بالكابتن**، و**زر طوارئ SOS بالنيابة** (يمرّ عبر `SosService`). تنبيهات **الانطلاق/الوصول** مربوطة بأمان داخل تدفق الرحلة (لا تُعطّل المعاملة أبداً). حماية صلاحيات: ولي الأمر لا يرى إلا طلابه المرتبطين (403 لغيرهم). مغطّى بـ **7 اختبارات Feature**. ملاحظة: عمود `users.type` خُفِّف من DB enum إلى string لإضافة الأنواع بأمان عبر PostgreSQL/SQLite.
 - ✅ **واجهة بوابة ولي الأمر (Frontend)** (RFQ-138): **تطبيق Expo جديد `guardian-app`** (دخول بالهاتف+OTP بلا كلمة سر، ثيم Navy واقٍ): شاشة البوابة فيها مُحدِّد الطالب + بطاقة التتبع الحيّ مع خريطة OSM + شريط نسبة الإنجاز + بيانات الكابتن والمركبة + سجل الوصول الآمن (انطلاق/وصول) + **زر SOS بالضغط المطوّل 3 ثوانٍ** + اتصال بالكابتن. + شاشة **"إدارة أولياء الأمور"** في تطبيق الطالب (إضافة/قائمة/إلغاء). طبقة مشتركة: أنواع + endpoints + ثيم guardian + i18n (ar/en) + `GuardianApi`/`StudentGuardiansApi`. ⚠️ الفرونت غير مُتحقَّق بناءً هنا (node_modules غير منصّبة + baseline الـ tsc للحزمة المشتركة غير نظيف أصلاً) — يلزم تحقّق عبر CI/محلياً.
 - ✅ **المحادثة داخل التطبيق (Chat) طالب↔كابتن** (RFQ-139/140): وحدة `Modules/Chat` — محادثة 1:1 مرتبطة بالرحلة بين الطالب وكابتن رحلته، مع تفويض صلاحيات لكل محادثة (الطرفان فقط، 403 لغيرهما)، رسائل + قراءة + بثّ `ChatMessageSent` (Reverb) + إشعار للطرف المستقبل (يحافظ على خصوصية رقم الهاتف). الفرونت: شاشة محادثة (فقاعات + polling كل 4ث + إرسال) في تطبيقي الطالب والكابتن، تُفتح من رحلات الطالب (محادثة الكابتن) ومن تفاصيل رحلة الكابتن لكل راكب (محادثة الطالب). مغطّى بـ **5 اختبارات Feature**.
+- ✅ **سحب أرباح الكابتن (Payout) + رُتب الكابتن** (RFQ-141/142): وحدة `Modules/Payouts` — طلب السحب يخصم من محفظة الكابتن فوراً (حجز)، الأدمن يعتمد (paid) أو يرفض (يُعيد المبلغ). حدّ أدنى 5 د.أ. مسارات الكابتن `/driver/wallet/withdrawals` ومسارات الأدمن `/admin/withdrawals/*` (بصلاحية payments.*). **endpoint أداء الكابتن** `/driver/performance`: الرتبة (Bronze→Silver→Gold→Platinum من Rewards) + التقدّم للرتبة التالية + الأرباح المتاحة + التقييم + عدد الرحلات. **منح نقاط للكابتن عند إكمال الرحلة** (مربوط بأمان في `TripService.end`). الفرونت: شاشة أرباح الكابتن (بطاقة الرتبة + شريط تقدّم + زر "سحب الأرباح" + سجل السحوبات) + شاشة نموذج السحب + `PayoutApi` (تتضمن طابور الأدمن). مغطّى بـ **6 اختبارات Feature**. (واجهة طابور السحب في لوحة الإدارة Next.js مؤجَّلة — الـ API جاهز.)
 - ⏳ التتبّع الحيّ (Reverb) عميل Echo + الخرائط (دليل لاحقاً) + Express dynamic pricing + min-fill
 - ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
@@ -255,5 +256,7 @@
 | 138 | feat(guardian-app+student): Guardian portal frontend — new Expo guardian-app (OTP login, portal: child selector, live tracking + map, safe-arrival log, hold-to-SOS, call captain) + student "Manage Guardians" screen + shared types/endpoints/theme/i18n + GuardianApi |
 | 139 | feat(chat): in-app chat (student↔captain) backend — Modules/Chat (conversations + messages), trip-scoped 1:1 threads, per-conversation authorisation, ChatMessageSent broadcast + recipient notification, mark-read + 5 feature tests |
 | 140 | feat(chat): in-app chat frontend — shared chat types/endpoints/i18n + ChatApi + chat screen (bubbles, poll, send) in student & driver apps, wired from student trips + driver trip-detail passenger list |
+| 141 | feat(payouts): captain earnings withdrawal — Modules/Payouts (request debits wallet, admin approve/paid, reject credits back) + driver performance endpoint (tier ladder + progress + earnings) + award captain reward points on trip completion + 6 feature tests |
+| 142 | feat(payouts): captain payout frontend — driver earnings screen (tier card + withdraw button + withdrawal history) + withdraw form screen + shared types/endpoints/i18n + PayoutApi (incl admin queue/approve/reject) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
