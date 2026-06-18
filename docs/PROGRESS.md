@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-125 |
-| نسبة الإنجاز | ~89% · التطبيقان مُعاد تصميمهما + بنية نشر إنتاج |
-| المرحلة الحالية | **بنية الإطلاق (Docker/نشر/قانوني) جاهزة. المتبقّي: طبقة AI (مفتاح OpenAI) + خرائط (مفتاح) + اختبارات + PostGIS فعلي** |
+| آخر Commit | RFQ-130 |
+| نسبة الإنجاز | ~93% · طبقة AI مبنية (مساعد + Fraud Monitor + Route Intelligence) |
+| المرحلة الحالية | **طبقة AI كاملة (backend + واجهات). التالي: الخرائط الفعلية + تشغيل/اختبار** |
 
 ---
 
@@ -236,5 +236,8 @@
 | 124 | feat(driver-app): redesign Trip Detail screen (DS v2) + wire all strings — 100% zero hardcoded Arabic across both mobile apps |
 | 125 | chore(deploy): production Dockerfiles (API + admin) + prod compose + hardened .env.production + legal policies (ar) + DEPLOYMENT.md |
 | 126 | test(backend): PHPUnit scaffolding (phpunit.xml + TestCase) + PricingService unit tests + auth-guard smoke tests |
+| 128 | feat(ai): AI module — Rafeeq Assistant + Fraud Monitor (risk scoring) + Route Intelligence |
+| 129 | feat(shared+api-client): AI types + ENDPOINTS + AssistantApi |
+| 130 | feat(frontend): Rafeeq Assistant chat screen (student) + admin AI safety center |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
