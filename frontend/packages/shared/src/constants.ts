@@ -190,6 +190,7 @@ export const ENDPOINTS = {
     rideRequests: '/admin/ride-requests',
     matchingRun: '/admin/matching/run',
     walletCredit: '/admin/wallets/credit',
+    reportsFinancial: '/admin/reports/financial',
   },
 } as const;
 
