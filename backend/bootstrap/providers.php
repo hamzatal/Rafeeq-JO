@@ -38,4 +38,5 @@ return [
     Rafeeq\Modules\Exchange\Providers\ExchangeServiceProvider::class,
     Rafeeq\Modules\AI\Providers\AIServiceProvider::class,
     Rafeeq\Modules\Safety\Providers\SafetyServiceProvider::class,
+    Rafeeq\Modules\Disputes\Providers\DisputesServiceProvider::class,
 ];
