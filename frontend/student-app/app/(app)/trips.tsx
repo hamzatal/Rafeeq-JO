@@ -6,6 +6,7 @@ import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
 import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
+import { LiveMap } from '../../src/components/LiveMap';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { subscribeToTrip } from '../../src/lib/realtime';
@@ -21,6 +22,7 @@ export default function Trips() {
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [location, setLocation] = useState<Record<string, string>>({});
+  const [coords, setCoords] = useState<Record<string, { lat: number; lng: number }>>({});
   const [stars, setStars] = useState<Record<string, number>>({});
   const [rated, setRated] = useState<Record<string, boolean>>({});
 
@@ -42,7 +44,7 @@ export default function Trips() {
       .filter((p) => p.trip)
       .map((p) =>
         subscribeToTrip(p.trip_id, {
-          onLocation: (e) => setLocation((prev) => ({ ...prev, [p.trip_id]: `${e.lat.toFixed(5)}, ${e.lng.toFixed(5)}` })),
+          onLocation: (e) => { setLocation((prev) => ({ ...prev, [p.trip_id]: `${e.lat.toFixed(5)}, ${e.lng.toFixed(5)}` })); setCoords((prev) => ({ ...prev, [p.trip_id]: { lat: e.lat, lng: e.lng } })); },
         }),
       );
     return () => unsubs.forEach((u) => u());
@@ -63,6 +65,7 @@ export default function Trips() {
     try {
       const loc = await api.transport.tripLocation(tripId);
       setLocation((p) => ({ ...p, [tripId]: loc ? `${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}` : t('trips.noLocation') }));
+      if (loc) setCoords((p) => ({ ...p, [tripId]: { lat: loc.lat, lng: loc.lng } }));
     } catch {
       setLocation((p) => ({ ...p, [tripId]: t('trips.locationError') }));
     }
@@ -109,6 +112,9 @@ export default function Trips() {
                 <Text style={s.trackText}>{t('trips.track')}</Text>
               </Pressable>
               {location[p.trip_id] && <Text style={s.meta}>📍 {location[p.trip_id]}</Text>}
+              {coords[p.trip_id] && (
+                <LiveMap points={[{ ...coords[p.trip_id], kind: 'captain', label: t('trips.track') }]} height={200} />
+              )}
 
               {p.trip?.status === 'completed' && (
                 rated[p.trip_id] ? (

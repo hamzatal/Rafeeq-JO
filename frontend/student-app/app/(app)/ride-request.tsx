@@ -8,6 +8,7 @@ import { Input } from '../../src/components/Input';
 import { Banner } from '../../src/components/Banner';
 import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
+import { LiveMap } from '../../src/components/LiveMap';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
@@ -123,6 +124,9 @@ export default function RideRequestScreen() {
             <View style={s.half}><Input label={t('rideRequest.lng')} keyboardType="numeric" value={lng} onChangeText={setLng} /></View>
           </View>
           <Input label={t('rideRequest.address')} value={address} onChangeText={setAddress} />
+          {Number.isFinite(Number(lat)) && Number.isFinite(Number(lng)) && Number(lat) !== 0 && Number(lng) !== 0 && (
+            <LiveMap points={[{ lat: Number(lat), lng: Number(lng), kind: 'pickup', label: t('rideRequest.pickup') }]} height={180} />
+          )}
         </Card>
 
         <View style={s.typeRow}>

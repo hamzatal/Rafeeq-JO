@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-130 |
-| نسبة الإنجاز | ~93% · طبقة AI مبنية (مساعد + Fraud Monitor + Route Intelligence) |
-| المرحلة الحالية | **طبقة AI كاملة (backend + واجهات). التالي: الخرائط الفعلية + تشغيل/اختبار** |
+| آخر Commit | RFQ-132 |
+| نسبة الإنجاز | ~95% · AI + خرائط حيّة مبنية |
+| المرحلة الحالية | **AI + الخرائط جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + توسيع الاختبارات + تلميع** |
 
 ---
 
@@ -239,5 +239,6 @@
 | 128 | feat(ai): AI module — Rafeeq Assistant + Fraud Monitor (risk scoring) + Route Intelligence |
 | 129 | feat(shared+api-client): AI types + ENDPOINTS + AssistantApi |
 | 130 | feat(frontend): Rafeeq Assistant chat screen (student) + admin AI safety center |
+| 132 | feat(maps): key-free LiveMap (Leaflet/OSM via WebView on native + live panel on web) — wired into trip tracking + ride-request |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
