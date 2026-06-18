@@ -227,5 +227,6 @@
 | 115 | docs: Design System v2 guide (docs/DESIGN.md) + progress update |
 | 116 | feat(student-app): redesign Account/Settings (profile + quick links) + Notifications + Wallet with DS v2 components |
 | 117 | feat(student-app): redesign Trips tab (cards + empty states + star ratings + live tracking) — all 5 tabs now DS v2 |
+| 118 | feat(student-app): redesign Subscriptions + Ride Request screens (DS v2) + fix missing react-hooks import in Subscriptions |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
