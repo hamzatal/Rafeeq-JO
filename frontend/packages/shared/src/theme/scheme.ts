@@ -1,5 +1,5 @@
 export type ColorScheme = 'light' | 'dark';
-export type ThemeRole = 'student' | 'driver' | 'admin';
+export type ThemeRole = 'student' | 'driver' | 'admin' | 'guardian';
 
 export interface ThemeColors {
   primary: string;
@@ -33,6 +33,8 @@ const roleAccent: Record<ThemeRole, { primary: string; primaryDark: string; acce
   student: { primary: '#0B7A43', primaryDark: '#075C32', accent: '#E6B23E', onPrimary: '#FFFFFF' },
   driver: { primary: '#E6B23E', primaryDark: '#C7951F', accent: '#E6B23E', onPrimary: '#0E261C' },
   admin: { primary: '#0B7A43', primaryDark: '#075C32', accent: '#E6B23E', onPrimary: '#FFFFFF' },
+  // Guardian app — protective deep navy + heritage gold (safety-first persona).
+  guardian: { primary: '#0E2A47', primaryDark: '#08203A', accent: '#E6B23E', onPrimary: '#FFFFFF' },
 };
 
 const neutralsLight = {
@@ -62,9 +64,13 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   const accent = roleAccent[role];
   const neutrals = scheme === 'dark' ? neutralsDark : neutralsLight;
 
-  // Lift the brand green slightly in dark mode for contrast.
-  const primary = scheme === 'dark' && role !== 'driver' ? '#15A05A' : accent.primary;
-  const primarySoft = scheme === 'dark' ? 'rgba(21,160,90,0.16)' : 'rgba(11,122,67,0.10)';
+  // Lift the brand green slightly in dark mode for contrast (green personas only).
+  const greenPersona = role === 'student' || role === 'admin';
+  const primary = scheme === 'dark' && greenPersona ? '#15A05A' : accent.primary;
+  const primarySoft =
+    role === 'guardian'
+      ? (scheme === 'dark' ? 'rgba(14,42,71,0.28)' : 'rgba(14,42,71,0.10)')
+      : (scheme === 'dark' ? 'rgba(21,160,90,0.16)' : 'rgba(11,122,67,0.10)');
 
   return {
     primary,

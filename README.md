@@ -81,7 +81,7 @@ npm run driver    # تطبيق الكابتن
 - [~] **Phase 6** — لوحة الإدارة + التحليلات · **الإشعارات (FCM+SMS) ✅** · **التقييم الثنائي ✅** (backend)
 - [~] **Phase 7** — الإطلاق · **SOS ✅** · Notifications ✅ · **OTP صعود + OTP إنزال (تأكيد الطرفين) ✅** · **محرك تسعير + Express ✅** · **حجز الرصيد ✅** · **كشف احتيال GPS ✅** · **بوابة ولي الأمر ✅ (backend)** · (Deployment/CI/اختبارات شاملة ⏳)
 
-> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md`. آخر commit: **RFQ-137**.
+> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md`. آخر commit: **RFQ-140**.
 
 ---
 

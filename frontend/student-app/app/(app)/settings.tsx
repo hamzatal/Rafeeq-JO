@@ -38,6 +38,7 @@ export default function Settings() {
 
   const links: { icon: IconName; label: string; href: string }[] = [
     { icon: 'gift', label: t('home.rewards'), href: '/(app)/rewards' },
+    { icon: 'shield', label: t('guardians.title'), href: '/(app)/guardians' },
     { icon: 'calendar', label: t('home.subscriptions'), href: '/(app)/subscriptions' },
     { icon: 'dollar-sign', label: t('home.payments'), href: '/(app)/payments' },
     { icon: 'help-circle', label: t('home.support'), href: '/(app)/support' },
