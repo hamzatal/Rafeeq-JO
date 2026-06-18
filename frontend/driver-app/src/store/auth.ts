@@ -47,13 +47,15 @@ export const useAuth = create<AuthState>((set, get) => {
         set({ status: 'unauthenticated' });
         return;
       }
+      // Optimistic: trust the stored token so startup is never blocked by the
+      // network; validate in the background (401 → logout, network error → stay in).
+      set({ status: 'authenticated' });
       try {
         const user = await api.auth.me();
         set({ user, status: 'authenticated' });
         await get().refreshDriver();
       } catch {
-        await tokenStorage.clear();
-        set({ user: null, driver: null, status: 'unauthenticated' });
+        /* offline / transient — stay authenticated */
       }
     },
 

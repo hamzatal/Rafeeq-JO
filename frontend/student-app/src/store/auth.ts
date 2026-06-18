@@ -43,12 +43,16 @@ export const useAuth = create<AuthState>((set) => {
         set({ status: 'unauthenticated' });
         return;
       }
+      // Optimistic: trust the stored token so startup is NEVER blocked by the
+      // network. Validate the session in the background — a 401 triggers the
+      // unauthorized handler (logout); a network error keeps the user in
+      // (offline-tolerant) instead of hanging on the splash.
+      set({ status: 'authenticated' });
       try {
         const user = await api.auth.me();
         set({ user, status: 'authenticated' });
       } catch {
-        await tokenStorage.clear();
-        set({ user: null, status: 'unauthenticated' });
+        /* offline / transient — stay authenticated; 401s are handled separately */
       }
     },
 
