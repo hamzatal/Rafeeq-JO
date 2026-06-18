@@ -17,6 +17,7 @@ Route::prefix('v1/auth')->group(function () {
         Route::post('request-otp', [AuthController::class, 'requestOtp']);
         Route::post('resend-otp', [AuthController::class, 'resendOtp']);
         Route::post('login', [AuthController::class, 'login']);
+        Route::post('mfa/verify', [AuthController::class, 'verifyMfa']);
         Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
         Route::post('reset-password', [AuthController::class, 'resetPassword']);
     });
@@ -26,5 +27,10 @@ Route::prefix('v1/auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('logout-all', [AuthController::class, 'logoutAll']);
+
+        // Two-factor authentication management (staff/admin).
+        Route::post('mfa/setup', [AuthController::class, 'mfaSetup']);
+        Route::post('mfa/confirm', [AuthController::class, 'mfaConfirm']);
+        Route::post('mfa/disable', [AuthController::class, 'mfaDisable']);
     });
 });
