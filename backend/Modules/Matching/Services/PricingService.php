@@ -80,6 +80,29 @@ class PricingService
      *   expected_captain_earnings_fils:int, below_min_fill:bool
      * }
      */
+    /**
+     * Split a final per-seat fare into the platform commission and the captain's
+     * share. Single source of truth so billing never re-derives this inline.
+     *
+     * @return array{commission_fils:int, captain_share_fils:int}
+     */
+    public function splitCommission(int $fareFils): array
+    {
+        $fare = max(0, $fareFils);
+        $commission = intdiv($fare * $this->commissionPercent(), 100);
+
+        return [
+            'commission_fils' => $commission,
+            'captain_share_fils' => $fare - $commission,
+        ];
+    }
+
+    /** Captain's expected earnings (after commission) for a given fare and rider count. */
+    public function expectedCaptainEarnings(int $fareFils, int $riders): int
+    {
+        return $this->splitCommission($fareFils)['captain_share_fils'] * max(0, $riders);
+    }
+
     public function quote(?int $baseFareFils, bool $isExpress, int $riders, int $capacity): array
     {
         $base = $baseFareFils !== null && $baseFareFils > 0 ? $baseFareFils : $this->baseFareFils();
@@ -89,8 +112,9 @@ class PricingService
         // Surge applies to the base portion only (not the flat express fee).
         $fare = (int) round($base * $surge) + $express;
 
-        $commission = intdiv($fare * $this->commissionPercent(), 100);
-        $captainShare = $fare - $commission;
+        $split = $this->splitCommission($fare);
+        $commission = $split['commission_fils'];
+        $captainShare = $split['captain_share_fils'];
 
         $expectedTotal = $fare * max(1, $riders);
         $expectedCaptain = $captainShare * max(1, $riders);

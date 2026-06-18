@@ -50,4 +50,19 @@ class PricingServiceTest extends TestCase
 
         $this->assertSame(1000, $q['base_fare_fils']);
     }
+
+    public function test_split_commission_is_single_source_of_truth(): void
+    {
+        $split = $this->pricing()->splitCommission(2000);
+
+        $this->assertSame(300, $split['commission_fils']);   // 15%
+        $this->assertSame(1700, $split['captain_share_fils']);
+    }
+
+    public function test_expected_captain_earnings_scale_with_riders(): void
+    {
+        // captain share per seat = 850 (1000 fare, 15% commission)
+        $this->assertSame(2550, $this->pricing()->expectedCaptainEarnings(1000, 3));
+        $this->assertSame(0, $this->pricing()->expectedCaptainEarnings(1000, 0));
+    }
 }

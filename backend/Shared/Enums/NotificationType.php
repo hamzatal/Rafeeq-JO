@@ -13,6 +13,7 @@ enum NotificationType: string
     case PaymentUnderReview = 'payment_under_review';
     case SubscriptionActivated = 'subscription_activated';
     case WalletCredited = 'wallet_credited';
+    case WalletLowBalance = 'wallet_low_balance';
     case TripScheduled = 'trip_scheduled';
     case TripStarted = 'trip_started';
     case TripCancelled = 'trip_cancelled';
@@ -31,7 +32,7 @@ enum NotificationType: string
     {
         return match ($this) {
             self::PaymentApproved, self::PaymentRejected, self::PaymentUnderReview,
-            self::SubscriptionActivated, self::WalletCredited => 'payments',
+            self::SubscriptionActivated, self::WalletCredited, self::WalletLowBalance => 'payments',
             self::TripScheduled, self::TripStarted, self::TripCancelled,
             self::TripCompleted, self::RideMatched, self::RideOffer,
             self::BoardingConfirmed, self::DropoffConfirmed => 'trips',

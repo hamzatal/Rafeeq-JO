@@ -14,12 +14,21 @@ use Rafeeq\Shared\Enums\TripStatus;
 /**
  * Pooling engine: groups pending ride requests (same zone + university)
  * into car-sized pooled trips awaiting a captain to accept.
+ *
+ * Express (urgent) requests are matched with PRIORITY and separately from
+ * scheduled ones: they may form a private single-rider trip and always carry
+ * the express surcharge. Fares are computed by PricingService (base + express
+ * fee + bounded surge for under-filled cars) and persisted on the trip so the
+ * captain sees real expected earnings before accepting.
  */
 class MatchingService extends BaseService
 {
     private const SEAT_CAPACITY = 4; // private car
 
-    public function __construct(private readonly AuditLogger $audit) {}
+    public function __construct(
+        private readonly AuditLogger $audit,
+        private readonly PricingService $pricing,
+    ) {}
 
     /** Form pooled trips from all pending requests. Returns number of trips created. */
     public function formTrips(): int
@@ -27,15 +36,28 @@ class MatchingService extends BaseService
         $pending = RideRequest::query()
             ->where('status', RideRequestStatus::Pending->value)
             ->whereNotNull('zone_id')
+            ->orderByDesc('is_express') // express first (priority)
             ->orderBy('desired_time')
             ->get();
 
-        $groups = $pending->groupBy(fn (RideRequest $r) => $r->zone_id.'|'.$r->university_id);
-
         $created = 0;
-        foreach ($groups as $group) {
+
+        // Express requests get priority and are pooled only with other express
+        // riders in the same zone+university (a private single rider is allowed).
+        $express = $pending->where('is_express', true);
+        foreach ($express->groupBy(fn (RideRequest $r) => $r->zone_id.'|'.$r->university_id) as $group) {
             foreach ($group->chunk(self::SEAT_CAPACITY) as $chunk) {
-                $this->createPooledTrip($chunk->values());
+                $this->createPooledTrip($chunk->values(), true);
+                $created++;
+            }
+        }
+
+        // Scheduled requests pool normally; a chunk below min-fill still forms a
+        // trip but PricingService applies a (capped) surge to protect earnings.
+        $scheduled = $pending->where('is_express', false);
+        foreach ($scheduled->groupBy(fn (RideRequest $r) => $r->zone_id.'|'.$r->university_id) as $group) {
+            foreach ($group->chunk(self::SEAT_CAPACITY) as $chunk) {
+                $this->createPooledTrip($chunk->values(), false);
                 $created++;
             }
         }
@@ -44,21 +66,36 @@ class MatchingService extends BaseService
     }
 
     /** @param Collection<int, RideRequest> $requests */
-    private function createPooledTrip(Collection $requests): Trip
+    private function createPooledTrip(Collection $requests, bool $isExpress): Trip
     {
-        return $this->transaction(function () use ($requests) {
+        return $this->transaction(function () use ($requests, $isExpress) {
             $first = $requests->first();
+            $riders = $requests->count();
+
+            // Compute the real per-seat fare for this pooled car.
+            $quote = $this->pricing->quote(
+                baseFareFils: $this->pricing->baseFareFils(),
+                isExpress: $isExpress,
+                riders: $riders,
+                capacity: self::SEAT_CAPACITY,
+            );
 
             $trip = Trip::create([
                 'type' => 'pooled',
+                'is_express' => $isExpress,
                 'zone_id' => $first->zone_id,
                 'university_id' => $first->university_id,
-                'fare_fils' => (int) config('rafeeq.default_fare_fils', 1000),
+                'base_fare_fils' => $quote['base_fare_fils'],
+                'express_fee_fils' => $quote['express_fee_fils'],
+                'surge_multiplier' => $quote['surge_multiplier'],
+                'fare_fils' => $quote['fare_fils'],
                 'scheduled_at' => $first->desired_time,
                 'status' => TripStatus::PendingDriver,
                 'capacity' => self::SEAT_CAPACITY,
             ]);
 
+            $usedBoarding = [];
+            $usedDropoff = [];
             foreach ($requests->values() as $index => $request) {
                 $trip->passengers()->create([
                     'student_id' => $request->student_id,
@@ -67,8 +104,8 @@ class MatchingService extends BaseService
                     'pickup_lng' => $request->pickup_lng,
                     'pickup_order' => $index,
                     'status' => TripPassengerStatus::Booked,
-                    'boarding_code' => $this->code(),
-                    'dropoff_code' => $this->code(),
+                    'boarding_code' => $this->uniqueCode($usedBoarding),
+                    'dropoff_code' => $this->uniqueCode($usedDropoff),
                 ]);
 
                 $request->forceFill([
@@ -77,14 +114,31 @@ class MatchingService extends BaseService
                 ])->save();
             }
 
-            $this->audit->log('matching.trip_formed', auditable: $trip, changes: ['passengers' => $requests->count()]);
+            $this->audit->log('matching.trip_formed', auditable: $trip, changes: [
+                'passengers' => $riders,
+                'is_express' => $isExpress,
+                'fare_fils' => $quote['fare_fils'],
+                'surge_multiplier' => $quote['surge_multiplier'],
+            ]);
 
             return $trip;
         });
     }
 
-    private function code(): string
+    /**
+     * Draw a 4-digit code unique within the codes already assigned in this trip
+     * (passed by reference so boarding and drop-off codes never collide).
+     *
+     * @param array<int, string> $used
+     */
+    private function uniqueCode(array &$used): string
     {
-        return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        do {
+            $code = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        } while (in_array($code, $used, true));
+
+        $used[] = $code;
+
+        return $code;
     }
 }
