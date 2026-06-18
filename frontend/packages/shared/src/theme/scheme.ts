@@ -73,7 +73,11 @@ const neutralsDark = {
 /** Build a full semantic palette for a role + scheme. */
 export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   const accent = roleAccent[role];
-  const neutrals = scheme === 'dark' ? neutralsDark : neutralsLight;
+
+  // The captain (driver) app is a fixed dark navy HUD (Stitch captain screens),
+  // regardless of the device light/dark preference.
+  const isDriverHud = role === 'driver';
+  const neutrals = scheme === 'dark' || isDriverHud ? neutralsDark : neutralsLight;
 
   // In dark mode the navy primary would vanish on the navy canvas, so the
   // role's bright accent (gold for student, cyan for admin) becomes the action.
@@ -86,13 +90,15 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   }
   const primarySoft = navyPersona
     ? hexToRgba(accent.accent, scheme === 'dark' ? 0.18 : 0.12)
-    : role === 'guardian'
-      ? scheme === 'dark'
-        ? 'rgba(14,42,71,0.28)'
-        : 'rgba(14,42,71,0.10)'
-      : scheme === 'dark'
-        ? 'rgba(0,229,255,0.18)'
-        : 'rgba(0,184,204,0.12)';
+    : isDriverHud
+      ? hexToRgba(accent.accent, 0.18)
+      : role === 'guardian'
+        ? scheme === 'dark'
+          ? 'rgba(14,42,71,0.28)'
+          : 'rgba(14,42,71,0.10)'
+        : scheme === 'dark'
+          ? 'rgba(0,229,255,0.18)'
+          : 'rgba(0,184,204,0.12)';
 
   return {
     primary,
