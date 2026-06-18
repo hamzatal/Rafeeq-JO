@@ -6,6 +6,7 @@ enum UserType: string
 {
     case Student = 'student';
     case Driver = 'driver';
+    case Guardian = 'guardian';
     case Support = 'support';
     case Supervisor = 'supervisor';
     case Admin = 'admin';
@@ -15,6 +16,7 @@ enum UserType: string
         return match ($this) {
             self::Student => 'طالب',
             self::Driver => 'كابتن',
+            self::Guardian => 'ولي أمر',
             self::Support => 'دعم فني',
             self::Supervisor => 'مشرف دعم',
             self::Admin => 'إدارة',
