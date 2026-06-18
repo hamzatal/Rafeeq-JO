@@ -198,6 +198,14 @@ export const ENDPOINTS = {
     reportsFinancial: '/admin/reports/financial',
     zones: '/admin/zones',
     zone: (id: string) => `/admin/zones/${id}`,
+    disputes: '/admin/disputes',
+    dispute: (id: string) => `/admin/disputes/${id}`,
+    disputeInvestigate: '/admin/disputes/investigate',
+    disputeAssign: (id: string) => `/admin/disputes/${id}/assign`,
+    disputeResolve: (id: string) => `/admin/disputes/${id}/resolve`,
+    disputeDismiss: (id: string) => `/admin/disputes/${id}/dismiss`,
+    disputeFreeze: (id: string) => `/admin/disputes/${id}/freeze`,
+    disputeUnfreeze: (id: string) => `/admin/disputes/${id}/unfreeze`,
   },
 } as const;
 

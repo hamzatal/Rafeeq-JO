@@ -17,6 +17,7 @@ const LINKS = [
   { href: '/support', label: 'الدعم' },
   { href: '/complaints', label: 'الشكاوى' },
   { href: '/safety', label: 'مركز الأمان' },
+  { href: '/disputes', label: 'مركز النزاعات' },
   { href: '/security', label: 'الأمان (MFA)' },
 ];
 

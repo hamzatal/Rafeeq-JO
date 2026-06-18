@@ -685,3 +685,64 @@ export interface Zone {
   has_boundary: boolean;
   is_active: boolean;
 }
+
+
+/** A dispute / investigation case in the safety center. */
+export interface Dispute {
+  id: string;
+  subject: { id: string; name?: string; phone?: string; type?: string; status?: string };
+  trip_id: string | null;
+  type: string; // risk_threshold | collusion | ghost_trip | sos | manual
+  status: 'open' | 'investigating' | 'resolved' | 'dismissed';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity_label: string;
+  risk_score: number | null;
+  summary: string | null;
+  assigned_to: string | null;
+  action_taken: string | null;
+  resolution: string | null;
+  resolved_at: string | null;
+  created_at: string | null;
+}
+
+export interface RiskAssessment {
+  score: number;
+  level: 'low' | 'medium' | 'high' | 'critical';
+  factors: Array<{ type: string; label: string; weight: number }>;
+  patterns?: Array<{ student_id: string; cancels: number }>;
+}
+
+export interface DisputeEvidence {
+  risk: RiskAssessment;
+  risk_flags: Array<{
+    id: string;
+    type: string;
+    severity: string;
+    severity_label: string;
+    description: string | null;
+    meta: Record<string, unknown> | null;
+    resolved: boolean;
+    created_at: string | null;
+  }>;
+  cancellations: Array<{
+    id: string;
+    trip_id: string | null;
+    reason: string | null;
+    passengers_count: number;
+    lat: number | null;
+    lng: number | null;
+    created_at: string | null;
+  }>;
+  ghost_watches: Array<{ id: string; trip_id: string; resolved: boolean; expires_at: string | null }>;
+}
+
+export interface DisputeDetail {
+  dispute: Dispute;
+  evidence: DisputeEvidence;
+}
+
+export interface InvestigateResult {
+  assessment: RiskAssessment;
+  dispute: Dispute | null;
+  frozen: boolean;
+}
