@@ -372,6 +372,17 @@ export const ar = {
     revoked: 'تم إلغاء الصلاحية.',
     selfError: 'لا يمكنك إضافة نفسك.',
   },
+  chat: {
+    title: 'المحادثة',
+    conversations: 'المحادثات',
+    placeholder: 'اكتب رسالة...',
+    send: 'إرسال',
+    empty: 'لا توجد رسائل بعد. ابدأ المحادثة.',
+    open: 'محادثة',
+    withCaptain: 'محادثة مع الكابتن',
+    withStudent: 'محادثة مع الطالب',
+    loadError: 'تعذّر فتح المحادثة.',
+  },
   validation: {
     required: 'هذا الحقل مطلوب',
     invalidPhone: 'رقم الهاتف غير صالح',

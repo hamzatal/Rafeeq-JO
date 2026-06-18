@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { Trip, TripPassenger } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Input } from '../../../src/components/Input';
 import { Button } from '../../../src/components/Button';
 import { Banner } from '../../../src/components/Banner';
 import { Card, SectionTitle, Badge, EmptyState } from '../../../src/components/ui';
+import { Icon } from '../../../src/components/Icon';
 import { useI18n } from '../../../src/i18n';
 import { api } from '../../../src/lib/api';
 import { useTheme, type AppTheme } from '../../../src/theme';
@@ -15,6 +16,7 @@ import { useTheme, type AppTheme } from '../../../src/theme';
 export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, locale } = useI18n();
+  const router = useRouter();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -100,7 +102,17 @@ export default function TripDetail() {
           passengers.map((p) => (
             <View key={p.id} style={s.pax}>
               <Text style={s.paxId}>{t('driver.passengerLabel')} #{p.id.slice(0, 6)}</Text>
-              <Badge label={p.status_label} tone={p.status === 'onboard' || p.status === 'dropped' ? 'success' : 'muted'} />
+              <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 10 }}>
+                <Badge label={p.status_label} tone={p.status === 'onboard' || p.status === 'dropped' ? 'success' : 'muted'} />
+                {p.status !== 'cancelled' && (
+                  <Pressable
+                    onPress={() => router.push({ pathname: '/(app)/chat', params: { tripId: id, studentUserId: p.student_id, title: t('chat.withStudent') } })}
+                    hitSlop={8}
+                  >
+                    <Icon name="message-circle" size={20} color={theme.colors.primary} />
+                  </Pressable>
+                )}
+              </View>
             </View>
           ))
         )}
