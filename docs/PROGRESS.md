@@ -225,5 +225,6 @@
 | 113 | feat(design): student component library — Icon (Feather) + Card/Header/Badge/EmptyState/ServiceTile/StatCard/ListRow + theme shadow |
 | 114 | feat(student-app): bottom tab navigation + fully redesigned Home (hero CTA + balance + icon service grid) |
 | 115 | docs: Design System v2 guide (docs/DESIGN.md) + progress update |
+| 116 | feat(student-app): redesign Account/Settings (profile + quick links) + Notifications + Wallet with DS v2 components |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
