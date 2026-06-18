@@ -160,7 +160,7 @@
 | **student-app** (Expo) | كامل: مصادقة، رئيسية، محفظة/دفع، اشتراكات، رحلات + تتبع حيّ، طلب باب-لباب، محادثة، عناوين، أولياء أمور، دعم، مكافآت، طرود، مفقودات، تبادل، تقييم، إعدادات (ثيم + ar/en) |
 | **driver-app** (Expo) | كامل: مصادقة، وثائق، مركبة، رحلات + تفاصيل (OTP صعود/إنزال)، عروض، أرباح + سحب، محادثة، إعدادات |
 | **guardian-app** (Expo) | بوابة ولي الأمر: دخول OTP، تتبع حيّ + خريطة، سجل وصول، SOS، اتصال بالكابتن |
-| **admin-dashboard** (Next.js) | دخول الموظفين (+ تحدّي MFA)، مراجعة/اعتماد الكباتن، المستخدمون، طابور الدفع، **سحوبات الكباتن**، **التقارير المالية**, **إدارة المناطق + محرّر Geofence**, **الأمان/MFA**، **مركز النزاعات**، مراقب الطلبات، الدعم/الشكاوى، مركز سلامة AI |
+| **admin-dashboard** (Next.js) | **مُعاد التصميم بالكامل وفق Stitch Enterprise (Navy `#001F3F` + Cyan `#00E5FF`، شريط جانبي كامل الارتفاع، صفحة كاملة العرض)**: مركز قيادة رئيسي (KPIs + شارت العمولة حسب المنطقة + نزاعات مفتوحة)، دخول الموظفين (+ MFA)، اعتماد الكباتن، المستخدمون، طابور الدفع، **سحوبات**، **التقارير المالية**، **إدارة المناطق + Geofence**، **الأمان/MFA**، **مركز النزاعات**، الدعم/الشكاوى، مركز سلامة AI. مُتحقَّق بـ `next build`. |
 
 > الحزم المشتركة: `@rafeeq/shared` (أنواع + ENDPOINTS + ثيم + i18n) و`@rafeeq/api-client` (**27 عميل**: auth, profile, wallet, payments, transport, driverTrips, catalog, notifications, ratings, rideRequests, support, complaints, parcels, rewards, lostFound, exchange, assistant, guardian, chat, payouts, addresses, reports, **zones**, admin, …).
 

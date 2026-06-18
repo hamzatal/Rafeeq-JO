@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-168 |
+| آخر Commit | RFQ-170 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -290,5 +290,7 @@
 | 166 | chore(admin): patch Next.js security advisory (14.2.35) + enable ESLint (clean) |
 | 167 | docs: CI parity verified locally + security posture note |
 | 168 | ci: verify migrations+seed on PostgreSQL 16 + guardian typecheck + blocking admin lint |
+| 169 | feat(admin): rebuild dashboard to Stitch enterprise design (Navy+Cyan Command Center, full-page, KPI home) |
+| 170 | docs: admin dashboard redesign (Stitch enterprise) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
