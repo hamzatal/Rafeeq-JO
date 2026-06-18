@@ -23,6 +23,10 @@
   },
   "packageManager": "npm@10.0.0",
   "license": "UNLICENSED",
+  "overrides": {
+    "@types/react": "18.2.79",
+    "@types/react-dom": "18.3.7"
+  },
   "dependencies": {
     "react-dom": "18.2.0",
     "react-native-web": "~0.19.10"
