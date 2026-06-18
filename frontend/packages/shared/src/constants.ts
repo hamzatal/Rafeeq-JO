@@ -26,6 +26,9 @@ export const ENDPOINTS = {
     profile: '/student/profile',
     guardians: '/student/guardians',
     guardian: (linkId: string) => `/student/guardians/${linkId}`,
+    addresses: '/student/addresses',
+    address: (id: string) => `/student/addresses/${id}`,
+    addressDefault: (id: string) => `/student/addresses/${id}/default`,
   },
   guardian: {
     children: '/guardian/children',
@@ -75,6 +78,13 @@ export const ENDPOINTS = {
     documents: '/driver/documents',
     submit: '/driver/submit',
     vehicles: '/driver/vehicles',
+    performance: '/driver/performance',
+    withdrawals: '/driver/wallet/withdrawals',
+  },
+  adminWithdrawals: {
+    list: '/admin/withdrawals',
+    approve: (id: string) => `/admin/withdrawals/${id}/approve`,
+    reject: (id: string) => `/admin/withdrawals/${id}/reject`,
   },
   driverOffers: {
     list: '/driver/trips/offers',
@@ -180,6 +190,7 @@ export const ENDPOINTS = {
     rideRequests: '/admin/ride-requests',
     matchingRun: '/admin/matching/run',
     walletCredit: '/admin/wallets/credit',
+    reportsFinancial: '/admin/reports/financial',
   },
 } as const;
 

@@ -169,6 +169,20 @@ class TripService extends BaseService
             );
         }
 
+        // Reward the captain for completing the trip — feeds the loyalty tier
+        // ladder (Bronze→Silver→Gold). Never breaks trip completion.
+        try {
+            $trip->loadMissing('driver');
+            $captainUser = $trip->driver ? User::find($trip->driver->user_id) : null;
+            $completed = $trip->passengers()->where('status', TripPassengerStatus::Dropped->value)->count();
+            if ($captainUser && $completed > 0) {
+                app(\Rafeeq\Modules\Rewards\Services\RewardService::class)
+                    ->earn($captainUser, $completed * 10, 'trip_completed', $trip->id);
+            }
+        } catch (\Throwable $e) {
+            // swallow — rewards must never block trip completion
+        }
+
         return $trip;
     }
 

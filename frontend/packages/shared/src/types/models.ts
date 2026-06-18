@@ -586,3 +586,68 @@ export interface ChatMessage {
   read: boolean;
   created_at: string | null;
 }
+
+
+/** ── Captain payouts & performance ────────────────────────────────── */
+
+export interface PayoutRequest {
+  id: string;
+  amount_fils: number;
+  method: string;
+  destination: string | null;
+  status: 'pending' | 'paid' | 'rejected';
+  note: string | null;
+  admin_note: string | null;
+  processed_at: string | null;
+  created_at: string | null;
+  captain?: { id: string; name: string; phone: string };
+}
+
+export interface DriverPerformance {
+  tier: string;
+  tier_label: string;
+  points: number;
+  lifetime_points: number;
+  next_tier: string | null;
+  next_tier_label: string | null;
+  points_to_next: number;
+  progress_percent: number;
+  available_earnings_fils: number;
+  rating: number;
+  total_trips: number;
+}
+
+
+/** ── Saved addresses (student) ────────────────────────────────────── */
+
+export interface SavedAddress {
+  id: string;
+  label: 'home' | 'university' | 'work' | 'other' | string;
+  title: string | null;
+  address_text: string;
+  lat: number | null;
+  lng: number | null;
+  is_default: boolean;
+  created_at: string | null;
+}
+
+
+export interface FinancialReportZone {
+  zone_id: string | null;
+  rides_count: number;
+  commission_fils: number;
+  gross_fare_fils: number;
+}
+
+export interface FinancialReport {
+  period: { from: string; to: string };
+  zone_id: string | null;
+  rides_count: number;
+  gross_fare_fils: number;
+  commission_fils: number;
+  captain_earnings_fils: number;
+  payouts_paid_fils: number;
+  topups_fils: number;
+  subscription_revenue_fils: number;
+  by_zone: FinancialReportZone[];
+}
