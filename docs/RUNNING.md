@@ -48,27 +48,36 @@ echo "NEXT_PUBLIC_API_URL=http://192.168.1.50:8000" > frontend/admin-dashboard/.
 
 بدل رسائل SMS المدفوعة، يمكن إرسال رمز الـ OTP عبر **واتساب** باستخدام بوابة [OpenWA](https://github.com/rmyndharis/OpenWA) المجانية المفتوحة المصدر (تُستضاف ذاتياً). الدمج جاهز في الباك إند عبر تجريد `SmsGateway` — تشغّل OpenWA كخدمة منفصلة فقط.
 
-**خطوات الإعداد:**
-```bash
-# 1) شغّل بوابة OpenWA (Docker) — تعمل على المنفذ 2785
-git clone https://github.com/rmyndharis/OpenWA && cd OpenWA
-cp .env.example .env          # ولّد API key داخلها
-docker compose up -d
-# لوحة التحكم + Swagger: http://localhost:2785/api/docs
+**مهم:** OpenWA تطبيق مستقلّ — **انسخه في مجلد منفصل بجانب مشروع رفيق، وليس داخله** (حتى لا يلتبس مع git/docker الخاصّين برفيق).
 
-# 2) أنشئ جلسة وامسح QR برقم واتساب رفيق الرسمي
-curl -X POST http://localhost:2785/api/sessions -H "X-API-Key: KEY" -d '{"name":"rafeeq"}'
+```bash
+# 1) من المجلد الأب (بجانب Rafeeq-JO وليس داخله):
+cd ..                                   # تطلع خطوة لخارج مجلد المشروع
+git clone https://github.com/rmyndharis/OpenWA
+cd OpenWA
+cp .env.example .env
+#   عدّل .env:  API_MASTER_KEY=<مفتاح-عشوائي-قوي>   و   API_PORT=2785
+docker compose up -d                    # يبني من المصدر أول مرة (دقائق) — يعمل على 2785
+# اللوحة + Swagger: http://localhost:2785/api/docs
+
+# التخطيط النهائي:
+#   ~/rafeeq/Rafeeq-JO/   ← مشروعك
+#   ~/rafeeq/OpenWA/      ← البوابة (منفصلة)
+
+# 2) أنشئ جلسة وامسح QR برقم واتساب رفيق الرسمي (KEY = نفس API_MASTER_KEY)
+curl -X POST http://localhost:2785/api/sessions       -H "X-API-Key: KEY" -H "Content-Type: application/json" -d '{"name":"rafeeq"}'
 curl -X POST http://localhost:2785/api/sessions/rafeeq/start -H "X-API-Key: KEY"
-curl http://localhost:2785/api/sessions/rafeeq/qr -H "X-API-Key: KEY"   # امسح الـ QR
+curl http://localhost:2785/api/sessions/rafeeq/qr     -H "X-API-Key: KEY"   # امسح الـ QR
 ```
 
-**3) فعّل واتساب في `backend/.env`:**
+**3) فعّل واتساب في `backend/.env` تبع رفيق:**
 ```env
 SMS_DRIVER=whatsapp
 WHATSAPP_GATEWAY_URL=http://localhost:2785
-WHATSAPP_API_KEY=نفس-المفتاح
+WHATSAPP_API_KEY=نفس-قيمة-API_MASTER_KEY
 WHATSAPP_SESSION=rafeeq
 ```
+> إذا OpenWA على سيرفر آخر، بدّل `localhost` بعنوان ذلك السيرفر (مثل `http://10.0.0.5:2785`).
 
 بعدها كل رمز OTP يُرسَل فعلياً عبر واتساب من الرقم اللي مسحت QR فيه، باسم رفيق. (الباك إند يحوّل الرقم تلقائياً لصيغة `9627XXXXXXXX@c.us`.)
 
