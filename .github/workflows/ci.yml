@@ -55,6 +55,59 @@ jobs:
           QUEUE_CONNECTION: sync
         run: php artisan test
 
+  database:
+    name: Database (PostgreSQL migrations + seed)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: rafeeq
+          POSTGRES_USER: rafeeq
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rafeeq"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo, pgsql, pdo_pgsql
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Migrate + seed on PostgreSQL
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: rafeeq
+          DB_USERNAME: rafeeq
+          DB_PASSWORD: secret
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+        run: |
+          php artisan migrate:fresh --force
+          php artisan db:seed --force
+
   frontend:
     name: Frontend (TypeScript)
     runs-on: ubuntu-latest
@@ -77,7 +130,8 @@ jobs:
         run: |
           npm run typecheck --workspace=student-app
           npm run typecheck --workspace=driver-app
+          npm run typecheck --workspace=guardian-app
           npm run typecheck --workspace=admin-dashboard
 
       - name: Lint admin dashboard
-        run: npm run lint --workspace=admin-dashboard || true
+        run: npm run lint --workspace=admin-dashboard
