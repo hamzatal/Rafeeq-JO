@@ -22,6 +22,11 @@ class ZoneRequest extends FormRequest
             'center_lat' => [$required, 'numeric', 'between:-90,90'],
             'center_lng' => [$required, 'numeric', 'between:-180,180'],
             'radius_km' => ['nullable', 'numeric', 'between:0.5,30'],
+            // Optional polygon geofence: array of [lat, lng] vertices (min 3).
+            'boundary' => ['nullable', 'array', 'min:3'],
+            'boundary.*' => ['array', 'size:2'],
+            'boundary.*.0' => ['required_with:boundary', 'numeric', 'between:-90,90'],
+            'boundary.*.1' => ['required_with:boundary', 'numeric', 'between:-180,180'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
