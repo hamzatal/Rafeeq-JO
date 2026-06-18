@@ -215,7 +215,8 @@
 
 - **CI (`.github/workflows/ci.yml`) أخضر — مُتحقَّق محلياً بنفس الخطوات**:
   - الباك: `php -l` على كل المصادر (نظيف) + `route:list` smoke + **75 اختبار PHPUnit ناجح**.
-  - الفرونت: `npm install` (عادي) ينجح + `tsc --noEmit` لكل الحِزم (الست خضراء) + **ESLint للـ admin: "No warnings or errors"**.
+  - **قاعدة البيانات**: وظيفة CI مستقلّة تشغّل `migrate:fresh` + `db:seed` على **PostgreSQL 16** (تكشف مشاكل خاصة بـ Postgres لا يكشفها SQLite). ✅ **مُتحقَّق محلياً على PostgreSQL 15**: كل الـ 57 migration + 4 seeders (أدوار/صلاحيات، أدمن، 4 جامعات، 6 مناطق) تشتغل خضراء.
+  - الفرونت: `npm install` (عادي) ينجح + `tsc --noEmit` لكل الحِزم (الست خضراء، بما فيها guardian-app) + **ESLint للـ admin إلزامي: "No warnings or errors"**.
 - **الأمان**:
   - ✅ تم ترقية **Next.js إلى 14.2.35** لإغلاق الإشعار الأمني المنشور (لوحة الإدارة هي الويب المنشور).
   - ℹ️ تبقّى تحذيرات `npm audit` من **أدوات Expo/React Native وقت البناء فقط** (uuid/xcode/@expo/bunyan) — ليست في كود الإنتاج المُرسَل للمستخدم، ومعالجتها تتطلب ترقية Expo SDK كاملة (مؤجّلة لتفادي كسر تطبيقات الموبايل). **لم يُشغّل `npm audit fix --force`** عمداً.
