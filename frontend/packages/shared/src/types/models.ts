@@ -20,6 +20,7 @@ export interface User {
   locale: 'ar' | 'en';
   avatar_url: string | null;
   phone_verified: boolean;
+  mfa_enabled?: boolean;
   roles?: string[];
   created_at: string | null;
 }
@@ -650,4 +651,37 @@ export interface FinancialReport {
   topups_fils: number;
   subscription_revenue_fils: number;
   by_zone: FinancialReportZone[];
+}
+
+
+/** Begin-setup response for two-factor authentication enrollment. */
+export interface MfaSetupResult {
+  secret: string;
+  otpauth_uri: string;
+}
+
+/** Confirm-setup response: one-time recovery codes (shown once). */
+export interface MfaConfirmResult {
+  recovery_codes: string[];
+}
+
+/** Login response when the account requires a second factor. */
+export interface MfaChallenge {
+  mfa_required: true;
+  mfa_token: string;
+}
+
+/** A service zone, optionally bounded by a polygon geofence. */
+export interface Zone {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  city: string | null;
+  center_lat: number;
+  center_lng: number;
+  radius_km: number;
+  /** Polygon vertices as [lat, lng] pairs (null when radius-only). */
+  boundary: Array<[number, number]> | null;
+  has_boundary: boolean;
+  is_active: boolean;
 }

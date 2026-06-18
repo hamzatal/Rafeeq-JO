@@ -24,6 +24,7 @@ import { ChatApi } from './chat';
 import { PayoutApi } from './payouts';
 import { AddressApi } from './addresses';
 import { FinancialReportApi } from './reports';
+import { ZonesApi } from './zones';
 
 export * from './client';
 export * from './auth';
@@ -50,6 +51,7 @@ export * from './chat';
 export * from './payouts';
 export * from './addresses';
 export * from './reports';
+export * from './zones';
 
 /** Aggregated API surface. Extend with more domains as modules land. */
 export class RafeeqApi {
@@ -79,6 +81,7 @@ export class RafeeqApi {
   readonly payouts: PayoutApi;
   readonly addresses: AddressApi;
   readonly reports: FinancialReportApi;
+  readonly zones: ZonesApi;
 
   constructor(options: RafeeqClientOptions) {
     this.http = createHttp(options);
@@ -107,6 +110,7 @@ export class RafeeqApi {
     this.payouts = new PayoutApi(this.http);
     this.addresses = new AddressApi(this.http);
     this.reports = new FinancialReportApi(this.http);
+    this.zones = new ZonesApi(this.http);
   }
 }
 

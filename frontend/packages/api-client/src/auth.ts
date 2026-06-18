@@ -4,6 +4,8 @@ import {
   type ApiSuccess,
   type AuthResult,
   type LoginPayload,
+  type MfaSetupResult,
+  type MfaConfirmResult,
   type RegisterPayload,
   type RegisterResult,
   type OtpRequestResult,
@@ -59,6 +61,31 @@ export class AuthApi {
   async me(): Promise<User> {
     const { data } = await this.http.get<ApiSuccess<User>>(ENDPOINTS.auth.me);
     return unwrap(data);
+  }
+
+  /* ── Two-factor authentication (staff/admin) ─────────────────────── */
+
+  /** Complete an MFA login challenge with a TOTP/recovery code → token. */
+  async verifyMfa(payload: { mfa_token: string; code: string; device_name?: string }): Promise<AuthResult> {
+    const { data } = await this.http.post<ApiSuccess<AuthResult>>(ENDPOINTS.auth.verifyMfa, payload);
+    return unwrap(data);
+  }
+
+  /** Begin 2FA enrollment: returns the secret + otpauth URI for the QR code. */
+  async mfaSetup(): Promise<MfaSetupResult> {
+    const { data } = await this.http.post<ApiSuccess<MfaSetupResult>>(ENDPOINTS.auth.mfaSetup);
+    return unwrap(data);
+  }
+
+  /** Confirm enrollment with the first code → returns recovery codes. */
+  async mfaConfirm(code: string): Promise<MfaConfirmResult> {
+    const { data } = await this.http.post<ApiSuccess<MfaConfirmResult>>(ENDPOINTS.auth.mfaConfirm, { code });
+    return unwrap(data);
+  }
+
+  /** Disable 2FA after re-verifying a current TOTP/recovery code. */
+  async mfaDisable(code: string): Promise<void> {
+    await this.http.post(ENDPOINTS.auth.mfaDisable, { code });
   }
 
   async logout(): Promise<void> {
