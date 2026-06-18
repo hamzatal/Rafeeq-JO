@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-137 |
+| آخر Commit | RFQ-138 |
 | نسبة الإنجاز | ~95% · AI + خرائط حيّة مبنية |
 | المرحلة الحالية | **AI + الخرائط جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + توسيع الاختبارات + تلميع** |
 
@@ -99,6 +99,7 @@
 - ✅ **حجز الرصيد (Wallet Hold)** (RFQ-135): عمود `held_fils` + جدول `wallet_holds` (active/captured/released). `WalletService`: `hold/capture/release/availableBalance/findActiveHold` (مع قفل صفوف وذرّية). عند **بدء الرحلة** يُحجز السعر لكل راكب يدفع من المحفظة (المتاح = الرصيد − المحجوز)؛ عند الصعود يُلتقط الحجز (خصم فعلي + دفع الكابتن)؛ عند الإلغاء يُحرَّر. إشعار `WalletLowBalance` عند نقص الرصيد. مغطّى باختبارات (6 حالات).
 - ✅ **كشف الاحتيال عبر GPS** (RFQ-136): جداول `driver_locations` + `ghost_trip_watches`. `GpsFraudService` (haversine): (1) **عدم تطابق الموقع عند الصعود** — تأكيد صعود والكابتن بعيد عن نقطة التقاط الراكب يرفع `boarding_location_mismatch`؛ (2) **الرحلة الوهمية** — إلغاء الكابتن لرحلة فيها ركّاب يفتح "مراقبة" زمنية لنقاط الالتقاط، وإذا اقترب الكابتن منها لاحقاً عبر نبضات موقعه يُرفع `ghost_trip_detected` (خطورة عالية). endpoint `POST /driver/location`. مغطّى باختبارات (5 حالات).
 - ✅ **بوابة ولي الأمر (Guardian Portal)** (RFQ-137): وحدة جديدة `Modules/Guardians` + نوع مستخدم `guardian` + دور `guardian`. الطالب يدير أولياء أمره (إضافة برقم الهاتف/العلاقة + إلغاء) — الحساب يُنشأ تلقائياً ويُسجَّل دخوله بالهاتف+OTP. ولي الأمر يرى: **أبناءه المرتبطين**، **تتبع الرحلة الحيّ** (الكابتن/المركبة/آخر موقع GPS/نسبة الإنجاز)، **سجل الوصول الآمن** (انطلاق/وصول)، **اتصال مُقنّع بالكابتن**، و**زر طوارئ SOS بالنيابة** (يمرّ عبر `SosService`). تنبيهات **الانطلاق/الوصول** مربوطة بأمان داخل تدفق الرحلة (لا تُعطّل المعاملة أبداً). حماية صلاحيات: ولي الأمر لا يرى إلا طلابه المرتبطين (403 لغيرهم). مغطّى بـ **7 اختبارات Feature**. ملاحظة: عمود `users.type` خُفِّف من DB enum إلى string لإضافة الأنواع بأمان عبر PostgreSQL/SQLite.
+- ✅ **واجهة بوابة ولي الأمر (Frontend)** (RFQ-138): **تطبيق Expo جديد `guardian-app`** (دخول بالهاتف+OTP بلا كلمة سر، ثيم Navy واقٍ): شاشة البوابة فيها مُحدِّد الطالب + بطاقة التتبع الحيّ مع خريطة OSM + شريط نسبة الإنجاز + بيانات الكابتن والمركبة + سجل الوصول الآمن (انطلاق/وصول) + **زر SOS بالضغط المطوّل 3 ثوانٍ** + اتصال بالكابتن. + شاشة **"إدارة أولياء الأمور"** في تطبيق الطالب (إضافة/قائمة/إلغاء). طبقة مشتركة: أنواع + endpoints + ثيم guardian + i18n (ar/en) + `GuardianApi`/`StudentGuardiansApi`. ⚠️ الفرونت غير مُتحقَّق بناءً هنا (node_modules غير منصّبة + baseline الـ tsc للحزمة المشتركة غير نظيف أصلاً) — يلزم تحقّق عبر CI/محلياً.
 - ⏳ التتبّع الحيّ (Reverb) عميل Echo + الخرائط (دليل لاحقاً) + Express dynamic pricing + min-fill
 - ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
@@ -250,5 +251,6 @@
 | 135 | feat(wallet): pre-authorisation balance holds — held_fils + wallet_holds, hold/capture/release, hold fare on trip start, capture on boarding, release on cancel |
 | 136 | feat(safety): GPS anti-fraud — ghost-trip detection (cancel watch + captain location ping) + boarding location-mismatch flag + driver location endpoint |
 | 137 | feat(guardians): Guardian (parent) portal — guardian↔student links (student-managed) + live trip tracking (captain/vehicle/location/progress) + safe-arrival log + masked captain contact + SOS relay + boarding/drop-off guardian alerts wired into trip flow + 7 feature tests |
+| 138 | feat(guardian-app+student): Guardian portal frontend — new Expo guardian-app (OTP login, portal: child selector, live tracking + map, safe-arrival log, hold-to-SOS, call captain) + student "Manage Guardians" screen + shared types/endpoints/theme/i18n + GuardianApi |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

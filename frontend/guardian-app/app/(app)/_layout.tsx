@@ -32,23 +32,9 @@ export default function AppLayout() {
         tabBarLabelStyle: { fontFamily: theme.fontFamily.medium, fontSize: 11 },
       }}
     >
-      <Tabs.Screen name="home" options={{ title: t('home.title'), tabBarIcon: tab('home') }} />
-      <Tabs.Screen name="trips" options={{ title: t('home.trips'), tabBarIcon: tab('navigation') }} />
-      <Tabs.Screen name="wallet" options={{ title: t('home.wallet'), tabBarIcon: tab('credit-card') }} />
+      <Tabs.Screen name="portal" options={{ title: t('guardian.portalTitle'), tabBarIcon: tab('shield') }} />
       <Tabs.Screen name="notifications" options={{ title: t('home.notifications'), tabBarIcon: tab('bell') }} />
       <Tabs.Screen name="settings" options={{ title: t('settings.title'), tabBarIcon: tab('user') }} />
-
-      {/* Secondary screens — reachable via navigation, hidden from the tab bar */}
-      <Tabs.Screen name="subscriptions" options={{ href: null }} />
-      <Tabs.Screen name="guardians" options={{ href: null }} />
-      <Tabs.Screen name="payments" options={{ href: null }} />
-      <Tabs.Screen name="ride-request" options={{ href: null }} />
-      <Tabs.Screen name="parcels" options={{ href: null }} />
-      <Tabs.Screen name="lost-found" options={{ href: null }} />
-      <Tabs.Screen name="rewards" options={{ href: null }} />
-      <Tabs.Screen name="exchange" options={{ href: null }} />
-      <Tabs.Screen name="support" options={{ href: null }} />
-      <Tabs.Screen name="assistant" options={{ href: null }} />
     </Tabs>
   );
 }
