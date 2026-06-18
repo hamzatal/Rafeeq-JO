@@ -18,6 +18,7 @@ import { ParcelsApi } from './parcels';
 import { RewardsApi } from './rewards';
 import { LostFoundApi } from './lostFound';
 import { ExchangeApi } from './exchange';
+import { AssistantApi } from './assistant';
 
 export * from './client';
 export * from './auth';
@@ -38,6 +39,7 @@ export * from './parcels';
 export * from './rewards';
 export * from './lostFound';
 export * from './exchange';
+export * from './assistant';
 
 /** Aggregated API surface. Extend with more domains as modules land. */
 export class RafeeqApi {
@@ -60,6 +62,7 @@ export class RafeeqApi {
   readonly rewards: RewardsApi;
   readonly lostFound: LostFoundApi;
   readonly exchange: ExchangeApi;
+  readonly assistant: AssistantApi;
 
   constructor(options: RafeeqClientOptions) {
     this.http = createHttp(options);
@@ -81,6 +84,7 @@ export class RafeeqApi {
     this.rewards = new RewardsApi(this.http);
     this.lostFound = new LostFoundApi(this.http);
     this.exchange = new ExchangeApi(this.http);
+    this.assistant = new AssistantApi(this.http);
   }
 }
 

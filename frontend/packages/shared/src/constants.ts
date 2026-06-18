@@ -144,6 +144,13 @@ export const ENDPOINTS = {
     mine: '/ride-requests/mine',
     cancel: (id: string) => `/ride-requests/${id}/cancel`,
   },
+  assistant: {
+    conversations: '/assistant/conversations',
+    messages: (id: string) => `/assistant/conversations/${id}`,
+    send: '/assistant/send',
+    adminRisks: '/admin/ai/risks',
+    adminRisk: (userId: string) => `/admin/ai/risks/${userId}`,
+  },
   admin: {
     users: '/admin/users',
     drivers: '/admin/drivers',

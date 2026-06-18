@@ -308,6 +308,13 @@ export const en: Translations = {
     listed: 'Item listed.',
     free: 'Free/Swap',
   },
+  assistant: {
+    title: 'Rafeeq Assistant',
+    placeholder: 'Type your question...',
+    send: 'Send',
+    empty: 'Ask Rafeeq Assistant about subscriptions, rides, wallet, parcels and more.',
+    aiOff: 'AI assistant is off — replies are guidance only.',
+  },
   validation: {
     required: 'This field is required',
     invalidPhone: 'Invalid phone number',

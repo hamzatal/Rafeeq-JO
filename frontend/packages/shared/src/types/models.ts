@@ -460,3 +460,33 @@ export interface ExchangeItem {
   status: ExchangeStatus;
   created_at: string | null;
 }
+
+
+
+// ── AI (Phase 5) ─────────────────────────────────────────────────────
+export interface AiConversation {
+  id: string;
+  title: string | null;
+  last_message_at: string | null;
+}
+
+export interface AiMessage {
+  id: string;
+  conversation_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  created_at: string | null;
+}
+
+export interface AssistantReply {
+  conversation_id: string;
+  message: AiMessage;
+  ai: boolean;
+}
+
+export interface RiskScore {
+  user_id?: string;
+  score: number;
+  level: 'low' | 'medium' | 'high' | 'critical';
+  factors: { type: string; label: string; weight: number }[];
+}
