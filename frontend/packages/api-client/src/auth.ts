@@ -4,6 +4,7 @@ import {
   type ApiSuccess,
   type AuthResult,
   type LoginPayload,
+  type MfaChallenge,
   type MfaSetupResult,
   type MfaConfirmResult,
   type RegisterPayload,
@@ -50,8 +51,12 @@ export class AuthApi {
     return unwrap(data);
   }
 
-  async login(payload: LoginPayload): Promise<AuthResult> {
-    const { data } = await this.http.post<ApiSuccess<AuthResult>>(
+  /**
+   * Password login. Returns either a full auth result, or — when the account
+   * has 2FA enabled — an MFA challenge to be completed via `verifyMfa`.
+   */
+  async login(payload: LoginPayload): Promise<AuthResult | MfaChallenge> {
+    const { data } = await this.http.post<ApiSuccess<AuthResult | MfaChallenge>>(
       ENDPOINTS.auth.login,
       payload,
     );

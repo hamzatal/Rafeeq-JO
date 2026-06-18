@@ -26,6 +26,8 @@ export interface AuthResult {
   user: User;
   token: string;
   token_type: 'Bearer';
+  /** Discriminator: a fully-authenticated result never requires MFA. */
+  mfa_required?: false;
 }
 
 export interface RegisterResult {

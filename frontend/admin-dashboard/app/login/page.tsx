@@ -7,10 +7,12 @@ import { RafeeqApiError } from '@rafeeq/api-client';
 import { useAuth } from '../../src/lib/auth';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, verifyMfa } = useAuth();
   const router = useRouter();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [step, setStep] = useState<'credentials' | 'mfa'>('credentials');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,10 +25,30 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      await login(normalizeJordanPhone(phone)!, password);
-      router.replace('/');
+      const result = await login(normalizeJordanPhone(phone)!, password);
+      if (result === 'mfa') {
+        setStep('mfa');
+      } else {
+        router.replace('/');
+      }
     } catch (err) {
       setError(err instanceof RafeeqApiError ? err.firstError() ?? err.message : 'تعذّر تسجيل الدخول');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!code.trim()) return setError('رمز التحقق مطلوب');
+
+    setLoading(true);
+    try {
+      await verifyMfa(code.trim());
+      router.replace('/');
+    } catch (err) {
+      setError(err instanceof RafeeqApiError ? err.firstError() ?? err.message : 'رمز التحقق غير صحيح');
     } finally {
       setLoading(false);
     }
@@ -46,19 +68,52 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm mb-1 font-medium">رقم الهاتف</label>
-            <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07XXXXXXXX" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1 font-medium">كلمة المرور</label>
-            <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? '...' : 'تسجيل الدخول'}
-          </button>
-        </form>
+        {step === 'credentials' ? (
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm mb-1 font-medium">رقم الهاتف</label>
+              <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07XXXXXXXX" />
+            </div>
+            <div>
+              <label className="block text-sm mb-1 font-medium">كلمة المرور</label>
+              <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <button type="submit" disabled={loading} className="btn-primary w-full">
+              {loading ? '...' : 'تسجيل الدخول'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={onVerify} className="space-y-4">
+            <div className="rounded-lg bg-background px-3 py-2 text-sm muted-text">
+              أدخل رمز المصادقة الثنائية من تطبيق المصادقة، أو رمز استرداد.
+            </div>
+            <div>
+              <label className="block text-sm mb-1 font-medium">رمز التحقق</label>
+              <input
+                className="input tracking-widest text-center"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="123456"
+                autoFocus
+                inputMode="numeric"
+              />
+            </div>
+            <button type="submit" disabled={loading} className="btn-primary w-full">
+              {loading ? '...' : 'تأكيد'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStep('credentials');
+                setCode('');
+                setError(null);
+              }}
+              className="btn-outline w-full"
+            >
+              رجوع
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
