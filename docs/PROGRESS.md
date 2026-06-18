@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-177 |
+| آخر Commit | RFQ-179 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -299,5 +299,7 @@
 | 175 | feat(student): navy hero welcome screen (Stitch) |
 | 176 | feat(student): redesign subscriptions screen (premium cards) |
 | 177 | docs: student auth + subscriptions Stitch redesign |
+| 178 | fix(apps): configurable API base URL (EXPO_PUBLIC/NEXT_PUBLIC) + clear network-error message |
+| 179 | docs: add docs/RUNNING.md (connect apps to backend + OpenAI key) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
