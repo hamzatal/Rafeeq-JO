@@ -7,6 +7,7 @@ import { Screen } from '../../src/components/Screen';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
+import { AuthHeader } from '../../src/components/AuthHeader';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { useTheme, type AppTheme } from '../../src/theme';
@@ -40,9 +41,8 @@ export default function Otp() {
 
   return (
     <Screen scroll>
+      <AuthHeader title={t('auth.otpTitle')} subtitle={t('auth.otpSubtitle')} />
       <View style={s.header}>
-        <Text style={s.title}>{t('auth.otpTitle')}</Text>
-        <Text style={s.subtitle}>{t('auth.otpSubtitle')}</Text>
         <Text style={s.phone}>{params.phone}</Text>
         {params.debug ? <Text style={s.debug}>{t('auth.testCode')}: {params.debug}</Text> : null}
       </View>
@@ -55,10 +55,8 @@ export default function Otp() {
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    header: { marginTop: t.spacing['2xl'], marginBottom: t.spacing.xl, gap: t.spacing.xs },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right' },
-    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.textSecondary, textAlign: 'right' },
-    phone: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary, textAlign: 'right' },
-    debug: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.warning, textAlign: 'right' },
+    header: { marginBottom: t.spacing.xl, gap: t.spacing.xs, alignItems: 'center' },
+    phone: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary, textAlign: 'center' },
+    debug: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.warning, textAlign: 'center' },
     codeInput: { textAlign: 'center', letterSpacing: 8, fontSize: 22 },
   });
