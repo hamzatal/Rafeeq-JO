@@ -235,5 +235,6 @@
 | 123 | fix(i18n): wire last hardcoded auth strings (OTP test code + captain badge) — zero hardcoded UI strings across both apps |
 | 124 | feat(driver-app): redesign Trip Detail screen (DS v2) + wire all strings — 100% zero hardcoded Arabic across both mobile apps |
 | 125 | chore(deploy): production Dockerfiles (API + admin) + prod compose + hardened .env.production + legal policies (ar) + DEPLOYMENT.md |
+| 126 | test(backend): PHPUnit scaffolding (phpunit.xml + TestCase) + PricingService unit tests + auth-guard smoke tests |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
