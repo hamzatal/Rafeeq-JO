@@ -11,6 +11,7 @@ import {
   Tajawal_800ExtraBold,
 } from '@expo-google-fonts/tajawal';
 import { I18nProvider } from '../src/i18n';
+import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { useAuth } from '../src/store/auth';
 import { usePrefs } from '../src/store/prefs';
 
@@ -37,10 +38,12 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <I18nProvider>
-        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-        <Slot />
-      </I18nProvider>
+      <ErrorBoundary>
+        <I18nProvider>
+          <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+          <Slot />
+        </I18nProvider>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
