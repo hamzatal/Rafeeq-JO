@@ -25,11 +25,18 @@ export default function AppLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
-          height: 64,
-          paddingBottom: 10,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          height: 68,
+          paddingBottom: 12,
           paddingTop: 8,
+          shadowColor: '#0B192C',
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: -4 },
+          elevation: 12,
         },
-        tabBarLabelStyle: { fontFamily: theme.fontFamily.medium, fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: theme.fontFamily.bold, fontSize: 11 },
       }}
     >
       <Tabs.Screen name="home" options={{ title: t('home.title'), tabBarIcon: tab('home') }} />
