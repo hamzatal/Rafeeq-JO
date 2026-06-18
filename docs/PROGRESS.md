@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-193 |
+| آخر Commit | RFQ-196 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -315,5 +315,8 @@
 | 191 | docs: student navy+gold + resilience batch |
 | 192 | feat(captain): fixed dark navy HUD theme (Stitch captain) |
 | 193 | docs: captain HUD theme |
+| 194 | feat(captain): HUD earnings hero on dashboard (live performance API) |
+| 195 | feat(apps): unified navy hero welcome for captain + guardian |
+| 196 | docs: captain HUD widgets + welcome screens |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
