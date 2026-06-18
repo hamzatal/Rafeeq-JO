@@ -616,3 +616,38 @@ export interface DriverPerformance {
   rating: number;
   total_trips: number;
 }
+
+
+/** ── Saved addresses (student) ────────────────────────────────────── */
+
+export interface SavedAddress {
+  id: string;
+  label: 'home' | 'university' | 'work' | 'other' | string;
+  title: string | null;
+  address_text: string;
+  lat: number | null;
+  lng: number | null;
+  is_default: boolean;
+  created_at: string | null;
+}
+
+
+export interface FinancialReportZone {
+  zone_id: string | null;
+  rides_count: number;
+  commission_fils: number;
+  gross_fare_fils: number;
+}
+
+export interface FinancialReport {
+  period: { from: string; to: string };
+  zone_id: string | null;
+  rides_count: number;
+  gross_fare_fils: number;
+  commission_fils: number;
+  captain_earnings_fils: number;
+  payouts_paid_fils: number;
+  topups_fils: number;
+  subscription_revenue_fils: number;
+  by_zone: FinancialReportZone[];
+}

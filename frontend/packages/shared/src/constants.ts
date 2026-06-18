@@ -26,6 +26,9 @@ export const ENDPOINTS = {
     profile: '/student/profile',
     guardians: '/student/guardians',
     guardian: (linkId: string) => `/student/guardians/${linkId}`,
+    addresses: '/student/addresses',
+    address: (id: string) => `/student/addresses/${id}`,
+    addressDefault: (id: string) => `/student/addresses/${id}/default`,
   },
   guardian: {
     children: '/guardian/children',
@@ -187,6 +190,7 @@ export const ENDPOINTS = {
     rideRequests: '/admin/ride-requests',
     matchingRun: '/admin/matching/run',
     walletCredit: '/admin/wallets/credit',
+    reportsFinancial: '/admin/reports/financial',
   },
 } as const;
 
