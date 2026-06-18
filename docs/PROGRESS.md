@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-133 |
+| آخر Commit | RFQ-136 |
 | نسبة الإنجاز | ~95% · AI + خرائط حيّة مبنية |
 | المرحلة الحالية | **AI + الخرائط جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + توسيع الاختبارات + تلميع** |
 
@@ -95,6 +95,9 @@
 - ✅ **التتبّع الحيّ (Reverb)**: أحداث بث `TripLocationUpdated` + `TripStatusChanged` على قناة `trip.{id}` (تُطلق عند بثّ الموقع/بدء/إنهاء/إلغاء). الافتراضي broadcast=log (آمن بدون سيرفر)؛ يُفعّل بـ reverb.
 - ✅ **أساس مكافحة الاحتيال (Safety)**: جداول `risk_flags` + `cancellation_logs` + كشف بقواعد (كابتن يلغي رحلة فيها ركّاب، معدّل إلغاء عالٍ) → علامات خطورة، + واجهة إدارة (عرض/معالجة العلامات + سجل الإلغاءات). تسجيل الإلغاء مربوط بـ TripService.
 - ✅ **OTP الإنزال (تأكيد الطرفين)**: عند تأكيد الصعود يُصدَر للطالب **كود إنزال** فريد داخل الرحلة؛ الكابتن يؤكّد النزول بإدخاله (`POST /driver/trips/{trip}/dropoff`) → الحالة `dropped` + `dropoff_confirmed_at`. إنهاء الرحلة بوجود ركّاب لم يُؤكَّد إنزالهم بالكود يرفع **علامة خطورة** (`trip_ended_without_dropoff_otp`) كدليل تسريب/رحلة وهمية. مربوط بالكامل في تطبيقي الكابتن (بطاقة إدخال) والطالب (عرض الكود). مغطّى باختبارات Feature (3 حالات: تأكيد ناجح، كود خاطئ مرفوض، إنهاء بلا تأكيد يرفع علامة).
+- ✅ **محرك التسعير الحقيقي + Express** (RFQ-134): `PricingService` صار مربوطاً فعلياً بـ`MatchingService` و`RideBillingService` (انتهى السعر الثابت 1000). أعمدة تسعير على الرحلة (`is_express`, `base_fare_fils`, `express_fee_fils`, `surge_multiplier`). **Express مُفعّل**: تجميع منفصل بأولوية + سيارة خاصة لراكب واحد + رسوم مستعجل + surge ألطف (مع سقف عادل). توحيد حساب العمولة في `splitCommission()`. `TripResource` يعرض تفصيل السعر + **أرباح الكابتن المتوقعة** (preview). مغطّى باختبارات (Unit + Feature).
+- ✅ **حجز الرصيد (Wallet Hold)** (RFQ-135): عمود `held_fils` + جدول `wallet_holds` (active/captured/released). `WalletService`: `hold/capture/release/availableBalance/findActiveHold` (مع قفل صفوف وذرّية). عند **بدء الرحلة** يُحجز السعر لكل راكب يدفع من المحفظة (المتاح = الرصيد − المحجوز)؛ عند الصعود يُلتقط الحجز (خصم فعلي + دفع الكابتن)؛ عند الإلغاء يُحرَّر. إشعار `WalletLowBalance` عند نقص الرصيد. مغطّى باختبارات (6 حالات).
+- ✅ **كشف الاحتيال عبر GPS** (RFQ-136): جداول `driver_locations` + `ghost_trip_watches`. `GpsFraudService` (haversine): (1) **عدم تطابق الموقع عند الصعود** — تأكيد صعود والكابتن بعيد عن نقطة التقاط الراكب يرفع `boarding_location_mismatch`؛ (2) **الرحلة الوهمية** — إلغاء الكابتن لرحلة فيها ركّاب يفتح "مراقبة" زمنية لنقاط الالتقاط، وإذا اقترب الكابتن منها لاحقاً عبر نبضات موقعه يُرفع `ghost_trip_detected` (خطورة عالية). endpoint `POST /driver/location`. مغطّى باختبارات (5 حالات).
 - ⏳ التتبّع الحيّ (Reverb) عميل Echo + الخرائط (دليل لاحقاً) + Express dynamic pricing + min-fill
 - ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
@@ -242,5 +245,8 @@
 | 130 | feat(frontend): Rafeeq Assistant chat screen (student) + admin AI safety center |
 | 132 | feat(maps): key-free LiveMap (Leaflet/OSM via WebView on native + live panel on web) — wired into trip tracking + ride-request |
 | 133 | feat(trips): drop-off OTP (both-ends confirmation) — issue dropoff code on boarding + captain confirm endpoint + unconfirmed-dropoff risk flag + driver/student UI + feature tests |
+| 134 | feat(pricing): wire PricingService into matching+billing (surge/min-fill/commission split) + activate Express (priority, private car, fee+surge) + fare breakdown & captain earnings preview |
+| 135 | feat(wallet): pre-authorisation balance holds — held_fils + wallet_holds, hold/capture/release, hold fare on trip start, capture on boarding, release on cancel |
+| 136 | feat(safety): GPS anti-fraud — ghost-trip detection (cancel watch + captain location ping) + boarding location-mismatch flag + driver location endpoint |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

@@ -19,4 +19,17 @@ return [
 
     // Fair cap on dynamic surge applied to under-filled pooled trips.
     'max_surge_multiplier' => (float) env('RAFEEQ_MAX_SURGE_MULTIPLIER', 1.5),
+
+    // ── GPS anti-fraud thresholds ───────────────────────────────────────────
+    // Max distance (m) allowed between the captain and a rider's pickup at the
+    // moment boarding is confirmed; beyond this is a location mismatch.
+    'gps_boarding_mismatch_meters' => (int) env('RAFEEQ_GPS_BOARDING_MISMATCH_METERS', 400),
+
+    // After a captain cancels a trip with riders, how long (minutes) we keep
+    // watching their location near the cancelled pickups for a ghost trip.
+    'ghost_watch_minutes' => (int) env('RAFEEQ_GHOST_WATCH_MINUTES', 30),
+
+    // How close (m) the captain must come to a watched pickup to trigger a
+    // ghost-trip flag.
+    'ghost_watch_radius_meters' => (int) env('RAFEEQ_GHOST_WATCH_RADIUS_METERS', 250),
 ];

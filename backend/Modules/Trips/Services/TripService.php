@@ -9,6 +9,7 @@ use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Modules\Safety\Services\FraudService;
+use Rafeeq\Modules\Safety\Services\GpsFraudService;
 use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Services\SubscriptionService;
@@ -17,6 +18,7 @@ use Rafeeq\Modules\Trips\Events\TripStatusChanged;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Models\TripTracking;
+use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Enums\NotificationType;
@@ -28,7 +30,9 @@ class TripService extends BaseService
         private readonly SubscriptionService $subscriptions,
         private readonly RideBillingService $billing,
         private readonly FraudService $fraud,
+        private readonly GpsFraudService $gps,
         private readonly NotificationService $notifications,
+        private readonly WalletService $wallets,
     ) {}
 
     public function schedule(DriverProfile $driver, Route $route, string $scheduledAt, ?string $vehicleId = null): Trip
@@ -56,10 +60,59 @@ class TripService extends BaseService
     {
         $this->assertStatus($trip, TripStatus::Scheduled, 'لا يمكن بدء هذه الرحلة.');
         $trip->forceFill(['status' => TripStatus::Started, 'started_at' => now()])->save();
+
+        // Reserve each wallet-paying rider's fare BEFORE the ride happens, so the
+        // commission can never be bypassed and the captain isn't driving for an
+        // empty wallet. Subscription-covered riders need no hold.
+        $this->placeFareHolds($trip);
+
         TripStatusChanged::dispatch($trip->id, $trip->status->value);
         $this->audit->log('trip.started', auditable: $trip);
 
         return $trip;
+    }
+
+    /**
+     * Place a pre-authorisation hold on every wallet-paying passenger's balance.
+     * Best-effort: a rider with insufficient funds is notified to top up but does
+     * not block the trip from starting for everyone else (enforced again at
+     * boarding, where payment must clear).
+     */
+    private function placeFareHolds(Trip $trip): void
+    {
+        $fare = (int) ($trip->fare_fils ?? 0);
+        if ($fare <= 0) {
+            return;
+        }
+
+        $passengers = $trip->passengers()
+            ->where('status', TripPassengerStatus::Booked->value)
+            ->whereNull('subscription_id')
+            ->get();
+
+        foreach ($passengers as $passenger) {
+            $student = User::find($passenger->student_id);
+            if (! $student) {
+                continue;
+            }
+
+            $wallet = $this->wallets->forUser($student);
+            if ($this->wallets->findActiveHold($wallet, $trip->id)) {
+                continue; // idempotent — already reserved
+            }
+
+            try {
+                $this->wallets->hold($wallet, $fare, $trip->id, 'حجز قيمة رحلة');
+            } catch (BusinessRuleException $e) {
+                $this->notifications->notify(
+                    $student,
+                    NotificationType::WalletLowBalance,
+                    'رصيدك لا يكفي',
+                    'رصيدك الحالي لا يغطي قيمة الرحلة. يرجى شحن المحفظة قبل الصعود.',
+                    ['trip_id' => $trip->id, 'required_fils' => $fare],
+                );
+            }
+        }
     }
 
     public function end(Trip $trip): Trip
@@ -143,7 +196,26 @@ class TripService extends BaseService
         // Anti-fraud: log the cancellation and evaluate suspicious patterns.
         $this->fraud->logCancellation($trip->id, $actor?->id, $role, $reason, $passengersCount);
 
+        // Anti-fraud: when a captain cancels a trip that had riders, watch their
+        // location for a ghost trip (cancelled on-platform, served off-platform).
+        if ($role === 'driver' && $passengersCount > 0) {
+            $this->gps->openGhostWatch($trip);
+        }
+
         $this->audit->log('trip.cancelled', $actor, auditable: $trip);
+
+        // Release any pre-authorisation holds — no money should stay reserved
+        // for a cancelled trip.
+        foreach ($affectedStudentIds as $studentId) {
+            $student = User::find($studentId);
+            if (! $student) {
+                continue;
+            }
+            $hold = $this->wallets->findActiveHold($this->wallets->forUser($student), $trip->id);
+            if ($hold) {
+                $this->wallets->release($hold);
+            }
+        }
 
         // Notify affected passengers (critical → SMS fallback when push is off).
         foreach ($affectedStudentIds as $studentId) {
@@ -236,6 +308,9 @@ class TripService extends BaseService
             $this->billing->chargeForBoarding($passenger, $trip);
 
             $this->audit->log('trip.boarded', auditable: $passenger);
+
+            // Anti-fraud: confirm the captain is physically near the rider's pickup.
+            $this->gps->checkBoardingProximity($trip, $passenger);
 
             // Tell the student boarding is confirmed and to keep their drop-off
             // code ready for arrival.

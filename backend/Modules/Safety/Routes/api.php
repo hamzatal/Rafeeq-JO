@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Rafeeq\Modules\Safety\Controllers\DriverLocationController;
 use Rafeeq\Modules\Safety\Controllers\SafetyAdminController;
 use Rafeeq\Modules\Safety\Controllers\SosController;
 
@@ -8,6 +9,11 @@ use Rafeeq\Modules\Safety\Controllers\SosController;
 Route::prefix('v1/sos')->middleware('auth:sanctum')->group(function () {
     Route::post('/', [SosController::class, 'trigger']);
     Route::get('mine', [SosController::class, 'mine']);
+});
+
+// Captain location ping (ghost-trip watch) — driver only
+Route::prefix('v1/driver')->middleware(['auth:sanctum', 'role:driver'])->group(function () {
+    Route::post('location', [DriverLocationController::class, 'store']);
 });
 
 // Admin safety center
