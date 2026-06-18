@@ -233,5 +233,6 @@
 | 121 | feat(driver-app): DS v2 redesign — bottom tabs + Icon/ui components + dashboard/offers/trips/earnings/account + i18n wiring |
 | 122 | feat(driver-app): redesign Documents + Vehicle screens (DS v2) + wire all hardcoded strings to i18n — driver app fully redesigned |
 | 123 | fix(i18n): wire last hardcoded auth strings (OTP test code + captain badge) — zero hardcoded UI strings across both apps |
+| 124 | feat(driver-app): redesign Trip Detail screen (DS v2) + wire all strings — 100% zero hardcoded Arabic across both mobile apps |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
