@@ -325,6 +325,10 @@ class TripService extends BaseService
                 );
             }
 
+            // Notify the student's guardians their child has departed (safe — never throws).
+            app(\Rafeeq\Modules\Guardians\Services\GuardianService::class)
+                ->notifyDeparture($passenger->student_id, $trip->id);
+
             return $passenger;
         });
     }
@@ -375,6 +379,10 @@ class TripService extends BaseService
                     ['trip_id' => $trip->id],
                 );
             }
+
+            // Notify the student's guardians their child arrived safely.
+            app(\Rafeeq\Modules\Guardians\Services\GuardianService::class)
+                ->notifyArrival($passenger->student_id, $trip->id);
 
             return $passenger;
         });
