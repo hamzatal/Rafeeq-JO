@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-165 |
+| آخر Commit | RFQ-167 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -287,5 +287,7 @@
 | 163 | chore(frontend): dedupe @types/react so admin type-checks clean |
 | 164 | fix(apps): type-check clean across student/driver/guardian (login union + Echo generic) |
 | 165 | docs: frontend now fully type-checked (6 packages green) |
+| 166 | chore(admin): patch Next.js security advisory (14.2.35) + enable ESLint (clean) |
+| 167 | docs: CI parity verified locally + security posture note |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
