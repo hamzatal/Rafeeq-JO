@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-149 |
-| نسبة الإنجاز | ~97% · كل وحدات المزايا مدموجة على foundation |
-| المرحلة الحالية | **كل المزايا الأساسية مبنية ومدموجة. المتبقّي: واجهات لوحة الإدارة Next.js للوحدات الجديدة + تشغيل/اختبار فعلي محلياً + تلميع** |
+| آخر Commit | RFQ-156 |
+| نسبة الإنجاز | ~98% · كل وحدات المزايا + واجهات إدارتها مدموجة على foundation |
+| المرحلة الحالية | **كل المزايا الأساسية + واجهات لوحة الإدارة جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + AI Fraud Monitor متقدّم + تلميع** |
 
 ---
 
@@ -107,7 +107,7 @@
 - ✅ **المصادقة الثنائية للإدارة (MFA / TOTP)** (RFQ-147/149): تطبيق **TOTP (RFC 6238)** مكتفٍ ذاتياً بلا أي مكتبة خارجية (`TotpService`) + `MfaService` (تسجيل تدريجي begin/confirm + رموز استرداد لمرة واحدة + تحدّي دخول قصير العمر عبر cache + إيقاف). عند تفعيل MFA: تسجيل الدخول بكلمة المرور **لا يصدر توكن** بل يرجع `mfa_required` + `mfa_token`، ويُكمَل عبر `POST /auth/mfa/verify` برمز TOTP أو رمز استرداد. إدارة (مصادَق): `/auth/mfa/setup` (QR otpauth) + `/confirm` + `/disable` — **لحسابات الموظفين فقط**. أعمدة `users`: `mfa_secret` (مشفّر) + `mfa_enabled_at` + `mfa_recovery_codes` (مشفّر). الفرونت: `User.mfa_enabled` + أنواع MFA + `AuthApi.verifyMfa/mfaSetup/mfaConfirm/mfaDisable`. مغطّى بـ **7 اختبارات Feature + 5 Unit**.
 - ✅ **حدود المناطق المضلّعة (Geofence / Polygon Zones)** (RFQ-148/149): عمود `zones.boundary` (مصفوفة JSON من رؤوس `[lat,lng]`) كحدّ جغرافي اختياري. `Zone::containsPoint()` خوارزمية ray-casting (نقطة داخل مضلّع) + `hasBoundary/withinRadius`. `ZoneService::nearest()` صار يحلّ بالترتيب: **احتواء المضلّع → دائرة النطاق → أقرب مركز** (متوافق رجعياً). `ZoneRequest` يتحقق من الحدود (3 رؤوس على الأقل + نطاقات صحيحة)؛ `ZoneResource` يعرض `boundary + has_boundary`. الفرونت: نوع `Zone` + `ZonesApi` (list/create/update/remove). مغطّى بـ **3 اختبارات Feature**.
 - 🧹 **تنظيف وترتيب** (RFQ-150): حذف ملف التصاميم `stitch_*.zip` (13MB) من المستودع + إزالة 6 صور مكررة من جذر `docs/` (محفوظة منظّمة في `docs/img-stitch/`) + إضافة `*.zip` و`stitch_*/` إلى `.gitignore` + **دمج كل شغل المزايا (137→149) على فرع `foundation` مباشرة وإنهاء سلسلة الـ PRs المتداخلة**.
-- ⏳ واجهات لوحة الإدارة (Next.js) للوحدات الجديدة: السحوبات + التقارير المالية + إعداد MFA + محرر حدود المناطق (الـ APIs كلها جاهزة)
+- ✅ **واجهات لوحة الإدارة (Next.js) للوحدات الجديدة** (RFQ-151→156): **دخول الموظفين بتحدّي MFA من خطوتين** + صفحة **`/withdrawals`** (طابور سحوبات الكباتن: اعتماد/رفض مع إعادة الرصيد) + صفحة **`/reports`** (تقارير مالية بنطاق تاريخ + تفصيل حسب المنطقة) + صفحة **`/zones`** (إدارة المناطق + **محرّر حدود المضلّع Geofence**) + صفحة **`/security`** (تفعيل/إيقاف MFA + رموز استرداد) + روابط Sidebar. (الفرونت غير مُتحقَّق بناءً؛ الملفات مُتحقَّقة صياغياً.)
 - ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
 
@@ -271,5 +271,11 @@
 | 148 | feat(zones): polygon geofence boundaries — zones.boundary + ray-casting containsPoint + nearest() polygon→radius→center + validation/resource + 3 feature tests |
 | 149 | feat(frontend): wire MFA + zones APIs — shared types/endpoints + AuthApi MFA methods + ZonesApi |
 | 150 | chore: consolidate all feature work (137→149) onto foundation + clean repo (drop 13MB design zip + dup docs images + .gitignore) |
+| 151 | feat(admin): MFA-aware staff login flow (two-step credentials → TOTP/recovery) |
+| 152 | feat(admin): captain withdrawals queue page (approve/reject + refund) |
+| 153 | feat(admin): financial reports page (date range + per-zone breakdown) |
+| 154 | feat(admin): zones management with polygon geofence vertex editor |
+| 155 | feat(admin): MFA self-enrollment page (setup/confirm/recovery/disable) + sidebar nav |
+| 156 | docs: mark admin dashboard UIs done in PROGRESS.md + FEATURES.md |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
