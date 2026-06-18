@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-174 |
+| آخر Commit | RFQ-177 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -296,5 +296,8 @@
 | 172 | feat(student): rebuild home to Stitch student layout (hero/subscription/trips) |
 | 173 | feat(student): polish bottom tab bar (rounded + shadow) |
 | 174 | docs: student app Stitch redesign progress |
+| 175 | feat(student): navy hero welcome screen (Stitch) |
+| 176 | feat(student): redesign subscriptions screen (premium cards) |
+| 177 | docs: student auth + subscriptions Stitch redesign |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
