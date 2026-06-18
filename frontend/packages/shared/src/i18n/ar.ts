@@ -70,12 +70,10 @@ export const ar = {
   driver: {
     dashboard: 'لوحة الكابتن',
     joinSubtitle: 'انضم كشريك نقل معتمد في رفيق',
-    earnings: 'أرباحي',
     balance: 'الرصيد',
     offers: 'عروض الرحلات',
     noOffers: 'لا توجد عروض حالياً',
     acceptOffer: 'قبول العرض',
-    seats: 'مقاعد',
     expectedEarnings: 'الأرباح المتوقعة',
     myRating: 'تقييمي',
     offerAccepted: 'تم قبول العرض. جهّز رحلتك.',
@@ -98,7 +96,6 @@ export const ar = {
     docRejected: 'مرفوضة',
     docUnderReview: 'قيد المراجعة',
     docNotUploaded: 'غير مرفوعة',
-    upload: 'رفع',
     change: 'تغيير',
     uploadFailed: 'تعذّر الرفع',
     vehicleAdded: 'تمت إضافة المركبة بنجاح',
@@ -433,4 +430,13 @@ export const ar = {
   },
 } as const;
 
-export type Translations = typeof ar;
+/**
+ * Deeply widen literal string values to `string` while preserving the key
+ * structure, so other locales (en.ts) must match the SAME keys but can supply
+ * their own translated strings.
+ */
+type DeepWidenStrings<T> = {
+  [K in keyof T]: T[K] extends string ? string : DeepWidenStrings<T[K]>;
+};
+
+export type Translations = DeepWidenStrings<typeof ar>;

@@ -35,7 +35,7 @@ export const palette = {
 } as const;
 
 // Student app theme (light, blue + gold).
-export const studentTheme = {
+export const studentTheme: AppTheme = {
   primary: palette.primary,
   accent: palette.gold,
   background: palette.background,
@@ -45,10 +45,10 @@ export const studentTheme = {
   textSecondary: palette.textSecondary,
   border: palette.border,
   ...statusColors(),
-} as const;
+};
 
 // Driver app theme (dark navy + gold).
-export const driverTheme = {
+export const driverTheme: AppTheme = {
   primary: palette.gold,
   accent: palette.gold,
   background: palette.navy,
@@ -58,7 +58,7 @@ export const driverTheme = {
   textSecondary: '#CBD5E1',
   border: '#334155',
   ...statusColors(),
-} as const;
+};
 
 function statusColors() {
   return {
@@ -69,7 +69,20 @@ function statusColors() {
   };
 }
 
-export type AppTheme = typeof studentTheme;
+export interface AppTheme {
+  primary: string;
+  accent: string;
+  background: string;
+  surface: string;
+  card: string;
+  text: string;
+  textSecondary: string;
+  border: string;
+  success: string;
+  warning: string;
+  danger: string;
+  info: string;
+}
 export type ThemeName = 'student' | 'driver';
 
 export const themes: Record<ThemeName, AppTheme> = {
