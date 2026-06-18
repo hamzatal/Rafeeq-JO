@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\Trips\Services;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Matching\Services\PricingService;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Wallet\Services\WalletService;
@@ -24,6 +25,7 @@ class RideBillingService extends BaseService
         private readonly WalletService $wallets,
         private readonly AuditLogger $audit,
         private readonly RewardService $rewards,
+        private readonly PricingService $pricing,
     ) {}
 
     public function chargeForBoarding(TripPassenger $passenger, Trip $trip): void
@@ -37,22 +39,24 @@ class RideBillingService extends BaseService
             return;
         }
 
-        $pct = (int) config('rafeeq.commission_percent', 15);
-        $commission = intdiv($fare * $pct, 100);
-        $captainShare = $fare - $commission;
+        $split = $this->pricing->splitCommission($fare);
+        $commission = $split['commission_fils'];
+        $captainShare = $split['captain_share_fils'];
 
         $this->transaction(function () use ($passenger, $trip, $fare, $commission, $captainShare) {
             // Student pays from wallet only when no subscription covers this ride.
             if (! $passenger->subscription_id) {
                 $student = User::find($passenger->student_id);
                 if ($student) {
-                    $this->wallets->debit(
-                        $this->wallets->forUser($student),
-                        $fare,
-                        WalletTxnType::RidePayment,
-                        'دفع رحلة',
-                        $trip->id,
-                    );
+                    $wallet = $this->wallets->forUser($student);
+                    // Prefer capturing the pre-authorised hold placed at trip start;
+                    // fall back to a direct debit if no hold exists.
+                    $hold = $this->wallets->findActiveHold($wallet, $trip->id);
+                    if ($hold) {
+                        $this->wallets->capture($hold, $fare, WalletTxnType::RidePayment, 'دفع رحلة', $trip->id);
+                    } else {
+                        $this->wallets->debit($wallet, $fare, WalletTxnType::RidePayment, 'دفع رحلة', $trip->id);
+                    }
                 }
             }
 

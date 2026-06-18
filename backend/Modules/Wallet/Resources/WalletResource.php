@@ -17,6 +17,9 @@ class WalletResource extends JsonResource
             'id' => $this->id,
             'balance_fils' => $this->balance_fils,
             'balance_jod' => round($this->balance_fils / 1000, 3),
+            'held_fils' => (int) ($this->held_fils ?? 0),
+            'available_fils' => $this->availableFils(),
+            'available_jod' => round($this->availableFils() / 1000, 3),
             'currency' => $this->currency,
         ];
     }
