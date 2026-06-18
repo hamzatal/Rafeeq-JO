@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-132 |
+| آخر Commit | RFQ-133 |
 | نسبة الإنجاز | ~95% · AI + خرائط حيّة مبنية |
 | المرحلة الحالية | **AI + الخرائط جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + توسيع الاختبارات + تلميع** |
 
@@ -94,6 +94,7 @@
 - ✅ **دورة المال**: عند تأكيد الصعود يُخصم من محفظة الطالب (إن لم يكن لديه اشتراك)، تُحجز عمولة المنصة (config: نسبة العمولة + الأجرة الافتراضية)، ويُحاسب الكابتن (يُضاف لمحفظته) — الأموال تمرّ عبر المنصة دائماً (RideBillingService).
 - ✅ **التتبّع الحيّ (Reverb)**: أحداث بث `TripLocationUpdated` + `TripStatusChanged` على قناة `trip.{id}` (تُطلق عند بثّ الموقع/بدء/إنهاء/إلغاء). الافتراضي broadcast=log (آمن بدون سيرفر)؛ يُفعّل بـ reverb.
 - ✅ **أساس مكافحة الاحتيال (Safety)**: جداول `risk_flags` + `cancellation_logs` + كشف بقواعد (كابتن يلغي رحلة فيها ركّاب، معدّل إلغاء عالٍ) → علامات خطورة، + واجهة إدارة (عرض/معالجة العلامات + سجل الإلغاءات). تسجيل الإلغاء مربوط بـ TripService.
+- ✅ **OTP الإنزال (تأكيد الطرفين)**: عند تأكيد الصعود يُصدَر للطالب **كود إنزال** فريد داخل الرحلة؛ الكابتن يؤكّد النزول بإدخاله (`POST /driver/trips/{trip}/dropoff`) → الحالة `dropped` + `dropoff_confirmed_at`. إنهاء الرحلة بوجود ركّاب لم يُؤكَّد إنزالهم بالكود يرفع **علامة خطورة** (`trip_ended_without_dropoff_otp`) كدليل تسريب/رحلة وهمية. مربوط بالكامل في تطبيقي الكابتن (بطاقة إدخال) والطالب (عرض الكود). مغطّى باختبارات Feature (3 حالات: تأكيد ناجح، كود خاطئ مرفوض، إنهاء بلا تأكيد يرفع علامة).
 - ⏳ التتبّع الحيّ (Reverb) عميل Echo + الخرائط (دليل لاحقاً) + Express dynamic pricing + min-fill
 - ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
@@ -240,5 +241,6 @@
 | 129 | feat(shared+api-client): AI types + ENDPOINTS + AssistantApi |
 | 130 | feat(frontend): Rafeeq Assistant chat screen (student) + admin AI safety center |
 | 132 | feat(maps): key-free LiveMap (Leaflet/OSM via WebView on native + live panel on web) — wired into trip tracking + ride-request |
+| 133 | feat(trips): drop-off OTP (both-ends confirmation) — issue dropoff code on boarding + captain confirm endpoint + unconfirmed-dropoff risk flag + driver/student UI + feature tests |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

@@ -51,6 +51,7 @@ export const ENDPOINTS = {
     end: (id: string) => `/driver/trips/${id}/end`,
     cancel: (id: string) => `/driver/trips/${id}/cancel`,
     board: (id: string) => `/driver/trips/${id}/board`,
+    dropoff: (id: string) => `/driver/trips/${id}/dropoff`,
     location: (id: string) => `/driver/trips/${id}/location`,
   },
   driver: {

@@ -65,18 +65,35 @@ class TripService extends BaseService
     public function end(Trip $trip): Trip
     {
         $this->assertStatus($trip, TripStatus::Started, 'الرحلة ليست جارية.');
+
+        // Passengers still "onboard" at trip end were never confirmed dropped via
+        // the drop-off OTP. Capture them as an anti-fraud signal before closing.
+        $unconfirmed = $trip->passengers()
+            ->where('status', TripPassengerStatus::Onboard->value)
+            ->whereNull('dropoff_confirmed_at')
+            ->count();
+
         $trip->forceFill(['status' => TripStatus::Completed, 'ended_at' => now()])->save();
 
-        // Onboard passengers are considered dropped at the end.
+        // Onboard passengers are considered dropped at the end (without OTP
+        // confirmation — dropoff_confirmed_at stays null as evidence).
         $trip->passengers()->where('status', TripPassengerStatus::Onboard->value)
             ->update(['status' => TripPassengerStatus::Dropped->value]);
+
+        if ($unconfirmed > 0) {
+            $trip->loadMissing('driver');
+            $driverUserId = $trip->driver ? $trip->driver->user_id : null;
+            $this->fraud->logUnconfirmedDropoffs($trip->id, $driverUserId, $unconfirmed);
+        }
 
         TripStatusChanged::dispatch($trip->id, $trip->status->value);
         $this->audit->log('trip.completed', auditable: $trip);
 
-        // Notify dropped passengers: trip completed + invite to rate the captain.
+        // Notify only passengers auto-dropped at trip end (those confirmed via the
+        // drop-off OTP already received arrival + rating notifications).
         $passengers = $trip->passengers()
             ->where('status', TripPassengerStatus::Dropped->value)
+            ->whereNull('dropoff_confirmed_at')
             ->get();
         foreach ($passengers as $passenger) {
             $student = User::find($passenger->student_id);
@@ -171,7 +188,7 @@ class TripService extends BaseService
                 'subscription_id' => $subscription->id,
                 'pickup_point_id' => $pickupPointId,
                 'status' => TripPassengerStatus::Booked,
-                'boarding_code' => str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT),
+                'boarding_code' => $this->uniqueTripCode($trip, 'boarding_code'),
             ]);
 
             $this->audit->log('trip.booked', $student, auditable: $passenger);
@@ -196,10 +213,16 @@ class TripService extends BaseService
             throw new BusinessRuleException('كود صعود غير صحيح.', 'INVALID_BOARDING_CODE');
         }
 
-        return $this->transaction(function () use ($passenger) {
+        return $this->transaction(function () use ($passenger, $trip) {
+            // Issue the drop-off OTP now: the student receives it on boarding and
+            // reads it out to the captain on arrival to confirm the drop-off
+            // in-app (both-ends confirmation — core anti-fraud control).
+            $dropoffCode = $this->uniqueTripCode($trip, 'dropoff_code');
+
             $passenger->forceFill([
                 'status' => TripPassengerStatus::Onboard,
                 'boarded_at' => now(),
+                'dropoff_code' => $dropoffCode,
             ])->save();
 
             if ($passenger->subscription_id) {
@@ -213,6 +236,70 @@ class TripService extends BaseService
             $this->billing->chargeForBoarding($passenger, $trip);
 
             $this->audit->log('trip.boarded', auditable: $passenger);
+
+            // Tell the student boarding is confirmed and to keep their drop-off
+            // code ready for arrival.
+            $student = User::find($passenger->student_id);
+            if ($student) {
+                $this->notifications->notify(
+                    $student,
+                    NotificationType::BoardingConfirmed,
+                    'تم تأكيد صعودك',
+                    "كود الإنزال الخاص بك: {$dropoffCode}. أعطِه للكابتن عند وصولك لتأكيد نزولك.",
+                    ['trip_id' => $trip->id, 'passenger_id' => $passenger->id],
+                );
+            }
+
+            return $passenger;
+        });
+    }
+
+    /**
+     * Driver confirms a passenger was dropped off by entering their drop-off
+     * code (drop-off OTP). This is the second half of the both-ends confirmation
+     * that completes a passenger's ride and is recorded as anti-fraud evidence.
+     */
+    public function confirmDropoff(Trip $trip, string $code): TripPassenger
+    {
+        if ($trip->status !== TripStatus::Started) {
+            throw new BusinessRuleException('الرحلة ليست جارية.', 'TRIP_NOT_STARTED');
+        }
+
+        $passenger = $trip->passengers()
+            ->where('dropoff_code', $code)
+            ->where('status', TripPassengerStatus::Onboard->value)
+            ->first();
+
+        if (! $passenger) {
+            throw new BusinessRuleException('كود إنزال غير صحيح.', 'INVALID_DROPOFF_CODE');
+        }
+
+        return $this->transaction(function () use ($trip, $passenger) {
+            $passenger->forceFill([
+                'status' => TripPassengerStatus::Dropped,
+                'dropoff_confirmed_at' => now(),
+            ])->save();
+
+            $this->audit->log('trip.dropped', auditable: $passenger);
+
+            // Confirm safe arrival and invite the student to rate the ride.
+            $student = User::find($passenger->student_id);
+            if ($student) {
+                $this->notifications->notify(
+                    $student,
+                    NotificationType::DropoffConfirmed,
+                    'وصلت بأمان',
+                    'تم تأكيد نزولك. نتمنى لك يوماً موفقاً!',
+                    ['trip_id' => $trip->id, 'passenger_id' => $passenger->id],
+                );
+                $this->notifications->notify(
+                    $student,
+                    NotificationType::RatingRequest,
+                    'قيّم رحلتك',
+                    'كيف كانت رحلتك مع الكابتن؟ قيّمه الآن.',
+                    ['trip_id' => $trip->id],
+                );
+            }
 
             return $passenger;
         });
@@ -238,5 +325,19 @@ class TripService extends BaseService
         if ($trip->status !== $expected) {
             throw new BusinessRuleException($message, 'INVALID_TRIP_STATE');
         }
+    }
+
+    /**
+     * Generate a 4-digit OTP that is unique among the trip's passengers for the
+     * given column, so boarding/drop-off codes can never collide within one trip
+     * (car-sized trips make collisions rare, but uniqueness must be guaranteed).
+     */
+    private function uniqueTripCode(Trip $trip, string $column): string
+    {
+        do {
+            $code = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        } while ($trip->passengers()->where($column, $code)->exists());
+
+        return $code;
     }
 }

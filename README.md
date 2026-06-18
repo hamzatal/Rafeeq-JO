@@ -79,9 +79,9 @@ npm run driver    # تطبيق الكابتن
 - [ ] **Phase 4** — الخدمات (Parcels / Lost & Found / Rewards)
 - [ ] **Phase 5** — الذكاء الاصطناعي (Rafeeq AI / Support / Safety / Fraud Monitor)
 - [~] **Phase 6** — لوحة الإدارة + التحليلات · **الإشعارات (FCM+SMS) ✅** · **التقييم الثنائي ✅** (backend)
-- [~] **Phase 7** — الإطلاق · **SOS ✅** · Notifications ✅ · (Deployment/CI/اختبارات ⏳)
+- [~] **Phase 7** — الإطلاق · **SOS ✅** · Notifications ✅ · **OTP صعود + OTP إنزال (تأكيد الطرفين) ✅** · (Deployment/CI/اختبارات ⏳)
 
-> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md`. آخر commit: **RFQ-079** (~58%).
+> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md`. آخر commit: **RFQ-133**.
 
 ---
 

@@ -46,6 +46,11 @@ export class DriverTripsApi {
     return unwrap(data);
   }
 
+  async confirmDropoff(id: string, code: string): Promise<TripPassenger> {
+    const { data } = await this.http.post<ApiSuccess<TripPassenger>>(ENDPOINTS.driverTrips.dropoff(id), { code });
+    return unwrap(data);
+  }
+
   async pushLocation(id: string, lat: number, lng: number, speed?: number): Promise<void> {
     await this.http.post(ENDPOINTS.driverTrips.location(id), { lat, lng, speed });
   }

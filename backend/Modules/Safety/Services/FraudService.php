@@ -34,6 +34,27 @@ class FraudService extends BaseService
         return $flag;
     }
 
+    /**
+     * A trip was completed while some passengers were still "onboard" and their
+     * drop-off was never confirmed in-app via OTP. Both-ends confirmation is a
+     * core anti-fraud control; an unconfirmed drop-off (especially after the
+     * captain ended the trip) is a leakage/ghost-trip signal worth flagging.
+     */
+    public function logUnconfirmedDropoffs(string $tripId, ?string $driverUserId, int $count): ?RiskFlag
+    {
+        if ($count <= 0) {
+            return null;
+        }
+
+        return $this->flag(
+            $driverUserId,
+            'trip_ended_without_dropoff_otp',
+            $count >= 3 ? RiskSeverity::High : RiskSeverity::Medium,
+            "انتهت الرحلة دون تأكيد إنزال {$count} راكب عبر كود الإنزال",
+            ['trip_id' => $tripId, 'unconfirmed' => $count],
+        );
+    }
+
     /** Record a cancellation and evaluate suspicious patterns. */
     public function logCancellation(
         ?string $tripId,

@@ -100,10 +100,18 @@ export default function Trips() {
               </View>
               {p.trip?.scheduled_at && <Text style={s.meta}>{new Date(p.trip.scheduled_at).toLocaleString(locale)}</Text>}
 
-              {p.boarding_code && (
+              {p.boarding_code && p.status === 'booked' && (
                 <View style={s.codeBox}>
                   <Text style={s.codeLabel}>{t('trips.boardingCode')}</Text>
                   <Text style={s.code}>{p.boarding_code}</Text>
+                </View>
+              )}
+
+              {p.dropoff_code && p.status === 'onboard' && (
+                <View style={s.codeBox}>
+                  <Text style={s.codeLabel}>{t('trips.dropoffCode')}</Text>
+                  <Text style={s.code}>{p.dropoff_code}</Text>
+                  <Text style={s.meta}>{t('trips.dropoffHint')}</Text>
                 </View>
               )}
 

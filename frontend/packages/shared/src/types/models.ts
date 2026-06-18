@@ -146,10 +146,13 @@ export interface TripPassenger {
   trip_id: string;
   student_id: string;
   pickup_point_id: string | null;
+  pickup_order: number | null;
   status: TripPassengerStatus;
   status_label: string;
   boarded_at: string | null;
+  dropoff_confirmed_at: string | null;
   boarding_code: string | null;
+  dropoff_code: string | null;
   trip?: Trip;
 }
 
