@@ -20,12 +20,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen bg-background dark:bg-dbg">
       <Sidebar />
-      <main className="flex-1 p-6 max-w-6xl">
+      {/* sidebar is fixed (w-64) on the right in RTL → offset main with mr-64 */}
+      <div className="mr-64 min-h-screen flex flex-col">
         <Topbar />
-        {children}
-      </main>
+        <main className="flex-1 p-6 lg:p-8">{children}</main>
+      </div>
     </div>
   );
 }
