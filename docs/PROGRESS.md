@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-191 |
+| آخر Commit | RFQ-193 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -313,5 +313,7 @@
 | 189 | feat(student): circular gold-tinted service tiles (Stitch) |
 | 190 | feat(admin): Next.js error + global-error boundaries (resilience) |
 | 191 | docs: student navy+gold + resilience batch |
+| 192 | feat(captain): fixed dark navy HUD theme (Stitch captain) |
+| 193 | docs: captain HUD theme |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
