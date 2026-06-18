@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-170 |
+| آخر Commit | RFQ-174 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -292,5 +292,9 @@
 | 168 | ci: verify migrations+seed on PostgreSQL 16 + guardian typecheck + blocking admin lint |
 | 169 | feat(admin): rebuild dashboard to Stitch enterprise design (Navy+Cyan Command Center, full-page, KPI home) |
 | 170 | docs: admin dashboard redesign (Stitch enterprise) |
+| 171 | feat(apps): re-theme student/captain to Stitch Navy+Cyan design system |
+| 172 | feat(student): rebuild home to Stitch student layout (hero/subscription/trips) |
+| 173 | feat(student): polish bottom tab bar (rounded + shadow) |
+| 174 | docs: student app Stitch redesign progress |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
