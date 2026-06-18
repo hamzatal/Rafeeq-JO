@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-146 |
-| نسبة الإنجاز | ~95% · AI + خرائط حيّة مبنية |
-| المرحلة الحالية | **AI + الخرائط جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + توسيع الاختبارات + تلميع** |
+| آخر Commit | RFQ-149 |
+| نسبة الإنجاز | ~97% · كل وحدات المزايا مدموجة على foundation |
+| المرحلة الحالية | **كل المزايا الأساسية مبنية ومدموجة. المتبقّي: واجهات لوحة الإدارة Next.js للوحدات الجديدة + تشغيل/اختبار فعلي محلياً + تلميع** |
 
 ---
 
@@ -104,7 +104,10 @@
 - ✅ **سحب أرباح الكابتن (Payout) + رُتب الكابتن** (RFQ-141/142): وحدة `Modules/Payouts` — طلب السحب يخصم من محفظة الكابتن فوراً (حجز)، الأدمن يعتمد (paid) أو يرفض (يُعيد المبلغ). حدّ أدنى 5 د.أ. مسارات الكابتن `/driver/wallet/withdrawals` ومسارات الأدمن `/admin/withdrawals/*` (بصلاحية payments.*). **endpoint أداء الكابتن** `/driver/performance`: الرتبة (Bronze→Silver→Gold→Platinum من Rewards) + التقدّم للرتبة التالية + الأرباح المتاحة + التقييم + عدد الرحلات. **منح نقاط للكابتن عند إكمال الرحلة** (مربوط بأمان في `TripService.end`). الفرونت: شاشة أرباح الكابتن (بطاقة الرتبة + شريط تقدّم + زر "سحب الأرباح" + سجل السحوبات) + شاشة نموذج السحب + `PayoutApi` (تتضمن طابور الأدمن). مغطّى بـ **6 اختبارات Feature**. (واجهة طابور السحب في لوحة الإدارة Next.js مؤجَّلة — الـ API جاهز.)
 - ✅ **العناوين المحفوظة (Saved Addresses)** (RFQ-143/144): وحدة `Modules/Addresses` — الطالب يحفظ مواقعه (منزل/جامعة/عمل/أخرى) بإحداثيات، مع عنوان افتراضي تلقائي وحماية ملكية (403 لغير المالك). CRUD على `/api/v1/student/addresses` + `/default`. الفرونت: شاشة عناوين الطالب (رقائق نوع + إضافة + تعيين افتراضي + حذف) + `AddressApi`. مغطّى بـ **4 اختبارات Feature**.
 - ✅ **التقارير المالية للإدارة (Financial Reports)** (RFQ-145/146): وحدة `Modules/Reports` (للقراءة فقط، بلا migration) — `FinancialReportService.summary(from,to,zoneId)` يجمّع: عدد الرحلات المدفوعة + إجمالي الأجور + **عمولة المنصة (الإيراد)** + أرباح الكباتن من `trip_passengers`، + السحوبات المدفوعة من `payout_requests`، + شحن المحفظة وإيراد الاشتراكات من `payment_requests`، مع تفصيل **حسب الزون** (by_zone). مسار `GET /api/v1/admin/reports/financial` (بصلاحية `analytics.view`). الفرونت: `FinancialReportApi` + endpoints مشتركة جاهزة للربط. مغطّى بـ **3 اختبارات Feature**. (صفحة لوحة الإدارة Next.js مؤجَّلة — الـ API جاهز.)
-- ⏳ التتبّع الحيّ (Reverb) عميل Echo + الخرائط (دليل لاحقاً) + Express dynamic pricing + min-fill
+- ✅ **المصادقة الثنائية للإدارة (MFA / TOTP)** (RFQ-147/149): تطبيق **TOTP (RFC 6238)** مكتفٍ ذاتياً بلا أي مكتبة خارجية (`TotpService`) + `MfaService` (تسجيل تدريجي begin/confirm + رموز استرداد لمرة واحدة + تحدّي دخول قصير العمر عبر cache + إيقاف). عند تفعيل MFA: تسجيل الدخول بكلمة المرور **لا يصدر توكن** بل يرجع `mfa_required` + `mfa_token`، ويُكمَل عبر `POST /auth/mfa/verify` برمز TOTP أو رمز استرداد. إدارة (مصادَق): `/auth/mfa/setup` (QR otpauth) + `/confirm` + `/disable` — **لحسابات الموظفين فقط**. أعمدة `users`: `mfa_secret` (مشفّر) + `mfa_enabled_at` + `mfa_recovery_codes` (مشفّر). الفرونت: `User.mfa_enabled` + أنواع MFA + `AuthApi.verifyMfa/mfaSetup/mfaConfirm/mfaDisable`. مغطّى بـ **7 اختبارات Feature + 5 Unit**.
+- ✅ **حدود المناطق المضلّعة (Geofence / Polygon Zones)** (RFQ-148/149): عمود `zones.boundary` (مصفوفة JSON من رؤوس `[lat,lng]`) كحدّ جغرافي اختياري. `Zone::containsPoint()` خوارزمية ray-casting (نقطة داخل مضلّع) + `hasBoundary/withinRadius`. `ZoneService::nearest()` صار يحلّ بالترتيب: **احتواء المضلّع → دائرة النطاق → أقرب مركز** (متوافق رجعياً). `ZoneRequest` يتحقق من الحدود (3 رؤوس على الأقل + نطاقات صحيحة)؛ `ZoneResource` يعرض `boundary + has_boundary`. الفرونت: نوع `Zone` + `ZonesApi` (list/create/update/remove). مغطّى بـ **3 اختبارات Feature**.
+- 🧹 **تنظيف وترتيب** (RFQ-150): حذف ملف التصاميم `stitch_*.zip` (13MB) من المستودع + إزالة 6 صور مكررة من جذر `docs/` (محفوظة منظّمة في `docs/img-stitch/`) + إضافة `*.zip` و`stitch_*/` إلى `.gitignore` + **دمج كل شغل المزايا (137→149) على فرع `foundation` مباشرة وإنهاء سلسلة الـ PRs المتداخلة**.
+- ⏳ واجهات لوحة الإدارة (Next.js) للوحدات الجديدة: السحوبات + التقارير المالية + إعداد MFA + محرر حدود المناطق (الـ APIs كلها جاهزة)
 - ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
 
@@ -262,5 +265,11 @@
 | 142 | feat(payouts): captain payout frontend — driver earnings screen (tier card + withdraw button + withdrawal history) + withdraw form screen + shared types/endpoints/i18n + PayoutApi (incl admin queue/approve/reject) |
 | 143 | feat(addresses): student saved addresses backend — Modules/Addresses (CRUD + set-default, auto-default, ownership 403) + 4 feature tests |
 | 144 | feat(addresses): saved addresses frontend — student addresses screen (label chips, add, set-default, delete) + settings entry + shared types/endpoints/i18n + AddressApi |
+| 145 | feat(reports): admin financial reports aggregation module (rides/commission/captain earnings + payouts + topups/subscriptions, by-zone) + 3 feature tests |
+| 146 | feat(reports): wire FinancialReportApi + shared types/endpoints + docs |
+| 147 | feat(auth): two-factor authentication (TOTP RFC 6238) for staff/admin — TotpService + MfaService (enroll, login challenge, recovery codes, disable) + encrypted user columns + 7 feature + 5 unit tests |
+| 148 | feat(zones): polygon geofence boundaries — zones.boundary + ray-casting containsPoint + nearest() polygon→radius→center + validation/resource + 3 feature tests |
+| 149 | feat(frontend): wire MFA + zones APIs — shared types/endpoints + AuthApi MFA methods + ZonesApi |
+| 150 | chore: consolidate all feature work (137→149) onto foundation + clean repo (drop 13MB design zip + dup docs images + .gitignore) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
