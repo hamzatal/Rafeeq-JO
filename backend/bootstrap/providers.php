@@ -27,6 +27,7 @@ return [
     Rafeeq\Modules\Wallet\Providers\WalletServiceProvider::class,
     Rafeeq\Modules\Payouts\Providers\PayoutsServiceProvider::class,
     Rafeeq\Modules\Payments\Providers\PaymentsServiceProvider::class,
+    Rafeeq\Modules\Reports\Providers\ReportsServiceProvider::class,
     Rafeeq\Modules\Notifications\Providers\NotificationsServiceProvider::class,
     Rafeeq\Modules\Ratings\Providers\RatingsServiceProvider::class,
     Rafeeq\Modules\Support\Providers\SupportServiceProvider::class,
