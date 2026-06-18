@@ -38,7 +38,7 @@ export function createHttp(options: RafeeqClientOptions): AxiosInstance {
   const http = axios.create({
     baseURL: `${options.baseURL.replace(/\/$/, '')}/api/${API_VERSION}`,
     headers: { Accept: 'application/json' },
-    timeout: 20000,
+    timeout: 15000,
   });
 
   http.interceptors.request.use(async (config) => {
@@ -54,9 +54,14 @@ export function createHttp(options: RafeeqClientOptions): AxiosInstance {
       const status = error.response?.status ?? 0;
       if (status === 401) options.onUnauthorized?.();
 
+      // No HTTP response → connectivity/timeout problem. Surface a clear,
+      // localized message instead of axios' generic "Network Error".
+      const isNetwork = !error.response;
       const payload: ApiError = error.response?.data ?? {
-        message: error.message || 'Network error',
-        code: 'NETWORK_ERROR',
+        message: isNetwork
+          ? 'تعذّر الاتصال بالخادم. تأكّد من اتصالك بالإنترنت ومن صحّة عنوان الـ API.'
+          : error.message || 'حدث خطأ غير متوقع.',
+        code: isNetwork ? 'NETWORK_ERROR' : 'UNKNOWN',
       };
       return Promise.reject(new RafeeqApiError(status, payload));
     },

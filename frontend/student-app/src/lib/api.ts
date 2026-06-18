@@ -14,7 +14,9 @@ export const setUnauthorizedHandler = (fn: () => void) => {
 };
 
 const apiUrl =
-  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ?? 'http://localhost:8000';
+  (process.env.EXPO_PUBLIC_API_URL as string | undefined) ??
+  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ??
+  'http://localhost:8000';
 
 export const api = createRafeeqApi({
   baseURL: apiUrl,
