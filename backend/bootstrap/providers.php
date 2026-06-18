@@ -12,6 +12,7 @@ return [
     Rafeeq\Modules\Users\Providers\UsersServiceProvider::class,
     Rafeeq\Modules\Students\Providers\StudentsServiceProvider::class,
     Rafeeq\Modules\Guardians\Providers\GuardiansServiceProvider::class,
+    Rafeeq\Modules\Chat\Providers\ChatServiceProvider::class,
     Rafeeq\Modules\Drivers\Providers\DriversServiceProvider::class,
     Rafeeq\Modules\Universities\Providers\UniversitiesServiceProvider::class,
     Rafeeq\Modules\Areas\Providers\AreasServiceProvider::class,
