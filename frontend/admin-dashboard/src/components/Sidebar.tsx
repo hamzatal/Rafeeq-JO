@@ -8,12 +8,16 @@ const LINKS = [
   { href: '/', label: 'الرئيسية' },
   { href: '/drivers', label: 'الكباتن' },
   { href: '/universities', label: 'الجامعات' },
+  { href: '/zones', label: 'المناطق' },
   { href: '/users', label: 'المستخدمون' },
   { href: '/payments', label: 'المدفوعات' },
+  { href: '/withdrawals', label: 'سحوبات الكباتن' },
+  { href: '/reports', label: 'التقارير المالية' },
   { href: '/ride-requests', label: 'طلبات الرحلات' },
   { href: '/support', label: 'الدعم' },
   { href: '/complaints', label: 'الشكاوى' },
   { href: '/safety', label: 'مركز الأمان' },
+  { href: '/security', label: 'الأمان (MFA)' },
 ];
 
 export function Sidebar() {
