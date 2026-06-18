@@ -67,7 +67,11 @@ export const useAuth = create<AuthState>((set, get) => {
     },
 
     async login(payload) {
-      await apply(await api.auth.login(payload));
+      const result = await api.auth.login(payload);
+      if (result.mfa_required) {
+        throw new Error('هذا الحساب يتطلب مصادقة ثنائية — سجّل الدخول عبر لوحة الإدارة');
+      }
+      await apply(result);
     },
 
     async refreshDriver() {

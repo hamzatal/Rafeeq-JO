@@ -21,13 +21,13 @@ interface ReverbExtra {
 
 const extra = (Constants.expoConfig?.extra ?? {}) as ReverbExtra;
 
-let echo: Echo | null = null;
+let echo: Echo<any> | null = null;
 
 export function realtimeEnabled(): boolean {
   return !!extra.reverbKey;
 }
 
-function getEcho(): Echo | null {
+function getEcho(): Echo<any> | null {
   if (!realtimeEnabled()) return null;
   if (!echo) {
     // laravel-echo needs Pusher on the global scope.

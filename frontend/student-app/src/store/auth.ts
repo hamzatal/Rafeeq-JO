@@ -64,6 +64,9 @@ export const useAuth = create<AuthState>((set) => {
 
     async login(payload) {
       const result = await api.auth.login(payload);
+      if (result.mfa_required) {
+        throw new Error('هذا الحساب يتطلب مصادقة ثنائية — سجّل الدخول عبر لوحة الإدارة');
+      }
       await apply(result);
     },
 
