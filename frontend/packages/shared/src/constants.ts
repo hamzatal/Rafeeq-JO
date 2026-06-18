@@ -34,6 +34,13 @@ export const ENDPOINTS = {
     contactCaptain: (studentUserId: string) => `/guardian/students/${studentUserId}/contact-captain`,
     sos: (studentUserId: string) => `/guardian/students/${studentUserId}/sos`,
   },
+  chat: {
+    conversations: '/chat/conversations',
+    open: (tripId: string) => `/chat/trips/${tripId}/open`,
+    messages: (conversationId: string) => `/chat/conversations/${conversationId}/messages`,
+    send: (conversationId: string) => `/chat/conversations/${conversationId}/messages`,
+    read: (conversationId: string) => `/chat/conversations/${conversationId}/read`,
+  },
   universities: {
     list: '/universities',
     one: (id: string) => `/universities/${id}`,

@@ -374,6 +374,17 @@ export const en: Translations = {
     revoked: 'Access revoked.',
     selfError: 'You cannot add yourself.',
   },
+  chat: {
+    title: 'Chat',
+    conversations: 'Conversations',
+    placeholder: 'Type a message...',
+    send: 'Send',
+    empty: 'No messages yet. Start the conversation.',
+    open: 'Chat',
+    withCaptain: 'Chat with the captain',
+    withStudent: 'Chat with the student',
+    loadError: 'Could not open the conversation.',
+  },
   validation: {
     required: 'This field is required',
     invalidPhone: 'Invalid phone number',

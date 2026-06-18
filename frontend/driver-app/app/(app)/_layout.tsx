@@ -42,6 +42,7 @@ export default function AppLayout() {
       <Tabs.Screen name="documents" options={{ href: null }} />
       <Tabs.Screen name="vehicle" options={{ href: null }} />
       <Tabs.Screen name="trip/[id]" options={{ href: null }} />
+      <Tabs.Screen name="chat" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import type { Trip, TripPassenger } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
@@ -15,6 +16,7 @@ import { useTheme, type AppTheme } from '../../src/theme';
 export default function Trips() {
   const { t, locale } = useI18n();
   const theme = useTheme();
+  const router = useRouter();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const [mine, setMine] = useState<TripPassenger[]>([]);
   const [available, setAvailable] = useState<Trip[]>([]);
@@ -119,6 +121,15 @@ export default function Trips() {
                 <Icon name="map-pin" size={16} color={theme.colors.primary} />
                 <Text style={s.trackText}>{t('trips.track')}</Text>
               </Pressable>
+              {p.trip && (p.status === 'booked' || p.status === 'onboard') && (
+                <Pressable
+                  onPress={() => router.push({ pathname: '/(app)/chat', params: { tripId: p.trip_id, title: t('chat.withCaptain') } })}
+                  style={s.trackBtn}
+                >
+                  <Icon name="message-circle" size={16} color={theme.colors.primary} />
+                  <Text style={s.trackText}>{t('chat.open')}</Text>
+                </Pressable>
+              )}
               {location[p.trip_id] && <Text style={s.meta}>📍 {location[p.trip_id]}</Text>}
               {coords[p.trip_id] && (
                 <LiveMap points={[{ ...coords[p.trip_id], kind: 'captain', label: t('trips.track') }]} height={200} />

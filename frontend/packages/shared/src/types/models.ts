@@ -566,3 +566,23 @@ export interface CaptainContact {
   masked_phone: string | null;
   call_mode: string;
 }
+
+
+/** ── In-app chat (student ↔ captain) ──────────────────────────────── */
+
+export interface ChatConversation {
+  id: string;
+  trip_id: string | null;
+  other_party: { id: string; name: string } | null;
+  last_message_at: string | null;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  sender_user_id: string;
+  mine: boolean;
+  body: string;
+  read: boolean;
+  created_at: string | null;
+}
