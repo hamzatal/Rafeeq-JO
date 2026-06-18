@@ -56,7 +56,7 @@ const makeStyles = (t: AppTheme) =>
     glowB: { position: 'absolute', bottom: 40, left: -80, width: 260, height: 260, borderRadius: 130, backgroundColor: t.colors.accent, opacity: 0.08 },
 
     hero: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-    logo: { width: 108, height: 108, borderRadius: 54, backgroundColor: 'rgba(0,229,255,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.lg, borderWidth: 3, borderColor: t.colors.accent },
+    logo: { width: 108, height: 108, borderRadius: 54, backgroundColor: 'rgba(255,191,0,0.14)', alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.lg, borderWidth: 3, borderColor: t.colors.accent },
     glyph: { fontFamily: t.fontFamily.extrabold, fontSize: 56, color: t.colors.accent },
     brand: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: '#FFFFFF', marginBottom: t.spacing.base },
     title: { fontFamily: t.fontFamily.bold, fontSize: 22, color: '#FFFFFF', textAlign: 'center', marginBottom: t.spacing.sm },
