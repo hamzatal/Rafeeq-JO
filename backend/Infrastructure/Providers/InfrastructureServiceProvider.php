@@ -12,6 +12,7 @@ use Rafeeq\Infrastructure\Push\LogPushGateway;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
 use Rafeeq\Infrastructure\Sms\HttpSmsGateway;
 use Rafeeq\Infrastructure\Sms\LogSmsGateway;
+use Rafeeq\Infrastructure\Sms\WhatsAppSmsGateway;
 
 class InfrastructureServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,7 @@ class InfrastructureServiceProvider extends ServiceProvider
         $this->app->bind(SmsGateway::class, function () {
             return match (config('services.sms.driver', 'log')) {
                 'http' => new HttpSmsGateway,
+                'whatsapp' => new WhatsAppSmsGateway,
                 default => new LogSmsGateway,
             };
         });

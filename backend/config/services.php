@@ -35,6 +35,15 @@ return [
         'base_url' => env('SMS_BASE_URL'),
     ],
 
+    // Self-hosted OpenWA WhatsApp gateway (https://github.com/rmyndharis/OpenWA).
+    // Set SMS_DRIVER=whatsapp to deliver OTP/notifications over WhatsApp.
+    'whatsapp' => [
+        'url' => env('WHATSAPP_GATEWAY_URL', 'http://localhost:2785'),
+        'api_key' => env('WHATSAPP_API_KEY'),
+        'session' => env('WHATSAPP_SESSION', 'rafeeq'),
+        'timeout' => (int) env('WHATSAPP_TIMEOUT', 15),
+    ],
+
     'maps' => [
         'provider' => env('MAPS_PROVIDER', 'google'),
         'google_key' => env('GOOGLE_MAPS_KEY'),
