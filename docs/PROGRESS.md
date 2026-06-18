@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-183 |
+| آخر Commit | RFQ-191 |
 | نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
@@ -305,5 +305,13 @@
 | 181 | docs: student wallet Stitch redesign |
 | 182 | feat(otp): WhatsApp OTP delivery via self-hosted OpenWA gateway (+3 tests) |
 | 183 | docs: WhatsApp OTP setup |
+| 184 | docs(running): OpenWA runs in a separate folder + API_MASTER_KEY |
+| 185 | feat(theme): student app → Deep Navy #0B192C + Heritage Gold #FFBF00 (Stitch) |
+| 186 | feat(apps): app-wide ErrorBoundary (student/driver/guardian) — a screen crash no longer kills the app |
+| 187 | fix(apps): optimistic startup — never hang on the network at boot |
+| 188 | feat(student): branded auth screens (navy+gold AuthHeader) |
+| 189 | feat(student): circular gold-tinted service tiles (Stitch) |
+| 190 | feat(admin): Next.js error + global-error boundaries (resilience) |
+| 191 | docs: student navy+gold + resilience batch |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
