@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-156 |
-| نسبة الإنجاز | ~98% · كل وحدات المزايا + واجهات إدارتها مدموجة على foundation |
-| المرحلة الحالية | **كل المزايا الأساسية + واجهات لوحة الإدارة جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + AI Fraud Monitor متقدّم + تلميع** |
+| آخر Commit | RFQ-160 |
+| نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال المتقدّمة + مركز النزاعات على foundation |
+| المرحلة الحالية | **منصّة مكتملة المزايا. المتبقّي: تشغيل/اختبار فعلي محلياً + جدولة sweep + تلميع** |
 
 ---
 
@@ -108,7 +108,8 @@
 - ✅ **حدود المناطق المضلّعة (Geofence / Polygon Zones)** (RFQ-148/149): عمود `zones.boundary` (مصفوفة JSON من رؤوس `[lat,lng]`) كحدّ جغرافي اختياري. `Zone::containsPoint()` خوارزمية ray-casting (نقطة داخل مضلّع) + `hasBoundary/withinRadius`. `ZoneService::nearest()` صار يحلّ بالترتيب: **احتواء المضلّع → دائرة النطاق → أقرب مركز** (متوافق رجعياً). `ZoneRequest` يتحقق من الحدود (3 رؤوس على الأقل + نطاقات صحيحة)؛ `ZoneResource` يعرض `boundary + has_boundary`. الفرونت: نوع `Zone` + `ZonesApi` (list/create/update/remove). مغطّى بـ **3 اختبارات Feature**.
 - 🧹 **تنظيف وترتيب** (RFQ-150): حذف ملف التصاميم `stitch_*.zip` (13MB) من المستودع + إزالة 6 صور مكررة من جذر `docs/` (محفوظة منظّمة في `docs/img-stitch/`) + إضافة `*.zip` و`stitch_*/` إلى `.gitignore` + **دمج كل شغل المزايا (137→149) على فرع `foundation` مباشرة وإنهاء سلسلة الـ PRs المتداخلة**.
 - ✅ **واجهات لوحة الإدارة (Next.js) للوحدات الجديدة** (RFQ-151→156): **دخول الموظفين بتحدّي MFA من خطوتين** + صفحة **`/withdrawals`** (طابور سحوبات الكباتن: اعتماد/رفض مع إعادة الرصيد) + صفحة **`/reports`** (تقارير مالية بنطاق تاريخ + تفصيل حسب المنطقة) + صفحة **`/zones`** (إدارة المناطق + **محرّر حدود المضلّع Geofence**) + صفحة **`/security`** (تفعيل/إيقاف MFA + رموز استرداد) + روابط Sidebar. (الفرونت غير مُتحقَّق بناءً؛ الملفات مُتحقَّقة صياغياً.)
-- ⏳ AI Fraud Monitor (تحليل ذكي فوق الأساس) + Risk Score مجمّع + مركز النزاعات
+- ✅ **مكافحة الاحتيال المتقدّمة + مركز النزاعات** (RFQ-157→160): **كشف تواطؤ** الكابتن↔الطالب عبر الإلغاءات المتكررة (`FraudMonitorService.detectCollusionFor` + `assess`) + **تجميد تلقائي** عند `score≥85` أو علامة حرجة + **وحدة `Modules/Disputes`** (ملف تحقيق يجمّع الأدلّة: علامات الخطر + الإلغاءات + مراقبات الرحلة الوهمية + درجة الخطر الحيّة؛ سير عمل فتح/إسناد/معالجة/رفض/تجميد) + **صفحة `/disputes`** في لوحة الإدارة + ربط `DisputesApi`. مغطّى بـ **11 اختبار** (المجموع 74 ناجح).
+- ⏳ جدولة `DisputeService.sweep()` عبر cron + لوحة AI insights للنزاعات (تحليل سردي اختياري عبر GPT)
 - ⏳ مزايا: نسائي، No-show، تقييم ثنائي، حوافز، مشاركة الرحلة، SMS fallback
 
 ---
@@ -277,5 +278,9 @@
 | 154 | feat(admin): zones management with polygon geofence vertex editor |
 | 155 | feat(admin): MFA self-enrollment page (setup/confirm/recovery/disable) + sidebar nav |
 | 156 | docs: mark admin dashboard UIs done in PROGRESS.md + FEATURES.md |
+| 157 | feat(ai): collusion pattern detection + risk assessment (detectCollusionFor + assess) |
+| 158 | feat(disputes): dispute/investigation center + auto-freeze (evidence + workflow) |
+| 159 | feat(admin): dispute center frontend (DisputesApi + /disputes page + sidebar) |
+| 160 | docs: advanced anti-fraud + dispute center in PROGRESS.md + FEATURES.md |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
