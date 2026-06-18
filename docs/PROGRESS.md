@@ -8,7 +8,7 @@
 | الفرع الحالي | `foundation/phase-0-1` |
 | آخر Commit | RFQ-115 |
 | نسبة الإنجاز | ~81% · **بدأ تجديد التصميم (Design System v2)** |
-| المرحلة الحالية | **إعادة تصميم شاملة — أساس DS v2 + هوية أردنية خضراء + Bottom Tabs + رئيسية الطالب. التالي: بقية شاشات الطالب** |
+| المرحلة الحالية | **تطبيق الطالب أُعيد تصميمه بالكامل (DS v2). التالي: تطبيق الكابتن + لوحة الإدارة بنفس النظام** |
 
 ---
 
@@ -228,5 +228,6 @@
 | 116 | feat(student-app): redesign Account/Settings (profile + quick links) + Notifications + Wallet with DS v2 components |
 | 117 | feat(student-app): redesign Trips tab (cards + empty states + star ratings + live tracking) — all 5 tabs now DS v2 |
 | 118 | feat(student-app): redesign Subscriptions + Ride Request screens (DS v2) + fix missing react-hooks import in Subscriptions |
+| 119 | feat(student-app): redesign Support + Parcels + Lost&Found + Exchange + Payments (DS v2) — student app fully redesigned |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

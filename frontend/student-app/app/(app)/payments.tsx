@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { CliqInstructions, PaymentRequest } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Screen } from '../../src/components/Screen';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
 import { Banner } from '../../src/components/Banner';
+import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
+import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-/** Web-only file picker for the CliQ transfer proof image. */
 function pickImageWeb(): Promise<unknown> {
   return new Promise((resolve) => {
     const doc = (globalThis as unknown as { document?: any }).document;
@@ -90,65 +91,71 @@ export default function Payments() {
   };
 
   const canUpload = (status: string) => ['pending', 'submitted', 'under_review'].includes(status);
+  const tone = (status: string) => (status === 'approved' ? 'success' : status === 'rejected' ? 'danger' : 'primary');
 
   return (
-    <Screen scroll>
-      <Text style={s.h1}>{t('payments.title')}</Text>
-      {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <Text style={s.h1}>{t('payments.title')}</Text>
+        {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
-      <View style={s.card}>
-        <Text style={s.section}>{t('payments.topupWallet')}</Text>
-        <Input label={t('wallet.amount')} keyboardType="numeric" value={amount} onChangeText={setAmount} placeholder="5" />
-        <Button title={t('payments.topupWallet')} onPress={createTopup} loading={busy} />
-      </View>
+        <SectionTitle title={t('payments.topupWallet')} />
+        <Card>
+          <Input label={t('wallet.amount')} keyboardType="numeric" value={amount} onChangeText={setAmount} placeholder="5" />
+          <Button title={t('payments.topupWallet')} onPress={createTopup} loading={busy} />
+        </Card>
 
-      {instructions && (
-        <View style={s.cliqCard}>
-          <Text style={s.cliqTitle}>{t('wallet.cliqTitle')}</Text>
-          <Text style={s.rowValue}>{t('wallet.alias')}: {instructions.alias ?? '—'}</Text>
-          <Text style={s.rowValue}>{t('wallet.reference')}: {instructions.reference}</Text>
-          <Text style={s.note}>{instructions.note}</Text>
-        </View>
-      )}
-
-      <Text style={s.section}>{t('payments.title')}</Text>
-      {items.length === 0 ? (
-        <Text style={s.meta}>{t('payments.none')}</Text>
-      ) : (
-        items.map((p) => (
-          <View key={p.id} style={s.card}>
-            <View style={s.row}>
-              <Text style={s.cardTitle}>{p.number}</Text>
-              <Text style={s.badge}>{p.status_label}</Text>
+        {instructions && (
+          <Card style={{ borderColor: theme.colors.primary }}>
+            <View style={s.cliqHead}>
+              <Icon name="info" size={18} color={theme.colors.primary} />
+              <Text style={s.cliqTitle}>{t('wallet.cliqTitle')}</Text>
             </View>
-            <Text style={s.meta}>{p.purpose_label} · {p.amount_jod.toFixed(3)} {t('subscriptions.currency')}</Text>
-            {p.created_at && <Text style={s.meta}>{new Date(p.created_at).toLocaleString(locale)}</Text>}
-            {p.reject_reason && <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text>}
-            {canUpload(p.status) && (
-              <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
-                <Text style={s.uploadText}>{uploading === p.id ? '...' : t('payments.uploadProof')}</Text>
-              </Pressable>
-            )}
-          </View>
-        ))
-      )}
-    </Screen>
+            <Text style={s.rowValue}>{t('wallet.alias')}: {instructions.alias ?? '—'}</Text>
+            <Text style={s.rowValue}>{t('wallet.reference')}: {instructions.reference}</Text>
+            <Text style={s.note}>{instructions.note}</Text>
+          </Card>
+        )}
+
+        <SectionTitle title={t('payments.title')} />
+        {items.length === 0 ? (
+          <EmptyState icon="dollar-sign" title={t('payments.none')} />
+        ) : (
+          items.map((p) => (
+            <Card key={p.id}>
+              <View style={s.row}>
+                <Text style={s.cardTitle}>{p.number}</Text>
+                <Badge label={p.status_label} tone={tone(p.status)} />
+              </View>
+              <Text style={s.meta}>{p.purpose_label} · {p.amount_jod.toFixed(3)} {t('subscriptions.currency')}</Text>
+              {p.created_at && <Text style={s.meta}>{new Date(p.created_at).toLocaleString(locale)}</Text>}
+              {p.reject_reason && <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text>}
+              {canUpload(p.status) && (
+                <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
+                  <Icon name="upload" size={16} color={theme.colors.primary} />
+                  <Text style={s.uploadText}>{uploading === p.id ? '...' : t('payments.uploadProof')}</Text>
+                </Pressable>
+              )}
+            </Card>
+          ))
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
-    section: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right', marginTop: t.spacing.base, marginBottom: t.spacing.sm },
-    card: { backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base },
-    cliqCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.primary, padding: t.spacing.base, marginBottom: t.spacing.base },
-    cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.xs },
+    safe: { flex: 1, backgroundColor: t.colors.background },
+    content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
+    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
+    cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: t.spacing.xs },
+    cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
     cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
-    badge: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.primary },
     rowValue: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.text, textAlign: 'right', marginBottom: 2 },
     note: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, textAlign: 'right', marginTop: t.spacing.xs },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
-    uploadBtn: { marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10, alignItems: 'center' },
+    uploadBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10 },
     uploadText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
   });
