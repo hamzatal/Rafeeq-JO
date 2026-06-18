@@ -24,7 +24,8 @@ class Trip extends Model
     use HasUuid;
 
     protected $fillable = [
-        'route_id', 'driver_id', 'vehicle_id', 'zone_id', 'university_id', 'type', 'fare_fils',
+        'route_id', 'driver_id', 'vehicle_id', 'zone_id', 'university_id', 'type',
+        'is_express', 'fare_fils', 'base_fare_fils', 'express_fee_fils', 'surge_multiplier',
         'scheduled_at', 'status', 'started_at', 'ended_at', 'capacity',
     ];
 
@@ -36,6 +37,11 @@ class Trip extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
             'capacity' => 'integer',
+            'is_express' => 'boolean',
+            'fare_fils' => 'integer',
+            'base_fare_fils' => 'integer',
+            'express_fee_fils' => 'integer',
+            'surge_multiplier' => 'float',
         ];
     }
 
