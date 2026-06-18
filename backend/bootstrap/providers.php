@@ -31,5 +31,6 @@ return [
     Rafeeq\Modules\Rewards\Providers\RewardsServiceProvider::class,
     Rafeeq\Modules\LostFound\Providers\LostFoundServiceProvider::class,
     Rafeeq\Modules\Exchange\Providers\ExchangeServiceProvider::class,
+    Rafeeq\Modules\AI\Providers\AIServiceProvider::class,
     Rafeeq\Modules\Safety\Providers\SafetyServiceProvider::class,
 ];
