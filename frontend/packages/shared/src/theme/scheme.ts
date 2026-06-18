@@ -24,38 +24,37 @@ export interface ThemeColors {
 const status = {
   success: '#16A34A',
   warning: '#E0930C',
-  danger: '#CE1126', // Jordan red
+  danger: '#DC2626',
   info: '#0EA5E9',
 };
 
 // Role accent (brand) per app — Jordan-inspired: deep green + heritage gold.
 const roleAccent: Record<ThemeRole, { primary: string; primaryDark: string; accent: string; onPrimary: string }> = {
-  student: { primary: '#0B7A43', primaryDark: '#075C32', accent: '#E6B23E', onPrimary: '#FFFFFF' },
-  driver: { primary: '#E6B23E', primaryDark: '#C7951F', accent: '#E6B23E', onPrimary: '#0E261C' },
-  admin: { primary: '#0B7A43', primaryDark: '#075C32', accent: '#E6B23E', onPrimary: '#FFFFFF' },
-  // Guardian app — protective deep navy + heritage gold (safety-first persona).
+  student: { primary: '#0B192C', primaryDark: '#001F3F', accent: '#00E5FF', onPrimary: '#FFFFFF' },
+  driver: { primary: '#00E5FF', primaryDark: '#00B8CC', accent: '#00E5FF', onPrimary: '#06121F' },
+  admin: { primary: '#0B192C', primaryDark: '#001F3F', accent: '#00E5FF', onPrimary: '#FFFFFF' },
   guardian: { primary: '#0E2A47', primaryDark: '#08203A', accent: '#E6B23E', onPrimary: '#FFFFFF' },
 };
 
 const neutralsLight = {
-  background: '#F4F7F5',
+  background: '#F4F7FB',
   surface: '#FFFFFF',
   card: '#FFFFFF',
-  text: '#0E261C',
-  textSecondary: '#516159',
-  muted: '#9AA8A0',
-  border: '#E4EAE6',
-  overlay: 'rgba(14,38,28,0.45)',
+  text: '#0F172A',
+  textSecondary: '#475569',
+  muted: '#94A3B8',
+  border: '#E2E8F0',
+  overlay: 'rgba(11,25,44,0.45)',
 };
 
 const neutralsDark = {
-  background: '#08130D',
-  surface: '#0F2017',
-  card: '#142A1E',
-  text: '#ECF4EF',
-  textSecondary: '#9FB3A8',
-  muted: '#5E7268',
-  border: '#214034',
+  background: '#06121F',
+  surface: '#0E2747',
+  card: '#13314F',
+  text: '#E6EEF7',
+  textSecondary: '#90A4BC',
+  muted: '#5A6B7B',
+  border: '#1E3A5F',
   overlay: 'rgba(0,0,0,0.6)',
 };
 
@@ -64,20 +63,33 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   const accent = roleAccent[role];
   const neutrals = scheme === 'dark' ? neutralsDark : neutralsLight;
 
-  // Lift the brand green slightly in dark mode for contrast (green personas only).
-  const greenPersona = role === 'student' || role === 'admin';
-  const primary = scheme === 'dark' && greenPersona ? '#15A05A' : accent.primary;
-  const primarySoft =
-    role === 'guardian'
-      ? (scheme === 'dark' ? 'rgba(14,42,71,0.28)' : 'rgba(14,42,71,0.10)')
-      : (scheme === 'dark' ? 'rgba(21,160,90,0.16)' : 'rgba(11,122,67,0.10)');
+  // Lift the brand colour in dark mode for navy personas: the navy primary
+  // would vanish on the navy canvas, so the vibrant cyan becomes the action.
+  const navyPersona = role === 'student' || role === 'admin';
+  let primary = accent.primary;
+  let onPrimary = accent.onPrimary;
+  if (scheme === 'dark' && navyPersona) {
+    primary = '#00E5FF';
+    onPrimary = '#06121F';
+  }
+  const primarySoft = navyPersona
+    ? scheme === 'dark'
+      ? 'rgba(0,229,255,0.16)'
+      : 'rgba(0,229,255,0.12)'
+    : role === 'guardian'
+      ? scheme === 'dark'
+        ? 'rgba(14,42,71,0.28)'
+        : 'rgba(14,42,71,0.10)'
+      : scheme === 'dark'
+        ? 'rgba(0,229,255,0.18)'
+        : 'rgba(0,184,204,0.12)';
 
   return {
     primary,
     primaryDark: accent.primaryDark,
     primarySoft,
     accent: accent.accent,
-    onPrimary: accent.onPrimary,
+    onPrimary,
     ...neutrals,
     ...status,
   };
