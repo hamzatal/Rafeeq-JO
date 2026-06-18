@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-122 |
-| نسبة الإنجاز | ~86% · تطبيقا الطالب والكابتن مُعاد تصميمهما بالكامل |
-| المرحلة الحالية | **الطالب + الكابتن مكتملان (DS v2). التالي: لوحة الإدارة + شاشات Auth + طبقة AI + الإطلاق** |
+| آخر Commit | RFQ-125 |
+| نسبة الإنجاز | ~89% · التطبيقان مُعاد تصميمهما + بنية نشر إنتاج |
+| المرحلة الحالية | **بنية الإطلاق (Docker/نشر/قانوني) جاهزة. المتبقّي: طبقة AI (مفتاح OpenAI) + خرائط (مفتاح) + اختبارات + PostGIS فعلي** |
 
 ---
 
@@ -234,5 +234,6 @@
 | 122 | feat(driver-app): redesign Documents + Vehicle screens (DS v2) + wire all hardcoded strings to i18n — driver app fully redesigned |
 | 123 | fix(i18n): wire last hardcoded auth strings (OTP test code + captain badge) — zero hardcoded UI strings across both apps |
 | 124 | feat(driver-app): redesign Trip Detail screen (DS v2) + wire all strings — 100% zero hardcoded Arabic across both mobile apps |
+| 125 | chore(deploy): production Dockerfiles (API + admin) + prod compose + hardened .env.production + legal policies (ar) + DEPLOYMENT.md |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

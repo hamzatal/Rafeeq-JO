@@ -1,0 +1,73 @@
+# Production stack for Rafeeq.
+# Secrets MUST be provided via a real secrets manager / .env (never committed).
+#   docker compose -f deployment/docker-compose.prod.yml up -d
+services:
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ../backend/.env.production
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports:
+      - "8000:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  admin:
+    build:
+      context: ../frontend
+      dockerfile: admin-dashboard/Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${ADMIN_API_URL:-https://api.rafeeq.jo}
+    ports:
+      - "3000:3000"
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-rafeeq}
+      POSTGRES_USER: ${DB_USERNAME:-rafeeq}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-rafeeq}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  reverb:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ../backend/.env.production
+    command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    depends_on:
+      redis: { condition: service_healthy }
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
+  redisdata:
