@@ -20,6 +20,7 @@ export default function TripDetail() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [passengers, setPassengers] = useState<TripPassenger[]>([]);
   const [code, setCode] = useState('');
+  const [dropCode, setDropCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
@@ -42,6 +43,12 @@ export default function TripDetail() {
     if (code.trim().length < 4) return;
     await act(() => api.driverTrips.confirmBoarding(id, code.trim()), t('driver.boardingConfirmed'));
     setCode('');
+  };
+
+  const confirmDropoff = async () => {
+    if (dropCode.trim().length < 4) return;
+    await act(() => api.driverTrips.confirmDropoff(id, dropCode.trim()), t('driver.dropoffConfirmed'));
+    setDropCode('');
   };
 
   if (!trip) {
@@ -75,6 +82,12 @@ export default function TripDetail() {
               <Text style={s.meta}>{t('driver.enterBoardingCode')}</Text>
               <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="----" style={s.codeInput} />
               <Button title={t('common.confirm')} onPress={confirmBoarding} loading={busy} />
+            </Card>
+            <Card>
+              <SectionTitle title={t('driver.confirmDropoffTitle')} />
+              <Text style={s.meta}>{t('driver.enterDropoffCode')}</Text>
+              <Input value={dropCode} onChangeText={setDropCode} keyboardType="number-pad" maxLength={6} placeholder="----" style={s.codeInput} />
+              <Button title={t('common.confirm')} onPress={confirmDropoff} loading={busy} />
             </Card>
             <Button title={t('driver.endTrip')} onPress={() => act(() => api.driverTrips.end(id), t('driver.tripEnded'))} style={{ marginBottom: theme.spacing.base }} />
           </>

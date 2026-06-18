@@ -20,6 +20,7 @@ enum NotificationType: string
     case RideMatched = 'ride_matched';
     case RideOffer = 'ride_offer';
     case BoardingConfirmed = 'boarding_confirmed';
+    case DropoffConfirmed = 'dropoff_confirmed';
     case RatingRequest = 'rating_request';
     case SosTriggered = 'sos_triggered';
     case AccountFrozen = 'account_frozen';
@@ -33,7 +34,7 @@ enum NotificationType: string
             self::SubscriptionActivated, self::WalletCredited => 'payments',
             self::TripScheduled, self::TripStarted, self::TripCancelled,
             self::TripCompleted, self::RideMatched, self::RideOffer,
-            self::BoardingConfirmed => 'trips',
+            self::BoardingConfirmed, self::DropoffConfirmed => 'trips',
             self::RatingRequest => 'ratings',
             self::SosTriggered, self::AccountFrozen => 'safety',
             default => 'general',

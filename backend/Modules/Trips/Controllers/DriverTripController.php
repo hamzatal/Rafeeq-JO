@@ -11,6 +11,7 @@ use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Requests\ConfirmBoardingRequest;
+use Rafeeq\Modules\Trips\Requests\ConfirmDropoffRequest;
 use Rafeeq\Modules\Trips\Requests\LocationRequest;
 use Rafeeq\Modules\Trips\Requests\ScheduleTripRequest;
 use Rafeeq\Modules\Trips\Resources\TripPassengerResource;
@@ -138,6 +139,14 @@ class DriverTripController extends Controller
         $passenger = $this->service->confirmBoarding($trip, $request->input('code'));
 
         return $this->ok(new TripPassengerResource($passenger), 'تم تأكيد صعود الراكب.');
+    }
+
+    public function confirmDropoff(ConfirmDropoffRequest $request, Trip $trip): JsonResponse
+    {
+        $this->ownedTrip($request, $trip);
+        $passenger = $this->service->confirmDropoff($trip, $request->input('code'));
+
+        return $this->ok(new TripPassengerResource($passenger), 'تم تأكيد إنزال الراكب.');
     }
 
     public function pushLocation(LocationRequest $request, Trip $trip): JsonResponse

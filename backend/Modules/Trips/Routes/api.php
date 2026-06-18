@@ -16,6 +16,7 @@ Route::prefix('v1/driver/trips')->middleware(['auth:sanctum', 'role:driver'])->g
     Route::post('{trip}/end', [DriverTripController::class, 'end']);
     Route::post('{trip}/cancel', [DriverTripController::class, 'cancel']);
     Route::post('{trip}/board', [DriverTripController::class, 'confirmBoarding']);
+    Route::post('{trip}/dropoff', [DriverTripController::class, 'confirmDropoff']);
     Route::post('{trip}/location', [DriverTripController::class, 'pushLocation']);
 });
 
