@@ -21,6 +21,8 @@ class ZoneResource extends JsonResource
             'center_lat' => $this->center_lat,
             'center_lng' => $this->center_lng,
             'radius_km' => $this->radius_km,
+            'boundary' => $this->boundary,
+            'has_boundary' => $this->hasBoundary(),
             'is_active' => $this->is_active,
         ];
     }

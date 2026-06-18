@@ -21,6 +21,10 @@ import { ExchangeApi } from './exchange';
 import { AssistantApi } from './assistant';
 import { GuardianApi, StudentGuardiansApi } from './guardian';
 import { ChatApi } from './chat';
+import { PayoutApi } from './payouts';
+import { AddressApi } from './addresses';
+import { FinancialReportApi } from './reports';
+import { ZonesApi } from './zones';
 
 export * from './client';
 export * from './auth';
@@ -44,6 +48,10 @@ export * from './exchange';
 export * from './assistant';
 export * from './guardian';
 export * from './chat';
+export * from './payouts';
+export * from './addresses';
+export * from './reports';
+export * from './zones';
 
 /** Aggregated API surface. Extend with more domains as modules land. */
 export class RafeeqApi {
@@ -70,6 +78,10 @@ export class RafeeqApi {
   readonly guardian: GuardianApi;
   readonly studentGuardians: StudentGuardiansApi;
   readonly chat: ChatApi;
+  readonly payouts: PayoutApi;
+  readonly addresses: AddressApi;
+  readonly reports: FinancialReportApi;
+  readonly zones: ZonesApi;
 
   constructor(options: RafeeqClientOptions) {
     this.http = createHttp(options);
@@ -95,6 +107,10 @@ export class RafeeqApi {
     this.guardian = new GuardianApi(this.http);
     this.studentGuardians = new StudentGuardiansApi(this.http);
     this.chat = new ChatApi(this.http);
+    this.payouts = new PayoutApi(this.http);
+    this.addresses = new AddressApi(this.http);
+    this.reports = new FinancialReportApi(this.http);
+    this.zones = new ZonesApi(this.http);
   }
 }
 

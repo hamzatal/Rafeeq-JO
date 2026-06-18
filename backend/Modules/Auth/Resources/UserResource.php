@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'locale' => $this->locale,
             'avatar_url' => $this->avatar_path ? url($this->avatar_path) : null,
             'phone_verified' => $this->isPhoneVerified(),
+            'mfa_enabled' => $this->hasMfaEnabled(),
             'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('name')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];

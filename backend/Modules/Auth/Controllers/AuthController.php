@@ -12,13 +12,15 @@ use Rafeeq\Modules\Auth\Requests\RequestOtpRequest;
 use Rafeeq\Modules\Auth\Requests\ResendOtpRequest;
 use Rafeeq\Modules\Auth\Requests\ResetPasswordRequest;
 use Rafeeq\Modules\Auth\Requests\VerifyOtpRequest;
+use Rafeeq\Modules\Auth\Requests\VerifyMfaRequest;
+use Rafeeq\Modules\Auth\Requests\ConfirmMfaRequest;
 use Rafeeq\Modules\Auth\Resources\UserResource;
 use Rafeeq\Modules\Auth\Services\AuthService;
 use Rafeeq\Shared\Enums\OtpChannel;
 
 class AuthController extends Controller
 {
-    public function __construct(private readonly AuthService $auth) {}
+    public function __construct(private readonly AuthService $auth, private readonly \Rafeeq\Modules\Auth\Services\MfaService $mfa) {}
 
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -75,11 +77,60 @@ class AuthController extends Controller
             request: $request,
         );
 
+        if ($result['mfa_required']) {
+            return $this->ok([
+                'mfa_required' => true,
+                'mfa_token' => $result['mfa_token'],
+            ], 'أدخل رمز المصادقة الثنائية لإكمال الدخول.');
+        }
+
+        return $this->ok([
+            'mfa_required' => false,
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
+            'token_type' => 'Bearer',
+        ], 'تم تسجيل الدخول.');
+    }
+
+    public function verifyMfa(VerifyMfaRequest $request): JsonResponse
+    {
+        $result = $this->auth->verifyMfaChallenge(
+            mfaToken: $request->input('mfa_token'),
+            code: $request->input('code'),
+            deviceName: $request->input('device_name'),
+            request: $request,
+        );
+
         return $this->ok([
             'user' => new UserResource($result['user']),
             'token' => $result['token'],
             'token_type' => 'Bearer',
         ], 'تم تسجيل الدخول.');
+    }
+
+    /* ── MFA management (authenticated) ──────────────────────────────── */
+
+    public function mfaSetup(Request $request): JsonResponse
+    {
+        $data = $this->mfa->beginSetup($request->user());
+
+        return $this->ok($data, 'امسح رمز QR في تطبيق المصادقة ثم أكّد بالرمز.');
+    }
+
+    public function mfaConfirm(ConfirmMfaRequest $request): JsonResponse
+    {
+        $recoveryCodes = $this->mfa->confirmSetup($request->user(), $request->input('code'));
+
+        return $this->ok([
+            'recovery_codes' => $recoveryCodes,
+        ], 'تم تفعيل المصادقة الثنائية. احفظ رموز الاسترداد في مكان آمن.');
+    }
+
+    public function mfaDisable(ConfirmMfaRequest $request): JsonResponse
+    {
+        $this->mfa->disable($request->user(), $request->input('code'));
+
+        return $this->ok(null, 'تم إيقاف المصادقة الثنائية.');
     }
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse

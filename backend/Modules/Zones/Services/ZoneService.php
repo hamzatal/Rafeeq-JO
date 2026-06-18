@@ -10,10 +10,25 @@ class ZoneService extends BaseService
 {
     public function __construct(private readonly AuditLogger $audit) {}
 
-    /** Find the nearest active zone to a coordinate (or null if none in range). */
+    /**
+     * Find the zone a coordinate belongs to.
+     *
+     * Resolution order:
+     *  1. A zone whose polygon geofence contains the point (most precise).
+     *  2. A zone whose radius circle contains the point.
+     *  3. The nearest zone by center distance (fallback).
+     */
     public function nearest(float $lat, float $lng): ?Zone
     {
         $zones = Zone::where('is_active', true)->get();
+
+        // 1) Polygon geofence match wins.
+        foreach ($zones as $zone) {
+            if ($zone->hasBoundary() && $zone->containsPoint($lat, $lng)) {
+                return $zone;
+            }
+        }
+
         $best = null;
         $bestDist = INF;
 
@@ -25,7 +40,7 @@ class ZoneService extends BaseService
             }
         }
 
-        // Prefer a zone whose radius contains the point; otherwise return nearest.
+        // 2/3) Prefer a zone whose radius contains the point; otherwise nearest.
         if ($best && $bestDist <= $best->radius_km) {
             return $best;
         }

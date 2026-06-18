@@ -20,6 +20,7 @@ class AuthService extends BaseService
         private readonly UserRepository $users,
         private readonly OtpService $otp,
         private readonly AuditLogger $audit,
+        private readonly MfaService $mfa,
     ) {}
 
     /**
@@ -104,7 +105,11 @@ class AuthService extends BaseService
     /**
      * Password login (mainly for staff/admin).
      *
-     * @return array{user: User, token: string}
+     * When the account has two-factor authentication enabled, NO token is
+     * issued here — instead a short-lived MFA challenge is returned and the
+     * caller must complete `verifyMfaChallenge()` with a TOTP/recovery code.
+     *
+     * @return array{user: User, token: ?string, mfa_required: bool, mfa_token: ?string}
      */
     public function login(string $phone, string $password, ?string $deviceName = null, ?Request $request = null): array
     {
@@ -116,9 +121,49 @@ class AuthService extends BaseService
 
         $this->guardCanLogin($user);
 
+        if ($user->hasMfaEnabled()) {
+            $this->audit->log('auth.login_mfa_challenge', $user, $request, $user);
+
+            return [
+                'user' => $user,
+                'token' => null,
+                'mfa_required' => true,
+                'mfa_token' => $this->mfa->issueChallenge($user),
+            ];
+        }
+
         $token = $this->issueToken($user, $deviceName, $request);
 
         $this->audit->log('auth.login', $user, $request, $user);
+
+        return [
+            'user' => $user->fresh('roles'),
+            'token' => $token,
+            'mfa_required' => false,
+            'mfa_token' => null,
+        ];
+    }
+
+    /**
+     * Complete an MFA login: verify the TOTP/recovery code for a challenge and
+     * issue the access token.
+     *
+     * @return array{user: User, token: string}
+     */
+    public function verifyMfaChallenge(string $mfaToken, string $code, ?string $deviceName = null, ?Request $request = null): array
+    {
+        $user = $this->mfa->resolveChallenge($mfaToken);
+
+        if (! $this->mfa->verifyCode($user, $code)) {
+            throw new BusinessRuleException('رمز التحقق غير صحيح.', 'MFA_CODE_INVALID');
+        }
+
+        $this->guardCanLogin($user);
+        $this->mfa->consumeChallenge($mfaToken);
+
+        $token = $this->issueToken($user, $deviceName, $request);
+
+        $this->audit->log('auth.login_mfa_verified', $user, $request, $user);
 
         return ['user' => $user->fresh('roles'), 'token' => $token];
     }

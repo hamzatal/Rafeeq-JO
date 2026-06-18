@@ -4,12 +4,17 @@ export const API_VERSION = 'v1';
 
 export const ENDPOINTS = {
   ping: '/ping',
+  zones: '/zones',
   auth: {
     register: '/auth/register',
     verifyOtp: '/auth/verify-otp',
     requestOtp: '/auth/request-otp',
     resendOtp: '/auth/resend-otp',
     login: '/auth/login',
+    verifyMfa: '/auth/mfa/verify',
+    mfaSetup: '/auth/mfa/setup',
+    mfaConfirm: '/auth/mfa/confirm',
+    mfaDisable: '/auth/mfa/disable',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
     me: '/auth/me',
@@ -26,6 +31,9 @@ export const ENDPOINTS = {
     profile: '/student/profile',
     guardians: '/student/guardians',
     guardian: (linkId: string) => `/student/guardians/${linkId}`,
+    addresses: '/student/addresses',
+    address: (id: string) => `/student/addresses/${id}`,
+    addressDefault: (id: string) => `/student/addresses/${id}/default`,
   },
   guardian: {
     children: '/guardian/children',
@@ -75,6 +83,13 @@ export const ENDPOINTS = {
     documents: '/driver/documents',
     submit: '/driver/submit',
     vehicles: '/driver/vehicles',
+    performance: '/driver/performance',
+    withdrawals: '/driver/wallet/withdrawals',
+  },
+  adminWithdrawals: {
+    list: '/admin/withdrawals',
+    approve: (id: string) => `/admin/withdrawals/${id}/approve`,
+    reject: (id: string) => `/admin/withdrawals/${id}/reject`,
   },
   driverOffers: {
     list: '/driver/trips/offers',
@@ -180,6 +195,9 @@ export const ENDPOINTS = {
     rideRequests: '/admin/ride-requests',
     matchingRun: '/admin/matching/run',
     walletCredit: '/admin/wallets/credit',
+    reportsFinancial: '/admin/reports/financial',
+    zones: '/admin/zones',
+    zone: (id: string) => `/admin/zones/${id}`,
   },
 } as const;
 

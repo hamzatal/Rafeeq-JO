@@ -20,6 +20,7 @@ export interface User {
   locale: 'ar' | 'en';
   avatar_url: string | null;
   phone_verified: boolean;
+  mfa_enabled?: boolean;
   roles?: string[];
   created_at: string | null;
 }
@@ -585,4 +586,102 @@ export interface ChatMessage {
   body: string;
   read: boolean;
   created_at: string | null;
+}
+
+
+/** ── Captain payouts & performance ────────────────────────────────── */
+
+export interface PayoutRequest {
+  id: string;
+  amount_fils: number;
+  method: string;
+  destination: string | null;
+  status: 'pending' | 'paid' | 'rejected';
+  note: string | null;
+  admin_note: string | null;
+  processed_at: string | null;
+  created_at: string | null;
+  captain?: { id: string; name: string; phone: string };
+}
+
+export interface DriverPerformance {
+  tier: string;
+  tier_label: string;
+  points: number;
+  lifetime_points: number;
+  next_tier: string | null;
+  next_tier_label: string | null;
+  points_to_next: number;
+  progress_percent: number;
+  available_earnings_fils: number;
+  rating: number;
+  total_trips: number;
+}
+
+
+/** ── Saved addresses (student) ────────────────────────────────────── */
+
+export interface SavedAddress {
+  id: string;
+  label: 'home' | 'university' | 'work' | 'other' | string;
+  title: string | null;
+  address_text: string;
+  lat: number | null;
+  lng: number | null;
+  is_default: boolean;
+  created_at: string | null;
+}
+
+
+export interface FinancialReportZone {
+  zone_id: string | null;
+  rides_count: number;
+  commission_fils: number;
+  gross_fare_fils: number;
+}
+
+export interface FinancialReport {
+  period: { from: string; to: string };
+  zone_id: string | null;
+  rides_count: number;
+  gross_fare_fils: number;
+  commission_fils: number;
+  captain_earnings_fils: number;
+  payouts_paid_fils: number;
+  topups_fils: number;
+  subscription_revenue_fils: number;
+  by_zone: FinancialReportZone[];
+}
+
+
+/** Begin-setup response for two-factor authentication enrollment. */
+export interface MfaSetupResult {
+  secret: string;
+  otpauth_uri: string;
+}
+
+/** Confirm-setup response: one-time recovery codes (shown once). */
+export interface MfaConfirmResult {
+  recovery_codes: string[];
+}
+
+/** Login response when the account requires a second factor. */
+export interface MfaChallenge {
+  mfa_required: true;
+  mfa_token: string;
+}
+
+/** A service zone, optionally bounded by a polygon geofence. */
+export interface Zone {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  city: string | null;
+  center_lat: number;
+  center_lng: number;
+  radius_km: number;
+  /** Polygon vertices as [lat, lng] pairs (null when radius-only). */
+  boundary: Array<[number, number]> | null;
+  has_boundary: boolean;
+  is_active: boolean;
 }

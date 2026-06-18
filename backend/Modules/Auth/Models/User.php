@@ -24,6 +24,9 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property UserStatus $status
  * @property string $locale
  * @property array|null $metadata
+ * @property string|null $mfa_secret
+ * @property \Illuminate\Support\Carbon|null $mfa_enabled_at
+ * @property array|null $mfa_recovery_codes
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -40,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $hidden = [
         'password', 'remember_token',
+        'mfa_secret', 'mfa_recovery_codes',
     ];
 
     protected function casts(): array
@@ -48,11 +52,20 @@ class User extends Authenticatable implements MustVerifyEmail
             'phone_verified_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'mfa_enabled_at' => 'datetime',
             'password' => 'hashed',
+            'mfa_secret' => 'encrypted',
+            'mfa_recovery_codes' => 'encrypted:array',
             'type' => UserType::class,
             'status' => UserStatus::class,
             'metadata' => 'array',
         ];
+    }
+
+    /** Whether two-factor authentication is active for this account. */
+    public function hasMfaEnabled(): bool
+    {
+        return $this->mfa_enabled_at !== null;
     }
 
     public function isPhoneVerified(): bool
