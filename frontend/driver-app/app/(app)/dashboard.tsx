@@ -1,22 +1,24 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { DriverStatus } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
 import { Button } from '../../src/components/Button';
+import { Card, ListRow, SectionTitle, Badge } from '../../src/components/ui';
+import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-const statusMeta: Record<DriverStatus, { key: string; variant: 'warning' | 'info' | 'success' | 'error' }> = {
-  pending: { key: 'driver.statusPending', variant: 'warning' },
-  under_review: { key: 'driver.statusUnderReview', variant: 'info' },
-  approved: { key: 'driver.statusApproved', variant: 'success' },
-  rejected: { key: 'driver.statusRejected', variant: 'error' },
-  suspended: { key: 'driver.statusSuspended', variant: 'error' },
+const statusMeta: Record<DriverStatus, { key: string; tone: 'warning' | 'primary' | 'success' | 'danger' }> = {
+  pending: { key: 'driver.statusPending', tone: 'warning' },
+  under_review: { key: 'driver.statusUnderReview', tone: 'primary' },
+  approved: { key: 'driver.statusApproved', tone: 'success' },
+  rejected: { key: 'driver.statusRejected', tone: 'danger' },
+  suspended: { key: 'driver.statusSuspended', tone: 'danger' },
 };
 
 export default function Dashboard() {
@@ -34,6 +36,7 @@ export default function Dashboard() {
   const status = driver?.status ?? 'pending';
   const meta = statusMeta[status];
   const canSubmit = status === 'pending' || status === 'rejected';
+  const approved = status === 'approved';
 
   const onSubmit = async () => {
     setError(null); setSubmitting(true);
@@ -47,47 +50,51 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={s.content}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
-          <View>
-            <Text style={s.greeting}>أهلاً كابتن 👋</Text>
-            <Text style={s.name}>{user?.full_name ?? ''}</Text>
+          <View style={s.avatar}><Text style={s.avatarText}>{(user?.full_name ?? 'ر').charAt(0)}</Text></View>
+          <View style={s.headerText}>
+            <Text style={s.greeting}>{t('driver.dashboard')}</Text>
+            <Text style={s.name} numberOfLines={1}>{user?.full_name ?? ''}</Text>
           </View>
-          <Pressable onPress={() => router.push('/(app)/settings')} style={s.iconBtn}><Text style={s.iconText}>⚙︎</Text></Pressable>
+          <Badge label={t(meta.key)} tone={meta.tone} />
         </View>
 
-        <Banner message={t(meta.key)} variant={meta.variant} />
         {status === 'rejected' && driver?.review_note ? <Banner message={driver.review_note} variant="error" /> : null}
+        {error ? <Banner message={error} variant="error" /> : null}
 
-        <Text style={s.section}>خطوات التوثيق</Text>
-        <Pressable style={s.card} onPress={() => router.push('/(app)/documents')}>
-          <Text style={s.cardTitle}>{t('driver.documents')}</Text>
-          <Text style={s.cardMeta}>{driver?.documents?.length ?? 0} مرفوعة</Text>
-        </Pressable>
-        <Pressable style={s.card} onPress={() => router.push('/(app)/vehicle')}>
-          <Text style={s.cardTitle}>{t('driver.vehicle')}</Text>
-          <Text style={s.cardMeta}>{driver?.vehicles?.length ?? 0} مركبة</Text>
-        </Pressable>
-        {status === 'approved' && (
-          <Pressable style={s.card} onPress={() => router.push('/(app)/trips')}>
-            <Text style={s.cardTitle}>{t('driver.myTrips')}</Text>
-            <Text style={s.cardMeta}>جدولة وإدارة رحلاتك</Text>
-          </Pressable>
-        )}
-        {status === 'approved' && (
-          <Pressable style={s.card} onPress={() => router.push('/(app)/offers')}>
-            <Text style={s.cardTitle}>{t('driver.offers')}</Text>
-            <Text style={s.cardMeta}>{t('driver.noOffers')}</Text>
-          </Pressable>
-        )}
-        {status === 'approved' && (
-          <Pressable style={s.card} onPress={() => router.push('/(app)/earnings')}>
-            <Text style={s.cardTitle}>{t('driver.earnings')}</Text>
-            <Text style={s.cardMeta}>{t('driver.balance')}</Text>
-          </Pressable>
+        {approved && (
+          <View style={s.statsRow}>
+            <View style={s.statBox}>
+              <Icon name="star" size={18} color={theme.colors.accent} />
+              <Text style={s.statVal}>{driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
+              <Text style={s.statLbl}>{t('driver.myRating')}</Text>
+            </View>
+            <View style={s.statBox}>
+              <Icon name="navigation" size={18} color={theme.colors.primary} />
+              <Text style={s.statVal}>{driver?.total_trips ?? 0}</Text>
+              <Text style={s.statLbl}>{t('driver.myTrips')}</Text>
+            </View>
+          </View>
         )}
 
-        <Banner message={error} variant="error" />
+        {approved && (
+          <>
+            <SectionTitle title={t('driver.dashboard')} />
+            <Card style={{ padding: 6 }}>
+              <ListRow icon="inbox" title={t('driver.offers')} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/offers')} />
+              <ListRow icon="navigation" title={t('driver.myTrips')} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/trips')} />
+              <ListRow icon="credit-card" title={t('driver.earnings')} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/earnings')} />
+            </Card>
+          </>
+        )}
+
+        <SectionTitle title={t('driver.documents')} />
+        <Card style={{ padding: 6 }}>
+          <ListRow icon="file-text" title={t('driver.documents')} subtitle={`${driver?.documents?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/documents')} />
+          <ListRow icon="truck" title={t('driver.vehicle')} subtitle={`${driver?.vehicles?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/vehicle')} />
+        </Card>
+
         {canSubmit ? <Button title={t('driver.submitReview')} onPress={onSubmit} loading={submitting} style={s.submit} /> : null}
       </ScrollView>
     </SafeAreaView>
@@ -97,15 +104,16 @@ export default function Dashboard() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
-    content: { padding: t.spacing.lg },
-    header: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: t.spacing.lg },
-    greeting: { fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.textSecondary, textAlign: 'right' },
-    name: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right' },
-    iconBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, alignItems: 'center', justifyContent: 'center' },
-    iconText: { fontSize: 18, color: t.colors.text },
-    section: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm, marginTop: t.spacing.sm },
-    card: { backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.md, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-    cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text },
-    cardMeta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
-    submit: { marginTop: t.spacing.base },
+    content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: t.spacing.lg },
+    avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
+    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.onPrimary },
+    headerText: { flex: 1 },
+    greeting: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
+    name: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'right' },
+    statsRow: { flexDirection: 'row-reverse', gap: t.spacing.base, marginBottom: t.spacing.sm },
+    statBox: { flex: 1, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, alignItems: 'center', ...t.shadow.sm },
+    statVal: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, marginTop: 4 },
+    statLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, marginTop: 2 },
+    submit: { marginTop: t.spacing.lg },
   });

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Trip } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Screen } from '../../src/components/Screen';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
+import { Card, EmptyState } from '../../src/components/ui';
+import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
@@ -52,37 +54,44 @@ export default function Offers() {
   };
 
   return (
-    <Screen scroll>
-      <Text style={s.h1}>{t('driver.offers')}</Text>
-      {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <Text style={s.h1}>{t('driver.offers')}</Text>
+        {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
-      {loading ? (
-        <Text style={s.meta}>{t('common.loading')}</Text>
-      ) : offers.length === 0 ? (
-        <Text style={s.meta}>{t('driver.noOffers')}</Text>
-      ) : (
-        offers.map((trip) => (
-          <View key={trip.id} style={s.card}>
-            <View style={s.row}>
-              <Text style={s.cardTitle}>{trip.route?.name ?? t('driver.offers')}</Text>
-              <Text style={s.seats}>{trip.booked_count ?? 0}/{trip.capacity} {t('driver.seats')}</Text>
-            </View>
-            {trip.scheduled_at && <Text style={s.meta}>{new Date(trip.scheduled_at).toLocaleString(locale)}</Text>}
-            <Button title={t('driver.acceptOffer')} onPress={() => accept(trip.id)} loading={busy === trip.id} style={s.btn} />
-          </View>
-        ))
-      )}
-    </Screen>
+        {loading ? (
+          <Text style={s.meta}>{t('common.loading')}</Text>
+        ) : offers.length === 0 ? (
+          <EmptyState icon="inbox" title={t('driver.noOffers')} />
+        ) : (
+          offers.map((trip) => (
+            <Card key={trip.id}>
+              <View style={s.row}>
+                <Text style={s.cardTitle}>{trip.route?.name ?? t('driver.offers')}</Text>
+                <View style={s.seats}>
+                  <Icon name="users" size={14} color={theme.colors.textSecondary} />
+                  <Text style={s.seatsText}>{trip.booked_count ?? 0}/{trip.capacity} {t('driver.seats')}</Text>
+                </View>
+              </View>
+              {trip.scheduled_at && <Text style={s.meta}>{new Date(trip.scheduled_at).toLocaleString(locale)}</Text>}
+              <Button title={t('driver.acceptOffer')} onPress={() => accept(trip.id)} loading={busy === trip.id} style={s.btn} />
+            </Card>
+          ))
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
-    card: { backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.md },
+    safe: { flex: 1, backgroundColor: t.colors.background },
+    content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
+    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-    cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text },
-    seats: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },
+    cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, flex: 1, textAlign: 'right' },
+    seats: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
+    seatsText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
     btn: { marginTop: t.spacing.sm },
   });
