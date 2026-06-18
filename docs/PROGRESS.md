@@ -6,9 +6,9 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-115 |
-| نسبة الإنجاز | ~81% · **بدأ تجديد التصميم (Design System v2)** |
-| المرحلة الحالية | **تطبيق الطالب أُعيد تصميمه بالكامل (DS v2). التالي: تطبيق الكابتن + لوحة الإدارة بنفس النظام** |
+| آخر Commit | RFQ-120 |
+| نسبة الإنجاز | ~82% · تطبيق الطالب مُعاد تصميمه بالكامل + تدقيق شامل |
+| المرحلة الحالية | **تدقيق شامل للتطبيقات الثلاثة + توحيد الهوية الخضراء (إدارة/سبلاش). التالي: إعادة تصميم الكابتن + الإدارة + طبقة AI + الإطلاق** |
 
 ---
 
@@ -229,5 +229,6 @@
 | 117 | feat(student-app): redesign Trips tab (cards + empty states + star ratings + live tracking) — all 5 tabs now DS v2 |
 | 118 | feat(student-app): redesign Subscriptions + Ride Request screens (DS v2) + fix missing react-hooks import in Subscriptions |
 | 119 | feat(student-app): redesign Support + Parcels + Lost&Found + Exchange + Payments (DS v2) — student app fully redesigned |
+| 120 | chore(audit+brand): full 3-app static audit (clean) + unify admin & native splash to Jordan-green identity + ARCHITECTURE.md |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.

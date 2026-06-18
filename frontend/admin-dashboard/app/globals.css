@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 html, body { padding: 0; margin: 0; }
-body { background: #F6F8FC; color: #0F172A; }
-html.dark body { background: #0B1220; color: #F1F5F9; }
+body { background: #F4F7F5; color: #0E261C; }
+html.dark body { background: #08130D; color: #ECF4EF; }
 * { box-sizing: border-box; }
 
 @layer components {
