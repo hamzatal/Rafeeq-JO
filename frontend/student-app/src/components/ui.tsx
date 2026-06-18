@@ -149,7 +149,7 @@ const makeStyles = (t: AppTheme) =>
     emptyHint: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'center', marginTop: 4, maxWidth: 260 },
 
     tile: { width: '23%', alignItems: 'center', marginBottom: t.spacing.base },
-    tileIcon: { width: 58, height: 58, borderRadius: 18, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+    tileIcon: { width: 58, height: 58, borderRadius: 29, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 6, borderWidth: 1, borderColor: t.colors.accent + '33' },
     tileLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text, textAlign: 'center' },
     tileSoon: { fontFamily: t.fontFamily.regular, fontSize: 9, color: t.colors.muted },
 
