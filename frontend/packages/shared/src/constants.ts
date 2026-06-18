@@ -26,6 +26,9 @@ export const ENDPOINTS = {
     profile: '/student/profile',
     guardians: '/student/guardians',
     guardian: (linkId: string) => `/student/guardians/${linkId}`,
+    addresses: '/student/addresses',
+    address: (id: string) => `/student/addresses/${id}`,
+    addressDefault: (id: string) => `/student/addresses/${id}/default`,
   },
   guardian: {
     children: '/guardian/children',

@@ -616,3 +616,17 @@ export interface DriverPerformance {
   rating: number;
   total_trips: number;
 }
+
+
+/** ── Saved addresses (student) ────────────────────────────────────── */
+
+export interface SavedAddress {
+  id: string;
+  label: 'home' | 'university' | 'work' | 'other' | string;
+  title: string | null;
+  address_text: string;
+  lat: number | null;
+  lng: number | null;
+  is_default: boolean;
+  created_at: string | null;
+}

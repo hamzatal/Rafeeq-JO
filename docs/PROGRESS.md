@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-142 |
+| آخر Commit | RFQ-144 |
 | نسبة الإنجاز | ~95% · AI + خرائط حيّة مبنية |
 | المرحلة الحالية | **AI + الخرائط جاهزة. المتبقّي: تشغيل/اختبار فعلي محلياً + توسيع الاختبارات + تلميع** |
 
@@ -258,5 +258,7 @@
 | 140 | feat(chat): in-app chat frontend — shared chat types/endpoints/i18n + ChatApi + chat screen (bubbles, poll, send) in student & driver apps, wired from student trips + driver trip-detail passenger list |
 | 141 | feat(payouts): captain earnings withdrawal — Modules/Payouts (request debits wallet, admin approve/paid, reject credits back) + driver performance endpoint (tier ladder + progress + earnings) + award captain reward points on trip completion + 6 feature tests |
 | 142 | feat(payouts): captain payout frontend — driver earnings screen (tier card + withdraw button + withdrawal history) + withdraw form screen + shared types/endpoints/i18n + PayoutApi (incl admin queue/approve/reject) |
+| 143 | feat(addresses): student saved addresses backend — Modules/Addresses (CRUD + set-default, auto-default, ownership 403) + 4 feature tests |
+| 144 | feat(addresses): saved addresses frontend — student addresses screen (label chips, add, set-default, delete) + settings entry + shared types/endpoints/i18n + AddressApi |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
