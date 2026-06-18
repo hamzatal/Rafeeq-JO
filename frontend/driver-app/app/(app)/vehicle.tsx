@@ -42,7 +42,7 @@ export default function Vehicle() {
         color: form.color.trim(), plate_number: form.plate.trim(), seats: Number(form.seats) || 4,
       });
       await refreshDriver();
-      setSuccess('تمت إضافة المركبة بنجاح');
+      setSuccess(t('driver.vehicleAdded'));
       setForm({ make: '', model: '', year: '', color: '', plate: '', seats: '4' });
     } catch (err) {
       setError(err instanceof RafeeqApiError ? err.firstError() ?? err.message : t('common.error'));
@@ -58,7 +58,7 @@ export default function Vehicle() {
           {driver.vehicles.map((v) => (
             <View key={v.id} style={s.vehicleCard}>
               <Text style={s.vehicleTitle}>{v.make} {v.model} ({v.year})</Text>
-              <Text style={s.vehicleMeta}>{v.plate_number} · {v.color} · {v.seats} مقاعد</Text>
+              <Text style={s.vehicleMeta}>{v.plate_number} · {v.color} · {v.seats} {t('driver.seatsWord')}</Text>
             </View>
           ))}
         </View>
