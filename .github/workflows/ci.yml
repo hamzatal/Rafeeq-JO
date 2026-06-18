@@ -46,6 +46,15 @@ jobs:
           php artisan route:list > /dev/null
           php artisan config:clear
 
+      - name: Run PHPUnit tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+        run: php artisan test
+
   frontend:
     name: Frontend (TypeScript)
     runs-on: ubuntu-latest
