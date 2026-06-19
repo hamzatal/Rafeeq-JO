@@ -148,6 +148,9 @@ export interface TripPassenger {
   student_id: string;
   pickup_point_id: string | null;
   pickup_order: number | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  student_name: string | null;
   status: TripPassengerStatus;
   status_label: string;
   boarded_at: string | null;
@@ -695,4 +698,18 @@ export interface InvestigateResult {
   assessment: RiskAssessment;
   dispute: Dispute | null;
   frozen: boolean;
+}
+
+
+/** Public client bootstrap config served by GET /v1/config. */
+export interface AppConfig {
+  maps: {
+    provider: 'google' | 'mapbox' | string;
+    key: string;
+    mapbox_token: string;
+    default_center: { lat: number; lng: number };
+  };
+  features: {
+    realtime: boolean;
+  };
 }

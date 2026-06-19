@@ -21,7 +21,13 @@
 - ملف **`docs/DATABASE_SCHEMA.md`** (موصوف بالمجالات) + **`docs/DATABASE_SCHEMA.generated.md`** (مُولَّد آلياً) + أمر **`php artisan db:schema-doc`**.
 - تحسين تطبيعي: إزالة العمود المكرّر `student_profiles.reward_tier` (المصدر الوحيد الآن `reward_accounts.tier`، شكل الـ API بلا تغيير).
 
-**التالي — المهمة 5:** تجهيز تكامل خرائط جوجل بالكامل (المفتاح GOOGLE_MAPS_KEY لاحقاً).
+**التالي — المهمة 6:** لوحة إدارة كاملة وشاملة + ذكية بـGPT.
+
+**✅ تم (RFQ-208) — المهمة 5: تجهيز خرائط جوجل بالكامل:**
+- **الباك**: endpoint عام **`GET /api/v1/config`** (مفتاح الخرائط + المزود + المركز الافتراضي + flags) — مصدر واحد للمفتاح. **`MapsService`** (Geocoding + Distance Matrix بـ Google عند توفر المفتاح، fallback haversine دائم، لا يرمي أبداً).
+- **الفرونت**: ترقية `LiveMap` لاستخدام **Google Maps JS API الرسمي** عند توفر المفتاح (بدل بلاطات mt1 غير الرسمية) + OSM fallback. المفتاح يُجلب من `/config` (lib/appConfig) مع fallback لـ app.json. أُضيفت الخريطة لتطبيق **الكابتن** (شاشة الرحلة → خريطة ملاحة بنقاط الالتقاط) + ConfigApi + نوع AppConfig + مزامنة نوع TripPassenger (pickup_lat/lng/student_name).
+- التحقق: 89 اختبار باك أخضر (منها 6 للخرائط) + tsc أخضر لكل الحزم + `/config` E2E.
+- ملاحظة: بمجرد وضع `GOOGLE_MAPS_KEY` في backend/.env يعمل كل شي تلقائياً (خرائط جوجل + geocoding + distance).
 
 **✅ تم (RFQ-207) — المهمة 4: OTP عبر WhatsApp Cloud API الرسمي:**
 - بوابة رسمية **`WhatsAppCloudSmsGateway`** (Meta Graph API): وضع **template** (قالب authentication + الرمز كمعامل body + زر copy-code) للـ OTP خارج نافذة 24س، ووضع **text** للنص الحرّ. يستخرج الرمز تلقائياً، يطبّع الرقم الأردني، يخفي الأرقام في اللوق، صلب (استثناء واضح عند غياب الإعداد/فشل Meta).

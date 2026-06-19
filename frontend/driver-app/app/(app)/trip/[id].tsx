@@ -9,6 +9,7 @@ import { Button } from '../../../src/components/Button';
 import { Banner } from '../../../src/components/Banner';
 import { Card, SectionTitle, Badge, EmptyState } from '../../../src/components/ui';
 import { Icon } from '../../../src/components/Icon';
+import { LiveMap, type MapPoint } from '../../../src/components/LiveMap';
 import { useI18n } from '../../../src/i18n';
 import { api } from '../../../src/lib/api';
 import { useTheme, type AppTheme } from '../../../src/theme';
@@ -33,6 +34,20 @@ export default function TripDetail() {
   }, [id]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // Pickup points for the captain's navigation map (passengers with coords).
+  const mapPoints = useMemo<MapPoint[]>(
+    () =>
+      passengers
+        .filter((p) => p.status !== 'cancelled' && p.pickup_lat != null && p.pickup_lng != null)
+        .map((p) => ({
+          lat: p.pickup_lat as number,
+          lng: p.pickup_lng as number,
+          label: p.student_name ?? t('driver.passengerLabel'),
+          kind: 'pickup' as const,
+        })),
+    [passengers, t],
+  );
 
   const act = async (fn: () => Promise<unknown>, okText: string) => {
     setMsg(null); setBusy(true);
@@ -69,6 +84,13 @@ export default function TripDetail() {
         </Card>
 
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
+
+        {mapPoints.length > 0 && (
+          <Card>
+            <SectionTitle title={t('driver.navigationMap')} />
+            <LiveMap points={mapPoints} route={mapPoints} height={240} legend={false} />
+          </Card>
+        )}
 
         {trip.status === 'scheduled' && (
           <View style={s.actions}>

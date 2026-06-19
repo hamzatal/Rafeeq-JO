@@ -14,6 +14,7 @@ import { I18nProvider } from '../src/i18n';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { useAuth } from '../src/store/auth';
 import { usePrefs } from '../src/store/prefs';
+import { loadAppConfig } from '../src/lib/appConfig';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,6 +33,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     void hydrate();
+    // Load public runtime config (maps key, flags). Non-blocking + safe.
+    void loadAppConfig();
   }, [hydrate]);
 
   useEffect(() => {

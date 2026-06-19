@@ -26,6 +26,7 @@ import { AddressApi } from './addresses';
 import { FinancialReportApi } from './reports';
 import { ZonesApi } from './zones';
 import { DisputesApi } from './disputes';
+import { ConfigApi } from './config';
 
 export * from './client';
 export * from './auth';
@@ -54,6 +55,7 @@ export * from './addresses';
 export * from './reports';
 export * from './zones';
 export * from './disputes';
+export * from './config';
 
 /** Aggregated API surface. Extend with more domains as modules land. */
 export class RafeeqApi {
@@ -84,6 +86,7 @@ export class RafeeqApi {
   readonly reports: FinancialReportApi;
   readonly zones: ZonesApi;
   readonly disputes: DisputesApi;
+  readonly config: ConfigApi;
 
   constructor(options: RafeeqClientOptions) {
     this.http = createHttp(options);
@@ -113,6 +116,7 @@ export class RafeeqApi {
     this.reports = new FinancialReportApi(this.http);
     this.zones = new ZonesApi(this.http);
     this.disputes = new DisputesApi(this.http);
+    this.config = new ConfigApi(this.http);
   }
 }
 

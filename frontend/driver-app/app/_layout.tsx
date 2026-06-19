@@ -14,6 +14,7 @@ import { I18nProvider } from '../src/i18n';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { useAuth } from '../src/store/auth';
 import { usePrefs } from '../src/store/prefs';
+import { loadAppConfig } from '../src/lib/appConfig';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -29,7 +30,7 @@ export default function RootLayout() {
   const hydrate = usePrefs((s) => s.hydrate);
   const hydrated = usePrefs((s) => s.hydrated);
 
-  useEffect(() => { void hydrate(); }, [hydrate]);
+  useEffect(() => { void hydrate(); void loadAppConfig(); }, [hydrate]);
   useEffect(() => { if (hydrated) void bootstrap(); }, [hydrated, bootstrap]);
   useEffect(() => { if (fontsLoaded && hydrated) void SplashScreen.hideAsync(); }, [fontsLoaded, hydrated]);
 

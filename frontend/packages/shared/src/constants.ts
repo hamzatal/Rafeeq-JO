@@ -4,6 +4,7 @@ export const API_VERSION = 'v1';
 
 export const ENDPOINTS = {
   ping: '/ping',
+  config: '/config',
   zones: '/zones',
   auth: {
     register: '/auth/register',

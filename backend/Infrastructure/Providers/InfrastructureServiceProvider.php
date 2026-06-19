@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Rafeeq\Infrastructure\Gpt\Contracts\GptClient;
 use Rafeeq\Infrastructure\Gpt\NullGptClient;
 use Rafeeq\Infrastructure\Gpt\OpenAiGptClient;
+use Rafeeq\Infrastructure\Maps\MapsService;
 use Rafeeq\Infrastructure\Push\Contracts\PushGateway;
 use Rafeeq\Infrastructure\Push\FcmPushGateway;
 use Rafeeq\Infrastructure\Push\LogPushGateway;
@@ -41,5 +42,8 @@ class InfrastructureServiceProvider extends ServiceProvider
 
             return $gateway->isEnabled() ? $gateway : new LogPushGateway;
         });
+
+        // Maps service: Google when a key is set, safe haversine fallback otherwise.
+        $this->app->singleton(MapsService::class, fn () => new MapsService);
     }
 }

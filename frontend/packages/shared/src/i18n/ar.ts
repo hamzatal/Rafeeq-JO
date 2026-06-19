@@ -117,6 +117,7 @@ export const ar = {
     dropoffConfirmed: 'تم تأكيد الإنزال',
     noPassengers: 'لا يوجد ركاب',
     passengerLabel: 'راكب',
+    navigationMap: 'خريطة الملاحة',
     documents: 'الوثائق',
     vehicle: 'المركبة',
     addVehicle: 'إضافة مركبة',

@@ -119,6 +119,7 @@ export const en: Translations = {
     dropoffConfirmed: 'Drop-off confirmed',
     noPassengers: 'No passengers',
     passengerLabel: 'Passenger',
+    navigationMap: 'Navigation map',
     documents: 'Documents',
     vehicle: 'Vehicle',
     addVehicle: 'Add vehicle',
