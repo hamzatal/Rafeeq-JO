@@ -126,18 +126,20 @@ export function Topbar() {
     <header className="sticky top-0 z-40 h-16 bg-surface/90 backdrop-blur border-b border-line flex items-center justify-between px-6 dark:bg-dcard/90 dark:border-dline">
       {/* Global search */}
       <div className="relative w-96 max-w-[48vw] hidden sm:block" ref={searchRef}>
-        <form onSubmit={submitSearch} className="relative">
-          <span className="material-symbols-outlined absolute end-3 top-1/2 -translate-y-1/2 text-muted text-[20px]">search</span>
-          <input
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSearchOpen(true);
-            }}
-            onFocus={() => setSearchOpen(true)}
-            className="w-full h-10 pe-10 ps-3 rounded-lg border border-line bg-background text-sm outline-none focus:border-cyan focus:ring-1 focus:ring-cyan dark:bg-dsurface dark:border-dline dark:text-dtext"
-            placeholder={t('shell.search')}
-          />
+        <form onSubmit={submitSearch}>
+          <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-line bg-background focus-within:border-cyan focus-within:ring-1 focus-within:ring-cyan dark:bg-dsurface dark:border-dline">
+            <span className="material-symbols-outlined text-muted text-[20px] leading-none shrink-0">search</span>
+            <input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSearchOpen(true);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              className="flex-1 h-full bg-transparent text-sm outline-none dark:text-dtext"
+              placeholder={t('shell.search')}
+            />
+          </div>
         </form>
 
         {searchOpen && query.trim() && (

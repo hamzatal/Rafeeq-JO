@@ -207,6 +207,10 @@ const DICT: Dict = {
 
   // Ride requests
   'rideRequests.runMatching': { ar: 'تشغيل التجميع', en: 'Run matching' },
+  'rideRequests.matchingHint': {
+    ar: 'يجمّع طلبات الرحلات المعلّقة في نفس المنطقة/الجامعة ضمن رحلات مشتركة ويسندها للكباتن المتاحين.',
+    en: 'Groups pending ride requests in the same zone/university into shared trips and assigns them to available captains.',
+  },
   'rideRequests.matchingStarted': { ar: 'تم تشغيل محرك التجميع.', en: 'Matching engine started.' },
   'rideRequests.matchingFailed': { ar: 'تعذّر تشغيل المحرك.', en: 'Could not start the engine.' },
   'rideRequests.none': { ar: 'لا توجد طلبات', en: 'No requests' },

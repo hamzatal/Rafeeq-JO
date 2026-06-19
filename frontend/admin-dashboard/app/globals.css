@@ -5,9 +5,26 @@
 @tailwind utilities;
 
 html, body { padding: 0; margin: 0; }
-body { background: #F4F7FB; color: #0B192C; }
+body { background: #F4F7FB; color: #0B192C; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 html.dark body { background: #00111F; color: #E6EEF7; }
 * { box-sizing: border-box; }
+
+/* Modern, slim scrollbars */
+* { scrollbar-width: thin; scrollbar-color: rgba(31,182,193,0.45) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(31,182,193,0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(31,182,193,0.6); background-clip: padding-box; }
+/* Sidebar (on navy) scrollbar — subtle light thumb */
+aside ::-webkit-scrollbar-thumb,
+aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); background-clip: padding-box; }
+aside ::-webkit-scrollbar-thumb:hover { background: rgba(31,182,193,0.7); background-clip: padding-box; }
+aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
 
 /* Material Symbols base */
 .material-symbols-outlined {

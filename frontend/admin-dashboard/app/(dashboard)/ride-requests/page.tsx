@@ -5,6 +5,7 @@ import type { ApiSuccess, RideRequest } from '@rafeeq/shared';
 import { ENDPOINTS } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Tooltip } from '../../../src/components/Tooltip';
 
 export default function RideRequestsPage() {
   const { t } = useT();
@@ -43,9 +44,11 @@ export default function RideRequestsPage() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-extrabold surface-text">{t('nav.rideRequests')}</h1>
-        <button onClick={runMatching} disabled={matching} className="btn-primary px-4 py-2 text-sm">
-          {matching ? '...' : t('rideRequests.runMatching')}
-        </button>
+        <Tooltip label={t('rideRequests.matchingHint')} side="start">
+          <button onClick={runMatching} disabled={matching} className="btn-primary px-4 py-2 text-sm">
+            {matching ? '...' : t('rideRequests.runMatching')}
+          </button>
+        </Tooltip>
       </div>
       {msg && <div className="card mb-4 text-sm text-primary">{msg}</div>}
 
