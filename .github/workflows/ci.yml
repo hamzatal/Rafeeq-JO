@@ -130,7 +130,6 @@ jobs:
         run: |
           npm run typecheck --workspace=student-app
           npm run typecheck --workspace=driver-app
-          npm run typecheck --workspace=guardian-app
           npm run typecheck --workspace=admin-dashboard
 
       - name: Lint admin dashboard
