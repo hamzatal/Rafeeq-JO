@@ -495,6 +495,29 @@ export interface RiskScore {
   factors: { type: string; label: string; weight: number }[];
 }
 
+// ── Safety: SOS + emergency contacts ─────────────────────────────────
+export type EmergencyRelation =
+  | 'parent' | 'sibling' | 'spouse' | 'relative' | 'friend' | 'other';
+
+export interface EmergencyContact {
+  id: string;
+  name: string;
+  phone: string;
+  relation: EmergencyRelation | null;
+  is_primary: boolean;
+  notify_on_sos: boolean;
+  created_at: string | null;
+}
+
+export type SosStatus = 'open' | 'acknowledged' | 'resolved';
+
+export interface SosIncident {
+  id: string;
+  trip_id: string | null;
+  status: SosStatus;
+  created_at: string | null;
+}
+
 
 /** ── Guardian (parent) portal ─────────────────────────────────────── */
 

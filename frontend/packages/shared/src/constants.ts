@@ -183,6 +183,15 @@ export const ENDPOINTS = {
     adminRisks: '/admin/ai/risks',
     adminRisk: (userId: string) => `/admin/ai/risks/${userId}`,
   },
+  sos: {
+    trigger: '/sos',
+    mine: '/sos/mine',
+  },
+  emergencyContacts: {
+    list: '/emergency-contacts',
+    create: '/emergency-contacts',
+    one: (id: string) => `/emergency-contacts/${id}`,
+  },
   admin: {
     users: '/admin/users',
     drivers: '/admin/drivers',

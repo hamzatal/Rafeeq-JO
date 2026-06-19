@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Rafeeq\Modules\Safety\Controllers\DriverLocationController;
+use Rafeeq\Modules\Safety\Controllers\EmergencyContactController;
 use Rafeeq\Modules\Safety\Controllers\SafetyAdminController;
 use Rafeeq\Modules\Safety\Controllers\SosController;
 
@@ -9,6 +10,14 @@ use Rafeeq\Modules\Safety\Controllers\SosController;
 Route::prefix('v1/sos')->middleware('auth:sanctum')->group(function () {
     Route::post('/', [SosController::class, 'trigger']);
     Route::get('mine', [SosController::class, 'mine']);
+});
+
+// Emergency / guardian contacts — managed by the user (no separate guardian app)
+Route::prefix('v1/emergency-contacts')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [EmergencyContactController::class, 'index']);
+    Route::post('/', [EmergencyContactController::class, 'store']);
+    Route::patch('{contact}', [EmergencyContactController::class, 'update']);
+    Route::delete('{contact}', [EmergencyContactController::class, 'destroy']);
 });
 
 // Captain location ping (ghost-trip watch) — driver only

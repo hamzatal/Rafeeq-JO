@@ -44,6 +44,7 @@ export default function Home() {
     { key: 'exchange', icon: 'repeat', href: '/(app)/exchange' },
     { key: 'support', icon: 'help-circle', href: '/(app)/support' },
     { key: 'assistant', icon: 'message-circle', href: '/(app)/assistant' },
+    { key: 'emergency', icon: 'alert-triangle', href: '/(app)/emergency' },
   ];
 
   const fmtTime = (iso: string | null) =>

@@ -4,8 +4,11 @@ namespace Rafeeq\Modules\Safety\Services;
 
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
+use Illuminate\Support\Facades\Log;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
+use Rafeeq\Modules\Safety\Models\EmergencyContact;
 use Rafeeq\Modules\Safety\Models\SosIncident;
 use Rafeeq\Shared\Enums\NotificationType;
 use Rafeeq\Shared\Enums\RiskSeverity;
@@ -16,6 +19,8 @@ class SosService extends BaseService
         private readonly AuditLogger $audit,
         private readonly FraudService $fraud,
         private readonly NotificationService $notifications,
+        private readonly EmergencyContactService $contacts,
+        private readonly SmsGateway $sms,
     ) {}
 
     public function trigger(User $user, ?float $lat, ?float $lng, ?string $tripId, ?string $note): SosIncident
@@ -51,6 +56,9 @@ class SosService extends BaseService
         // Alert the safety team (admins + supervisors).
         $this->alertSafetyTeam($incident, $user);
 
+        // Alert the user's own emergency / guardian contacts by SMS.
+        $this->alertEmergencyContacts($incident, $user, $lat, $lng);
+
         return $incident;
     }
 
@@ -68,6 +76,42 @@ class SosService extends BaseService
                     ['incident_id' => $incident->id, 'reporter_id' => $reporter->id],
                 );
             });
+    }
+
+    /**
+     * Alert the user's own emergency / guardian contacts by SMS with a live
+     * location link. Never throws — a delivery failure must not break the SOS.
+     */
+    private function alertEmergencyContacts(SosIncident $incident, User $user, ?float $lat, ?float $lng): void
+    {
+        $recipients = $this->contacts->sosRecipients($user);
+        if ($recipients->isEmpty()) {
+            return;
+        }
+
+        $name = $user->full_name ?? 'الطالب';
+        $locationLine = ($lat !== null && $lng !== null)
+            ? ' الموقع: https://maps.google.com/?q='.$lat.','.$lng
+            : '';
+        $message = 'رفيق - تنبيه طوارئ: قام '.$name.' بتفعيل نداء الطوارئ ويحتاج مساعدتك الآن.'
+            .$locationLine
+            .' (تم إبلاغ فريق سلامة رفيق أيضاً).';
+
+        $recipients->each(function (EmergencyContact $contact) use ($message, $incident, $user) {
+            try {
+                $this->sms->send($contact->phone, $message);
+            } catch (\Throwable $e) {
+                Log::warning('[SOS] emergency contact SMS failed', [
+                    'incident' => $incident->id,
+                    'user' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        });
+
+        $this->audit->log('sos.contacts_alerted', $user, auditable: $incident, changes: [
+            'count' => $recipients->count(),
+        ]);
     }
 
     public function resolve(SosIncident $incident, User $admin, string $status): SosIncident

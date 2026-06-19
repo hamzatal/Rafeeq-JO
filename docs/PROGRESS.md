@@ -6,8 +6,8 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-196 |
-| نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + الفرونت مُتحقَّق type-check بالكامل |
+| آخر Commit | RFQ-198 |
+| نسبة الإنجاز | ~99% · كل المزايا + مكافحة الاحتيال + ميزة الطوارئ داخل تطبيق الطالب + الفرونت مُتحقَّق type-check بالكامل |
 | المرحلة الحالية | **منصّة مكتملة المزايا، الباك (75 اختبار) والفرونت (6 حزم tsc) خضراء. المتبقّي: تشغيل فعلي على PostgreSQL + تلميع** |
 
 ---
@@ -94,6 +94,7 @@
 - ✅ **دورة المال**: عند تأكيد الصعود يُخصم من محفظة الطالب (إن لم يكن لديه اشتراك)، تُحجز عمولة المنصة (config: نسبة العمولة + الأجرة الافتراضية)، ويُحاسب الكابتن (يُضاف لمحفظته) — الأموال تمرّ عبر المنصة دائماً (RideBillingService).
 - ✅ **التتبّع الحيّ (Reverb)**: أحداث بث `TripLocationUpdated` + `TripStatusChanged` على قناة `trip.{id}` (تُطلق عند بثّ الموقع/بدء/إنهاء/إلغاء). الافتراضي broadcast=log (آمن بدون سيرفر)؛ يُفعّل بـ reverb.
 - ✅ **أساس مكافحة الاحتيال (Safety)**: جداول `risk_flags` + `cancellation_logs` + كشف بقواعد (كابتن يلغي رحلة فيها ركّاب، معدّل إلغاء عالٍ) → علامات خطورة، + واجهة إدارة (عرض/معالجة العلامات + سجل الإلغاءات). تسجيل الإلغاء مربوط بـ TripService.
+- ✅ **الطوارئ + جهات اتصال موثوقة داخل تطبيق الطالب** (RFQ-198): بديل خفيف لتطبيق ولي الأمر المنفصل — الطالب يضيف جهات اتصال طوارئ (حتى 5، أساسي واحد، علم `notify_on_sos`) ويتصل بها مباشرة. عند تفعيل SOS من شاشة الطالب: التقاط الموقع (expo-location موبايل / geolocation ويب) → `SosService` يُنبّه فريق السلامة **+ يرسل SMS لجهات اتصال الطالب مع رابط موقعه الحيّ** (لا يفشل أبداً). موديول backend كامل: جدول `emergency_contacts` + `EmergencyContact` + `EmergencyContactService` (CRUD + تطبيع هاتف أردني + إدارة الأساسي) + `EmergencyContactController` + routes `/v1/emergency-contacts`. شاشة `emergency.tsx` (تسليح→تأكيد SOS + اتصال مباشر بولي الأمر + إدارة جهات الاتصال) + `EmergencyApi` + i18n (ar/en متناظر). ملاحظة: المستخدم يعتبر تطبيق ولي الأمر المنفصل غير ضروري — هذه الميزة هي البديل المعتمد.
 - ✅ **OTP الإنزال (تأكيد الطرفين)**: عند تأكيد الصعود يُصدَر للطالب **كود إنزال** فريد داخل الرحلة؛ الكابتن يؤكّد النزول بإدخاله (`POST /driver/trips/{trip}/dropoff`) → الحالة `dropped` + `dropoff_confirmed_at`. إنهاء الرحلة بوجود ركّاب لم يُؤكَّد إنزالهم بالكود يرفع **علامة خطورة** (`trip_ended_without_dropoff_otp`) كدليل تسريب/رحلة وهمية. مربوط بالكامل في تطبيقي الكابتن (بطاقة إدخال) والطالب (عرض الكود). مغطّى باختبارات Feature (3 حالات: تأكيد ناجح، كود خاطئ مرفوض، إنهاء بلا تأكيد يرفع علامة).
 - ✅ **محرك التسعير الحقيقي + Express** (RFQ-134): `PricingService` صار مربوطاً فعلياً بـ`MatchingService` و`RideBillingService` (انتهى السعر الثابت 1000). أعمدة تسعير على الرحلة (`is_express`, `base_fare_fils`, `express_fee_fils`, `surge_multiplier`). **Express مُفعّل**: تجميع منفصل بأولوية + سيارة خاصة لراكب واحد + رسوم مستعجل + surge ألطف (مع سقف عادل). توحيد حساب العمولة في `splitCommission()`. `TripResource` يعرض تفصيل السعر + **أرباح الكابتن المتوقعة** (preview). مغطّى باختبارات (Unit + Feature).
 - ✅ **حجز الرصيد (Wallet Hold)** (RFQ-135): عمود `held_fils` + جدول `wallet_holds` (active/captured/released). `WalletService`: `hold/capture/release/availableBalance/findActiveHold` (مع قفل صفوف وذرّية). عند **بدء الرحلة** يُحجز السعر لكل راكب يدفع من المحفظة (المتاح = الرصيد − المحجوز)؛ عند الصعود يُلتقط الحجز (خصم فعلي + دفع الكابتن)؛ عند الإلغاء يُحرَّر. إشعار `WalletLowBalance` عند نقص الرصيد. مغطّى باختبارات (6 حالات).
@@ -318,5 +319,6 @@
 | 194 | feat(captain): HUD earnings hero on dashboard (live performance API) |
 | 195 | feat(apps): unified navy hero welcome for captain + guardian |
 | 196 | docs: captain HUD widgets + welcome screens |
+| 198 | feat(safety): in-app emergency feature — guardian/emergency contacts (CRUD + SMS alerts on SOS with live location) + student Emergency screen (lightweight alternative to the standalone guardian app) |
 
 > حدّث هذا الجدول وخانة "آخر Commit" مع كل push.
