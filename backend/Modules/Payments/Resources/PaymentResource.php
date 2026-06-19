@@ -19,6 +19,8 @@ class PaymentResource extends JsonResource
             'status' => $this->status,
             'ai_confidence' => $this->ai_confidence,
             'verified_by' => $this->verified_by,
+            'bank_reference' => $this->bank_reference,
+            'fraud_flags' => $this->fraud_flags ?? [],
             'extracted' => $this->extracted,
             'notes' => $this->notes,
             'has_proof' => $this->proof_path !== null,
