@@ -12,6 +12,14 @@ const STATUSES = [
   { value: 'pending', label: 'بانتظار الدفع' },
 ];
 
+const FRAUD_LABELS: Record<string, string> = {
+  duplicate_reference: 'رقم عملية مكرّر',
+  duplicate_image: 'صورة مكرّرة',
+  beneficiary_mismatch: 'المستفيد لا يطابق',
+  sender_name_mismatch: 'اسم المُرسِل لا يطابق',
+  looks_edited: 'يبدو معدّلاً',
+};
+
 export default function PaymentsPage() {
   const [items, setItems] = useState<PaymentRequest[]>([]);
   const [status, setStatus] = useState('');
@@ -95,13 +103,17 @@ export default function PaymentsPage() {
                 <th className="text-right p-3 font-medium">الغرض</th>
                 <th className="text-right p-3 font-medium">المبلغ</th>
                 <th className="text-right p-3 font-medium">الثقة (AI)</th>
+                <th className="text-right p-3 font-medium">تدقيق الاحتيال</th>
                 <th className="text-right p-3 font-medium">الحالة</th>
                 <th className="text-right p-3 font-medium">إجراءات</th>
               </tr>
             </thead>
             <tbody>
               {items.map((p) => {
-                const ai = p.payments?.[0]?.ai_confidence ?? null;
+                const payment = p.payments?.[0];
+                const ai = payment?.ai_confidence ?? null;
+                const flags = payment?.fraud_flags ?? [];
+                const senderName = (payment?.extracted as { sender_name?: string } | undefined)?.sender_name;
                 const actionable = ['pending', 'submitted', 'under_review'].includes(p.status);
                 return (
                   <tr key={p.id} className="row-line align-top">
@@ -109,6 +121,20 @@ export default function PaymentsPage() {
                     <td className="p-3 text-muted">{p.purpose_label}</td>
                     <td className="p-3 text-muted">{p.amount_jod.toFixed(3)} د.أ</td>
                     <td className="p-3 text-muted">{ai !== null ? `${ai}%` : '—'}</td>
+                    <td className="p-3">
+                      {flags.length === 0 ? (
+                        <span className="text-success text-xs">✓ نظيف</span>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          {flags.map((f) => (
+                            <span key={f} className="badge bg-danger/10 text-danger border border-danger/30 text-[11px]">
+                              {FRAUD_LABELS[f] ?? f}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {senderName && <div className="text-[11px] text-muted mt-1">المُرسِل: {senderName}</div>}
+                    </td>
                     <td className="p-3 text-muted">{p.status_label}</td>
                     <td className="p-3">
                       <div className="flex flex-wrap gap-2">
