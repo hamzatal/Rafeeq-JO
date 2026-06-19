@@ -4,11 +4,11 @@
  */
 
 export const fontFamily = {
-  regular: 'Tajawal_400Regular',
-  medium: 'Tajawal_500Medium',
-  semibold: 'Tajawal_700Bold',
-  bold: 'Tajawal_700Bold',
-  extrabold: 'Tajawal_800ExtraBold',
+  regular: 'IBMPlexSansArabic_400Regular',
+  medium: 'IBMPlexSansArabic_500Medium',
+  semibold: 'IBMPlexSansArabic_600SemiBold',
+  bold: 'IBMPlexSansArabic_700Bold',
+  extrabold: 'IBMPlexSansArabic_700Bold',
 } as const;
 
 export const fontWeight = {
