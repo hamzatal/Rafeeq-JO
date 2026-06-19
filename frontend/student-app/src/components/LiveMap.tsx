@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import Constants from 'expo-constants';
 import { useTheme, type AppTheme } from '../theme';
 import { Icon } from './Icon';
 
@@ -7,91 +8,329 @@ export interface MapPoint {
   lat: number;
   lng: number;
   label?: string;
-  kind?: 'captain' | 'pickup' | 'destination';
+  kind?: 'captain' | 'pickup' | 'destination' | 'origin';
 }
 
 interface LiveMapProps {
+  /** Markers to render. A `captain` point animates smoothly between updates. */
   points: MapPoint[];
+  /** Optional ordered polyline (e.g. captain → pickups → university). */
+  route?: { lat: number; lng: number }[];
+  /** When provided, tapping the map reports the chosen coordinates. */
+  onPick?: (p: { lat: number; lng: number }) => void;
+  /** Show the small legend below the map. Default: true when >1 kind. */
+  legend?: boolean;
   height?: number;
 }
 
 /**
- * Key-free live map.
- *  - Native: renders Leaflet + OpenStreetMap tiles inside a WebView.
- *  - Web: renders a clean live-position panel + "open in maps" link
- *    (react-native-webview web support is limited, so we avoid it there).
- * Upgrade path: swap OSM tiles for Google/Mapbox once a key is configured.
+ * Optional Google Maps key. When set in app.json (expo.extra.mapsKey) the map
+ * uses Google raster tiles; otherwise it falls back to free OpenStreetMap tiles.
+ * Either way the map is fully functional — the key only upgrades tile quality.
  */
-export function LiveMap({ points, height = 220 }: LiveMapProps) {
+const MAPS_KEY: string | undefined =
+  (Constants.expoConfig?.extra as { mapsKey?: string } | undefined)?.mapsKey || undefined;
+
+const IRBID = { lat: 32.5556, lng: 35.85 };
+
+export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMapProps) {
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
+  const webRef = useRef<any>(null);
 
-  const center = points[0] ?? { lat: 32.5556, lng: 35.85 }; // Irbid fallback
+  const center = points[0] ?? route?.[0] ?? IRBID;
+  const colors = useMemo(
+    () => ({
+      captain: theme.colors.primary,
+      pickup: '#2563EB',
+      destination: theme.colors.accent,
+      origin: theme.colors.success,
+      route: theme.colors.primary,
+    }),
+    [theme],
+  );
 
+  const kinds = new Set(points.map((p) => p.kind ?? 'pickup'));
+  const showLegend = legend ?? kinds.size > 1;
+
+  // ── Web fallback: a clean live panel (Leaflet/WebView aren't reliable on web).
   if (Platform.OS === 'web') {
     return (
-      <View style={[s.webCard, { height }]}>
-        <Icon name="map-pin" size={26} color={theme.colors.primary} />
-        {points.map((p, i) => (
-          <Text key={i} style={s.webCoord}>
-            {p.label ? `${p.label}: ` : ''}{p.lat.toFixed(5)}, {p.lng.toFixed(5)}
-          </Text>
-        ))}
-        <Pressable
-          onPress={() => Linking.openURL(`https://www.openstreetmap.org/?mlat=${center.lat}&mlon=${center.lng}#map=15/${center.lat}/${center.lng}`)}
-          style={s.webBtn}
-        >
-          <Text style={s.webBtnText}>فتح في الخريطة</Text>
-        </Pressable>
+      <View>
+        <View style={[s.webCard, { height }]}>
+          <Icon name="map-pin" size={26} color={theme.colors.primary} />
+          {points.map((p, i) => (
+            <Text key={i} style={s.webCoord}>
+              {p.label ? `${p.label}: ` : ''}
+              {p.lat.toFixed(5)}, {p.lng.toFixed(5)}
+            </Text>
+          ))}
+          <Pressable
+            onPress={() =>
+              Linking.openURL(
+                `https://www.openstreetmap.org/?mlat=${center.lat}&mlon=${center.lng}#map=15/${center.lat}/${center.lng}`,
+              )
+            }
+            style={s.webBtn}
+          >
+            <Text style={s.webBtnText}>فتح في الخريطة</Text>
+          </Pressable>
+        </View>
+        {showLegend && <Legend s={s} colors={colors} kinds={kinds} />}
       </View>
     );
   }
 
-  // Native: lazy-require so the web bundle never loads the native module.
+  // ── Native: Leaflet inside a WebView. Built once; updates are injected.
   const { WebView } = require('react-native-webview');
-  const html = buildLeafletHtml(points, center);
+
+  // Keep the initial HTML stable so the map never reloads/flickers. Live updates
+  // (captain movement, route changes) are pushed via injectJavaScript below.
+  const initial = useRef({ points, route, center }).current;
+  const html = useMemo(
+    () => buildLeafletHtml(initial.points, initial.route, initial.center, colors, !!onPick, MAPS_KEY),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  // Push live data into the running map whenever inputs change.
+  useEffect(() => {
+    const payload = JSON.stringify({ points, route: route ?? null });
+    webRef.current?.injectJavaScript(`window.__rafeeqUpdate && window.__rafeeqUpdate(${payload}); true;`);
+  }, [points, route]);
+
+  const onMessage = (e: { nativeEvent: { data: string } }) => {
+    if (!onPick) return;
+    try {
+      const m = JSON.parse(e.nativeEvent.data);
+      if (m?.type === 'pick' && Number.isFinite(m.lat) && Number.isFinite(m.lng)) {
+        onPick({ lat: m.lat, lng: m.lng });
+      }
+    } catch {
+      /* ignore malformed messages */
+    }
+  };
 
   return (
-    <View style={[s.mapWrap, { height }]}>
-      <WebView
-        originWhitelist={['*']}
-        source={{ html }}
-        style={{ flex: 1, backgroundColor: 'transparent' }}
-        scrollEnabled={false}
-      />
+    <View>
+      <View style={[s.mapWrap, { height }]}>
+        <WebView
+          ref={webRef}
+          originWhitelist={['*']}
+          source={{ html }}
+          style={{ flex: 1, backgroundColor: 'transparent' }}
+          scrollEnabled={false}
+          onMessage={onMessage}
+        />
+        {onPick && (
+          <View style={s.pickHint} pointerEvents="none">
+            <Icon name="crosshair" size={13} color={theme.colors.onPrimary} />
+            <Text style={s.pickHintText}>اضغط على الخريطة لتحديد الموقع</Text>
+          </View>
+        )}
+      </View>
+      {showLegend && <Legend s={s} colors={colors} kinds={kinds} />}
     </View>
   );
 }
 
-function buildLeafletHtml(points: MapPoint[], center: MapPoint): string {
-  const data = JSON.stringify(points);
-  const c = JSON.stringify({ lat: center.lat, lng: center.lng });
+function Legend({
+  s,
+  colors,
+  kinds,
+}: {
+  s: ReturnType<typeof makeStyles>;
+  colors: Record<string, string>;
+  kinds: Set<string>;
+}) {
+  const labels: Record<string, string> = {
+    captain: 'الكابتن',
+    pickup: 'نقطة الالتقاط',
+    destination: 'الوجهة',
+    origin: 'الانطلاق',
+  };
+  return (
+    <View style={s.legend}>
+      {[...kinds].map((k) => (
+        <View key={k} style={s.legendItem}>
+          <View style={[s.legendDot, { backgroundColor: colors[k] ?? colors.pickup }]} />
+          <Text style={s.legendText}>{labels[k] ?? k}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function buildLeafletHtml(
+  points: MapPoint[],
+  route: { lat: number; lng: number }[] | undefined,
+  center: { lat: number; lng: number },
+  colors: Record<string, string>,
+  pickable: boolean,
+  mapsKey?: string,
+): string {
+  const data = JSON.stringify({ points, route: route ?? null });
+  const c = JSON.stringify(center);
+  const col = JSON.stringify(colors);
+
+  // Tile source: Google raster when a key is configured, else OpenStreetMap.
+  const tileUrl = mapsKey
+    ? `https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=${mapsKey}`
+    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
   return `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<style>html,body,#map{height:100%;margin:0;background:#eef3f0}</style>
-</head><body><div id="map"></div>
+<style>
+  html,body,#map{height:100%;margin:0;background:#eef3f0}
+  .rfq-pin{display:flex;align-items:center;justify-content:center;border-radius:50%;
+    border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);font:700 12px sans-serif;color:#fff}
+  .rfq-car{font-size:18px;line-height:1}
+  .rfq-pulse{animation:rfqpulse 1.6s infinite}
+  @keyframes rfqpulse{0%{box-shadow:0 0 0 0 rgba(11,121,67,.5)}70%{box-shadow:0 0 0 14px rgba(11,121,67,0)}100%{box-shadow:0 0 0 0 rgba(11,121,67,0)}}
+</style></head><body><div id="map"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  var pts = ${data}; var c = ${c};
+  var COL = ${col};
+  var c = ${c};
   var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([c.lat,c.lng],14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-  var colors={captain:'#0B7A43',pickup:'#2563EB',destination:'#E6B23E'};
-  var bounds=[];
-  pts.forEach(function(p){
-    var m=L.circleMarker([p.lat,p.lng],{radius:9,color:'#fff',weight:3,fillColor:colors[p.kind]||'#0B7A43',fillOpacity:1}).addTo(map);
-    if(p.label){m.bindTooltip(p.label,{permanent:false});}
-    bounds.push([p.lat,p.lng]);
+  L.tileLayer('${tileUrl}',{maxZoom:19,subdomains:['a','b','c']}).addTo(map);
+
+  var markers=[], routeLine=null, captainMarker=null;
+
+  function icon(kind,index){
+    var bg = COL[kind] || COL.pickup;
+    var inner = kind==='captain' ? '<span class="rfq-car">🚗</span>'
+      : kind==='destination' ? '★'
+      : kind==='origin' ? '⌂'
+      : (index!=null ? (index+1) : '');
+    var size = kind==='captain' ? 40 : 30;
+    var cls = 'rfq-pin' + (kind==='captain' ? ' rfq-pulse' : '');
+    return L.divIcon({className:'',html:'<div class="'+cls+'" style="width:'+size+'px;height:'+size+'px;background:'+bg+'">'+inner+'</div>',
+      iconSize:[size,size],iconAnchor:[size/2,size/2]});
+  }
+
+  function draw(d){
+    markers.forEach(function(m){map.removeLayer(m);}); markers=[];
+    if(routeLine){map.removeLayer(routeLine);routeLine=null;}
+    var bounds=[];
+    var pickupIndex=0;
+    var captain=null;
+    (d.points||[]).forEach(function(p){
+      var kind=p.kind||'pickup';
+      var idx = kind==='pickup' ? pickupIndex++ : null;
+      if(kind==='captain'){captain=p;}
+      var m=L.marker([p.lat,p.lng],{icon:icon(kind,idx)}).addTo(map);
+      if(p.label){m.bindTooltip(p.label,{direction:'top'});}
+      markers.push(m);
+      bounds.push([p.lat,p.lng]);
+    });
+    var line = d.route && d.route.length>1 ? d.route
+      : (bounds.length>1 ? bounds.map(function(b){return {lat:b[0],lng:b[1]};}) : null);
+    if(line){
+      routeLine=L.polyline(line.map(function(p){return [p.lat,p.lng];}),
+        {color:COL.route,weight:5,opacity:.75,dashArray:'1,8',lineCap:'round'}).addTo(map);
+      line.forEach(function(p){bounds.push([p.lat,p.lng]);});
+    }
+    if(bounds.length>1){map.fitBounds(bounds,{padding:[44,44],maxZoom:16});}
+    else if(bounds.length===1){map.setView(bounds[0],15);}
+    return captain;
+  }
+
+  // Smoothly slide the captain marker from its current spot to the new one.
+  function animateCaptain(to){
+    if(!captainMarker){return;}
+    var from=captainMarker.getLatLng();
+    var start=Date.now(), dur=900;
+    function step(){
+      var t=Math.min(1,(Date.now()-start)/dur);
+      var lat=from.lat+(to.lat-from.lat)*t, lng=from.lng+(to.lng-from.lng)*t;
+      captainMarker.setLatLng([lat,lng]);
+      if(t<1){requestAnimationFrame(step);}
+    }
+    step();
+  }
+
+  window.__rafeeqUpdate=function(d){
+    // If only the captain moved, animate; otherwise redraw everything.
+    var newCaptain=(d.points||[]).filter(function(p){return (p.kind||'')==='captain';})[0];
+    var sameCount = markers.length===(d.points||[]).length;
+    if(captainMarker && newCaptain && sameCount){
+      animateCaptain(newCaptain);
+    } else {
+      var cap=draw(d);
+      captainMarker = cap ? markers[(d.points||[]).findIndex(function(p){return (p.kind||'')==='captain';})] : null;
+    }
+  };
+
+  var cap0=draw(${data});
+  captainMarker = cap0 ? markers.find(function(m,i){return (${data}.points[i]||{}).kind==='captain';}) : null;
+
+  ${pickable ? `
+  var pickMarker=null;
+  map.on('click',function(e){
+    if(pickMarker){pickMarker.setLatLng(e.latlng);} else {
+      pickMarker=L.marker(e.latlng,{icon:icon('pickup',0),draggable:true}).addTo(map);
+      pickMarker.on('dragend',function(ev){var ll=ev.target.getLatLng();post(ll.lat,ll.lng);});
+    }
+    post(e.latlng.lat,e.latlng.lng);
   });
-  if(bounds.length>1){map.fitBounds(bounds,{padding:[40,40]});}
+  function post(lat,lng){
+    if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify({type:'pick',lat:lat,lng:lng}));}
+  }` : ''}
 </script></body></html>`;
 }
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    mapWrap: { borderRadius: t.radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.border, marginTop: t.spacing.sm },
-    webCard: { borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm },
+    mapWrap: {
+      borderRadius: t.radius.lg,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: t.colors.border,
+      marginTop: t.spacing.sm,
+    },
+    pickHint: {
+      position: 'absolute',
+      bottom: 8,
+      alignSelf: 'center',
+      flexDirection: 'row-reverse',
+      alignItems: 'center',
+      gap: 5,
+      backgroundColor: t.colors.primary,
+      borderRadius: t.radius.md,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      opacity: 0.92,
+    },
+    pickHintText: { fontFamily: t.fontFamily.medium, fontSize: 11, color: t.colors.onPrimary },
+    legend: {
+      flexDirection: 'row-reverse',
+      flexWrap: 'wrap',
+      gap: t.spacing.base,
+      marginTop: t.spacing.xs,
+      paddingHorizontal: 4,
+    },
+    legendItem: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5 },
+    legendDot: { width: 10, height: 10, borderRadius: 5 },
+    legendText: { fontFamily: t.fontFamily.medium, fontSize: 11, color: t.colors.textSecondary },
+    webCard: {
+      borderRadius: t.radius.lg,
+      borderWidth: 1,
+      borderColor: t.colors.border,
+      backgroundColor: t.colors.primarySoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      marginTop: t.spacing.sm,
+    },
     webCoord: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.text },
-    webBtn: { marginTop: 6, backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 8, paddingHorizontal: t.spacing.lg },
+    webBtn: {
+      marginTop: 6,
+      backgroundColor: t.colors.primary,
+      borderRadius: t.radius.md,
+      paddingVertical: 8,
+      paddingHorizontal: t.spacing.lg,
+    },
     webBtnText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.onPrimary },
   });

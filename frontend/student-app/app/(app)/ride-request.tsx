@@ -124,9 +124,28 @@ export default function RideRequestScreen() {
             <View style={s.half}><Input label={t('rideRequest.lng')} keyboardType="numeric" value={lng} onChangeText={setLng} /></View>
           </View>
           <Input label={t('rideRequest.address')} value={address} onChangeText={setAddress} />
-          {Number.isFinite(Number(lat)) && Number.isFinite(Number(lng)) && Number(lat) !== 0 && Number(lng) !== 0 && (
-            <LiveMap points={[{ lat: Number(lat), lng: Number(lng), kind: 'pickup', label: t('rideRequest.pickup') }]} height={180} />
-          )}
+          {(() => {
+            const la = Number(lat);
+            const ln = Number(lng);
+            const hasPickup = Number.isFinite(la) && Number.isFinite(ln) && la !== 0 && ln !== 0;
+            const uni = universities.find((u) => u.id === universityId);
+            const hasDest = !!uni && uni.lat != null && uni.lng != null;
+            const pts: { lat: number; lng: number; kind?: 'origin' | 'destination'; label?: string }[] = [];
+            if (hasPickup) pts.push({ lat: la, lng: ln, kind: 'origin', label: t('rideRequest.pickup') });
+            if (hasDest) pts.push({ lat: uni!.lat!, lng: uni!.lng!, kind: 'destination', label: locale === 'ar' ? uni!.name_ar : uni!.name_en });
+            const route = hasPickup && hasDest ? [{ lat: la, lng: ln }, { lat: uni!.lat!, lng: uni!.lng! }] : undefined;
+            return (
+              <LiveMap
+                points={pts.length ? pts : [{ lat: uni?.lat ?? 32.5556, lng: uni?.lng ?? 35.85, kind: 'destination' }]}
+                route={route}
+                height={200}
+                onPick={(p) => {
+                  setLat(p.lat.toFixed(6));
+                  setLng(p.lng.toFixed(6));
+                }}
+              />
+            );
+          })()}
         </Card>
 
         <View style={s.typeRow}>
