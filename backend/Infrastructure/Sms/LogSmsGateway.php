@@ -16,11 +16,16 @@ class LogSmsGateway implements SmsGateway
     {
         $reference = 'log_'.Str::uuid()->toString();
 
-        Log::channel(config('logging.default'))->info('[SMS:LOG] Outbound message', [
-            'to' => $to,
-            'message' => $message,
-            'reference' => $reference,
-        ]);
+        // Logging must never break the OTP/notification path it stands in for.
+        try {
+            Log::info('[SMS:LOG] Outbound message', [
+                'to' => $to,
+                'message' => $message,
+                'reference' => $reference,
+            ]);
+        } catch (\Throwable) {
+            // ignore — this is the no-op fallback gateway
+        }
 
         return $reference;
     }

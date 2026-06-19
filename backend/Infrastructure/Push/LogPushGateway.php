@@ -21,14 +21,19 @@ class LogPushGateway implements PushGateway
     {
         $reference = 'push_log_'.Str::uuid()->toString();
 
-        Log::channel(config('logging.default'))->info('[PUSH:LOG] Notification', [
-            'token' => substr($deviceToken, 0, 12).'…',
-            'title' => $title,
-            'body' => $body,
-            'data' => $data,
-            'options' => $options,
-            'reference' => $reference,
-        ]);
+        // Logging must never break the flow it stands in for (resilience).
+        try {
+            Log::info('[PUSH:LOG] Notification', [
+                'token' => substr($deviceToken, 0, 12).'…',
+                'title' => $title,
+                'body' => $body,
+                'data' => $data,
+                'options' => $options,
+                'reference' => $reference,
+            ]);
+        } catch (\Throwable) {
+            // ignore — this is the no-op fallback gateway
+        }
 
         return $reference;
     }

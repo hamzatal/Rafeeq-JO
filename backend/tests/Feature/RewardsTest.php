@@ -81,4 +81,15 @@ class RewardsTest extends TestCase
         $this->assertSame(100, $options[0]['points']);
         $this->assertSame(1000, $options[0]['credit_fils']);
     }
+
+    public function test_new_account_has_valid_default_tier(): void
+    {
+        // Regression: a freshly-created reward account must expose a non-null tier
+        // (previously firstOrCreate left tier null → /rewards 500'd for new users).
+        $account = $this->rewards()->account($this->user());
+
+        $this->assertNotNull($account->tier);
+        $this->assertSame('bronze', $account->tier->value);
+        $this->assertSame(0, $account->points);
+    }
 }

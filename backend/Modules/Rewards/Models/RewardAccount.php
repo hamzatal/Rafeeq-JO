@@ -20,6 +20,13 @@ class RewardAccount extends Model
 
     protected $fillable = ['user_id', 'tier', 'points', 'lifetime_points'];
 
+    /** Defaults so a freshly-created account always has a valid tier/points. */
+    protected $attributes = [
+        'tier' => 'bronze',
+        'points' => 0,
+        'lifetime_points' => 0,
+    ];
+
     protected function casts(): array
     {
         return [
