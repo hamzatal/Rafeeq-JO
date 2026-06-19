@@ -6,6 +6,9 @@ export const ENDPOINTS = {
   ping: '/ping',
   config: '/config',
   zones: '/zones',
+  coupons: {
+    validate: '/coupons/validate',
+  },
   auth: {
     register: '/auth/register',
     verifyOtp: '/auth/verify-otp',
@@ -201,6 +204,8 @@ export const ENDPOINTS = {
     subscriptions: '/admin/subscriptions',
     subscriptionActivate: (id: string) => `/admin/subscriptions/${id}/activate`,
     trips: '/admin/trips',
+    coupons: '/admin/coupons',
+    coupon: (id: string) => `/admin/coupons/${id}`,
     rideRequests: '/admin/ride-requests',
     matchingRun: '/admin/matching/run',
     walletCredit: '/admin/wallets/credit',

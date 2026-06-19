@@ -41,6 +41,7 @@ const GROUPS: { title: string; links: NavLink[] }[] = [
     title: 'المالية',
     links: [
       { href: '/payments', label: 'المدفوعات', icon: 'payments' },
+      { href: '/coupons', label: 'الكوبونات', icon: 'sell' },
       { href: '/withdrawals', label: 'سحوبات الكباتن', icon: 'account_balance_wallet' },
       { href: '/reports', label: 'التقارير المالية', icon: 'monitoring' },
     ],

@@ -2,6 +2,7 @@ import type { AxiosInstance } from 'axios';
 import {
   ENDPOINTS,
   type ApiSuccess,
+  type Coupon,
   type DriverDocument,
   type DriverProfile,
   type Route,
@@ -139,5 +140,25 @@ export class AdminApi {
   async listTrips(params: ListParams = {}): Promise<{ items: Trip[]; meta: ApiSuccess<Trip[]>['meta'] }> {
     const { data } = await this.http.get<ApiSuccess<Trip[]>>(ENDPOINTS.admin.trips, { params });
     return { items: data.data, meta: data.meta };
+  }
+
+  // ── Coupons / discounts management ───────────────────────────────
+  async listCoupons(params: ListParams & { active?: boolean } = {}): Promise<{ items: Coupon[]; meta: ApiSuccess<Coupon[]>['meta'] }> {
+    const { data } = await this.http.get<ApiSuccess<Coupon[]>>(ENDPOINTS.admin.coupons, { params });
+    return { items: data.data, meta: data.meta };
+  }
+
+  async createCoupon(payload: Partial<Coupon>): Promise<Coupon> {
+    const { data } = await this.http.post<ApiSuccess<Coupon>>(ENDPOINTS.admin.coupons, payload);
+    return unwrap(data);
+  }
+
+  async updateCoupon(id: string, payload: Partial<Coupon>): Promise<Coupon> {
+    const { data } = await this.http.patch<ApiSuccess<Coupon>>(ENDPOINTS.admin.coupon(id), payload);
+    return unwrap(data);
+  }
+
+  async deleteCoupon(id: string): Promise<void> {
+    await this.http.delete(ENDPOINTS.admin.coupon(id));
   }
 }

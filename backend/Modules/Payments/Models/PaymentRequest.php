@@ -31,8 +31,8 @@ class PaymentRequest extends Model
     use HasUuid;
 
     protected $fillable = [
-        'number', 'user_id', 'payable_type', 'payable_id', 'purpose',
-        'amount_fils', 'currency', 'method', 'status', 'reject_reason',
+        'number', 'user_id', 'payable_type', 'payable_id', 'coupon_id', 'purpose',
+        'amount_fils', 'discount_fils', 'currency', 'method', 'status', 'reject_reason',
         'expires_at', 'approved_at', 'approved_by',
     ];
 
@@ -42,6 +42,7 @@ class PaymentRequest extends Model
             'purpose' => PaymentPurpose::class,
             'status' => PaymentStatus::class,
             'amount_fils' => 'integer',
+            'discount_fils' => 'integer',
             'expires_at' => 'datetime',
             'approved_at' => 'datetime',
         ];

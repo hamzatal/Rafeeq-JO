@@ -44,6 +44,7 @@ class PaymentService extends BaseService
         private readonly WalletService $wallets,
         private readonly SubscriptionService $subscriptions,
         private readonly NotificationService $notifications,
+        private readonly \Rafeeq\Modules\Coupons\Services\CouponService $coupons,
     ) {}
 
     /**
@@ -55,9 +56,26 @@ class PaymentService extends BaseService
         int $amountFils,
         ?string $payableType = null,
         ?string $payableId = null,
+        ?string $couponCode = null,
     ): PaymentRequest {
         if ($amountFils <= 0) {
             throw new BusinessRuleException('قيمة الدفع غير صحيحة.', 'INVALID_AMOUNT');
+        }
+
+        // Optional coupon: validate + compute discount on the original amount.
+        // A validation failure surfaces to the payer (they typed a code).
+        $couponId = null;
+        $discountFils = 0;
+        if ($couponCode !== null && trim($couponCode) !== '') {
+            $result = $this->coupons->validate(
+                code: $couponCode,
+                user: $user,
+                context: $this->couponScope($purpose),
+                amountFils: $amountFils,
+                planId: $purpose === PaymentPurpose::Subscription ? $payableId : null,
+            );
+            $couponId = $result['coupon']->id;
+            $discountFils = $result['discount_fils'];
         }
 
         $ttl = (int) config('services.cliq.request_ttl_minutes', 1440);
@@ -67,8 +85,11 @@ class PaymentService extends BaseService
             'user_id' => $user->id,
             'payable_type' => $payableType,
             'payable_id' => $payableId,
+            'coupon_id' => $couponId,
             'purpose' => $purpose,
-            'amount_fils' => $amountFils,
+            // The payer pays the discounted amount; the original = amount + discount.
+            'amount_fils' => max(0, $amountFils - $discountFils),
+            'discount_fils' => $discountFils,
             'currency' => 'JOD',
             'method' => 'cliq',
             'status' => PaymentStatus::Pending,
@@ -76,11 +97,22 @@ class PaymentService extends BaseService
         ]);
 
         $this->audit->log('payment.request_created', $user, auditable: $request, changes: [
-            'amount_fils' => $amountFils,
+            'amount_fils' => $request->amount_fils,
+            'discount_fils' => $discountFils,
             'purpose' => $purpose->value,
         ]);
 
         return $request;
+    }
+
+    /** Map a payment purpose to the matching coupon scope. */
+    private function couponScope(PaymentPurpose $purpose): \Rafeeq\Shared\Enums\CouponScope
+    {
+        return match ($purpose) {
+            PaymentPurpose::Subscription => \Rafeeq\Shared\Enums\CouponScope::Subscription,
+            PaymentPurpose::WalletTopup => \Rafeeq\Shared\Enums\CouponScope::WalletTopup,
+            default => \Rafeeq\Shared\Enums\CouponScope::Any,
+        };
     }
 
     /** CliQ transfer instructions shown to the payer. */
@@ -180,6 +212,23 @@ class PaymentService extends BaseService
 
             $this->fulfil($request);
 
+            // Consume the coupon (if any) now that the payment is approved.
+            // Wrapped so a redemption-recording hiccup never blocks fulfilment.
+            if ($request->coupon_id) {
+                \Rafeeq\Core\Support\Safely::run(function () use ($request) {
+                    $coupon = \Rafeeq\Modules\Coupons\Models\Coupon::find($request->coupon_id);
+                    if ($coupon && $request->user) {
+                        $this->coupons->redeem(
+                            $coupon,
+                            $request->user,
+                            (int) $request->discount_fils,
+                            'payment_request',
+                            $request->id,
+                        );
+                    }
+                }, 'payment.coupon_redeem', ['request' => $request->id]);
+            }
+
             $this->audit->log($auto ? 'payment.auto_approved' : 'payment.approved', $actor, auditable: $request, changes: [
                 'number' => $request->number,
                 'amount_fils' => $request->amount_fils,
@@ -266,9 +315,11 @@ class PaymentService extends BaseService
             return;
         }
 
+        // Wallet is credited with the ORIGINAL amount (paid + discount), so a
+        // wallet-top-up coupon acts as a bonus (pay less, receive full credit).
         $this->wallets->credit(
             $this->wallets->forUser($user),
-            $request->amount_fils,
+            $request->amount_fils + (int) $request->discount_fils,
             WalletTxnType::Topup,
             'شحن المحفظة عبر CliQ',
             $request->number,

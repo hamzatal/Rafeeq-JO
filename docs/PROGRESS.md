@@ -21,7 +21,15 @@
 - ملف **`docs/DATABASE_SCHEMA.md`** (موصوف بالمجالات) + **`docs/DATABASE_SCHEMA.generated.md`** (مُولَّد آلياً) + أمر **`php artisan db:schema-doc`**.
 - تحسين تطبيعي: إزالة العمود المكرّر `student_profiles.reward_tier` (المصدر الوحيد الآن `reward_accounts.tier`، شكل الـ API بلا تغيير).
 
-**التالي — المهمة 7:** نظام كوبونات وخصومات وحوافز شامل وذكي.
+**التالي — المهمة 8:** نظام نقاط وحوافز للطالب والكابتن.
+
+**✅ تم (RFQ-211) — المهمة 7: نظام كوبونات وخصومات شامل وذكي:**
+- موديول جديد **`Modules/Coupons`**: جدولا `coupons` + `coupon_redemptions`، نموذجان، enums `CouponType` (percentage/fixed) + `CouponScope` (any/subscription/wallet_topup/ride).
+- **`CouponService`**: validate (يتحقق من الصلاحية + النطاق + الجامعة/الخطة + الحد الأدنى + حدود الاستخدام الكلي/لكل مستخدم + أول عملية) + computeDiscount (نسبة بسقف / مبلغ ثابت، لا يتجاوز المبلغ) + redeem (ذرّي بقفل صف) + CRUD.
+- مسارات: `POST /coupons/validate` (معاينة) + `admin/coupons` CRUD (صلاحية `coupons.manage` مزروعة للأدمن والمشرف).
+- **ربط بالدفع**: `payment_requests` + عمودا `coupon_id`/`discount_fils`؛ `createRequest` يقبل `coupon_code` (خصم على ما يُدفع)؛ شحن المحفظة يضيف المبلغ الأصلي (الكوبون = بونص)؛ الاستبدال عند الاعتماد (Safely). 
+- صفحة admin `/coupons` (إنشاء + جدول + تفعيل/حذف) + مجموعة المالية. api-client AdminApi coupons + أنواع Coupon.
+- التحقق: 100 اختبار باك (9 جديدة للكوبونات) + tsc أخضر + **E2E حقيقي** (أدمن أنشأ WELCOME20 → طالب تحقق: خصم 2000 على 10000 = 8000؛ نطاق خاطئ مرفوض).
 
 **✅ تم (RFQ-209/210) — المهمة 6: لوحة إدارة كاملة + ذكية بـGPT:**
 - **رؤى ذكية (GPT)**: `AdminInsightsService` يجمع مؤشرات المنصة + تحليل وتوصيات بالعربية عبر GPT (fallback قاعدي بلا مفتاح) → `GET /admin/ai/insights` + صفحة `/insights` (تحليل + توصيات + 12 بطاقة مؤشر).

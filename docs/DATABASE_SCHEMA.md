@@ -3,7 +3,7 @@
 > **المصدر الرسمي لبنية قاعدة البيانات.** يُحدَّث مع كل migration جديد.
 > يُولَّد جزء منه آلياً من قاعدة البيانات الحيّة عبر `php artisan db:schema-doc` (انظر الأسفل).
 >
-> آخر تحديث: RFQ-204 · PostgreSQL 16 · المجموع: **63 جدول** (54 جدول نطاق + 9 جداول نظام).
+> آخر تحديث: RFQ-211 · PostgreSQL 16 · المجموع: **65 جدول** (56 جدول نطاق + 9 جداول نظام).
 
 ---
 
@@ -137,6 +137,12 @@
 | `ai_conversations` | user_id!, title, last_message_at |
 | `ai_messages` | conversation_id!, role!, content!, tokens! |
 | `saved_addresses` | user_id!, label!, title, address_text!, lat, lng, is_default! |
+
+### 3.13 الكوبونات والخصومات (Coupons) — 2
+| الجدول | الأعمدة الرئيسية | ملاحظات |
+|--------|------------------|---------|
+| `coupons` | code! (unique), type! (percentage/fixed), value!, max_discount_fils, min_amount_fils!, scope!, university_id, plan_id, first_order_only!, usage_limit, per_user_limit, used_count!, starts_at, expires_at, is_active!, deleted_at | محرّك الخصومات |
+| `coupon_redemptions` | coupon_id!, user_id!, discount_fils!, context_type, context_id | سجل الاستبدال (حدود لكل مستخدم) |
 
 ---
 

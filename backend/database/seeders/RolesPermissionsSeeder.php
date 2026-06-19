@@ -46,6 +46,7 @@ class RolesPermissionsSeeder extends Seeder
             'settings.manage' => ['إدارة الإعدادات', 'Manage settings'],
             'audit.view' => ['عرض سجل التدقيق', 'View audit logs'],
             'analytics.view' => ['عرض التحليلات', 'View analytics'],
+            'coupons.manage' => ['إدارة الكوبونات', 'Manage coupons'],
         ],
     ];
 
@@ -85,6 +86,7 @@ class RolesPermissionsSeeder extends Seeder
             'users.view', 'drivers.view', 'drivers.review', 'drivers.approve', 'drivers.suspend',
             'payments.view', 'payments.approve',
             'analytics.view',
+            'coupons.manage',
         ]);
 
         // Admin: all permissions (also bypasses checks as superuser).

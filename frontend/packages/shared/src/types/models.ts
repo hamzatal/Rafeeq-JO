@@ -737,3 +737,37 @@ export interface AdminInsights {
   recommendations: string[];
   source: 'ai' | 'rules';
 }
+
+
+/** Coupon / discount (admin-managed). */
+export type CouponType = 'percentage' | 'fixed';
+export type CouponScope = 'any' | 'subscription' | 'wallet_topup' | 'ride';
+
+export interface Coupon {
+  id: string;
+  code: string;
+  description: string | null;
+  type: CouponType;
+  type_label: string;
+  value: number;
+  max_discount_fils: number | null;
+  min_amount_fils: number;
+  scope: CouponScope;
+  scope_label: string;
+  university_id: string | null;
+  plan_id: string | null;
+  first_order_only: boolean;
+  usage_limit: number | null;
+  per_user_limit: number | null;
+  used_count: number;
+  starts_at: string | null;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string | null;
+}
+
+export interface CouponValidation {
+  code: string;
+  discount_fils: number;
+  final_fils: number;
+}

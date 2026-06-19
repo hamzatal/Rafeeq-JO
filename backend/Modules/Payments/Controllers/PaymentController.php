@@ -33,7 +33,14 @@ class PaymentController extends Controller
 
         [$amountFils, $payableType, $payableId] = $this->resolvePayable($request, $purpose, $user->id);
 
-        $paymentRequest = $this->payments->createRequest($user, $purpose, $amountFils, $payableType, $payableId);
+        $paymentRequest = $this->payments->createRequest(
+            $user,
+            $purpose,
+            $amountFils,
+            $payableType,
+            $payableId,
+            $request->validated('coupon_code'),
+        );
 
         return $this->created([
             'request' => new PaymentRequestResource($paymentRequest),

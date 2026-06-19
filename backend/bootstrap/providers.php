@@ -19,6 +19,7 @@ return [
     Rafeeq\Modules\PickupPoints\Providers\PickupPointsServiceProvider::class,
     Rafeeq\Modules\Routes\Providers\RoutesServiceProvider::class,
     Rafeeq\Modules\Subscriptions\Providers\SubscriptionsServiceProvider::class,
+    Rafeeq\Modules\Coupons\Providers\CouponsServiceProvider::class,
     Rafeeq\Modules\Trips\Providers\TripsServiceProvider::class,
     Rafeeq\Modules\Zones\Providers\ZonesServiceProvider::class,
     Rafeeq\Modules\RideRequests\Providers\RideRequestsServiceProvider::class,

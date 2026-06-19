@@ -4,7 +4,7 @@
 > للتوثيق الموصوف بالمجالات: `docs/DATABASE_SCHEMA.md`.
 
 - المُولّد من: **pgsql** · التاريخ: 2026-06-19
-- المجموع: **63** جدول (54 نطاق + 9 نظام)
+- المجموع: **65** جدول (56 نطاق + 9 نظام)
 
 ---
 
@@ -150,6 +150,50 @@
 **Foreign keys:** `against_user_id` → `users(id)` · `handled_by` → `users(id)` · `reporter_id` → `users(id)`
 
 **Indexes:** `against_user_id` · `number` (unique) · `status,severity`
+
+### `coupon_redemptions`
+
+| العمود | النوع | Nullable | افتراضي |
+|---|---|---|---|
+| `id` | uuid | — |  |
+| `coupon_id` | uuid | — |  |
+| `user_id` | uuid | — |  |
+| `discount_fils` | int4 | — |  |
+| `context_type` | varchar | ✓ |  |
+| `context_id` | uuid | ✓ |  |
+| `created_at` | timestamp | ✓ |  |
+| `updated_at` | timestamp | ✓ |  |
+
+**Foreign keys:** `coupon_id` → `coupons(id)` · `user_id` → `users(id)`
+
+**Indexes:** `coupon_id,user_id`
+
+### `coupons`
+
+| العمود | النوع | Nullable | افتراضي |
+|---|---|---|---|
+| `id` | uuid | — |  |
+| `code` | varchar | — |  |
+| `description` | varchar | ✓ |  |
+| `type` | varchar | — |  |
+| `value` | int4 | — |  |
+| `max_discount_fils` | int4 | ✓ |  |
+| `min_amount_fils` | int4 | — | 0 |
+| `scope` | varchar | — | 'any'::character varying |
+| `university_id` | uuid | ✓ |  |
+| `plan_id` | uuid | ✓ |  |
+| `first_order_only` | bool | — | false |
+| `usage_limit` | int4 | ✓ |  |
+| `per_user_limit` | int4 | ✓ |  |
+| `used_count` | int4 | — | 0 |
+| `starts_at` | timestamp | ✓ |  |
+| `expires_at` | timestamp | ✓ |  |
+| `is_active` | bool | — | true |
+| `created_at` | timestamp | ✓ |  |
+| `updated_at` | timestamp | ✓ |  |
+| `deleted_at` | timestamp | ✓ |  |
+
+**Indexes:** `code` (unique) · `expires_at` · `is_active,scope`
 
 ### `device_tokens`
 
@@ -436,6 +480,8 @@
 | `approved_by` | uuid | ✓ |  |
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
+| `coupon_id` | uuid | ✓ |  |
+| `discount_fils` | int4 | — | 0 |
 
 **Foreign keys:** `approved_by` → `users(id)` · `user_id` → `users(id)`
 
