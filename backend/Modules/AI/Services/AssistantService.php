@@ -31,7 +31,10 @@ class AssistantService extends BaseService
     /** Keep the last N turns as context to bound token usage. */
     private const HISTORY_LIMIT = 12;
 
-    public function __construct(private readonly GptClient $gpt) {}
+    public function __construct(
+        private readonly GptClient $gpt,
+        private readonly AiUsageService $usage,
+    ) {}
 
     public function conversations(User $user)
     {
@@ -78,6 +81,11 @@ class AssistantService extends BaseService
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
         }
 
+        // Cost governance: soft monthly per-user token cap.
+        if (! $this->usage->withinBudget($user->id)) {
+            return ['content' => $this->budgetReached(), 'ai' => false, 'tokens' => 0];
+        }
+
         $messages = [['role' => 'system', 'content' => self::SYSTEM_PROMPT]];
 
         // Inject a live snapshot of the student's account so answers are accurate
@@ -92,16 +100,37 @@ class AssistantService extends BaseService
             $messages[] = ['role' => $m->role, 'content' => $m->content];
         }
 
+        // Reuse the answer for an identical context within a short window to
+        // avoid paying for duplicate calls (key includes the full prompt).
+        $ttl = (int) config('services.openai.reply_cache_ttl', 0);
+        $cacheKey = 'ai_reply:'.hash('sha256', json_encode($messages));
+        if ($ttl > 0 && ($cached = \Illuminate\Support\Facades\Cache::get($cacheKey)) !== null) {
+            return ['content' => $cached, 'ai' => true, 'tokens' => 0];
+        }
+
         try {
             $result = $this->gpt->chat($messages, ['temperature' => 0.4, 'max_tokens' => 600]);
             if ($result->stub || trim($result->content) === '') {
                 return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
             }
 
-            return ['content' => trim($result->content), 'ai' => true, 'tokens' => $result->totalTokens()];
+            $content = trim($result->content);
+            if ($ttl > 0) {
+                \Illuminate\Support\Facades\Cache::put($cacheKey, $content, $ttl);
+            }
+            $this->usage->forget($user->id);
+
+            return ['content' => $content, 'ai' => true, 'tokens' => $result->totalTokens()];
         } catch (\Throwable) {
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
         }
+    }
+
+    /** Shown when a user exhausts their monthly assistant token budget. */
+    private function budgetReached(): string
+    {
+        return 'وصلت للحد الشهري المتاح لاستخدام المساعد الذكي. يتجدّد تلقائياً مع بداية الشهر القادم. '
+            .'بإمكانك خلال هذه الفترة استخدام التطبيق بشكل كامل أو فتح تذكرة دعم لأي استفسار.';
     }
 
     /**
