@@ -67,6 +67,33 @@ const GROUPS: { titleKey: string; links: NavLink[] }[] = [
   },
 ];
 
+/** Short hover hints explaining what each page does (non-intrusive tooltips). */
+const HINTS: Record<string, string> = {
+  '/': 'نظرة عامة على مؤشرات المنصّة اللحظية',
+  '/insights': 'تحليلات ورؤى مولّدة بالذكاء الاصطناعي',
+  '/ride-requests': 'طلبات الرحلات الواردة وحالتها',
+  '/zones': 'مناطق التغطية والحدود الجغرافية',
+  '/universities': 'الجامعات ونقاط الالتقاط',
+  '/routes': 'مسارات النقل الثابتة',
+  '/plans': 'خطط الاشتراك وأسعارها',
+  '/subscriptions': 'اشتراكات الطلاب النشطة',
+  '/trips': 'مراقبة الرحلات الجارية والمكتملة',
+  '/drivers': 'الكباتن والتحقق من الوثائق',
+  '/users': 'كل المستخدمين + شحن المحافظ',
+  '/payments': 'مراجعة شحنات CliQ + تدقيق الاحتيال بالـ AI',
+  '/coupons': 'إنشاء وإدارة كوبونات الخصم',
+  '/withdrawals': 'طلبات سحب أرباح الكباتن',
+  '/reports': 'التقارير المالية والإيرادات',
+  '/cliq': 'إعدادات CliQ وتغيير الاسم المستعار',
+  '/safety': 'بلاغات SOS وإدارة المخاطر',
+  '/disputes': 'النزاعات المالية بين الأطراف',
+  '/support': 'تذاكر الدعم مع فرز ذكي بالـ AI',
+  '/complaints': 'الشكاوى وتصعيدها الذكي',
+  '/security': 'المصادقة الثنائية وسجلّات الأمان',
+  '/admins': 'إضافة وتعديل موظفي الإدارة وأدوارهم',
+  '/profile': 'تعديل بياناتك وكلمة المرور',
+};
+
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -103,11 +130,21 @@ export function Sidebar() {
               if (adminOnly.has(l.href) && !isAdmin) return null;
               const active = isActive(l.href);
               return (
-                <Link key={l.href} href={l.href} className={`nav-item ${active ? 'nav-item-active' : ''}`}>
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  title={HINTS[l.href] ?? ''}
+                  className={`nav-item group/nav relative ${active ? 'nav-item-active' : ''}`}
+                >
                   <span className={`material-symbols-outlined text-[20px] ${active ? 'icon-fill' : ''}`}>
                     {l.icon}
                   </span>
                   <span className="truncate">{t(l.labelKey)}</span>
+                  {HINTS[l.href] && (
+                    <span className="pointer-events-none absolute start-full top-1/2 -translate-y-1/2 ms-2 z-[90] w-52 rounded-lg bg-navy-deep border border-white/10 px-3 py-2 text-[11px] leading-snug text-white/90 shadow-lift opacity-0 scale-95 transition-all duration-150 delay-300 group-hover/nav:opacity-100 group-hover/nav:scale-100">
+                      {HINTS[l.href]}
+                    </span>
+                  )}
                 </Link>
               );
             })}

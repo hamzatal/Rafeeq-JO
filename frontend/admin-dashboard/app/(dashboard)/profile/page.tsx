@@ -71,10 +71,11 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <h1 className="text-2xl font-extrabold surface-text mb-1">{t('profile.title')}</h1>
       <p className="text-sm text-muted mb-6">{user?.phone}</p>
 
+      <div className="grid gap-6 xl:grid-cols-2 items-start">
       {/* Account details */}
       <form onSubmit={saveProfile} className="card mb-6">
         <h2 className="font-bold surface-text mb-4">{t('profile.account')}</h2>
@@ -126,6 +127,7 @@ export default function ProfilePage() {
           {pwdMsg && <span className={`text-sm ${pwdMsg.kind === 'ok' ? 'text-success' : 'text-danger'}`}>{pwdMsg.text}</span>}
         </div>
       </form>
+      </div>
     </div>
   );
 }

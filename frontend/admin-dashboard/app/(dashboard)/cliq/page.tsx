@@ -55,7 +55,7 @@ export default function CliqPage() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <h1 className="text-2xl font-extrabold surface-text mb-1">{t('cliq.title')}</h1>
       <p className="text-sm text-muted mb-6">{t('cliq.intro')}</p>
 
