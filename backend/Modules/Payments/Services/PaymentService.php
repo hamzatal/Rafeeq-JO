@@ -146,9 +146,18 @@ class PaymentService extends BaseService
 
         $path = $proof->store("payments/{$request->id}", self::DISK);
 
+        // Fingerprint the image to detect re-uploads of the same screenshot.
+        $imageHash = null;
+        try {
+            $imageHash = hash('sha256', (string) file_get_contents($proof->getRealPath()));
+        } catch (\Throwable) {
+            // hashing is best-effort; absence just means we skip the image-dedup check
+        }
+
         $payment = $request->payments()->create([
             'method' => 'cliq',
             'proof_path' => $path,
+            'image_hash' => $imageHash,
             'status' => 'verifying',
             'submitted_at' => now(),
         ]);
@@ -160,20 +169,34 @@ class PaymentService extends BaseService
         $imageUrl = $this->proofUrl($path);
         $verdict = $this->verifier->verify($request, $imageUrl);
 
+        $bankReference = $verdict['extracted']['bank_reference'] ?? null;
+
+        // ── Anti-fraud guards: a single CliQ transfer can be claimed once ──
+        $fraudFlags = $this->fraudFlags($payment, $imageHash, $bankReference, $verdict);
+        $decision = $verdict['decision'];
+
+        // Any hard fraud signal blocks auto-approval and forces human review.
+        if ($fraudFlags !== [] && $decision === 'matched') {
+            $decision = 'manual_review';
+        }
+
         $payment->forceFill([
             'extracted' => $verdict['extracted'] ?? null,
             'ai_confidence' => $verdict['confidence'] ?? 0,
             'verified_by' => $verdict['verified_by'] ?? 'ai',
-            'status' => $verdict['decision'],
+            'bank_reference' => $bankReference,
+            'fraud_flags' => $fraudFlags === [] ? null : $fraudFlags,
+            'status' => $decision,
         ])->save();
 
         $this->audit->log('payment.verified', auditable: $payment, changes: [
-            'decision' => $verdict['decision'],
+            'decision' => $decision,
             'confidence' => $verdict['confidence'] ?? 0,
+            'fraud_flags' => $fraudFlags,
         ]);
 
-        // Route based on the AI decision.
-        if ($verdict['decision'] === 'matched') {
+        // Route based on the final decision.
+        if ($decision === 'matched') {
             $this->approve($request, actor: null, payment: $payment, auto: true);
         } else {
             // mismatch or manual_review -> human review queue.
@@ -181,6 +204,47 @@ class PaymentService extends BaseService
         }
 
         return $payment->fresh('request');
+    }
+
+    /**
+     * Detect anti-fraud signals so the same transfer cannot credit two
+     * accounts and a forwarded/duplicate receipt is never auto-approved.
+     *
+     * @param  array<string, mixed>  $verdict
+     * @return array<int, string>
+     */
+    private function fraudFlags(Payment $payment, ?string $imageHash, ?string $bankReference, array $verdict): array
+    {
+        $flags = [];
+
+        // 1) Same image already submitted (any user) -> re-used screenshot.
+        if ($imageHash !== null && Payment::where('image_hash', $imageHash)
+            ->where('id', '!=', $payment->id)->exists()) {
+            $flags[] = 'duplicate_image';
+        }
+
+        // 2) Same bank transaction reference already used -> one transfer claimed twice.
+        if ($bankReference !== null && trim($bankReference) !== '' && Payment::where('bank_reference', $bankReference)
+            ->where('id', '!=', $payment->id)->exists()) {
+            $flags[] = 'duplicate_reference';
+        }
+
+        // 3) Beneficiary alias does not match ours -> money not sent to us.
+        if (($verdict['extracted']['beneficiary_matches'] ?? null) === false) {
+            $flags[] = 'beneficiary_mismatch';
+        }
+
+        // 4) Sender name does not match the account holder -> wrong person.
+        if (($verdict['extracted']['name_matches'] ?? null) === false) {
+            $flags[] = 'sender_name_mismatch';
+        }
+
+        // 5) Model suspects the screenshot was edited.
+        if (($verdict['extracted']['looks_edited'] ?? null) === true) {
+            $flags[] = 'looks_edited';
+        }
+
+        return $flags;
     }
 
     /**

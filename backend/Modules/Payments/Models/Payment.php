@@ -17,6 +17,9 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property array|null $extracted
  * @property int|null $ai_confidence
  * @property string|null $verified_by
+ * @property string|null $bank_reference
+ * @property string|null $image_hash
+ * @property array|null $fraud_flags
  * @property string $status
  * @property string|null $notes
  * @property \Illuminate\Support\Carbon|null $submitted_at
@@ -27,13 +30,15 @@ class Payment extends Model
 
     protected $fillable = [
         'payment_request_id', 'method', 'proof_path', 'extracted',
-        'ai_confidence', 'verified_by', 'status', 'notes', 'submitted_at',
+        'ai_confidence', 'verified_by', 'bank_reference', 'image_hash',
+        'fraud_flags', 'status', 'notes', 'submitted_at',
     ];
 
     protected function casts(): array
     {
         return [
             'extracted' => 'array',
+            'fraud_flags' => 'array',
             'ai_confidence' => 'integer',
             'submitted_at' => 'datetime',
         ];
