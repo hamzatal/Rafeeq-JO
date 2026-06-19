@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { FinancialReport, Dispute } from '@rafeeq/shared';
 import { api } from '../../src/lib/api';
 import { useAuth } from '../../src/lib/auth';
+import { useT } from '../../src/lib/i18n';
 
 const jod = (fils: number) => `${(fils / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 const monthStart = () => {
@@ -58,6 +59,7 @@ function KpiCard({ k }: { k: Kpi }) {
 
 export default function CommandCenter() {
   const { user } = useAuth();
+  const { t, locale } = useT();
   const [report, setReport] = useState<FinancialReport | null>(null);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,33 +88,33 @@ export default function CommandCenter() {
 
   const kpis: Kpi[] = [
     {
-      label: 'الرحلات المدفوعة (الشهر)',
+      label: t('home.kpi.rides'),
       value: (report?.rides_count ?? 0).toLocaleString('en-US'),
       icon: 'directions_car',
-      trend: 'منذ بداية الشهر',
+      trend: t('home.trend.sinceMonth'),
       bar: 0.75,
     },
     {
-      label: 'إيراد المنصة — عمولة',
+      label: t('home.kpi.commission'),
       value: jod(report?.commission_fils ?? 0),
       unit: 'JOD',
       icon: 'account_balance_wallet',
-      trend: 'صافي عمولة المنصة',
+      trend: t('home.trend.netCommission'),
       bar: 0.8,
     },
     {
-      label: 'إجمالي الأجور المحصّلة',
+      label: t('home.kpi.gross'),
       value: jod(report?.gross_fare_fils ?? 0),
       unit: 'JOD',
       icon: 'payments',
-      trend: 'إجمالي قيمة الرحلات',
+      trend: t('home.trend.grossValue'),
       bar: 0.6,
     },
     {
-      label: 'نزاعات مفتوحة عالية الخطورة',
+      label: t('home.kpi.disputes'),
       value: String(criticalOpen),
       icon: 'warning',
-      trend: criticalOpen > 0 ? 'تتطلب مراجعة فورية' : 'لا يوجد حالياً',
+      trend: criticalOpen > 0 ? t('home.trend.needsReview') : t('home.trend.none'),
       bar: criticalOpen > 0 ? 0.3 : 0.05,
       danger: criticalOpen > 0,
     },
@@ -125,10 +127,10 @@ export default function CommandCenter() {
       {/* Page header */}
       <div className="flex flex-wrap justify-between items-end gap-3">
         <div>
-          <h1 className="page-title">نظرة عامة على الأسطول</h1>
-          <p className="muted-text mt-1">أهلاً {user?.full_name} — مراقبة الأداء والمقاييس الرئيسية لحظياً.</p>
+          <h1 className="page-title">{t('home.title')}</h1>
+          <p className="muted-text mt-1">{t('home.welcome')} {user?.full_name} — {t('home.subtitle')}</p>
         </div>
-        <div className="text-xs font-mono text-muted">آخر تحديث: {new Date().toLocaleString('ar')}</div>
+        <div className="text-xs font-mono text-muted">{t('home.lastUpdate')}: {new Date().toLocaleString(locale)}</div>
       </div>
 
       {/* KPI row */}
@@ -145,17 +147,17 @@ export default function CommandCenter() {
           <div className="px-5 py-4 border-b border-line flex justify-between items-center">
             <h3 className="font-bold text-navy dark:text-dtext flex items-center gap-2">
               <span className="material-symbols-outlined text-cyan-deep text-[20px]">monitoring</span>
-              عمولة المنصة حسب المنطقة
+              {t('home.commissionByZone')}
             </h3>
             <Link href="/reports" className="text-sm text-cyan-deep hover:underline">
-              التقارير الكاملة
+              {t('home.fullReports')}
             </Link>
           </div>
           <div className="p-5 flex-1 min-h-[280px]">
             {loading ? (
-              <div className="h-full flex items-center justify-center text-muted">جارٍ التحميل...</div>
+              <div className="h-full flex items-center justify-center text-muted">{t('common.loading')}</div>
             ) : (report?.by_zone?.length ?? 0) === 0 ? (
-              <div className="h-full flex items-center justify-center text-muted">لا توجد بيانات للفترة الحالية</div>
+              <div className="h-full flex items-center justify-center text-muted">{t('home.noData')}</div>
             ) : (
               <div className="flex items-end gap-3 h-[260px]">
                 {report!.by_zone.slice(0, 8).map((z, i) => (
@@ -166,7 +168,7 @@ export default function CommandCenter() {
                       style={{ height: `${(z.commission_fils / maxZone) * 100}%` }}
                     />
                     <div className="text-[10px] text-muted truncate w-full text-center">
-                      {z.zone_id ? z.zone_id.slice(0, 6) : 'عام'}
+                      {z.zone_id ? z.zone_id.slice(0, 6) : t('home.general')}
                     </div>
                   </div>
                 ))}
@@ -177,15 +179,15 @@ export default function CommandCenter() {
 
         {/* Quick links / module summary */}
         <div className="card flex flex-col">
-          <h3 className="font-bold text-navy dark:text-dtext mb-4">وصول سريع</h3>
+          <h3 className="font-bold text-navy dark:text-dtext mb-4">{t('home.quickAccess')}</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { href: '/disputes', label: 'النزاعات', icon: 'gavel' },
-              { href: '/withdrawals', label: 'السحوبات', icon: 'account_balance_wallet' },
-              { href: '/drivers', label: 'الكباتن', icon: 'sports_motorsports' },
-              { href: '/zones', label: 'المناطق', icon: 'map' },
-              { href: '/reports', label: 'التقارير', icon: 'monitoring' },
-              { href: '/safety', label: 'الأمان', icon: 'shield' },
+              { href: '/disputes', label: t('nav.disputes'), icon: 'gavel' },
+              { href: '/withdrawals', label: t('nav.withdrawals'), icon: 'account_balance_wallet' },
+              { href: '/drivers', label: t('nav.drivers'), icon: 'sports_motorsports' },
+              { href: '/zones', label: t('nav.zones'), icon: 'map' },
+              { href: '/reports', label: t('nav.reports'), icon: 'monitoring' },
+              { href: '/safety', label: t('nav.safety'), icon: 'shield' },
             ].map((q) => (
               <Link
                 key={q.href}
@@ -205,25 +207,25 @@ export default function CommandCenter() {
         <div className="px-5 py-4 border-b border-line flex justify-between items-center">
           <h3 className="font-bold text-navy dark:text-dtext flex items-center gap-2">
             <span className="material-symbols-outlined text-danger text-[20px]">gavel</span>
-            أحدث النزاعات المفتوحة
+            {t('home.recentDisputes')}
           </h3>
           <Link href="/disputes" className="text-sm text-cyan-deep hover:underline">
-            عرض الكل
+            {t('common.viewAll')}
           </Link>
         </div>
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+            <div className="p-6 text-center text-muted">{t('common.loading')}</div>
           ) : disputes.length === 0 ? (
-            <div className="p-6 text-center text-muted">لا توجد نزاعات مفتوحة 🎉</div>
+            <div className="p-6 text-center text-muted">{t('home.noDisputes')}</div>
           ) : (
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>الحساب</th>
-                  <th>النوع</th>
-                  <th>الخطورة</th>
-                  <th>درجة الخطر</th>
+                  <th>{t('home.account')}</th>
+                  <th>{t('home.type')}</th>
+                  <th>{t('home.severity')}</th>
+                  <th>{t('home.riskScore')}</th>
                 </tr>
               </thead>
               <tbody>
