@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum CouponType: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Percentage = 'percentage';
     case Fixed = 'fixed';
 
@@ -12,6 +14,14 @@ enum CouponType: string
         return match ($this) {
             self::Percentage => 'نسبة مئوية',
             self::Fixed => 'مبلغ ثابت',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Percentage => 'Percentage',
+            self::Fixed => 'Fixed amount',
         };
     }
 

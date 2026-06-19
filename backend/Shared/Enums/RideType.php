@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum RideType: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Scheduled = 'scheduled';
     case Express = 'express'; // urgent: private or priority pooling
 
@@ -12,6 +14,14 @@ enum RideType: string
         return match ($this) {
             self::Scheduled => 'مجدولة',
             self::Express => 'مستعجلة',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Scheduled => 'Scheduled',
+            self::Express => 'Express',
         };
     }
 

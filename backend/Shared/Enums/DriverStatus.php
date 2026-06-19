@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum DriverStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Pending = 'pending';
     case UnderReview = 'under_review';
     case Approved = 'approved';
@@ -18,6 +20,17 @@ enum DriverStatus: string
             self::Approved => 'معتمد',
             self::Rejected => 'مرفوض',
             self::Suspended => 'موقوف',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Pending => 'Awaiting documents',
+            self::UnderReview => 'Under review',
+            self::Approved => 'Approved',
+            self::Rejected => 'Rejected',
+            self::Suspended => 'Suspended',
         };
     }
 

@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum Gender: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Male = 'male';
     case Female = 'female';
 
@@ -12,6 +14,14 @@ enum Gender: string
         return match ($this) {
             self::Male => 'ذكر',
             self::Female => 'أنثى',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Male => 'Male',
+            self::Female => 'Female',
         };
     }
 

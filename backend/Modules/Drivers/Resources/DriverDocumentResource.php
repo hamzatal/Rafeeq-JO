@@ -16,9 +16,9 @@ class DriverDocumentResource extends JsonResource
         return [
             'id' => $this->id,
             'type' => $this->type->value,
-            'type_label' => $this->type->labelAr(),
+            'type_label' => $this->type->label(),
             'status' => $this->status->value,
-            'status_label' => $this->status->labelAr(),
+            'status_label' => $this->status->label(),
             'review_note' => $this->review_note,
             'expires_at' => $this->expires_at?->toDateString(),
             'uploaded_at' => $this->created_at?->toIso8601String(),

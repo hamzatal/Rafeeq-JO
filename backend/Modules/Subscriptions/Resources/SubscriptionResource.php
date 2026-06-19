@@ -19,7 +19,7 @@ class SubscriptionResource extends JsonResource
             'plan_id' => $this->plan_id,
             'route_id' => $this->route_id,
             'status' => $this->status->value,
-            'status_label' => $this->status->labelAr(),
+            'status_label' => $this->status->label(),
             'usable' => $this->isUsable(),
             'starts_at' => $this->starts_at?->toIso8601String(),
             'ends_at' => $this->ends_at?->toIso8601String(),

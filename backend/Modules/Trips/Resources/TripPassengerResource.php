@@ -26,7 +26,7 @@ class TripPassengerResource extends JsonResource
             'pickup_lng' => $this->pickup_lng,
             'student_name' => $this->whenLoaded('student', fn () => $this->student?->full_name),
             'status' => $this->status->value,
-            'status_label' => $this->status->labelAr(),
+            'status_label' => $this->status->label(),
             'boarded_at' => $this->boarded_at?->toIso8601String(),
             'dropoff_confirmed_at' => $this->dropoff_confirmed_at?->toIso8601String(),
             'boarding_code' => $isOwner ? $this->boarding_code : null,

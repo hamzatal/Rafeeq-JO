@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum RewardTier: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Bronze = 'bronze';
     case Silver = 'silver';
     case Gold = 'gold';
@@ -16,6 +18,16 @@ enum RewardTier: string
             self::Silver => 'فضي',
             self::Gold => 'ذهبي',
             self::Platinum => 'بلاتيني',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Bronze => 'Bronze',
+            self::Silver => 'Silver',
+            self::Gold => 'Gold',
+            self::Platinum => 'Platinum',
         };
     }
 

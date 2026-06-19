@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum ParcelSize: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Small = 'small';
     case Medium = 'medium';
     case Large = 'large';
@@ -14,6 +16,15 @@ enum ParcelSize: string
             self::Small => 'صغير',
             self::Medium => 'متوسط',
             self::Large => 'كبير',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Small => 'Small',
+            self::Medium => 'Medium',
+            self::Large => 'Large',
         };
     }
 

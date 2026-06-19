@@ -28,11 +28,11 @@ class RideRequestResource extends JsonResource
             'pickup_address' => $this->pickup_address,
             'desired_time' => $this->desired_time?->toIso8601String(),
             'type' => $this->type->value,
-            'type_label' => $this->type->labelAr(),
+            'type_label' => $this->type->label(),
             'is_express' => $this->is_express,
             'express_fee_fils' => $this->express_fee_fils,
             'status' => $this->status->value,
-            'status_label' => $this->status->labelAr(),
+            'status_label' => $this->status->label(),
             'notes' => $this->notes,
         ];
     }

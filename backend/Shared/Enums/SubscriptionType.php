@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum SubscriptionType: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Weekly = 'weekly';
     case Monthly = 'monthly';
     case Term = 'term';
@@ -14,6 +16,15 @@ enum SubscriptionType: string
             self::Weekly => 'أسبوعي',
             self::Monthly => 'شهري',
             self::Term => 'فصلي',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Weekly => 'Weekly',
+            self::Monthly => 'Monthly',
+            self::Term => 'Term',
         };
     }
 

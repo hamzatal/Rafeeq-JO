@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum DocumentType: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case NationalId = 'national_id';
     case License = 'license';
     case VehicleRegistration = 'vehicle_registration';
@@ -20,6 +22,18 @@ enum DocumentType: string
             self::Insurance => 'التأمين',
             self::CriminalRecord => 'عدم محكومية',
             self::Photo => 'صورة شخصية',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::NationalId => 'National ID',
+            self::License => 'Driving license',
+            self::VehicleRegistration => 'Vehicle registration',
+            self::Insurance => 'Insurance',
+            self::CriminalRecord => 'Criminal record',
+            self::Photo => 'Photo',
         };
     }
 

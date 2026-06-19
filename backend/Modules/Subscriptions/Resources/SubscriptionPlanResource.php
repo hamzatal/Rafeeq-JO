@@ -19,7 +19,7 @@ class SubscriptionPlanResource extends JsonResource
             'route_id' => $this->route_id,
             'name' => $this->name,
             'type' => $this->type->value,
-            'type_label' => $this->type->labelAr(),
+            'type_label' => $this->type->label(),
             'price_fils' => $this->price_fils,
             'price_jod' => round($this->price_fils / 1000, 3),
             'rides_count' => $this->rides_count,

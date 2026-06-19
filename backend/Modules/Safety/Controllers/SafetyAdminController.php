@@ -27,7 +27,7 @@ class SafetyAdminController extends Controller
             'user_id' => $f->user_id,
             'type' => $f->type,
             'severity' => $f->severity->value,
-            'severity_label' => $f->severity->labelAr(),
+            'severity_label' => $f->severity->label(),
             'description' => $f->description,
             'meta' => $f->meta,
             'resolved' => $f->resolved_at !== null,

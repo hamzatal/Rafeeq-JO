@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum ParcelStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Created = 'created';
     case AwaitingPickup = 'awaiting_pickup';
     case InTransit = 'in_transit';
@@ -18,6 +20,17 @@ enum ParcelStatus: string
             self::InTransit => 'في الطريق',
             self::Delivered => 'تم التسليم',
             self::Cancelled => 'ملغى',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Created => 'Created',
+            self::AwaitingPickup => 'Awaiting pickup',
+            self::InTransit => 'In transit',
+            self::Delivered => 'Delivered',
+            self::Cancelled => 'Cancelled',
         };
     }
 

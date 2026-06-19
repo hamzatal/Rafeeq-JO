@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum TripStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Scheduled = 'scheduled';
     case Started = 'started';
     case Completed = 'completed';
@@ -18,6 +20,17 @@ enum TripStatus: string
             self::Completed => 'مكتملة',
             self::Cancelled => 'ملغاة',
             self::PendingDriver => 'بانتظار كابتن',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Scheduled => 'Scheduled',
+            self::Started => 'In progress',
+            self::Completed => 'Completed',
+            self::Cancelled => 'Cancelled',
+            self::PendingDriver => 'Awaiting captain',
         };
     }
 

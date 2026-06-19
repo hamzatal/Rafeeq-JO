@@ -27,7 +27,7 @@ class TripResource extends JsonResource
             'type' => $this->type,
             'is_express' => (bool) $this->is_express,
             'status' => $this->status->value,
-            'status_label' => $this->status->labelAr(),
+            'status_label' => $this->status->label(),
             'scheduled_at' => $this->scheduled_at?->toIso8601String(),
             'started_at' => $this->started_at?->toIso8601String(),
             'ended_at' => $this->ended_at?->toIso8601String(),

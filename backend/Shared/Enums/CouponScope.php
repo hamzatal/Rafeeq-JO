@@ -7,6 +7,8 @@ namespace Rafeeq\Shared\Enums;
  */
 enum CouponScope: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Any = 'any';
     case Subscription = 'subscription';
     case WalletTopup = 'wallet_topup';
@@ -19,6 +21,16 @@ enum CouponScope: string
             self::Subscription => 'الاشتراكات',
             self::WalletTopup => 'شحن المحفظة',
             self::Ride => 'الرحلات',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Any => 'All operations',
+            self::Subscription => 'Subscriptions',
+            self::WalletTopup => 'Wallet top-up',
+            self::Ride => 'Rides',
         };
     }
 

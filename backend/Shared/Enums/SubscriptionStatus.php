@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum SubscriptionStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Pending = 'pending';
     case Active = 'active';
     case Expired = 'expired';
@@ -16,6 +18,16 @@ enum SubscriptionStatus: string
             self::Active => 'فعّال',
             self::Expired => 'منتهٍ',
             self::Cancelled => 'ملغى',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Pending => 'Awaiting payment',
+            self::Active => 'Active',
+            self::Expired => 'Expired',
+            self::Cancelled => 'Cancelled',
         };
     }
 

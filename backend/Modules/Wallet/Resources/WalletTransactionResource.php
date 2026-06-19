@@ -16,7 +16,7 @@ class WalletTransactionResource extends JsonResource
         return [
             'id' => $this->id,
             'type' => $this->type->value,
-            'type_label' => $this->type->labelAr(),
+            'type_label' => $this->type->label(),
             'amount_fils' => $this->amount_fils,
             'amount_jod' => round($this->amount_fils / 1000, 3),
             'balance_after' => $this->balance_after,

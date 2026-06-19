@@ -17,7 +17,7 @@ class DriverProfileResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status->value,
-            'status_label' => $this->status->labelAr(),
+            'status_label' => $this->status->label(),
             'can_drive' => $this->status->canDrive(),
             'verification_level' => $this->verification_level,
             'rating_avg' => (float) $this->rating_avg,
