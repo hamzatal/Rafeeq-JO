@@ -97,7 +97,7 @@
 
 ## 🧪 الجودة (Quality)
 
-- **الاختبارات:** `cd backend && php artisan test` (الحالي: 122 اختبار).
+- **الاختبارات:** `cd backend && php artisan test` (الحالي: 132 اختبار).
 - **التحليل الساكن:** `cd backend && vendor/bin/phpstan analyse` (Larastan، إعداد في `phpstan.neon`).
 - **فحص الأنواع (الفرونت):** لكل تطبيق `npx tsc --noEmit`.
 - **الستايل:** `cd backend && vendor/bin/pint`.
