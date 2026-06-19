@@ -219,6 +219,8 @@ export interface Payment {
   status: string;
   ai_confidence: number | null;
   verified_by: string | null;
+  bank_reference?: string | null;
+  fraud_flags?: string[];
   extracted: Record<string, unknown> | null;
   notes: string | null;
   has_proof: boolean;
