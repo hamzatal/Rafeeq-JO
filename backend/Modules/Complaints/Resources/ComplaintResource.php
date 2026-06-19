@@ -22,6 +22,7 @@ class ComplaintResource extends JsonResource
             'status' => $this->status->value,
             'status_label' => $this->status->labelAr(),
             'description' => $this->description,
+            'ai_report' => $this->ai_report,
             'against_type' => $this->against_type,
             'against_user_id' => $this->against_user_id,
             'trip_id' => $this->trip_id,

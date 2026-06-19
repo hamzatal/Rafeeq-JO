@@ -30,13 +30,19 @@ class ComplaintService extends BaseService
         private readonly AuditLogger $audit,
         private readonly FraudService $fraud,
         private readonly NotificationService $notifications,
+        private readonly ComplaintTriageService $triageAi,
     ) {}
 
     public function file(User $reporter, array $data): Complaint
     {
-        $severity = $this->triage($data['category'], $data['severity'] ?? null);
+        // AI safety net: analyse the description so a mis-categorised but
+        // dangerous complaint is still escalated. Best-effort (may be null).
+        $aiReport = $this->triageAi->analyze($data['category'], $data['description']);
 
-        return $this->transaction(function () use ($reporter, $data, $severity) {
+        $severity = $this->triage($data['category'], $data['severity'] ?? null);
+        $severity = $this->mergeSeverity($severity, $aiReport['severity'] ?? null);
+
+        return $this->transaction(function () use ($reporter, $data, $severity, $aiReport) {
             $complaint = Complaint::create([
                 'number' => $this->generateNumber(),
                 'reporter_id' => $reporter->id,
@@ -47,9 +53,13 @@ class ComplaintService extends BaseService
                 'severity' => $severity,
                 'status' => $severity === RiskSeverity::Critical ? ComplaintStatus::Investigating : ComplaintStatus::Open,
                 'description' => $data['description'],
+                'ai_report' => $aiReport,
             ]);
 
-            $this->audit->log('complaint.filed', $reporter, auditable: $complaint, changes: ['severity' => $severity->value]);
+            $this->audit->log('complaint.filed', $reporter, auditable: $complaint, changes: [
+                'severity' => $severity->value,
+                'ai_severity' => $aiReport['severity'] ?? null,
+            ]);
 
             if ($severity === RiskSeverity::Critical) {
                 $this->handleCritical($complaint);
@@ -57,6 +67,24 @@ class ComplaintService extends BaseService
 
             return $complaint;
         });
+    }
+
+    /** Return the more severe of the rule-based and AI-suggested severities. */
+    private function mergeSeverity(RiskSeverity $current, ?string $aiSeverity): RiskSeverity
+    {
+        if ($aiSeverity === null || ! in_array($aiSeverity, RiskSeverity::values(), true)) {
+            return $current;
+        }
+
+        $rank = [
+            RiskSeverity::Low->value => 0,
+            RiskSeverity::Medium->value => 1,
+            RiskSeverity::High->value => 2,
+            RiskSeverity::Critical->value => 3,
+        ];
+        $ai = RiskSeverity::from($aiSeverity);
+
+        return $rank[$ai->value] > $rank[$current->value] ? $ai : $current;
     }
 
     /** Immediate containment for critical complaints. */
