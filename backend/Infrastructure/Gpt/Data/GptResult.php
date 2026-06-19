@@ -9,13 +9,22 @@ namespace Rafeeq\Infrastructure\Gpt\Data;
  */
 final class GptResult
 {
+    /**
+     * @param  array<int, array{id:string, name:string, arguments:array<string,mixed>}>  $toolCalls
+     */
     public function __construct(
         public readonly string $content,
         public readonly int $promptTokens = 0,
         public readonly int $completionTokens = 0,
         public readonly string $model = '',
         public readonly bool $stub = false,
+        public readonly array $toolCalls = [],
     ) {}
+
+    public function hasToolCalls(): bool
+    {
+        return $this->toolCalls !== [];
+    }
 
     public function totalTokens(): int
     {

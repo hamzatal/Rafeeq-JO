@@ -57,6 +57,8 @@ class OpenAiGptClient implements GptClient
             'temperature' => $options['temperature'] ?? 0.2,
             'max_tokens' => $options['max_tokens'] ?? 1024,
             'response_format' => ($options['json'] ?? false) ? ['type' => 'json_object'] : null,
+            'tools' => $options['tools'] ?? null,
+            'tool_choice' => $options['tool_choice'] ?? null,
         ], fn ($v) => $v !== null);
 
         try {
@@ -77,12 +79,24 @@ class OpenAiGptClient implements GptClient
             throw new BusinessRuleException('فشل طلب الذكاء الاصطناعي.', 'GPT_REQUEST_FAILED');
         }
 
+        $rawToolCalls = $response->json('choices.0.message.tool_calls', []) ?? [];
+        $toolCalls = [];
+        foreach ($rawToolCalls as $tc) {
+            $args = json_decode((string) ($tc['function']['arguments'] ?? '{}'), true);
+            $toolCalls[] = [
+                'id' => (string) ($tc['id'] ?? ''),
+                'name' => (string) ($tc['function']['name'] ?? ''),
+                'arguments' => is_array($args) ? $args : [],
+            ];
+        }
+
         return new GptResult(
             content: (string) $response->json('choices.0.message.content', ''),
             promptTokens: (int) $response->json('usage.prompt_tokens', 0),
             completionTokens: (int) $response->json('usage.completion_tokens', 0),
             model: (string) $response->json('model', $model),
             stub: false,
+            toolCalls: $toolCalls,
         );
     }
 }

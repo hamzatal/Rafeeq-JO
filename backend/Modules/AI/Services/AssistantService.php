@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\AI\Services;
 
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Infrastructure\Gpt\Contracts\GptClient;
+use Rafeeq\Modules\AI\Tools\AssistantToolRegistry;
 use Rafeeq\Modules\AI\Models\AiConversation;
 use Rafeeq\Modules\AI\Models\AiMessage;
 use Rafeeq\Modules\Auth\Models\User;
@@ -34,6 +35,7 @@ class AssistantService extends BaseService
     public function __construct(
         private readonly GptClient $gpt,
         private readonly AiUsageService $usage,
+        private readonly AssistantToolRegistry $tools,
     ) {}
 
     public function conversations(User $user)
@@ -109,21 +111,77 @@ class AssistantService extends BaseService
         }
 
         try {
-            $result = $this->gpt->chat($messages, ['temperature' => 0.4, 'max_tokens' => 600]);
-            if ($result->stub || trim($result->content) === '') {
-                return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
+            $tools = $this->tools->schemas();
+            $totalTokens = 0;
+            $usedTool = false;
+
+            // Tool-calling loop: the model may call server-side tools (e.g. open a
+            // support ticket, fetch top-up instructions) before giving its final
+            // answer. Bounded to avoid runaway loops.
+            for ($i = 0; $i < 4; $i++) {
+                $result = $this->gpt->chat($messages, [
+                    'temperature' => 0.4,
+                    'max_tokens' => 600,
+                    'tools' => $tools,
+                ]);
+                $totalTokens += $result->totalTokens();
+
+                if ($result->hasToolCalls() && $i < 3) {
+                    $usedTool = true;
+                    $messages[] = $this->assistantToolCallMessage($result);
+                    foreach ($result->toolCalls as $call) {
+                        $output = $this->tools->run($call['name'], $user, $call['arguments']);
+                        $messages[] = [
+                            'role' => 'tool',
+                            'tool_call_id' => $call['id'],
+                            'content' => json_encode($output, JSON_UNESCAPED_UNICODE) ?: '{}',
+                        ];
+                    }
+
+                    continue;
+                }
+
+                if ($result->stub || trim($result->content) === '') {
+                    return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => $totalTokens];
+                }
+
+                $content = trim($result->content);
+                // Don't cache answers produced by side-effecting tools.
+                if ($ttl > 0 && ! $usedTool) {
+                    \Illuminate\Support\Facades\Cache::put($cacheKey, $content, $ttl);
+                }
+                $this->usage->forget($user->id);
+
+                return ['content' => $content, 'ai' => true, 'tokens' => $totalTokens];
             }
 
-            $content = trim($result->content);
-            if ($ttl > 0) {
-                \Illuminate\Support\Facades\Cache::put($cacheKey, $content, $ttl);
-            }
-            $this->usage->forget($user->id);
-
-            return ['content' => $content, 'ai' => true, 'tokens' => $result->totalTokens()];
+            return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => $totalTokens];
         } catch (\Throwable) {
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
         }
+    }
+
+    /**
+     * Rebuild the OpenAI assistant message that carries tool calls so it can be
+     * appended to the conversation before the tool results.
+     *
+     * @return array<string, mixed>
+     */
+    private function assistantToolCallMessage(\Rafeeq\Infrastructure\Gpt\Data\GptResult $result): array
+    {
+        $calls = [];
+        foreach ($result->toolCalls as $call) {
+            $calls[] = [
+                'id' => $call['id'],
+                'type' => 'function',
+                'function' => [
+                    'name' => $call['name'],
+                    'arguments' => json_encode($call['arguments'], JSON_UNESCAPED_UNICODE) ?: '{}',
+                ],
+            ];
+        }
+
+        return ['role' => 'assistant', 'content' => $result->content ?: null, 'tool_calls' => $calls];
     }
 
     /** Shown when a user exhausts their monthly assistant token budget. */
