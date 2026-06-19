@@ -184,7 +184,7 @@ function buildGoogleHtml(
   var COL = ${col};
   var CENTER = ${c};
   var PICKABLE = ${pickable ? 'true' : 'false'};
-  var map, markers=[], routeLine=null, captainMarker=null, pickMarker=null, pendingInitial=${data};
+  var map, markers=[], routeLine=null, routeLineCasing=null, captainMarker=null, pickMarker=null, pendingInitial=${data};
 
   function post(lat,lng){
     if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify({type:'pick',lat:lat,lng:lng}));}
@@ -192,18 +192,33 @@ function buildGoogleHtml(
 
   function pin(kind){
     var bg = COL[kind] || COL.pickup;
-    var glyph = kind==='captain' ? '🚗' : kind==='destination' ? '★' : kind==='origin' ? '⌂' : '●';
-    var size = kind==='captain' ? 44 : 30;
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'">'
-      + '<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+(size/2-3)+'" fill="'+bg+'" stroke="#fff" stroke-width="3"/>'
-      + '<text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="'+(kind==='captain'?20:14)+'">'+glyph+'</text></svg>';
-    return { url: 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg),
-             scaledSize: new google.maps.Size(size,size), anchor: new google.maps.Point(size/2,size/2) };
+    // Captain & origin/destination use distinct modern marker shapes.
+    if(kind==='captain'){
+      var c = '<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46">'
+        + '<circle cx="23" cy="23" r="19" fill="'+bg+'" stroke="#fff" stroke-width="3"/>'
+        + '<g transform="translate(11,12)" fill="#fff">'
+        + '<path d="M3 11 L4.2 6.5 C4.5 5.4 5.5 4.6 6.7 4.6 L17.3 4.6 C18.5 4.6 19.5 5.4 19.8 6.5 L21 11 L21 16.5 C21 17.2 20.4 17.8 19.7 17.8 L18.3 17.8 C17.6 17.8 17 17.2 17 16.5 L17 15.5 L7 15.5 L7 16.5 C7 17.2 6.4 17.8 5.7 17.8 L4.3 17.8 C3.6 17.8 3 17.2 3 16.5 Z"/>'
+        + '</g>'
+        + '<circle cx="15.5" cy="27" r="2.2" fill="'+bg+'"/><circle cx="30.5" cy="27" r="2.2" fill="'+bg+'"/></svg>';
+      return { url: 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(c),
+               scaledSize: new google.maps.Size(46,46), anchor: new google.maps.Point(23,23) };
+    }
+    var glyph = kind==='destination' ? '★' : kind==='origin' ? '⌂' : '';
+    // Modern teardrop pin with white core.
+    var t = '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="46" viewBox="0 0 34 46">'
+      + '<defs><filter id="s" x="-30%" y="-20%" width="160%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.35"/></filter></defs>'
+      + '<path filter="url(#s)" d="M17 1 C8.2 1 1 8.2 1 17 C1 28.5 17 45 17 45 C17 45 33 28.5 33 17 C33 8.2 25.8 1 17 1 Z" fill="'+bg+'" stroke="#fff" stroke-width="2"/>'
+      + '<circle cx="17" cy="17" r="6.5" fill="#fff"/>'
+      + (glyph ? '<text x="17" y="21" text-anchor="middle" font-size="9" font-weight="bold" fill="'+bg+'">'+glyph+'</text>' : '')
+      + '</svg>';
+    return { url: 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(t),
+             scaledSize: new google.maps.Size(34,46), anchor: new google.maps.Point(17,45) };
   }
 
   function draw(d){
     markers.forEach(function(m){m.setMap(null);}); markers=[];
     if(routeLine){routeLine.setMap(null);routeLine=null;}
+    if(routeLineCasing){routeLineCasing.setMap(null);routeLineCasing=null;}
     var bounds = new google.maps.LatLngBounds();
     var captain=null, captainIdx=-1;
     (d.points||[]).forEach(function(p,i){
@@ -215,8 +230,12 @@ function buildGoogleHtml(
     var line = d.route && d.route.length>1 ? d.route
       : ((d.points||[]).length>1 ? d.points : null);
     if(line){
-      routeLine=new google.maps.Polyline({path:line.map(function(p){return {lat:p.lat,lng:p.lng};}),
-        geodesic:true, strokeColor:COL.route, strokeOpacity:0.8, strokeWeight:5, map:map});
+      var path = line.map(function(p){return {lat:p.lat,lng:p.lng};});
+      // White casing underneath + colored route on top (map-app look).
+      routeLineCasing=new google.maps.Polyline({path:path, geodesic:true,
+        strokeColor:'#FFFFFF', strokeOpacity:0.9, strokeWeight:9, map:map, zIndex:1});
+      routeLine=new google.maps.Polyline({path:path, geodesic:true,
+        strokeColor:COL.route, strokeOpacity:1, strokeWeight:5, map:map, zIndex:2});
       line.forEach(function(p){bounds.extend({lat:p.lat,lng:p.lng});});
     }
     if((d.points||[]).length>1 || (line&&line.length>1)){ map.fitBounds(bounds,48); }
@@ -283,11 +302,15 @@ function buildLeafletHtml(
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   html,body,#map{height:100%;margin:0;background:#eef3f0}
-  .rfq-pin{display:flex;align-items:center;justify-content:center;border-radius:50%;
-    border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);font:700 12px sans-serif;color:#fff}
-  .rfq-car{font-size:18px;line-height:1}
-  .rfq-pulse{animation:rfqpulse 1.6s infinite}
-  @keyframes rfqpulse{0%{box-shadow:0 0 0 0 rgba(11,121,67,.5)}70%{box-shadow:0 0 0 14px rgba(11,121,67,0)}100%{box-shadow:0 0 0 0 rgba(11,121,67,0)}}
+  .rfq-pin-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+  .rfq-tear{position:relative;width:30px;height:40px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+  .rfq-tear svg{display:block}
+  .rfq-tear .lbl{position:absolute;top:5px;left:0;width:30px;text-align:center;font:800 11px sans-serif}
+  .rfq-badge{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;
+    border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);color:#fff;font-size:20px;line-height:1}
+  .rfq-pulse::after{content:'';position:absolute;width:42px;height:42px;border-radius:50%;
+    background:var(--rfq-c);opacity:.45;animation:rfqpulse 1.7s infinite}
+  @keyframes rfqpulse{0%{transform:scale(1);opacity:.45}70%{transform:scale(2.4);opacity:0}100%{opacity:0}}
 </style></head><body><div id="map"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -296,23 +319,25 @@ function buildLeafletHtml(
   var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([c.lat,c.lng],14);
   L.tileLayer('${tileUrl}',{maxZoom:19,subdomains:['a','b','c']}).addTo(map);
 
-  var markers=[], routeLine=null, captainMarker=null;
+  var markers=[], routeLine=null, routeCasing=null, captainMarker=null;
 
   function icon(kind,index){
     var bg = COL[kind] || COL.pickup;
-    var inner = kind==='captain' ? '<span class="rfq-car">🚗</span>'
-      : kind==='destination' ? '★'
-      : kind==='origin' ? '⌂'
-      : (index!=null ? (index+1) : '');
-    var size = kind==='captain' ? 40 : 30;
-    var cls = 'rfq-pin' + (kind==='captain' ? ' rfq-pulse' : '');
-    return L.divIcon({className:'',html:'<div class="'+cls+'" style="width:'+size+'px;height:'+size+'px;background:'+bg+'">'+inner+'</div>',
-      iconSize:[size,size],iconAnchor:[size/2,size/2]});
+    if(kind==='captain'){
+      var car='<svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1H8v1a1 1 0 01-1 1H6a1 1 0 01-1-1z"/><circle cx="8" cy="14.5" r="1.4" fill="'+bg+'"/><circle cx="16" cy="14.5" r="1.4" fill="'+bg+'"/></svg>';
+      return L.divIcon({className:'',iconSize:[42,42],iconAnchor:[21,21],
+        html:'<div class="rfq-pin-wrap"><div class="rfq-pulse" style="--rfq-c:'+bg+'"></div><div class="rfq-badge" style="background:'+bg+'">'+car+'</div></div>'});
+    }
+    var glyph = kind==='destination' ? '★' : kind==='origin' ? '⌂' : (index!=null ? (index+1) : '');
+    var tear='<svg width="30" height="40" viewBox="0 0 30 40"><path d="M15 1C7.3 1 1 7.3 1 15c0 10 14 24 14 24s14-14 14-24C29 7.3 22.7 1 15 1z" fill="'+bg+'" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg>';
+    return L.divIcon({className:'',iconSize:[30,40],iconAnchor:[15,39],
+      html:'<div class="rfq-tear">'+tear+'<div class="lbl" style="color:'+bg+'">'+glyph+'</div></div>'});
   }
 
   function draw(d){
     markers.forEach(function(m){map.removeLayer(m);}); markers=[];
     if(routeLine){map.removeLayer(routeLine);routeLine=null;}
+    if(routeCasing){map.removeLayer(routeCasing);routeCasing=null;}
     var bounds=[];
     var pickupIndex=0;
     var captain=null;
@@ -328,8 +353,10 @@ function buildLeafletHtml(
     var line = d.route && d.route.length>1 ? d.route
       : (bounds.length>1 ? bounds.map(function(b){return {lat:b[0],lng:b[1]};}) : null);
     if(line){
-      routeLine=L.polyline(line.map(function(p){return [p.lat,p.lng];}),
-        {color:COL.route,weight:5,opacity:.75,dashArray:'1,8',lineCap:'round'}).addTo(map);
+      var latlngs=line.map(function(p){return [p.lat,p.lng];});
+      // White casing under a solid colored route (clean map-app styling).
+      routeCasing=L.polyline(latlngs,{color:'#fff',weight:9,opacity:.95,lineCap:'round',lineJoin:'round'}).addTo(map);
+      routeLine=L.polyline(latlngs,{color:COL.route,weight:5,opacity:1,lineCap:'round',lineJoin:'round'}).addTo(map);
       line.forEach(function(p){bounds.push([p.lat,p.lng]);});
     }
     if(bounds.length>1){map.fitBounds(bounds,{padding:[44,44],maxZoom:16});}

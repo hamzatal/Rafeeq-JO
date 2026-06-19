@@ -161,4 +161,62 @@ export class AdminApi {
   async deleteCoupon(id: string): Promise<void> {
     await this.http.delete(ENDPOINTS.admin.coupon(id));
   }
+
+  // ── Wallet: manual top-up (admin confirms a CliQ transfer) ───────
+  /**
+   * Credit a user's (student or captain) wallet manually.
+   * Backed by POST /admin/wallets/credit (permission: payments.approve).
+   */
+  async creditWallet(payload: { user_id: string; amount_fils: number; reference?: string }): Promise<void> {
+    await this.http.post(ENDPOINTS.admin.walletCredit, payload);
+  }
+
+  // ── Admin team management (permission: users.manage / admin-only) ─
+  async listStaff(params: ListParams = {}): Promise<{ items: User[]; meta: ApiSuccess<User[]>['meta'] }> {
+    const { data } = await this.http.get<ApiSuccess<User[]>>(ENDPOINTS.admin.staff, { params });
+    return { items: data.data, meta: data.meta };
+  }
+
+  async staffRoles(): Promise<{ name: string; label_ar: string; label_en: string }[]> {
+    const { data } = await this.http.get<ApiSuccess<{ name: string; label_ar: string; label_en: string }[]>>(
+      ENDPOINTS.admin.staffRoles,
+    );
+    return unwrap(data);
+  }
+
+  async createStaff(payload: {
+    full_name: string;
+    phone: string;
+    email?: string | null;
+    password: string;
+    role: string;
+  }): Promise<User> {
+    const { data } = await this.http.post<ApiSuccess<User>>(ENDPOINTS.admin.staff, payload);
+    return unwrap(data);
+  }
+
+  async updateStaff(
+    id: string,
+    payload: { full_name?: string; email?: string | null; status?: string; role?: string; password?: string },
+  ): Promise<User> {
+    const { data } = await this.http.patch<ApiSuccess<User>>(ENDPOINTS.admin.staffOne(id), payload);
+    return unwrap(data);
+  }
+
+  // ── CliQ settings (permission: settings.manage / admin-only) ─────
+  async getCliqSettings(): Promise<CliqSettings> {
+    const { data } = await this.http.get<ApiSuccess<CliqSettings>>(ENDPOINTS.admin.settingsCliq);
+    return unwrap(data);
+  }
+
+  async updateCliqSettings(payload: Partial<CliqSettings>): Promise<CliqSettings> {
+    const { data } = await this.http.patch<ApiSuccess<CliqSettings>>(ENDPOINTS.admin.settingsCliq, payload);
+    return unwrap(data);
+  }
+}
+
+export interface CliqSettings {
+  alias: string | null;
+  beneficiary_name: string | null;
+  bank_name: string | null;
 }

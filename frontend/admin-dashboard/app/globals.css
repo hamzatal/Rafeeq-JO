@@ -67,7 +67,7 @@ html.dark body { background: #00111F; color: #E6EEF7; }
            text-white/70 hover:text-white hover:bg-white/10 transition-colors;
   }
   .nav-item-active {
-    @apply text-navy bg-cyan hover:bg-cyan hover:text-navy font-bold border-r-4 border-cyan-soft;
+    @apply text-navy bg-cyan hover:bg-cyan hover:text-navy font-bold border-s-4 border-cyan-soft;
   }
 }
 

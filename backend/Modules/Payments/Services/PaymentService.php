@@ -118,12 +118,14 @@ class PaymentService extends BaseService
     /** CliQ transfer instructions shown to the payer. */
     public function instructions(PaymentRequest $request): array
     {
+        $cliq = app(\Rafeeq\Modules\Settings\Services\SettingService::class)->cliq();
+
         return [
             'number' => $request->number,
             'method' => 'cliq',
-            'alias' => config('services.cliq.alias'),
-            'beneficiary' => config('services.cliq.beneficiary_name'),
-            'bank' => config('services.cliq.bank_name'),
+            'alias' => $cliq['alias'],
+            'beneficiary' => $cliq['beneficiary_name'],
+            'bank' => $cliq['bank_name'],
             'amount_fils' => $request->amount_fils,
             'amount_jod' => round($request->amount_fils / 1000, 3),
             'reference' => $request->number,

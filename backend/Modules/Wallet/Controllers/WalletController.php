@@ -38,11 +38,13 @@ class WalletController extends Controller
 
         $reference = 'WALLET-'.strtoupper(substr($request->user()->id, 0, 6)).'-'.now()->format('ymdHis');
 
+        $cliq = app(\Rafeeq\Modules\Settings\Services\SettingService::class)->cliq();
+
         return $this->ok([
             'method' => 'cliq',
-            'alias' => config('services.cliq.alias'),
-            'beneficiary' => config('services.cliq.beneficiary_name'),
-            'bank' => config('services.cliq.bank_name'),
+            'alias' => $cliq['alias'],
+            'beneficiary' => $cliq['beneficiary_name'],
+            'bank' => $cliq['bank_name'],
             'amount_fils' => $validated['amount_fils'],
             'amount_jod' => round($validated['amount_fils'] / 1000, 3),
             'reference' => $reference,

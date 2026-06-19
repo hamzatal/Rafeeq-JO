@@ -44,6 +44,7 @@ class PaymentVerificationService
         }
 
         $expectedJod = round($request->amount_fils / 1000, 3);
+        $expectedName = trim((string) ($request->user?->full_name ?? ''));
 
         $prompt = <<<PROMPT
         You are a payment verification assistant for a Jordanian ride platform that accepts CliQ bank transfers.
@@ -52,6 +53,7 @@ class PaymentVerificationService
         Expected payment:
         - amount: {$expectedJod} JOD
         - reference: {$request->number}
+        - sender full name (account holder): {$expectedName}
 
         Return JSON with these keys:
         {
@@ -59,6 +61,9 @@ class PaymentVerificationService
           "transferred_at": string|null,    // ISO-8601 if a date/time is visible
           "reference": string|null,         // any reference / note text found
           "beneficiary": string|null,       // recipient name/alias if visible
+          "sender_name": string|null,       // the SENDER's name as printed on the receipt
+          "name_matches": boolean,          // does the sender name reasonably match the expected full name
+                                            // (allow Arabic/English transliteration & partial first+last match)
           "is_cliq": boolean,               // does it look like a CliQ/bank transfer receipt
           "amount_matches": boolean,        // does the detected amount equal the expected amount
           "confidence": number              // 0..100 your confidence in this reading
@@ -88,6 +93,8 @@ class PaymentVerificationService
             'transferred_at' => $data['transferred_at'] ?? null,
             'reference' => $data['reference'] ?? null,
             'beneficiary' => $data['beneficiary'] ?? null,
+            'sender_name' => $data['sender_name'] ?? null,
+            'name_matches' => array_key_exists('name_matches', $data) ? (bool) $data['name_matches'] : null,
             'is_cliq' => (bool) ($data['is_cliq'] ?? false),
             'raw' => $data,
         ];
@@ -96,11 +103,18 @@ class PaymentVerificationService
         $amountOk = $detectedFils !== null
             && abs($detectedFils - $request->amount_fils) <= self::AMOUNT_TOLERANCE_FILS;
 
-        if ($confidence >= 80 && $amountOk && ($data['is_cliq'] ?? false)) {
+        // Name check only gates when we actually know the expected name AND the
+        // model returned a verdict; otherwise it is neutral (human can confirm).
+        $nameKnown = $expectedName !== '' && array_key_exists('name_matches', $data);
+        $nameOk = ! $nameKnown || (bool) $data['name_matches'];
+
+        if ($confidence >= 80 && $amountOk && $nameOk && ($data['is_cliq'] ?? false)) {
             $decision = 'matched';
         } elseif ($detectedFils !== null && ! $amountOk && $confidence >= 70) {
             $decision = 'mismatch';
         } else {
+            // Includes the case where the amount matches but the sender name does
+            // not — a fraud signal we deliberately route to a human, never auto-approve.
             $decision = 'manual_review';
         }
 

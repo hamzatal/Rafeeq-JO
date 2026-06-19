@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { palette } from '@rafeeq/shared';
+import { MapBackdrop } from './MapBackdrop';
 
 const ROAD_WIDTH = 240;
 
@@ -26,6 +27,9 @@ export function BrandSplash() {
 
   return (
     <Animated.View style={[styles.container, { opacity: fade }]}>
+      {/* Jordan road-map backdrop (gold on navy) */}
+      <MapBackdrop roadColor="rgba(230,178,62,0.10)" routeColor={GOLD} nodeColor="rgba(230,178,62,0.35)" />
+
       <View style={styles.emblem}>
         <Animated.View style={[styles.ring, { transform: [{ rotate }] }]} />
         <Text style={styles.glyph}>R</Text>
