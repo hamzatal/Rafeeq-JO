@@ -191,6 +191,7 @@ export const ar = {
     none: 'لا توجد مدفوعات بعد',
     topupWallet: 'شحن المحفظة',
     uploadProof: 'رفع إشعار التحويل',
+    saveInvoice: 'حفظ الفاتورة (PDF)',
     proofUploaded: 'تم استلام الإشعار وهو قيد المراجعة.',
     webOnlyUpload: 'رفع الإشعار متاح من المتصفّح حالياً.',
     instructions: 'تعليمات الدفع',

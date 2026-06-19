@@ -15,40 +15,18 @@ import { saveInvoicePdf } from '../../src/lib/invoice';
 import { useAuth } from '../../src/store/auth';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-function pickImageWeb(): Promise<unknown> {
-  return new Promise((resolve) => {
-    const doc = (globalThis as unknown as { document?: any }).document;
-    if (!doc) return resolve(null);
-    const input = doc.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = () => resolve(input.files && input.files[0] ? input.files[0] : null);
-    input.click();
-  });
-}
-
-/**
- * Pick a CliQ transfer receipt. On native we use the image library (the
- * receipt is usually a screenshot); on web we fall back to a file input.
- * Returns a value appended directly to FormData.
- */
 async function pickProof(): Promise<Blob | null> {
-  if (Platform.OS === 'web') {
-    return (await pickImageWeb()) as Blob | null;
-  }
+  if (Platform.OS === 'web') return null;
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) return null;
-  const res = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    quality: 0.8,
-  });
+  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
   if (res.canceled || !res.assets?.length) return null;
-  const asset = res.assets[0];
-  const name = asset.fileName ?? `receipt-${Date.now()}.jpg`;
-  return { uri: asset.uri, name, type: asset.mimeType ?? 'image/jpeg' } as unknown as Blob;
+  const a = res.assets[0];
+  return { uri: a.uri, name: a.fileName ?? `receipt-${Date.now()}.jpg`, type: a.mimeType ?? 'image/jpeg' } as unknown as Blob;
 }
 
-export default function Payments() {
+
+export default function Invoices() {
   const { t, locale } = useI18n();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
@@ -92,6 +70,7 @@ export default function Payments() {
       setBusy(false);
     }
   };
+
 
   const uploadProof = async (id: string) => {
     const file = await pickProof();
@@ -138,6 +117,7 @@ export default function Payments() {
           </Card>
         )}
 
+
         <SectionTitle title={t('payments.title')} />
         {items.length === 0 ? (
           <EmptyState icon="dollar-sign" title={t('payments.none')} />
@@ -168,6 +148,7 @@ export default function Payments() {
     </SafeAreaView>
   );
 }
+
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({

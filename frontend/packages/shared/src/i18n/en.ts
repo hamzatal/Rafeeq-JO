@@ -193,6 +193,7 @@ export const en: Translations = {
     none: 'No payments yet',
     topupWallet: 'Top up wallet',
     uploadProof: 'Upload transfer proof',
+    saveInvoice: 'Save invoice (PDF)',
     proofUploaded: 'Proof received and under review.',
     webOnlyUpload: 'Proof upload is available on the web for now.',
     instructions: 'Payment instructions',

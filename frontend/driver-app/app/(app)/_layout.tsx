@@ -44,6 +44,7 @@ export default function AppLayout() {
       <Tabs.Screen name="trip/[id]" options={{ href: null }} />
       <Tabs.Screen name="chat" options={{ href: null }} />
       <Tabs.Screen name="withdraw" options={{ href: null }} />
+      <Tabs.Screen name="invoices" options={{ href: null }} />
     </Tabs>
   );
 }

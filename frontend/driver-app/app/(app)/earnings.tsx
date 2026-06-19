@@ -60,6 +60,12 @@ export default function Earnings() {
           <Text style={s.withdrawText}>{t('payout.withdraw')}</Text>
         </Pressable>
 
+        {/* Invoices / wallet top-up */}
+        <Pressable onPress={() => router.push('/(app)/invoices')} style={s.invoicesLink}>
+          <Icon name="file-text" size={16} color={theme.colors.primary} />
+          <Text style={s.invoicesLinkText}>{t('payments.title')}</Text>
+        </Pressable>
+
         {/* Performance / tier */}
         {perf && (
           <View style={s.tierCard}>
@@ -145,6 +151,8 @@ const makeStyles = (t: AppTheme) =>
     h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
     withdrawBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.primary, borderRadius: t.radius.lg, paddingVertical: 14, marginTop: t.spacing.md, marginBottom: t.spacing.base },
     withdrawText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onPrimary },
+    invoicesLink: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, marginBottom: t.spacing.base },
+    invoicesLinkText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
     tierCard: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
     tierTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text },
