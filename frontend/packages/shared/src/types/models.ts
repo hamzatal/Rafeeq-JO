@@ -363,6 +363,14 @@ export interface SupportTicket {
   priority: TicketPriority;
   priority_label: string;
   level: number;
+  ai_triage?: {
+    sentiment: string;
+    urgency: string;
+    suggested_category: string;
+    summary: string;
+    suggested_reply: string;
+    confidence: number;
+  } | null;
   assigned_to: string | null;
   last_reply_at: string | null;
   created_at: string | null;

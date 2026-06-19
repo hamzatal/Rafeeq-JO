@@ -26,19 +26,25 @@ class TicketService extends BaseService
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly NotificationService $notifications,
+        private readonly TicketTriageService $triage,
     ) {}
 
     public function open(User $user, TicketCategory $category, string $subject, string $body, TicketPriority $priority = TicketPriority::Normal): SupportTicket
     {
         return $this->transaction(function () use ($user, $category, $subject, $body, $priority) {
+            // AI triage of the opening message (best-effort, never blocks).
+            $triage = $this->triage->triage($subject, $body);
+            $effectivePriority = $this->priorityFromTriage($triage, $priority);
+
             $ticket = SupportTicket::create([
                 'number' => $this->generateNumber(),
                 'user_id' => $user->id,
                 'category' => $category,
                 'subject' => $subject,
                 'status' => TicketStatus::Open,
-                'priority' => $priority,
+                'priority' => $effectivePriority,
                 'level' => 1,
+                'ai_triage' => $triage,
                 'last_reply_at' => now(),
             ]);
 
@@ -48,10 +54,33 @@ class TicketService extends BaseService
                 'is_staff' => false,
             ]);
 
-            $this->audit->log('support.ticket_opened', $user, auditable: $ticket);
+            $this->audit->log('support.ticket_opened', $user, auditable: $ticket, changes: [
+                'ai_urgency' => $triage['urgency'] ?? null,
+            ]);
 
             return $ticket->load('messages');
         });
+    }
+
+    /** Bump priority when AI flags the ticket as high/urgent (never lowers it). */
+    private function priorityFromTriage(?array $triage, TicketPriority $current): TicketPriority
+    {
+        $urgency = $triage['urgency'] ?? null;
+        $aiPriority = match ($urgency) {
+            'urgent' => TicketPriority::Urgent,
+            'high' => TicketPriority::High,
+            default => $current,
+        };
+
+        // Keep whichever is more severe (Low < Normal < High < Urgent).
+        $rank = [
+            TicketPriority::Low->value => 0,
+            TicketPriority::Normal->value => 1,
+            TicketPriority::High->value => 2,
+            TicketPriority::Urgent->value => 3,
+        ];
+
+        return $rank[$aiPriority->value] >= $rank[$current->value] ? $aiPriority : $current;
     }
 
     /** Add a message. Staff replies move the ticket to "pending" (awaiting user). */
