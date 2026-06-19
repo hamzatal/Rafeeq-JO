@@ -213,6 +213,25 @@ export class AdminApi {
     const { data } = await this.http.patch<ApiSuccess<CliqSettings>>(ENDPOINTS.admin.settingsCliq, payload);
     return unwrap(data);
   }
+
+  // ── Broadcast notifications (permission: users.manage) ───────────
+  async notificationAudience(): Promise<{ all: number; students: number; drivers: number }> {
+    const { data } = await this.http.get<ApiSuccess<{ all: number; students: number; drivers: number }>>(
+      ENDPOINTS.admin.notifyAudience,
+    );
+    return unwrap(data);
+  }
+
+  async sendNotification(payload: {
+    audience: 'all' | 'students' | 'drivers' | 'users';
+    user_ids?: string[];
+    title: string;
+    body: string;
+    coupon_code?: string;
+  }): Promise<{ sent: number }> {
+    const { data } = await this.http.post<ApiSuccess<{ sent: number }>>(ENDPOINTS.admin.notify, payload);
+    return unwrap(data);
+  }
 }
 
 export interface CliqSettings {

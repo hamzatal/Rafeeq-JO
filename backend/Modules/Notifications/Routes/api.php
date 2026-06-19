@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Rafeeq\Modules\Notifications\Controllers\AdminNotificationController;
 use Rafeeq\Modules\Notifications\Controllers\NotificationController;
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
@@ -16,4 +17,10 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Device tokens (push)
     Route::post('notifications/devices', [NotificationController::class, 'registerDevice']);
     Route::delete('notifications/devices', [NotificationController::class, 'unregisterDevice']);
+});
+
+// ── Admin: broadcast notifications to user segments (permission: users.manage) ──
+Route::prefix('v1/admin/notifications')->middleware(['auth:sanctum', 'permission:users.manage'])->group(function () {
+    Route::get('audience', [AdminNotificationController::class, 'audience']);
+    Route::post('send', [AdminNotificationController::class, 'send']);
 });

@@ -63,6 +63,7 @@ const GROUPS: { titleKey: string; links: NavLink[] }[] = [
     titleKey: 'nav.group.admin',
     links: [
       { href: '/admins', labelKey: 'nav.admins', icon: 'admin_panel_settings' },
+      { href: '/notifications', labelKey: 'nav.notify', icon: 'campaign' },
       { href: '/profile', labelKey: 'nav.profile', icon: 'account_circle' },
     ],
   },
@@ -92,6 +93,7 @@ const HINTS: Record<string, string> = {
   '/complaints': 'الشكاوى وتصعيدها الذكي',
   '/security': 'المصادقة الثنائية وسجلّات الأمان',
   '/admins': 'إضافة وتعديل موظفي الإدارة وأدوارهم',
+  '/notifications': 'إرسال إشعارات لفئات المستخدمين + إرفاق كوبونات',
   '/profile': 'تعديل بياناتك وكلمة المرور',
 };
 
@@ -102,7 +104,7 @@ export function Sidebar() {
 
   const isAdmin = (user?.roles ?? []).includes('admin');
   // Hide admin-only links from non-admin staff.
-  const adminOnly = new Set(['/admins', '/cliq']);
+  const adminOnly = new Set(['/admins', '/cliq', '/notifications']);
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');

@@ -93,6 +93,25 @@ class NotificationService extends BaseService
         return NotificationPreference::firstOrCreate(['user_id' => $user->id]);
     }
 
+    /**
+     * Admin broadcast: send the same notification to many users. Returns the
+     * number actually recorded. Each send is best-effort (never throws).
+     *
+     * @param  \Illuminate\Support\Collection<int, User>  $users
+     * @param  array<string, mixed>  $data
+     */
+    public function broadcast($users, string $title, string $body, array $data = []): int
+    {
+        $count = 0;
+        foreach ($users as $user) {
+            if ($this->notify($user, NotificationType::General, $title, $body, $data)) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
     /** Register (upsert) a device token for push delivery. */
     public function registerDevice(User $user, string $token, string $platform = 'android'): DeviceToken
     {

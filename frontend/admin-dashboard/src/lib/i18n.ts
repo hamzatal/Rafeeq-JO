@@ -52,7 +52,23 @@ const DICT: Dict = {
   'nav.complaints': { ar: 'الشكاوى', en: 'Complaints' },
   'nav.security': { ar: 'الأمان (MFA)', en: 'Security (MFA)' },
   'nav.admins': { ar: 'فريق الإدارة', en: 'Admin Team' },
+  'nav.notify': { ar: 'إرسال إشعارات', en: 'Send notifications' },
   'nav.profile': { ar: 'ملفي الشخصي', en: 'My Profile' },
+
+  // Broadcast notifications
+  'notify.title': { ar: 'إرسال الإشعارات', en: 'Send notifications' },
+  'notify.intro': { ar: 'أرسل إشعاراً لفئة من المستخدمين، مع إمكانية إرفاق كوبون خصم.', en: 'Send a notification to a user segment, optionally attaching a discount coupon.' },
+  'notify.audience': { ar: 'الفئة المستهدفة', en: 'Target audience' },
+  'notify.all': { ar: 'الجميع', en: 'Everyone' },
+  'notify.students': { ar: 'الطلاب', en: 'Students' },
+  'notify.drivers': { ar: 'الكباتن', en: 'Captains' },
+  'notify.titleField': { ar: 'العنوان', en: 'Title' },
+  'notify.bodyField': { ar: 'نص الإشعار', en: 'Message' },
+  'notify.couponField': { ar: 'رمز كوبون (اختياري)', en: 'Coupon code (optional)' },
+  'notify.couponHint': { ar: 'عند الإرفاق، يظهر للمستخدم زر تفعيل الكوبون داخل الإشعار.', en: 'When attached, users see an "activate coupon" action inside the notification.' },
+  'notify.send': { ar: 'إرسال الإشعار', en: 'Send notification' },
+  'notify.sentTo': { ar: 'تم الإرسال إلى', en: 'Sent to' },
+  'notify.users': { ar: 'مستخدم', en: 'users' },
 
   // Profile page
   'profile.title': { ar: 'ملفي الشخصي', en: 'My Profile' },
