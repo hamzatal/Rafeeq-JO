@@ -13,6 +13,10 @@ return [
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
         'timeout' => (int) env('OPENAI_TIMEOUT', 60),
         'max_monthly_tokens' => (int) env('OPENAI_MAX_MONTHLY_TOKENS', 50_000_000),
+        // Soft per-user monthly cap for the in-app assistant (abuse / cost guard).
+        'max_user_monthly_tokens' => (int) env('OPENAI_MAX_USER_MONTHLY_TOKENS', 200_000),
+        // Cache identical assistant contexts for this many seconds (0 = disabled).
+        'reply_cache_ttl' => (int) env('OPENAI_REPLY_CACHE_TTL', 300),
     ],
 
     'cliq' => [
