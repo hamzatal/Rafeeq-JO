@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Subscriptions\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Models\SubscriptionPlan;
@@ -41,7 +42,7 @@ class SubscriptionController extends Controller
     {
         // Students may only cancel their own subscriptions.
         if (! $request->user()->isStaff() && $subscription->student_id !== $request->user()->id) {
-            return $this->ok(null, 'غير مصرّح.');
+            throw new AuthorizationException('غير مصرّح.');
         }
 
         return $this->ok(new SubscriptionResource($this->service->cancel($subscription)), 'تم إلغاء الاشتراك.');
