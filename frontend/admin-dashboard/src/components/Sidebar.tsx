@@ -44,6 +44,7 @@ const GROUPS: { titleKey: string; links: NavLink[] }[] = [
       { href: '/payments', labelKey: 'nav.payments', icon: 'payments' },
       { href: '/coupons', labelKey: 'nav.coupons', icon: 'sell' },
       { href: '/withdrawals', labelKey: 'nav.withdrawals', icon: 'account_balance_wallet' },
+      { href: '/cliq', labelKey: 'nav.cliq', icon: 'account_balance' },
       { href: '/reports', labelKey: 'nav.reports', icon: 'monitoring' },
     ],
   },
@@ -73,7 +74,7 @@ export function Sidebar() {
 
   const isAdmin = (user?.roles ?? []).includes('admin');
   // Hide admin-only links from non-admin staff.
-  const adminOnly = new Set(['/admins']);
+  const adminOnly = new Set(['/admins', '/cliq']);
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');

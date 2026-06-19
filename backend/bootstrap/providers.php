@@ -10,6 +10,7 @@ return [
     // Domain modules (each module registers its own routes + migrations)
     Rafeeq\Modules\Auth\Providers\AuthServiceProvider::class,
     Rafeeq\Modules\Users\Providers\UsersServiceProvider::class,
+    Rafeeq\Modules\Settings\Providers\SettingsServiceProvider::class,
     Rafeeq\Modules\Students\Providers\StudentsServiceProvider::class,
     Rafeeq\Modules\Addresses\Providers\AddressesServiceProvider::class,
     Rafeeq\Modules\Chat\Providers\ChatServiceProvider::class,

@@ -202,4 +202,21 @@ export class AdminApi {
     const { data } = await this.http.patch<ApiSuccess<User>>(ENDPOINTS.admin.staffOne(id), payload);
     return unwrap(data);
   }
+
+  // ── CliQ settings (permission: settings.manage / admin-only) ─────
+  async getCliqSettings(): Promise<CliqSettings> {
+    const { data } = await this.http.get<ApiSuccess<CliqSettings>>(ENDPOINTS.admin.settingsCliq);
+    return unwrap(data);
+  }
+
+  async updateCliqSettings(payload: Partial<CliqSettings>): Promise<CliqSettings> {
+    const { data } = await this.http.patch<ApiSuccess<CliqSettings>>(ENDPOINTS.admin.settingsCliq, payload);
+    return unwrap(data);
+  }
+}
+
+export interface CliqSettings {
+  alias: string | null;
+  beneficiary_name: string | null;
+  bank_name: string | null;
 }

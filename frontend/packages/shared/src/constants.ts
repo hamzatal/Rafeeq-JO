@@ -214,6 +214,7 @@ export const ENDPOINTS = {
     staff: '/admin/staff',
     staffOne: (id: string) => `/admin/staff/${id}`,
     staffRoles: '/admin/staff/roles',
+    settingsCliq: '/admin/settings/cliq',
     reportsFinancial: '/admin/reports/financial',
     zones: '/admin/zones',
     zone: (id: string) => `/admin/zones/${id}`,

@@ -99,6 +99,24 @@ const DICT: Dict = {
     ar: 'هذه الصفحة متاحة للإدارة العليا فقط.',
     en: 'This page is available to top-level admins only.',
   },
+
+  // CliQ settings
+  'cliq.title': { ar: 'إعدادات CliQ', en: 'CliQ Settings' },
+  'cliq.intro': {
+    ar: 'منصة الدفع الحالية هي CliQ. عدّل الاسم المستعار وبيانات المستفيد عند الحاجة.',
+    en: 'CliQ is the current payment method. Update the alias and beneficiary details when needed.',
+  },
+  'cliq.alias': { ar: 'الاسم المستعار (Alias)', en: 'CliQ Alias' },
+  'cliq.beneficiary': { ar: 'اسم المستفيد', en: 'Beneficiary name' },
+  'cliq.bank': { ar: 'اسم البنك', en: 'Bank name' },
+  'cliq.save': { ar: 'حفظ إعدادات CliQ', en: 'Save CliQ settings' },
+  'cliq.saved': { ar: 'تم تحديث إعدادات CliQ.', en: 'CliQ settings updated.' },
+  'cliq.recentTopups': { ar: 'طلبات الشحن الأخيرة', en: 'Recent top-up requests' },
+  'cliq.noTopups': { ar: 'لا توجد طلبات حالياً', en: 'No requests right now' },
+  'cliq.number': { ar: 'الرقم المرجعي', en: 'Reference' },
+  'cliq.amount': { ar: 'المبلغ', en: 'Amount' },
+  'cliq.payer': { ar: 'الدافع', en: 'Payer' },
+  'cliq.status': { ar: 'الحالة', en: 'Status' },
 };
 
 export type Translate = (key: string, fallback?: string) => string;
