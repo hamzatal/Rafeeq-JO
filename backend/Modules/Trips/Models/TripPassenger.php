@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Trips\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Traits\HasUuid;
 
@@ -47,5 +48,10 @@ class TripPassenger extends Model
     public function trip(): BelongsTo
     {
         return $this->belongsTo(Trip::class);
+    }
+
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
     }
 }

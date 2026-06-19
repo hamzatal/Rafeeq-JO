@@ -88,10 +88,11 @@ class TripService extends BaseService
         $passengers = $trip->passengers()
             ->where('status', TripPassengerStatus::Booked->value)
             ->whereNull('subscription_id')
+            ->with('student')
             ->get();
 
         foreach ($passengers as $passenger) {
-            $student = User::find($passenger->student_id);
+            $student = $passenger->student;
             if (! $student) {
                 continue;
             }
@@ -147,9 +148,10 @@ class TripService extends BaseService
         $passengers = $trip->passengers()
             ->where('status', TripPassengerStatus::Dropped->value)
             ->whereNull('dropoff_confirmed_at')
+            ->with('student')
             ->get();
         foreach ($passengers as $passenger) {
-            $student = User::find($passenger->student_id);
+            $student = $passenger->student;
             if (! $student) {
                 continue;
             }
