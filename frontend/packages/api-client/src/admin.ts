@@ -170,4 +170,36 @@ export class AdminApi {
   async creditWallet(payload: { user_id: string; amount_fils: number; reference?: string }): Promise<void> {
     await this.http.post(ENDPOINTS.admin.walletCredit, payload);
   }
+
+  // ── Admin team management (permission: users.manage / admin-only) ─
+  async listStaff(params: ListParams = {}): Promise<{ items: User[]; meta: ApiSuccess<User[]>['meta'] }> {
+    const { data } = await this.http.get<ApiSuccess<User[]>>(ENDPOINTS.admin.staff, { params });
+    return { items: data.data, meta: data.meta };
+  }
+
+  async staffRoles(): Promise<{ name: string; label_ar: string; label_en: string }[]> {
+    const { data } = await this.http.get<ApiSuccess<{ name: string; label_ar: string; label_en: string }[]>>(
+      ENDPOINTS.admin.staffRoles,
+    );
+    return unwrap(data);
+  }
+
+  async createStaff(payload: {
+    full_name: string;
+    phone: string;
+    email?: string | null;
+    password: string;
+    role: string;
+  }): Promise<User> {
+    const { data } = await this.http.post<ApiSuccess<User>>(ENDPOINTS.admin.staff, payload);
+    return unwrap(data);
+  }
+
+  async updateStaff(
+    id: string,
+    payload: { full_name?: string; email?: string | null; status?: string; role?: string; password?: string },
+  ): Promise<User> {
+    const { data } = await this.http.patch<ApiSuccess<User>>(ENDPOINTS.admin.staffOne(id), payload);
+    return unwrap(data);
+  }
 }

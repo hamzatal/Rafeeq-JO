@@ -59,7 +59,10 @@ const GROUPS: { titleKey: string; links: NavLink[] }[] = [
   },
   {
     titleKey: 'nav.group.admin',
-    links: [{ href: '/profile', labelKey: 'nav.profile', icon: 'account_circle' }],
+    links: [
+      { href: '/admins', labelKey: 'nav.admins', icon: 'admin_panel_settings' },
+      { href: '/profile', labelKey: 'nav.profile', icon: 'account_circle' },
+    ],
   },
 ];
 
@@ -67,6 +70,10 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t } = useT();
+
+  const isAdmin = (user?.roles ?? []).includes('admin');
+  // Hide admin-only links from non-admin staff.
+  const adminOnly = new Set(['/admins']);
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
@@ -92,6 +99,7 @@ export function Sidebar() {
               {t(g.titleKey)}
             </div>
             {g.links.map((l) => {
+              if (adminOnly.has(l.href) && !isAdmin) return null;
               const active = isActive(l.href);
               return (
                 <Link key={l.href} href={l.href} className={`nav-item ${active ? 'nav-item-active' : ''}`}>

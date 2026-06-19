@@ -84,6 +84,21 @@ const DICT: Dict = {
   'common.save': { ar: 'حفظ', en: 'Save' },
   'common.error': { ar: 'حدث خطأ، حاول مجدداً.', en: 'Something went wrong, try again.' },
   'common.loading': { ar: 'جارٍ التحميل...', en: 'Loading...' },
+
+  // Admin team management
+  'admins.title': { ar: 'فريق الإدارة', en: 'Admin Team' },
+  'admins.add': { ar: 'إضافة موظف', en: 'Add staff' },
+  'admins.role': { ar: 'الدور', en: 'Role' },
+  'admins.created': { ar: 'تم إنشاء حساب الموظف.', en: 'Staff account created.' },
+  'admins.updated': { ar: 'تم تحديث الحساب.', en: 'Account updated.' },
+  'admins.password': { ar: 'كلمة المرور', en: 'Password' },
+  'admins.newPassword': { ar: 'كلمة مرور جديدة (اختياري)', en: 'New password (optional)' },
+  'admins.status': { ar: 'الحالة', en: 'Status' },
+  'admins.edit': { ar: 'تعديل', en: 'Edit' },
+  'admins.noAccess': {
+    ar: 'هذه الصفحة متاحة للإدارة العليا فقط.',
+    en: 'This page is available to top-level admins only.',
+  },
 };
 
 export type Translate = (key: string, fallback?: string) => string;
