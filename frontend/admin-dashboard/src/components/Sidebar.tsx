@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/auth';
 import { useT } from '../lib/i18n';
+import { LogoMark } from './Logo';
 
 interface NavLink {
   href: string;
@@ -110,9 +111,7 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-navy text-white flex flex-col z-50 shadow-lift">
       {/* Brand */}
       <div className="px-5 py-5 flex items-center gap-3 border-b border-white/10">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan/25 to-cyan/5 border border-cyan/40 flex items-center justify-center">
-          <span className="material-symbols-outlined icon-fill text-cyan">hub</span>
-        </div>
+        <LogoMark size={42} />
         <div>
           <div className="text-lg font-extrabold font-display text-cyan-soft leading-tight">رفيق JO</div>
           <div className="text-[11px] text-white/60">{t('brand.tagline')}</div>

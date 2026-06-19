@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, ImageBackground, StyleSheet, Text, View } from 'react-native';
 import { palette } from '@rafeeq/shared';
-import { MapBackdrop } from './MapBackdrop';
 
 const ROAD_WIDTH = 240;
 
@@ -26,33 +25,39 @@ export function BrandSplash() {
   const carBob = drive.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, -1.5, 0, -1.5, 0] });
 
   return (
-    <Animated.View style={[styles.container, { opacity: fade }]}>
-      {/* Jordan road-map backdrop (gold on navy) */}
-      <MapBackdrop roadColor="rgba(230,178,62,0.10)" routeColor={GOLD} nodeColor="rgba(230,178,62,0.35)" />
+    <ImageBackground
+      source={require('../../assets/splash-map.jpg')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      {/* Light scrim keeps the map clearly visible while text stays legible */}
+      <View style={styles.scrim} pointerEvents="none" />
 
-      <View style={styles.emblem}>
-        <Animated.View style={[styles.ring, { transform: [{ rotate }] }]} />
-        <Text style={styles.glyph}>R</Text>
-        <View style={styles.star} />
-      </View>
-
-      <Text style={styles.word}>رفيق</Text>
-      <Text style={styles.tag}>كابتن</Text>
-
-      <View style={styles.road}>
-        <View style={styles.centerLine}>
-          {Array.from({ length: 9 }).map((_, i) => (
-            <View key={i} style={styles.dash} />
-          ))}
+      <Animated.View style={[styles.center, { opacity: fade }]}>
+        <View style={styles.emblem}>
+          <Animated.View style={[styles.ring, { transform: [{ rotate }] }]} />
+          <Text style={styles.glyph}>R</Text>
+          <View style={styles.star} />
         </View>
-        <Animated.View style={[styles.car, { transform: [{ translateX: carX }, { translateY: carBob }] }]}>
-          <View style={styles.carCabin} />
-          <View style={styles.carBody} />
-          <View style={[styles.wheel, styles.wheelL]} />
-          <View style={[styles.wheel, styles.wheelR]} />
-        </Animated.View>
-      </View>
-    </Animated.View>
+
+        <Text style={styles.word}>رفيق</Text>
+        <Text style={styles.tag}>كابتن</Text>
+
+        <View style={styles.road}>
+          <View style={styles.centerLine}>
+            {Array.from({ length: 9 }).map((_, i) => (
+              <View key={i} style={styles.dash} />
+            ))}
+          </View>
+          <Animated.View style={[styles.car, { transform: [{ translateX: carX }, { translateY: carBob }] }]}>
+            <View style={styles.carCabin} />
+            <View style={styles.carBody} />
+            <View style={[styles.wheel, styles.wheelL]} />
+            <View style={[styles.wheel, styles.wheelR]} />
+          </Animated.View>
+        </View>
+      </Animated.View>
+    </ImageBackground>
   );
 }
 
@@ -60,6 +65,8 @@ const GOLD = palette.gold;
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.navy },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.navy, opacity: 0.45 },
+  center: { flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' },
   emblem: { width: 120, height: 120, borderRadius: 60, backgroundColor: palette.navySurface, alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   ring: { position: 'absolute', width: 104, height: 104, borderRadius: 52, borderWidth: 4, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
   glyph: { fontFamily: 'Tajawal_800ExtraBold', fontSize: 60, fontWeight: '900', color: GOLD },

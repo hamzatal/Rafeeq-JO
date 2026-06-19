@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, ImageBackground, StyleSheet, Text, View } from 'react-native';
 import { palette } from '@rafeeq/shared';
-import { MapBackdrop } from './MapBackdrop';
 
 /**
  * Animated branded launch — Student.
@@ -32,12 +31,13 @@ export function BrandSplash() {
   const carBob = drive.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, -1.5, 0, -1.5, 0] });
 
   return (
-    <View style={styles.container}>
-      {/* Jordan road-map backdrop */}
-      <MapBackdrop roadColor="rgba(255,255,255,0.09)" routeColor={GOLD} nodeColor="rgba(255,255,255,0.30)" />
-
-      {/* Soft vignette so the logo stays readable over the map */}
-      <View style={styles.vignette} pointerEvents="none" />
+    <ImageBackground
+      source={require('../../assets/splash-map.jpg')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      {/* Light scrim so the map stays clearly visible while keeping text readable */}
+      <View style={styles.scrim} pointerEvents="none" />
 
       <Animated.View style={{ opacity, transform: [{ scale }] }}>
         <View style={styles.emblem}>
@@ -55,14 +55,14 @@ export function BrandSplash() {
       {/* Road with a car driving along it */}
       <View style={styles.road}>
         <View style={styles.lane} />
-        <Animated.View style={[styles.car, { transform: [{ translateX: carX }, { translateY: carBob }] }]}>
-          <View style={styles.carCabin} />
-          <View style={styles.carBody} />
-          <View style={[styles.wheel, styles.wheelL]} />
-          <View style={[styles.wheel, styles.wheelR]} />
-        </Animated.View>
-      </View>
-    </View>
+          <Animated.View style={[styles.car, { transform: [{ translateX: carX }, { translateY: carBob }] }]}>
+            <View style={styles.carCabin} />
+            <View style={styles.carBody} />
+            <View style={[styles.wheel, styles.wheelL]} />
+            <View style={[styles.wheel, styles.wheelR]} />
+          </Animated.View>
+        </View>
+    </ImageBackground>
   );
 }
 
@@ -71,7 +71,7 @@ const GOLD = palette.gold;
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.primary },
-  vignette: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.primary, opacity: 0.35 },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.primary, opacity: 0.42 },
   emblem: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   ring: { position: 'absolute', width: 104, height: 104, borderRadius: 52, borderWidth: 4, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
   glyph: { fontFamily: 'Tajawal_800ExtraBold', fontSize: 62, fontWeight: '900', color: palette.primary },

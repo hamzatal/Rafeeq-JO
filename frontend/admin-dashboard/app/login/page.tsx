@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { normalizeJordanPhone, validators } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { useAuth } from '../../src/lib/auth';
+import { LogoMark } from '../../src/components/Logo';
 
 export default function LoginPage() {
   const { login, verifyMfa } = useAuth();
@@ -56,23 +57,21 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-navy">
-      {/* Amman map backdrop, dimmed */}
+      {/* Amman map backdrop — kept clearly visible */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/amman-map.jpg')" }}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-gradient-to-br from-navy/95 via-navy/85 to-navy-deep/95" aria-hidden />
-      <div className="absolute inset-0 backdrop-blur-[2px]" aria-hidden />
+      {/* Light scrim only on the info (left) side for text contrast; form side stays clear */}
+      <div className="absolute inset-0 bg-gradient-to-r from-navy/80 via-navy/45 to-navy/15" aria-hidden />
 
       {/* Content */}
       <div className="relative z-10 min-h-screen grid lg:grid-cols-2">
         {/* Left — brand & info */}
         <div className="hidden lg:flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan/30 to-cyan/5 border border-cyan/40 flex items-center justify-center">
-              <span className="material-symbols-outlined text-cyan text-[26px]">hub</span>
-            </div>
+            <LogoMark size={52} />
             <div>
               <div className="text-2xl font-extrabold text-cyan-soft leading-tight">رفيق JO</div>
               <div className="text-xs text-white/60">مركز قيادة المنصّة</div>
