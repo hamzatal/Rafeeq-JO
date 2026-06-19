@@ -21,7 +21,13 @@
 - ملف **`docs/DATABASE_SCHEMA.md`** (موصوف بالمجالات) + **`docs/DATABASE_SCHEMA.generated.md`** (مُولَّد آلياً) + أمر **`php artisan db:schema-doc`**.
 - تحسين تطبيعي: إزالة العمود المكرّر `student_profiles.reward_tier` (المصدر الوحيد الآن `reward_accounts.tier`، شكل الـ API بلا تغيير).
 
-**التالي — المهمة 2:** تنظيم بنية المشروع + Best Practices + الصلابة (graceful degradation: ألا يسقط التطبيق عند فشل أي تكامل). ثم المهمة 3 (نظام الإشعارات الكامل + الصوت).
+**التالي — المهمة 3:** نظام الإشعارات الكامل (طالب/كابتن/أدمن) + الصوت.
+
+**✅ تم (RFQ-205) — المهمة 2: تنظيم البنية + الصلابة (Resilience):**
+- أداة **`Core/Support/Safely`** لتشغيل الآثار الجانبية بأمان (تُسجّل وتُبتلع، لا تكسر المعاملة الأساسية) + 4 اختبارات.
+- تقوية **`AuditLogger`** و**`NotificationService.notify()`** ليصبحا لا يرميان أبداً (مغلّفان).
+- توثيق **`docs/RESILIENCE.md`** (سياسة الصلابة + مصفوفة fallback للتكاملات) + **`docs/MODULE_GUIDE.md`** (البنية + كيفية إضافة وحدة جديدة + best practices).
+- التحقق: 75 اختبار أخضر + migrate:fresh + E2E على PostgreSQL.
 
 > التكاملات اليدوية: `OPENAI_API_KEY`، `FIREBASE_*` (FCM)، `CLIQ_*`، `WHATSAPP_*` (OTP رسمي قادم). كلها اختيارية — النظام يعمل بأمان بدونها (fallback).
 

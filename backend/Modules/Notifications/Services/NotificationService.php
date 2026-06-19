@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Notifications\Services;
 
 use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Core\Support\Safely;
 use Rafeeq\Infrastructure\Push\Contracts\PushGateway;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
 use Rafeeq\Modules\Auth\Models\User;
@@ -36,38 +37,50 @@ class NotificationService extends BaseService
     /**
      * @param  array<string, mixed>  $data
      */
-    public function notify(User $user, NotificationType $type, string $title, string $body, array $data = []): Notification
+    public function notify(User $user, NotificationType $type, string $title, string $body, array $data = []): ?Notification
     {
-        $category = $type->category();
-        $critical = $type->isCritical();
-        $prefs = $this->preferences($user);
-        $channels = ['inapp'];
+        // Notification dispatch is a side-effect: it must never throw into (and
+        // roll back) the business transaction that triggered it.
+        try {
+            $category = $type->category();
+            $critical = $type->isCritical();
+            $prefs = $this->preferences($user);
+            $channels = ['inapp'];
 
-        // Push delivery.
-        $allowsCategory = $critical || $prefs->allows($category);
-        if ($prefs->push_enabled && $allowsCategory) {
-            if ($this->sendPush($user, $title, $body, array_merge($data, ['type' => $type->value]))) {
-                $channels[] = 'push';
+            // Push delivery.
+            $allowsCategory = $critical || $prefs->allows($category);
+            if ($prefs->push_enabled && $allowsCategory) {
+                if ($this->sendPush($user, $title, $body, array_merge($data, ['type' => $type->value]))) {
+                    $channels[] = 'push';
+                }
             }
-        }
 
-        // SMS fallback for critical notifications when push didn't go out.
-        if ($critical && ! in_array('push', $channels, true) && $prefs->sms_enabled) {
-            if ($this->sendSms($user, $title, $body)) {
-                $channels[] = 'sms';
+            // SMS fallback for critical notifications when push didn't go out.
+            if ($critical && ! in_array('push', $channels, true) && $prefs->sms_enabled) {
+                if ($this->sendSms($user, $title, $body)) {
+                    $channels[] = 'sms';
+                }
             }
-        }
 
-        return Notification::create([
-            'user_id' => $user->id,
-            'type' => $type->value,
-            'category' => $category,
-            'title' => $title,
-            'body' => $body,
-            'data' => $data ?: null,
-            'channels' => $channels,
-            'is_critical' => $critical,
-        ]);
+            return Notification::create([
+                'user_id' => $user->id,
+                'type' => $type->value,
+                'category' => $category,
+                'title' => $title,
+                'body' => $body,
+                'data' => $data ?: null,
+                'channels' => $channels,
+                'is_critical' => $critical,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('[Notifications] notify failed', [
+                'user' => $user->id,
+                'type' => $type->value,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     public function preferences(User $user): NotificationPreference
