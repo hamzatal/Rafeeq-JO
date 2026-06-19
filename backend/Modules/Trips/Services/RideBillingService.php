@@ -80,10 +80,10 @@ class RideBillingService extends BaseService
                 'paid_at' => now(),
             ])->save();
 
-            // Loyalty: reward the student for completing a ride.
+            // Loyalty: reward the student for completing a ride (+ first-ride bonus).
             $student = $student ?? User::find($passenger->student_id);
             if ($student) {
-                $this->rewards->earn($student, RewardService::POINTS_PER_RIDE, 'رحلة مكتملة', $trip->id);
+                $this->rewards->grantForRide($student, $trip->id);
             }
 
             $this->audit->log('ride.charged', auditable: $passenger, changes: [

@@ -771,3 +771,10 @@ export interface CouponValidation {
   discount_fils: number;
   final_fils: number;
 }
+
+
+/** A wallet-redemption option from the rewards catalog. */
+export interface RewardRedemptionOption {
+  points: number;
+  credit_fils: number;
+}

@@ -9,6 +9,7 @@ enum WalletTxnType: string
     case Refund = 'refund';          // + refund
     case Commission = 'commission';  // - platform commission (reserved)
     case Payout = 'payout';          // - captain payout
+    case RewardRedemption = 'reward_redemption'; // + points redeemed to wallet
     case Adjustment = 'adjustment';  // +/- manual admin correction
 
     public function labelAr(): string
@@ -19,6 +20,7 @@ enum WalletTxnType: string
             self::Refund => 'استرداد',
             self::Commission => 'عمولة المنصة',
             self::Payout => 'تحويل للكابتن',
+            self::RewardRedemption => 'استبدال نقاط',
             self::Adjustment => 'تسوية',
         };
     }

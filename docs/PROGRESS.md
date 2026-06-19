@@ -21,7 +21,14 @@
 - ملف **`docs/DATABASE_SCHEMA.md`** (موصوف بالمجالات) + **`docs/DATABASE_SCHEMA.generated.md`** (مُولَّد آلياً) + أمر **`php artisan db:schema-doc`**.
 - تحسين تطبيعي: إزالة العمود المكرّر `student_profiles.reward_tier` (المصدر الوحيد الآن `reward_accounts.tier`، شكل الـ API بلا تغيير).
 
-**التالي — المهمة 8:** نظام نقاط وحوافز للطالب والكابتن.
+**التالي — المهمة 9:** تحسينات الذكاء الاصطناعي (مساعد الطالب + لوحة الأدمن).
+
+**✅ تم (RFQ-212) — المهمة 8: نظام نقاط وحوافز للطالب والكابتن:**
+- **`RewardService` موسّع**: ثوابت (POINTS_PER_RIDE=10, FIRST_RIDE_BONUS=50, REFERRAL_BONUS=100, POINTS_PER_JOD=100) + **`grantForRide`** (نقاط أساسية + حافز أول رحلة مرة واحدة) + **`redeemForWallet`** (استبدال النقاط برصيد محفظة، 100 نقطة = 1 د.أ، ذرّي) + **`redemptionOptions`** (كتالوج).
+- `RideBillingService` يستخدم `grantForRide` (الطالب يكسب + بونص أول رحلة). الكابتن يكسب عند إكمال الرحلة (موجود).
+- `WalletTxnType::RewardRedemption` جديد. مسارات `/rewards/options` + `/rewards/redeem-wallet`.
+- فرونت: `RewardsApi.options/redeemToWallet` + نوع `RewardRedemptionOption` + شاشة المكافآت للطالب (أزرار استبدال بالرصيد + بانر) + i18n.
+- التحقق: 105 اختبار باك (5 جديدة للمكافآت) + tsc أخضر لكل الفرونت.
 
 **✅ تم (RFQ-211) — المهمة 7: نظام كوبونات وخصومات شامل وذكي:**
 - موديول جديد **`Modules/Coupons`**: جدولا `coupons` + `coupon_redemptions`، نموذجان، enums `CouponType` (percentage/fixed) + `CouponScope` (any/subscription/wallet_topup/ride).

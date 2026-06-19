@@ -57,4 +57,22 @@ class RewardController extends Controller
 
         return $this->ok(['id' => $txn->id], 'تم استبدال النقاط.');
     }
+
+    /** Wallet-redemption catalog (points → JOD credit). */
+    public function options(): JsonResponse
+    {
+        return $this->ok($this->rewards->redemptionOptions());
+    }
+
+    /** Redeem points for wallet credit. */
+    public function redeemWallet(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'points' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $result = $this->rewards->redeemForWallet($request->user(), $data['points']);
+
+        return $this->ok($result, 'تم استبدال النقاط برصيد المحفظة.');
+    }
 }

@@ -149,7 +149,9 @@ export const ENDPOINTS = {
   rewards: {
     show: '/rewards',
     transactions: '/rewards/transactions',
+    options: '/rewards/options',
     redeem: '/rewards/redeem',
+    redeemWallet: '/rewards/redeem-wallet',
   },
   lostFound: {
     list: '/lost-found',

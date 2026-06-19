@@ -284,6 +284,8 @@ export const en: Translations = {
     redeemed: 'Points redeemed.',
     insufficient: 'Not enough points',
     pointsToNext: 'points to next tier',
+    redeemToWallet: 'Redeem to wallet',
+    redeemOption: 'pts = JOD',
   },
   lostFound: {
     title: 'Lost & Found',

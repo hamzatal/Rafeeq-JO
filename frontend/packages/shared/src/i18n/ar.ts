@@ -282,6 +282,8 @@ export const ar = {
     redeemed: 'تم استبدال النقاط.',
     insufficient: 'النقاط غير كافية',
     pointsToNext: 'نقطة للمستوى التالي',
+    redeemToWallet: 'استبدال برصيد المحفظة',
+    redeemOption: 'نقطة = د.أ',
   },
   lostFound: {
     title: 'المفقودات',
