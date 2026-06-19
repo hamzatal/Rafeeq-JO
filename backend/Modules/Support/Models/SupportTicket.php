@@ -29,7 +29,7 @@ class SupportTicket extends Model
 
     protected $fillable = [
         'number', 'user_id', 'category', 'subject',
-        'status', 'priority', 'level', 'assigned_to', 'last_reply_at',
+        'status', 'priority', 'level', 'ai_triage', 'assigned_to', 'last_reply_at',
     ];
 
     protected function casts(): array
@@ -39,6 +39,7 @@ class SupportTicket extends Model
             'status' => TicketStatus::class,
             'priority' => TicketPriority::class,
             'level' => 'integer',
+            'ai_triage' => 'array',
             'last_reply_at' => 'datetime',
         ];
     }

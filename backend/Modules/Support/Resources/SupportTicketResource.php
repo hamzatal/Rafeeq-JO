@@ -24,6 +24,7 @@ class SupportTicketResource extends JsonResource
             'priority' => $this->priority->value,
             'priority_label' => $this->priority->labelAr(),
             'level' => $this->level,
+            'ai_triage' => $this->ai_triage,
             'assigned_to' => $this->assigned_to,
             'last_reply_at' => $this->last_reply_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
