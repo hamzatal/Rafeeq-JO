@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import type { CliqInstructions, PaymentRequest } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Button } from '../../src/components/Button';
@@ -22,6 +23,27 @@ function pickImageWeb(): Promise<unknown> {
     input.onchange = () => resolve(input.files && input.files[0] ? input.files[0] : null);
     input.click();
   });
+}
+
+/**
+ * Pick a CliQ transfer receipt. On native we use the image library (the
+ * receipt is usually a screenshot); on web we fall back to a file input.
+ * Returns a value appended directly to FormData.
+ */
+async function pickProof(): Promise<Blob | null> {
+  if (Platform.OS === 'web') {
+    return (await pickImageWeb()) as Blob | null;
+  }
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) return null;
+  const res = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 0.8,
+  });
+  if (res.canceled || !res.assets?.length) return null;
+  const asset = res.assets[0];
+  const name = asset.fileName ?? `receipt-${Date.now()}.jpg`;
+  return { uri: asset.uri, name, type: asset.mimeType ?? 'image/jpeg' } as unknown as Blob;
 }
 
 export default function Payments() {
@@ -69,11 +91,7 @@ export default function Payments() {
   };
 
   const uploadProof = async (id: string) => {
-    if (Platform.OS !== 'web') {
-      setMsg({ text: t('payments.webOnlyUpload'), ok: false });
-      return;
-    }
-    const file = await pickImageWeb();
+    const file = await pickProof();
     if (!file) return;
     setUploading(id);
     setMsg(null);
