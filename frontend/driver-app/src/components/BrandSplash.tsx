@@ -1,60 +1,71 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, ImageBackground, StyleSheet, Text, View } from 'react-native';
-import { palette } from '@rafeeq/shared';
-
-const ROAD_WIDTH = 240;
+import { palette, fontFamily } from '@rafeeq/shared';
 
 /**
- * Animated branded launch — Driver (dark).
- * New Jordan-inspired identity: gold "R" emblem with the seven-pointed star,
- * and a car driving along the road (replaces the old moving pin).
+ * Branded launch — Captain. Premium identity over the map: a glowing emblem
+ * with a slow orbit ring, the wordmark, and a soft three-dot loader
+ * (replaces the old driving-car animation).
  */
 export function BrandSplash() {
+  const scale = useRef(new Animated.Value(0.8)).current;
   const fade = useRef(new Animated.Value(0)).current;
   const spin = useRef(new Animated.Value(0)).current;
-  const drive = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
+  const dots = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
 
   useEffect(() => {
-    Animated.timing(fade, { toValue: 1, duration: 700, useNativeDriver: true }).start();
-    Animated.loop(Animated.timing(spin, { toValue: 1, duration: 3200, easing: Easing.linear, useNativeDriver: true })).start();
-    Animated.loop(Animated.timing(drive, { toValue: 1, duration: 2200, easing: Easing.inOut(Easing.ease), useNativeDriver: true })).start();
-  }, [drive, fade, spin]);
+    Animated.parallel([
+      Animated.spring(scale, { toValue: 1, friction: 6, tension: 70, useNativeDriver: true }),
+      Animated.timing(fade, { toValue: 1, duration: 600, useNativeDriver: true }),
+    ]).start();
+    Animated.loop(Animated.timing(spin, { toValue: 1, duration: 5000, easing: Easing.linear, useNativeDriver: true })).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 1100, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 1100, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ]),
+    ).start();
+    dots.forEach((d, i) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(i * 180),
+          Animated.timing(d, { toValue: 1, duration: 420, useNativeDriver: true }),
+          Animated.timing(d, { toValue: 0, duration: 420, useNativeDriver: true }),
+          Animated.delay((2 - i) * 180),
+        ]),
+      ).start();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
-  const carX = drive.interpolate({ inputRange: [0, 1], outputRange: [6, ROAD_WIDTH - 50] });
-  const carBob = drive.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, -1.5, 0, -1.5, 0] });
+  const glow = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.6] });
+  const glowScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.18] });
 
   return (
-    <ImageBackground
-      source={require('../../assets/splash-map.jpg')}
-      style={styles.container}
-      resizeMode="cover"
-    >
-      {/* Light scrim keeps the map clearly visible while text stays legible */}
+    <ImageBackground source={require('../../assets/splash-map.jpg')} style={styles.container} resizeMode="cover">
       <View style={styles.scrim} pointerEvents="none" />
 
-      <Animated.View style={[styles.center, { opacity: fade }]}>
-        <View style={styles.emblem}>
+      <Animated.View style={{ opacity: fade, transform: [{ scale }], alignItems: 'center' }}>
+        <View style={styles.emblemWrap}>
+          <Animated.View style={[styles.glow, { opacity: glow, transform: [{ scale: glowScale }] }]} />
           <Animated.View style={[styles.ring, { transform: [{ rotate }] }]} />
-          <Text style={styles.glyph}>R</Text>
-          <View style={styles.star} />
+          <View style={styles.emblem}>
+            <Text style={styles.glyph}>ر</Text>
+          </View>
         </View>
 
         <Text style={styles.word}>رفيق</Text>
         <Text style={styles.tag}>كابتن</Text>
 
-        <View style={styles.road}>
-          <View style={styles.centerLine}>
-            {Array.from({ length: 9 }).map((_, i) => (
-              <View key={i} style={styles.dash} />
-            ))}
-          </View>
-          <Animated.View style={[styles.car, { transform: [{ translateX: carX }, { translateY: carBob }] }]}>
-            <View style={styles.carCabin} />
-            <View style={styles.carBody} />
-            <View style={[styles.wheel, styles.wheelL]} />
-            <View style={[styles.wheel, styles.wheelR]} />
-          </Animated.View>
+        <View style={styles.dots}>
+          {dots.map((d, i) => (
+            <Animated.View
+              key={i}
+              style={[styles.dot, { opacity: d.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }), transform: [{ scale: d.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.25] }) }] }]}
+            />
+          ))}
         </View>
       </Animated.View>
     </ImageBackground>
@@ -65,23 +76,14 @@ const GOLD = palette.gold;
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.navy },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.navy, opacity: 0.45 },
-  center: { flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' },
-  emblem: { width: 120, height: 120, borderRadius: 60, backgroundColor: palette.navySurface, alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
-  ring: { position: 'absolute', width: 104, height: 104, borderRadius: 52, borderWidth: 4, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
-  glyph: { fontFamily: 'Tajawal_800ExtraBold', fontSize: 60, fontWeight: '900', color: GOLD },
-  star: { position: 'absolute', top: 16, right: 22, width: 10, height: 10, borderRadius: 5, backgroundColor: '#CE1126' },
-  word: { fontFamily: 'Tajawal_800ExtraBold', fontSize: 40, color: '#FFFFFF' },
-  tag: { fontFamily: 'Tajawal_700Bold', fontSize: 16, color: GOLD, marginTop: 4, letterSpacing: 2 },
-
-  road: { width: ROAD_WIDTH, height: 44, borderRadius: 8, backgroundColor: palette.navySurface, marginTop: 40, justifyContent: 'center', overflow: 'hidden' },
-  centerLine: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8 },
-  dash: { width: 14, height: 4, borderRadius: 2, backgroundColor: 'rgba(212,160,23,0.5)' },
-
-  car: { position: 'absolute', bottom: 8, width: 44, height: 24 },
-  carBody: { position: 'absolute', bottom: 6, width: 44, height: 12, borderRadius: 5, backgroundColor: GOLD },
-  carCabin: { position: 'absolute', bottom: 14, left: 9, width: 24, height: 11, borderTopLeftRadius: 7, borderTopRightRadius: 7, backgroundColor: GOLD },
-  wheel: { position: 'absolute', bottom: 0, width: 11, height: 11, borderRadius: 6, backgroundColor: '#0A0A0A', borderWidth: 2, borderColor: palette.navySurface },
-  wheelL: { left: 6 },
-  wheelR: { right: 6 },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.navy, opacity: 0.55 },
+  emblemWrap: { width: 132, height: 132, alignItems: 'center', justifyContent: 'center', marginBottom: 26 },
+  glow: { position: 'absolute', width: 132, height: 132, borderRadius: 66, backgroundColor: GOLD },
+  ring: { position: 'absolute', width: 122, height: 122, borderRadius: 61, borderWidth: 2.5, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
+  emblem: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 } },
+  glyph: { fontFamily: fontFamily.extrabold, fontSize: 56, color: palette.navy, marginTop: -4 },
+  word: { fontFamily: fontFamily.extrabold, fontSize: 38, color: '#FFFFFF', textAlign: 'center', letterSpacing: 1 },
+  tag: { fontFamily: fontFamily.medium, fontSize: 14, color: GOLD, marginTop: 6, textAlign: 'center' },
+  dots: { flexDirection: 'row', gap: 8, marginTop: 28 },
+  dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: GOLD },
 });
