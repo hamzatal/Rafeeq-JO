@@ -9,6 +9,7 @@ import type {
 } from '@rafeeq/shared';
 import { api, setUnauthorizedHandler } from '../lib/api';
 import { tokenStorage } from '../lib/storage';
+import { registerForPush, unregisterPush } from '../lib/push';
 
 type Status = 'idle' | 'authenticated' | 'unauthenticated';
 
@@ -29,6 +30,7 @@ export const useAuth = create<AuthState>((set, get) => {
     await tokenStorage.set(result.token);
     set({ user: result.user, status: 'authenticated' });
     await get().refreshDriver();
+    void registerForPush();
   };
 
   setUnauthorizedHandler(() => {
@@ -54,6 +56,7 @@ export const useAuth = create<AuthState>((set, get) => {
         const user = await api.auth.me();
         set({ user, status: 'authenticated' });
         await get().refreshDriver();
+        void registerForPush();
       } catch {
         /* offline / transient — stay authenticated */
       }
@@ -86,6 +89,7 @@ export const useAuth = create<AuthState>((set, get) => {
     },
 
     async logout() {
+      await unregisterPush();
       try {
         await api.auth.logout();
       } catch {

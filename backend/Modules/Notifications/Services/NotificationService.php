@@ -50,7 +50,12 @@ class NotificationService extends BaseService
             // Push delivery.
             $allowsCategory = $critical || $prefs->allows($category);
             if ($prefs->push_enabled && $allowsCategory) {
-                if ($this->sendPush($user, $title, $body, array_merge($data, ['type' => $type->value]))) {
+                $pushOptions = [
+                    'channel_id' => $type->channelId(),
+                    'sound' => $type->sound(),
+                    'priority' => $type->pushPriority(),
+                ];
+                if ($this->sendPush($user, $title, $body, array_merge($data, ['type' => $type->value]), $pushOptions)) {
                     $channels[] = 'push';
                 }
             }
@@ -120,8 +125,8 @@ class NotificationService extends BaseService
         return Notification::where('user_id', $user->id)->whereNull('read_at')->count();
     }
 
-    /** @param array<string, mixed> $data */
-    private function sendPush(User $user, string $title, string $body, array $data): bool
+    /** @param array<string, mixed> $data @param array<string, mixed> $options */
+    private function sendPush(User $user, string $title, string $body, array $data, array $options = []): bool
     {
         $tokens = DeviceToken::where('user_id', $user->id)->pluck('token');
         if ($tokens->isEmpty()) {
@@ -131,7 +136,7 @@ class NotificationService extends BaseService
         $delivered = false;
         foreach ($tokens as $token) {
             try {
-                $this->push->send($token, $title, $body, $data);
+                $this->push->send($token, $title, $body, $data, $options);
                 $delivered = true;
             } catch (\Throwable $e) {
                 Log::warning('[Notifications] push failed', ['user' => $user->id, 'error' => $e->getMessage()]);

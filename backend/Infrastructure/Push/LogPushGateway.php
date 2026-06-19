@@ -17,7 +17,7 @@ class LogPushGateway implements PushGateway
         return false;
     }
 
-    public function send(string $deviceToken, string $title, string $body, array $data = []): string
+    public function send(string $deviceToken, string $title, string $body, array $data = [], array $options = []): string
     {
         $reference = 'push_log_'.Str::uuid()->toString();
 
@@ -26,6 +26,7 @@ class LogPushGateway implements PushGateway
             'title' => $title,
             'body' => $body,
             'data' => $data,
+            'options' => $options,
             'reference' => $reference,
         ]);
 

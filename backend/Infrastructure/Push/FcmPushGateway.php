@@ -22,7 +22,7 @@ class FcmPushGateway implements PushGateway
             && ! empty(config('services.firebase.credentials'));
     }
 
-    public function send(string $deviceToken, string $title, string $body, array $data = []): string
+    public function send(string $deviceToken, string $title, string $body, array $data = [], array $options = []): string
     {
         $projectId = (string) config('services.firebase.project_id');
 
@@ -32,14 +32,37 @@ class FcmPushGateway implements PushGateway
                 return 'push_skipped_no_token';
             }
 
+            $priority = ($options['priority'] ?? 'normal') === 'high' ? 'high' : 'normal';
+            $channelId = (string) ($options['channel_id'] ?? 'rafeeq_default');
+            $sound = (string) ($options['sound'] ?? 'default');
+            // FCM expects a real resource name or "default"; map our logical
+            // names so a missing custom sound never breaks delivery.
+            $androidSound = $sound === 'default' ? 'default' : $sound;
+            $apnsSound = $sound === 'default' ? 'default' : $sound.'.caf';
+
+            $message = [
+                'token' => $deviceToken,
+                'notification' => ['title' => $title, 'body' => $body],
+                'data' => array_map(fn ($v) => (string) $v, $data),
+                'android' => [
+                    'priority' => $priority === 'high' ? 'HIGH' : 'NORMAL',
+                    'notification' => [
+                        'sound' => $androidSound,
+                        'channel_id' => $channelId,
+                        'notification_priority' => $priority === 'high' ? 'PRIORITY_MAX' : 'PRIORITY_DEFAULT',
+                        'default_vibrate_timings' => true,
+                    ],
+                ],
+                'apns' => [
+                    'headers' => ['apns-priority' => $priority === 'high' ? '10' : '5'],
+                    'payload' => ['aps' => ['sound' => $apnsSound]],
+                ],
+            ];
+
             $response = Http::withToken($accessToken)
                 ->timeout(15)
                 ->post("https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send", [
-                    'message' => [
-                        'token' => $deviceToken,
-                        'notification' => ['title' => $title, 'body' => $body],
-                        'data' => array_map(fn ($v) => (string) $v, $data),
-                    ],
+                    'message' => $message,
                 ]);
 
             if ($response->failed()) {

@@ -21,7 +21,13 @@
 - ملف **`docs/DATABASE_SCHEMA.md`** (موصوف بالمجالات) + **`docs/DATABASE_SCHEMA.generated.md`** (مُولَّد آلياً) + أمر **`php artisan db:schema-doc`**.
 - تحسين تطبيعي: إزالة العمود المكرّر `student_profiles.reward_tier` (المصدر الوحيد الآن `reward_accounts.tier`، شكل الـ API بلا تغيير).
 
-**التالي — المهمة 3:** نظام الإشعارات الكامل (طالب/كابتن/أدمن) + الصوت.
+**التالي — المهمة 4:** تكامل OTP عبر WhatsApp Cloud API الرسمي.
+
+**✅ تم (RFQ-206) — المهمة 3: نظام الإشعارات الكامل + الصوت:**
+- **الباك**: `NotificationType` صار يحدّد القناة + الأولوية + الصوت لكل نوع (rafeeq_rides/critical/trips/payments/default). `FcmPushGateway` يبني بلوكات android+apns مع **sound + channel_id + priority** (طلبات الكابتن MAX + صوت، تنبيهات حرجة عالية). عقد `PushGateway` وُسِّع بـ `$options` (متوافق رجعياً).
+- **الفرونت**: كان **ناقصاً تماماً** — أُضيف `expo-notifications` + `expo-device` لتطبيقي الطالب والكابتن + `src/lib/push.ts` (تسجيل توكن FCM الأصلي، قنوات أندرويد بالصوت، معالج foreground يعرض ويشغّل الصوت، إلغاء التسجيل عند الخروج) مربوط في auth store. كله صلب (لا يكسر التطبيق على web/المحاكي/بلا Firebase).
+- التحقق: 79 اختبار باك أخضر + **tsc أخضر لكل حزم الفرونت** (طالب/كابتن/shared/api-client).
+- ملاحظة: القنوات تستخدم صوت `default` الآن؛ لإضافة نغمة مميزة لطلب الكابتن، أسقِط ملف صوت في إعداد plugin `expo-notifications` (`sounds`) وحدّث `sound` للقناة.
 
 **✅ تم (RFQ-205) — المهمة 2: تنظيم البنية + الصلابة (Resilience):**
 - أداة **`Core/Support/Safely`** لتشغيل الآثار الجانبية بأمان (تُسجّل وتُبتلع، لا تكسر المعاملة الأساسية) + 4 اختبارات.

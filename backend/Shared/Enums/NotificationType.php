@@ -48,6 +48,44 @@ enum NotificationType: string
         return in_array($this, [self::SosTriggered, self::AccountFrozen, self::TripCancelled], true);
     }
 
+    /**
+     * Android notification channel id (must match a channel created on the
+     * device). Channels control sound, vibration and importance per category.
+     */
+    public function channelId(): string
+    {
+        return match (true) {
+            $this->isCritical() => 'rafeeq_critical',
+            in_array($this, [self::RideOffer, self::RideMatched], true) => 'rafeeq_rides',
+            $this->category() === 'trips' => 'rafeeq_trips',
+            $this->category() === 'payments' => 'rafeeq_payments',
+            default => 'rafeeq_default',
+        };
+    }
+
+    /** FCM/APNs delivery priority — high wakes the device immediately. */
+    public function pushPriority(): string
+    {
+        return match (true) {
+            $this->isCritical() => 'high',
+            in_array($this, [self::RideOffer, self::RideMatched, self::TripStarted, self::BoardingConfirmed], true) => 'high',
+            default => 'normal',
+        };
+    }
+
+    /**
+     * Notification sound. 'default' is always safe (device default). Ride offers
+     * for captains use a distinct, attention-grabbing tone when bundled.
+     */
+    public function sound(): string
+    {
+        return match ($this) {
+            self::SosTriggered, self::AccountFrozen => 'critical',
+            self::RideOffer, self::RideMatched => 'ride_offer',
+            default => 'default',
+        };
+    }
+
     /** @return array<int, string> */
     public static function values(): array
     {

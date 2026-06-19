@@ -26,7 +26,7 @@
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker"],
+    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker", ["expo-notifications", { "color": "#001F3F" }]],
     "extra": {
       "apiUrl": "http://localhost:8000"
     }

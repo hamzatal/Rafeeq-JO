@@ -35,6 +35,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "يستخدم رفيق موقعك لتحديد نقطة الالتقاط وإرساله مع نداء الطوارئ."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0B7A43"
+        }
       ]
     ],
     "extra": {

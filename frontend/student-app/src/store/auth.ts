@@ -8,6 +8,7 @@ import type {
 } from '@rafeeq/shared';
 import { api, setUnauthorizedHandler } from '../lib/api';
 import { tokenStorage } from '../lib/storage';
+import { registerForPush, unregisterPush } from '../lib/push';
 
 type Status = 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -25,6 +26,8 @@ export const useAuth = create<AuthState>((set) => {
   const apply = async (result: AuthResult) => {
     await tokenStorage.set(result.token);
     set({ user: result.user, status: 'authenticated' });
+    // Register this device for push (FCM). Non-blocking + never throws.
+    void registerForPush();
   };
 
   // Auto sign-out on 401.
@@ -51,6 +54,7 @@ export const useAuth = create<AuthState>((set) => {
       try {
         const user = await api.auth.me();
         set({ user, status: 'authenticated' });
+        void registerForPush();
       } catch {
         /* offline / transient — stay authenticated; 401s are handled separately */
       }
@@ -75,6 +79,7 @@ export const useAuth = create<AuthState>((set) => {
     },
 
     async logout() {
+      await unregisterPush();
       try {
         await api.auth.logout();
       } catch {
