@@ -22,8 +22,13 @@ class ApiResponse
     ): JsonResponse {
         $payload = ['data' => self::normalize($data)];
 
-        if ($data instanceof AbstractPaginator) {
-            $meta = array_merge(self::paginationMeta($data), $meta);
+        // Attach pagination meta both for raw paginators AND for resource
+        // collections that wrap a paginator (XxxResource::collection($paginator)).
+        // Laravel only injects pagination meta when the resource is the ROOT of
+        // the response; here it is nested under "data", so we add it ourselves.
+        $paginator = self::extractPaginator($data);
+        if ($paginator !== null) {
+            $meta = array_merge(self::paginationMeta($paginator), $meta);
         }
 
         if (! empty($meta)) {
@@ -83,6 +88,23 @@ class ApiResponse
         return $data;
     }
 
+    /**
+     * Resolve the underlying paginator from either a raw paginator or a
+     * resource collection that wraps one. Returns null when not paginated.
+     */
+    private static function extractPaginator(mixed $data): ?AbstractPaginator
+    {
+        if ($data instanceof AbstractPaginator) {
+            return $data;
+        }
+
+        if ($data instanceof ResourceCollection && $data->resource instanceof AbstractPaginator) {
+            return $data->resource;
+        }
+
+        return null;
+    }
+
     private static function paginationMeta(AbstractPaginator $paginator): array
     {
         return [
@@ -90,7 +112,7 @@ class ApiResponse
                 'current_page' => $paginator->currentPage(),
                 'per_page' => $paginator->perPage(),
                 'total' => method_exists($paginator, 'total') ? $paginator->total() : null,
-                'has_more' => $paginator->hasMorePages(),
+                'has_more' => method_exists($paginator, 'hasMorePages') ? $paginator->hasMorePages() : false,
             ],
         ];
     }
