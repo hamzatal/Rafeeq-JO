@@ -77,7 +77,7 @@
 |---|---|
 | `php -l` لكل ملفات backend (347) | ✅ صفر أخطاء |
 | route → controller method (كل الموديولات) | ✅ صفر مفقود |
-| تسجيل كل الموديولات (21) في `providers.php` | ✅ |
+| تسجيل كل الموديولات (30) في `providers.php` | ✅ |
 | frontend: hooks مستخدمة دون استيراد react (التطبيقات الثلاثة) | ✅ صفر (بعد إصلاح `subscriptions.tsx`) |
 | frontend: مراجع `api.<domain>` مقابل `RafeeqApi` | ✅ كلها صحيحة |
 | i18n: تطابق مفاتيح ar/en (238/238) | ✅ |

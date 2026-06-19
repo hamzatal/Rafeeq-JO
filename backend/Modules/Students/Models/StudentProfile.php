@@ -4,7 +4,9 @@ namespace Rafeeq\Modules\Students\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Rewards\Models\RewardAccount;
 use Rafeeq\Shared\Enums\Gender;
 use Rafeeq\Shared\Enums\RewardTier;
 use Rafeeq\Shared\Traits\HasUuid;
@@ -16,8 +18,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string|null $student_number
  * @property string|null $faculty
  * @property Gender|null $gender
- * @property RewardTier $reward_tier
  * @property bool $onboarded
+ * @property-read RewardAccount|null $rewardAccount
  */
 class StudentProfile extends Model
 {
@@ -25,14 +27,13 @@ class StudentProfile extends Model
 
     protected $fillable = [
         'user_id', 'university_id', 'default_pickup_point_id',
-        'student_number', 'faculty', 'gender', 'reward_tier', 'onboarded',
+        'student_number', 'faculty', 'gender', 'onboarded',
     ];
 
     protected function casts(): array
     {
         return [
             'gender' => Gender::class,
-            'reward_tier' => RewardTier::class,
             'onboarded' => 'boolean',
         ];
     }
@@ -40,5 +41,20 @@ class StudentProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The reward account shares the same user_id. Linking here lets the profile
+     * expose the (single source of truth) reward tier without duplicating it.
+     */
+    public function rewardAccount(): HasOne
+    {
+        return $this->hasOne(RewardAccount::class, 'user_id', 'user_id');
+    }
+
+    /** Reward tier resolved from the reward account, defaulting to Bronze. */
+    public function rewardTier(): RewardTier
+    {
+        return $this->rewardAccount?->tier ?? RewardTier::Bronze;
     }
 }

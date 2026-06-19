@@ -1,8 +1,11 @@
 # 📦 ملف التسليم الشامل — رفيق (Rafeeq)
 
 > **للمحادثة الجديدة: اقرأ هذا الملف + `docs/PROGRESS.md` + `docs/ROADMAP.md` + `.kiro/steering/` قبل أي عمل.**
-> آخر commit: **RFQ-110**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز التقديرية: **~80%** (الأساس والقلب التشغيلي ~95%).
-> **محدّث (M8 الخدمات الإضافية):** الطرود (OTP مزدوج) + النقاط/المكافآت + المفقودات + التبادل — backend كامل + شاشات الطالب. الباقي الأساسي: طبقة AI، الخرائط الفعلية، وصفحات إدارة متبقية، وصلابة الإطلاق.
+> ⚠️ **المصدر الرسمي للحالة الحيّة هو `docs/PROGRESS.md`** — عند أي اختلاف بالأرقام، اعتمد PROGRESS.
+> آخر commit: **RFQ-203**. الفرع: `foundation/phase-0-1`. نسبة الإنجاز: **الكود ~99% / التشغيل الفعلي قيد التقدّم** (انظر `docs/LAUNCH_CHECKLIST.md`).
+> **الإحصاءات الموحّدة:** 30 وحدة backend · ~62 migration · 71 اختبار (211 assertion) · ~194 مسار API · 3 تطبيقات (student-app · driver-app · admin-dashboard).
+> **ملاحظة تاريخية:** الأقسام التفصيلية أدناه (قائمة "المتبقّي") كُتبت في مرحلة سابقة (RFQ-110) وقد تجاوزها التنفيذ — معظم ما يُذكر فيها كـ"لم يُبنَ" أصبح مبنيّاً بالكامل. اعتمد PROGRESS.md للحالة الفعلية.
+> **حُذف نهائياً (RFQ-199):** تطبيق ولي الأمر `guardian-app` ووحدة `Modules/Guardians` — استُبدل بميزة جهات اتصال الطوارئ داخل تطبيق الطالب (`Modules/Safety`).
 > القواعد: لا اختصار، لا حذف مزايا، لا ديمو داتا. commits مرقّمة `[RFQ-###]`. حدّث PROGRESS + README مع كل push.
 
 ---
@@ -108,7 +111,12 @@ npm run admin     # http://localhost:3000
 ```
 
 ## ⏭️ الخطوة التالية المقترحة (للمحادثة الجديدة)
-**اكتمل (backend):** Payments (CliQ + GPT Vision)، Notifications (FCM + SMS fallback)، Ratings، وبنية Gpt + Push. التالي حسب `docs/EXECUTION_PLAN.md`:
-**الخرائط الحيّة** (واجهة خريطة فعلية للطالب/الكابتن/الإدارة فوق عميل Echo الجاهز + بثّ GPS من تطبيق الكابتن)، ثم **الخدمات الإضافية** (Parcels/LostFound/Rewards/Exchange)، ثم **طبقة AI** (مساعد رفيق + Fraud Monitor + Route Intelligence). ملاحظة تشغيل Reverb: يتطلب `REVERB_*` + `php artisan reverb:start` + `extra.reverb*` في app.json. آخر رقم commit مستخدم: **RFQ-101** (التالي RFQ-102).
+> **المصدر الرسمي للحالة والخطوة التالية: `docs/PROGRESS.md` + `docs/LAUNCH_CHECKLIST.md`.**
 
-رسالة الانتقال: "أكمل مشروع رفيق (hamzatal/Rafeeq-JO، فرع foundation/phase-0-1). اقرأ docs/HANDOFF.md و docs/EXECUTION_PLAN.md و docs/PROGRESS.md و docs/ROADMAP.md و .kiro/steering/ وكمّل من M3 — آخر commit RFQ-079، التالي RFQ-080. بدون اختصار أو حذف مزايا."
+اكتملت كل موديولات الـ backend (30 وحدة) وتطبيقات الفرونت الثلاثة. ✅ **تم التحقق الفعلي على PostgreSQL 16** (migrate:fresh + seed + تدفّق E2E: register→verify-otp→token→مسار محمي). المتبقّي للإطلاق الرسمي (راجع `LAUNCH_CHECKLIST.md`):
+1. **التكاملات الخارجية**: بوابة OTP فعلية (WhatsApp/SMS) + CliQ + FCM + OpenAI.
+2. **النشر**: خادم إنتاج + Redis + HTTPS + عامل الطابور/الجدولة.
+3. **الخرائط الفعلية** (Google Maps) بدل Leaflet/OSM.
+4. **استكمال صفحات لوحة الإدارة** + توسيع الاختبارات + E2E على أجهزة حقيقية.
+
+رسالة الانتقال: "أكمل مشروع رفيق (hamzatal/Rafeeq-JO، فرع foundation/phase-0-1). اقرأ docs/PROGRESS.md و docs/LAUNCH_CHECKLIST.md و docs/HANDOFF.md و .kiro/steering/. آخر commit RFQ-203. بدون اختصار أو حذف مزايا."

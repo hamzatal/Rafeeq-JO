@@ -27,7 +27,7 @@ php artisan serve --host=0.0.0.0 --port=8000
 
 | التطبيق | المتغيّر | الملف |
 |--------|----------|------|
-| student-app / driver-app / guardian-app (Expo) | `EXPO_PUBLIC_API_URL` | `.env` في مجلد كل تطبيق |
+| student-app / driver-app (Expo) | `EXPO_PUBLIC_API_URL` | `.env` في مجلد كل تطبيق |
 | admin-dashboard (Next.js) | `NEXT_PUBLIC_API_URL` | `.env.local` |
 
 ```bash

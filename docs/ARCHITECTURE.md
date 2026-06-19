@@ -13,7 +13,7 @@
 ## 3) طبقات الـ Backend
 `Core` (ApiResponse/BaseService/Repository/Exceptions/Middleware/RBAC/Audit) · `Shared` (Enums + Traits) · `Infrastructure` (SMS · Push/FCM · Gpt/OpenAI) · `Modules` (المجال) · بثّ Events.
 
-### الموديولات (21)
+### الموديولات (30)
 | الموديول | الوظيفة |
 |---|---|
 | Auth · Users · Students · Drivers | الهوية + الملفات + توثيق الكباتن |
@@ -21,16 +21,21 @@
 | Subscriptions | الخطط + اشتراكات الطلاب |
 | RideRequests · Matching | طلب باب-لباب + محرّك التجميع + **تسعير Express/min-fill** |
 | Trips | الرحلات + Trip OTP + التتبّع + بث Reverb |
-| Wallet | محفظة مسبقة الدفع (فلس) |
+| Wallet · Payouts | محفظة مسبقة الدفع (فلس) + سحب أرباح الكباتن |
 | Payments | CliQ + **GPT Vision** + اعتماد تلقائي/يدوي + تفعيل الاشتراك/الشحن |
 | Notifications | DB + FCM + **SMS fallback للحرج** + تفضيلات |
 | Ratings | تقييم ثنائي + متوسط الكابتن |
-| Support | تذاكر L1–L4 + تصعيد |
-| Complaints | تصنيف خطورة + **تجميد فوري بالحرج** + تنبيه فريق السلامة |
-| Safety | Risk Flags + Cancellation Logs + كشف احتيال + **SOS** |
+| Support · Complaints · Disputes | تذاكر L1–L4 + تصنيف خطورة + مركز النزاعات + **تجميد تلقائي** |
+| Safety | Risk Flags + Cancellation Logs + كشف احتيال + **SOS + جهات اتصال الطوارئ** |
+| Chat | محادثة طالب↔كابتن مرتبطة بالرحلة |
 | Parcels | توصيل طرود + **OTP مزدوج (استلام/تسليم)** + سلسلة عهدة |
 | Rewards | نقاط + مستويات + كسب تلقائي بالرحلات |
 | LostFound · Exchange | المفقودات (مطابقة) + التبادل الطلابي |
+| Addresses | العناوين المحفوظة للطالب |
+| Reports | التقارير المالية للإدارة (للقراءة) |
+| AI | مساعد رفيق + المحادثات (GPT) |
+
+> **ملاحظة:** حُذف نهائياً (RFQ-199) موديول `Guardians` وتطبيق `guardian-app` — استُبدل بجهات اتصال الطوارئ في `Modules/Safety`.
 
 ## 4) دورة المال ومكافحة الاحتيال (أولوية قصوى)
 - كل الدفع عبر **CliQ** → محفظة مسبقة الدفع. الكابتن يتقاضى **من المنصة** (لا كاش) + حجز العمولة (config: 15%).

@@ -21,8 +21,8 @@ class StudentProfileResource extends JsonResource
             'faculty' => $this->faculty,
             'gender' => $this->gender?->value,
             'gender_label' => $this->gender?->labelAr(),
-            'reward_tier' => $this->reward_tier->value,
-            'reward_tier_label' => $this->reward_tier->labelAr(),
+            'reward_tier' => $this->rewardTier()->value,
+            'reward_tier_label' => $this->rewardTier()->labelAr(),
             'onboarded' => $this->onboarded,
         ];
     }

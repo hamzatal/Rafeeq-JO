@@ -79,9 +79,11 @@ npm run driver    # تطبيق الكابتن
 - [ ] **Phase 4** — الخدمات (Parcels / Lost & Found / Rewards)
 - [ ] **Phase 5** — الذكاء الاصطناعي (Rafeeq AI / Support / Safety / Fraud Monitor)
 - [~] **Phase 6** — لوحة الإدارة + التحليلات · **الإشعارات (FCM+SMS) ✅** · **التقييم الثنائي ✅** (backend)
-- [~] **Phase 7** — الإطلاق · **SOS ✅** · Notifications ✅ · **OTP صعود + OTP إنزال (تأكيد الطرفين) ✅** · **محرك تسعير + Express ✅** · **حجز الرصيد ✅** · **كشف احتيال GPS ✅** · **بوابة ولي الأمر ✅ (backend)** · (Deployment/CI/اختبارات شاملة ⏳)
+- [~] **Phase 7** — الإطلاق · **SOS + جهات اتصال الطوارئ ✅** · Notifications ✅ · **OTP صعود + OTP إنزال (تأكيد الطرفين) ✅** · **محرك تسعير + Express ✅** · **حجز الرصيد ✅** · **كشف احتيال GPS ✅** · (Deployment/CI/اختبارات شاملة ⏳)
 
-> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md`. كتالوج المزايا: `docs/FEATURES.md`. **المتبقّي للإطلاق: `docs/LAUNCH_CHECKLIST.md`.** آخر commit: **RFQ-197**.
+> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md` (**المصدر الرسمي للحالة**). كتالوج المزايا: `docs/FEATURES.md`. **المتبقّي للإطلاق: `docs/LAUNCH_CHECKLIST.md`.** آخر commit: **RFQ-203**.
+>
+> ملاحظة: حُذف نهائياً (RFQ-199) تطبيق ولي الأمر `guardian-app` ووحدة `Guardians` — استُبدل بجهات اتصال الطوارئ داخل تطبيق الطالب.
 
 ---
 

@@ -11,7 +11,10 @@ class StudentService extends BaseService
     /** Get the student's profile, creating an empty one on first access. */
     public function forUser(User $user): StudentProfile
     {
-        return StudentProfile::firstOrCreate(['user_id' => $user->id]);
+        // Eager-load the reward account so the resource can expose the tier
+        // (single source of truth) without an extra lazy query.
+        return StudentProfile::with('rewardAccount')
+            ->firstOrCreate(['user_id' => $user->id]);
     }
 
     public function update(User $user, array $data): StudentProfile
@@ -33,6 +36,6 @@ class StudentService extends BaseService
 
         $profile->save();
 
-        return $profile->fresh();
+        return $profile->fresh('rewardAccount');
     }
 }

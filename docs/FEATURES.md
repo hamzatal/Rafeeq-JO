@@ -1,8 +1,8 @@
 # دليل مزايا منصّة رفيق (Rafeeq) — الكتالوج الشامل
 
 > نظرة واحدة على **كل** ما بُني في المنصّة من كل النواحي: الوحدات الخلفية، الواجهات، الأمان، الدفع، والاختبارات.
-> آخر تحديث: بعد دمج كل الشغل على `foundation/phase-0-1` (حتى RFQ-150).
-> للحالة التفصيلية والخطوة التالية: `docs/PROGRESS.md`. للخطة الكاملة: `docs/ROADMAP.md` + `docs/EXECUTION_PLAN.md`.
+> آخر تحديث: بعد دمج كل الشغل على `foundation/phase-0-1` (حتى RFQ-203).
+> للحالة التفصيلية والخطوة التالية: `docs/PROGRESS.md` (المصدر الرسمي). للخطة الكاملة: `docs/ROADMAP.md` + `docs/EXECUTION_PLAN.md`.
 
 ---
 
@@ -13,11 +13,11 @@
 | الباك إند | Laravel 11 (PHP 8.2+) — Modular Monolith، namespace `Rafeeq\` |
 | قاعدة البيانات | PostgreSQL 16 (+ PostGIS لاحقاً) · مفاتيح UUID · المال بالـ **فلس** (integer) |
 | المصادقة | Laravel Sanctum (توكنات UUID) + **MFA/TOTP للموظفين** |
-| التطبيقات | Expo RN: **student-app**, **driver-app**, **guardian-app** · **admin-dashboard** (Next.js) |
-| الحزم المشتركة | `@rafeeq/shared` (أنواع + ثيم + i18n ar/en) · `@rafeeq/api-client` (27 عميل API) |
-| عدد الوحدات الخلفية | **31 وحدة** |
-| ملفات الـ Migrations | **62** |
-| تغطية الاختبارات | **75 اختبار باك ناجح** (224 assertion) + **الفرونت كله يمرّ `tsc --noEmit`** (6 حزم) |
+| التطبيقات | Expo RN: **student-app**, **driver-app** · **admin-dashboard** (Next.js) |
+| الحزم المشتركة | `@rafeeq/shared` (أنواع + ثيم + i18n ar/en) · `@rafeeq/api-client` (عملاء API نوعيون) |
+| عدد الوحدات الخلفية | **30 وحدة** |
+| ملفات الـ Migrations | **~62** |
+| تغطية الاختبارات | **71 اختبار باك ناجح** (211 assertion) + **الفرونت يمرّ `tsc --noEmit`** |
 | الدفع | CliQ الأردن (محفظة مسبقة الدفع + تحقّق GPT Vision) |
 | اللغة | عربي أولاً + RTL + ثنائي (ar/en) |
 
@@ -42,7 +42,7 @@
 | **Users** | الملف الشخصي (تحديث، كلمة المرور، تغيير الهاتف بـ OTP، حذف الحساب) |
 | **Students** | ملفات الطلاب (جامعة، نقطة التقاط افتراضية) |
 | **Drivers** | ملفات الكباتن + المركبات + الوثائق (رفع آمن + مراجعة واعتماد الإدارة) |
-| **Guardians** | بوابة ولي الأمر (انظر §6) |
+| ~~**Guardians**~~ | ❌ **حُذف نهائياً (RFQ-199)** — استُبدل بجهات اتصال الطوارئ داخل تطبيق الطالب (`Modules/Safety`) |
 
 ### المصادقة الثنائية (MFA / TOTP) — RFQ-147/149
 - تطبيق **TOTP وفق RFC 6238** مكتفٍ ذاتياً (بلا أي مكتبة خارجية): `TotpService` (توليد سر Base32، رابط `otpauth://` للـ QR، تحقّق مع تحمّل انحراف الساعة ±خطوة).
@@ -141,12 +141,9 @@
 | **Exchange** | تبادل جامعي (كتب/ملاحظات/أدوات) + حجز |
 | **AI** | مساعد رفيق + ذكاء المسارات |
 
-### بوابة ولي الأمر (Guardian Portal) — RFQ-137/138
-- وحدة `Modules/Guardians` + نوع مستخدم `guardian` + دور `guardian`.
-- الطالب يدير أولياء أمره (إضافة بالهاتف/العلاقة + إلغاء) — الحساب يُنشأ تلقائياً، الدخول بالهاتف+OTP.
-- ولي الأمر يرى: أبناءه المرتبطين + **تتبع الرحلة الحيّ** + **سجل الوصول الآمن** + **اتصال مُقنّع بالكابتن** + **SOS بالنيابة**.
-- تنبيهات الانطلاق/الوصول مربوطة بأمان داخل تدفق الرحلة. حماية: 403 لأي طالب غير مرتبط. **7 اختبارات**.
-- **الفرونت**: تطبيق Expo جديد `guardian-app` (دخول OTP، تتبع حيّ + خريطة، SOS بالضغط المطوّل) + شاشة إدارة أولياء الأمور في تطبيق الطالب.
+### ~~بوابة ولي الأمر (Guardian Portal)~~ — ❌ حُذفت نهائياً (RFQ-199)
+- أُزيلت وحدة `Modules/Guardians` ونوع/دور `guardian` وتطبيق `guardian-app` بالكامل (قرار تبسيط).
+- **البديل المعتمد:** جهات اتصال الطوارئ داخل تطبيق الطالب (`Modules/Safety` → `emergency_contacts`): الطالب يضيف حتى 5 جهات (واحدة أساسية، علم `notify_on_sos`)، وعند SOS تُنبَّه عبر SMS مع رابط الموقع الحيّ. انظر §الطوارئ.
 
 ### المحادثة (Chat) — RFQ-139/140
 - محادثة مرتبطة بالرحلة، تفويض لكل محادثة (الطرفان فقط، 403 لغيرهما)، بثّ `ChatMessageSent` + إشعار. شاشة في تطبيقي الطالب والكابتن. **5 اختبارات**.
@@ -159,10 +156,9 @@
 |---------|--------|
 | **student-app** (Expo) | **مُعاد التصميم وفق Stitch (Deep Navy `#0B192C` + Heritage Gold `#FFBF00`)**: رئيسية + بطاقة "إلى أين" + اشتراك فاخر + محفظة بنكية + خدمات دائرية ذهبية + رحلات سابقة، شاشات مصادقة بهوية مُوحّدة. كامل: محفظة/دفع، اشتراكات، رحلات، طلب باب-لباب، محادثة، عناوين، أولياء أمور، دعم، مكافآت، طرود، مفقودات، تبادل، تقييم، إشعارات، إعدادات |
 | **driver-app** (Expo) | **HUD داكن (Deep Navy + Cyan) ثابت — مطابق Stitch captain**: لوحة الكابتن، الوثائق، المركبة، الرحلات + تفاصيل (OTP صعود/إنزال)، عروض، أرباح + سحب، محادثة، إعدادات |
-| **guardian-app** (Expo) | **navy واقٍ + ذهبي (Stitch guardian)**: ترحيب navy hero، بوابة ولي الأمر (تتبع حيّ + خريطة + سجل وصول + SOS + اتصال بالكابتن)، إشعارات، إعدادات |
 | **admin-dashboard** (Next.js) | **مُعاد التصميم بالكامل وفق Stitch Enterprise (Navy `#001F3F` + Cyan `#00E5FF`، شريط جانبي كامل الارتفاع، صفحة كاملة العرض)**: مركز قيادة رئيسي (KPIs + شارت العمولة حسب المنطقة + نزاعات مفتوحة)، دخول الموظفين (+ MFA)، اعتماد الكباتن، المستخدمون، طابور الدفع، **سحوبات**، **التقارير المالية**، **إدارة المناطق + Geofence**، **الأمان/MFA**، **مركز النزاعات**، الدعم/الشكاوى، مركز سلامة AI. مُتحقَّق بـ `next build`. |
 
-> الحزم المشتركة: `@rafeeq/shared` (أنواع + ENDPOINTS + ثيم + i18n) و`@rafeeq/api-client` (**27 عميل**: auth, profile, wallet, payments, transport, driverTrips, catalog, notifications, ratings, rideRequests, support, complaints, parcels, rewards, lostFound, exchange, assistant, guardian, chat, payouts, addresses, reports, **zones**, admin, …).
+> الحزم المشتركة: `@rafeeq/shared` (أنواع + ENDPOINTS + ثيم + i18n) و`@rafeeq/api-client` (عملاء نوعيون: auth, profile, wallet, payments, transport, driverTrips, catalog, notifications, ratings, rideRequests, support, complaints, parcels, rewards, lostFound, exchange, assistant, chat, payouts, addresses, reports, zones, admin, …). ❌ عميل `guardian` أُزيل مع حذف بوابة ولي الأمر (RFQ-199).
 
 ### واجهات لوحة الإدارة المتبقّية (الـ APIs جاهزة) ⏳
 ✅ **تمّ (RFQ-151→155):**
@@ -180,7 +176,7 @@
 
 ---
 
-## 10. تغطية الاختبارات (63 ناجح)
+## 10. تغطية الاختبارات (71 ناجح · 211 assertion)
 
 | الملف | يغطّي |
 |-------|-------|
@@ -193,13 +189,16 @@
 | `WalletHoldTest` (6) | حجز/التقاط/تحرير الرصيد + ربط الرحلة |
 | `DropoffOtpTest` (3) | تأكيد الإنزال + علامة خطورة |
 | `GpsFraudTest` (5) | الرحلة الوهمية + عدم تطابق الموقع |
-| `GuardianPortalTest` (7) | الربط، التتبع، التنبيهات، SOS، حماية الصلاحيات |
 | `ChatTest` (5) | المحادثة + التفويض |
 | `PayoutTest` (6) | السحب + الاعتماد/الرفض + الأداء |
 | `SavedAddressTest` (4) | العناوين + الافتراضي + الملكية |
 | `FinancialReportTest` (3) | التجميع + فلتر الزون + الصلاحية |
 | `FraudMonitorTest` (4) | كشف التواطؤ + idempotency + تحت العتبة + assess |
+| `FraudSweepCommandTest` | أمر مسح الاحتيال المجدول |
 | `DisputeCenterTest` (7) | التجميد التلقائي + idempotency + الأدلّة + المعالجة/الرفض + حماية الصلاحيات |
+| `WhatsAppOtpTest` (3) | إرسال OTP عبر OpenWA + تطبيع الأرقام + معالجة الخطأ |
+
+> ❌ أُزيل `GuardianPortalTest` مع حذف بوابة ولي الأمر (RFQ-199).
 
 ---
 
@@ -214,9 +213,9 @@
 ## 12. حالة الـ CI والأمان
 
 - **CI (`.github/workflows/ci.yml`) أخضر — مُتحقَّق محلياً بنفس الخطوات**:
-  - الباك: `php -l` على كل المصادر (نظيف) + `route:list` smoke + **75 اختبار PHPUnit ناجح**.
-  - **قاعدة البيانات**: وظيفة CI مستقلّة تشغّل `migrate:fresh` + `db:seed` على **PostgreSQL 16** (تكشف مشاكل خاصة بـ Postgres لا يكشفها SQLite). ✅ **مُتحقَّق محلياً على PostgreSQL 15**: كل الـ 57 migration + 4 seeders (أدوار/صلاحيات، أدمن، 4 جامعات، 6 مناطق) تشتغل خضراء.
-  - الفرونت: `npm install` (عادي) ينجح + `tsc --noEmit` لكل الحِزم (الست خضراء، بما فيها guardian-app) + **ESLint للـ admin إلزامي: "No warnings or errors"**.
+  - الباك: `php -l` على كل المصادر (نظيف) + `route:list` smoke + **71 اختبار PHPUnit ناجح** (211 assertion).
+  - **قاعدة البيانات**: وظيفة CI مستقلّة تشغّل `migrate:fresh` + `db:seed` على **PostgreSQL 16**. ✅ **مُتحقَّق فعلياً على PostgreSQL 16**: كل الـ migrations (62) + 4 seeders (أدوار/صلاحيات، أدمن، 4 جامعات، 6 مناطق) تشتغل خضراء، وتدفّق E2E حقيقي (register→verify-otp→token→مسار محمي) ناجح.
+  - الفرونت: `npm install` (عادي) ينجح + `tsc --noEmit` لكل الحِزم (الخمس خضراء بعد حذف guardian-app) + **ESLint للـ admin إلزامي: "No warnings or errors"**.
 - **الأمان**:
   - ✅ تم ترقية **Next.js إلى 14.2.35** لإغلاق الإشعار الأمني المنشور (لوحة الإدارة هي الويب المنشور).
   - ℹ️ تبقّى تحذيرات `npm audit` من **أدوات Expo/React Native وقت البناء فقط** (uuid/xcode/@expo/bunyan) — ليست في كود الإنتاج المُرسَل للمستخدم، ومعالجتها تتطلب ترقية Expo SDK كاملة (مؤجّلة لتفادي كسر تطبيقات الموبايل). **لم يُشغّل `npm audit fix --force`** عمداً.
