@@ -17,8 +17,11 @@ class SetLocale
     {
         $supported = config('app.supported_locales', ['ar', 'en']);
 
-        $locale = $request->user()?->locale
-            ?? $this->fromHeader($request, $supported)
+        // An explicit, supported Accept-Language header reflects the language the
+        // user is actively viewing (set by the apps/dashboard), so it wins; then
+        // the user's saved preference; then the app default.
+        $locale = $this->fromHeader($request, $supported)
+            ?? $request->user()?->locale
             ?? config('app.locale');
 
         if (in_array($locale, $supported, true)) {
@@ -30,6 +33,10 @@ class SetLocale
 
     private function fromHeader(Request $request, array $supported): ?string
     {
+        if (! $request->headers->has('Accept-Language')) {
+            return null;
+        }
+
         $header = $request->getPreferredLanguage($supported);
 
         return $header ?: null;

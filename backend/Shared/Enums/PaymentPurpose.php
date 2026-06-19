@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum PaymentPurpose: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Subscription = 'subscription';
     case WalletTopup = 'wallet_topup';
     case Parcel = 'parcel';
@@ -14,6 +16,15 @@ enum PaymentPurpose: string
             self::Subscription => 'اشتراك',
             self::WalletTopup => 'شحن المحفظة',
             self::Parcel => 'طرد',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Subscription => 'Subscription',
+            self::WalletTopup => 'Wallet top-up',
+            self::Parcel => 'Parcel',
         };
     }
 

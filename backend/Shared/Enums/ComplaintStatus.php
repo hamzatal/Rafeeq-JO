@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum ComplaintStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Open = 'open';
     case Investigating = 'investigating';
     case Resolved = 'resolved';
@@ -16,6 +18,16 @@ enum ComplaintStatus: string
             self::Investigating => 'قيد التحقيق',
             self::Resolved => 'تم الحل',
             self::Dismissed => 'مرفوضة',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Open => 'Open',
+            self::Investigating => 'Investigating',
+            self::Resolved => 'Resolved',
+            self::Dismissed => 'Dismissed',
         };
     }
 

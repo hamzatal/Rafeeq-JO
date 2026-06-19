@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum TicketStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Open = 'open';
     case Pending = 'pending';        // awaiting user reply
     case Escalated = 'escalated';
@@ -18,6 +20,17 @@ enum TicketStatus: string
             self::Escalated => 'مُصعّدة',
             self::Resolved => 'تم الحل',
             self::Closed => 'مغلقة',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Open => 'Open',
+            self::Pending => 'Awaiting your reply',
+            self::Escalated => 'Escalated',
+            self::Resolved => 'Resolved',
+            self::Closed => 'Closed',
         };
     }
 

@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum PaymentStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Pending = 'pending';         // request created, awaiting proof
     case Submitted = 'submitted';     // proof uploaded, awaiting verification
     case UnderReview = 'under_review'; // AI inconclusive / flagged for human review
@@ -20,6 +22,18 @@ enum PaymentStatus: string
             self::Approved => 'معتمد',
             self::Rejected => 'مرفوض',
             self::Expired => 'منتهٍ',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Pending => 'Awaiting payment',
+            self::Submitted => 'Awaiting verification',
+            self::UnderReview => 'Under review',
+            self::Approved => 'Approved',
+            self::Rejected => 'Rejected',
+            self::Expired => 'Expired',
         };
     }
 

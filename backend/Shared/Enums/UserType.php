@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum UserType: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Student = 'student';
     case Driver = 'driver';
     case Support = 'support';
@@ -18,6 +20,17 @@ enum UserType: string
             self::Support => 'دعم فني',
             self::Supervisor => 'مشرف دعم',
             self::Admin => 'إدارة',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Student => 'Student',
+            self::Driver => 'Captain',
+            self::Support => 'Support',
+            self::Supervisor => 'Supervisor',
+            self::Admin => 'Admin',
         };
     }
 

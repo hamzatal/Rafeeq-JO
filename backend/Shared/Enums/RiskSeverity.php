@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum RiskSeverity: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Low = 'low';
     case Medium = 'medium';
     case High = 'high';
@@ -16,6 +18,16 @@ enum RiskSeverity: string
             self::Medium => 'متوسط',
             self::High => 'مرتفع',
             self::Critical => 'حرج',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Low => 'Low',
+            self::Medium => 'Medium',
+            self::High => 'High',
+            self::Critical => 'Critical',
         };
     }
 

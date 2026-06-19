@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum TicketCategory: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Subscription = 'subscription';
     case Trip = 'trip';
     case Payment = 'payment';
@@ -26,6 +28,21 @@ enum TicketCategory: string
             self::Pickup => 'نقاط الالتقاط',
             self::Technical => 'فنّي',
             self::Other => 'أخرى',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Subscription => 'Subscriptions',
+            self::Trip => 'Trips',
+            self::Payment => 'Payments',
+            self::Driver => 'Captains',
+            self::Student => 'Students',
+            self::Parcel => 'Parcels',
+            self::Pickup => 'Pickup points',
+            self::Technical => 'Technical',
+            self::Other => 'Other',
         };
     }
 

@@ -4,6 +4,8 @@ namespace Rafeeq\Shared\Enums;
 
 enum UserStatus: string
 {
+    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
     case Pending = 'pending';
     case Active = 'active';
     case Suspended = 'suspended';
@@ -16,6 +18,16 @@ enum UserStatus: string
             self::Active => 'نشط',
             self::Suspended => 'موقوف',
             self::Banned => 'محظور',
+        };
+    }
+
+    public function labelEn(): string
+    {
+        return match ($this) {
+            self::Pending => 'Pending activation',
+            self::Active => 'Active',
+            self::Suspended => 'Suspended',
+            self::Banned => 'Banned',
         };
     }
 
