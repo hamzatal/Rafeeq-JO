@@ -12,6 +12,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     // Admin AI / fraud insights
     Route::prefix('admin/ai')->middleware('permission:analytics.view')->group(function () {
+        Route::get('insights', [AiAdminController::class, 'insights']);
         Route::get('risks', [AiAdminController::class, 'risks']);
         Route::get('risks/{userId}', [AiAdminController::class, 'risk']);
     });

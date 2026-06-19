@@ -713,3 +713,27 @@ export interface AppConfig {
     realtime: boolean;
   };
 }
+
+
+/** Smart admin command-center briefing (GET /admin/ai/insights). */
+export interface AdminInsights {
+  generated_at: string;
+  ai_enabled: boolean;
+  metrics: {
+    users: { total: number; students: number; drivers: number; new_this_month: number };
+    drivers: { pending_review: number; approved: number };
+    trips: { this_month: number; completed: number; cancelled: number };
+    subscriptions: { active: number };
+    finance: {
+      rides_count: number;
+      gross_fare_fils: number;
+      commission_fils: number;
+      captain_earnings_fils: number;
+      subscription_revenue_fils: number;
+    };
+    safety: { open_disputes: number; unresolved_risk_flags: number; pending_payments: number };
+  };
+  analysis: string;
+  recommendations: string[];
+  source: 'ai' | 'rules';
+}

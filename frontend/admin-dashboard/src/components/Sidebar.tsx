@@ -15,6 +15,7 @@ const GROUPS: { title: string; links: NavLink[] }[] = [
     title: 'العمليات',
     links: [
       { href: '/', label: 'مركز القيادة', icon: 'dashboard' },
+      { href: '/insights', label: 'الرؤى الذكية', icon: 'neurology' },
       { href: '/ride-requests', label: 'طلبات الرحلات', icon: 'near_me' },
       { href: '/zones', label: 'المناطق', icon: 'map' },
       { href: '/universities', label: 'الجامعات', icon: 'school' },

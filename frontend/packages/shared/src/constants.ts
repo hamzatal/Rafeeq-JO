@@ -172,6 +172,7 @@ export const ENDPOINTS = {
     conversations: '/assistant/conversations',
     messages: (id: string) => `/assistant/conversations/${id}`,
     send: '/assistant/send',
+    adminInsights: '/admin/ai/insights',
     adminRisks: '/admin/ai/risks',
     adminRisk: (userId: string) => `/admin/ai/risks/${userId}`,
   },

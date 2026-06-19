@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 import {
   ENDPOINTS,
+  type AdminInsights,
   type AiConversation,
   type AiMessage,
   type ApiSuccess,
@@ -32,6 +33,11 @@ export class AssistantApi {
   }
 
   // Admin
+  async insights(): Promise<AdminInsights> {
+    const { data } = await this.http.get<ApiSuccess<AdminInsights>>(ENDPOINTS.assistant.adminInsights);
+    return unwrap(data);
+  }
+
   async risks(limit = 20): Promise<RiskScore[]> {
     const { data } = await this.http.get<ApiSuccess<RiskScore[]>>(ENDPOINTS.assistant.adminRisks, { params: { limit } });
     return unwrap(data);
