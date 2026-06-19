@@ -21,7 +21,13 @@
 - ملف **`docs/DATABASE_SCHEMA.md`** (موصوف بالمجالات) + **`docs/DATABASE_SCHEMA.generated.md`** (مُولَّد آلياً) + أمر **`php artisan db:schema-doc`**.
 - تحسين تطبيعي: إزالة العمود المكرّر `student_profiles.reward_tier` (المصدر الوحيد الآن `reward_accounts.tier`، شكل الـ API بلا تغيير).
 
-**التالي — المهمة 10:** تقوية الأمان ومنع الاختراق + التكامل بين المنصات.
+**التالي — المهمة 11:** اختبارات E2E شاملة + تجربة حقيقية بدون أخطاء.
+
+**✅ تم (RFQ-214) — المهمة 10: تقوية الأمان:**
+- **`SecurityHeaders` middleware** على كل استجابات API: `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Content-Security-Policy` صارم، + **HSTS عند HTTPS فقط** (لا يكسر التطوير المحلي).
+- **Throttling عام**: `throttle:api` (120/دقيقة per-user/IP) على كل المسارات + `throttle:sensitive` (20/دقيقة) على التحقق من الكوبونات (معرّفة في CoreServiceProvider). `throttle:auth` كما هو.
+- التحقق: 109 اختبار باك (2 جديدة SecurityHeadersTest) + الرؤوس مؤكّدة على استجابة حيّة.
+- ملاحظات موثّقة في SECURITY.md (toكن الأدمن localStorage→httpOnly، HTTPS بالإنتاج، أسرار عبر Secrets Manager).
 
 **✅ تم (RFQ-213) — المهمة 9: تحسينات الذكاء الاصطناعي:**
 - **مساعد الطالب أصبح واعياً بالسياق**: `AssistantService` يحقن لقطة حيّة من حساب الطالب (رصيد المحفظة + النقاط + الاشتراك الفعّال + الرحلة القادمة) في prompt الـGPT → إجابات دقيقة عن "كم رصيدي/متى رحلتي". مغلّف بـSafely (لا يكسر المساعد أبداً) + fallback مُعلّب بلا مفتاح.

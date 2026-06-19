@@ -11,8 +11,9 @@ use Rafeeq\Modules\Coupons\Controllers\CouponController;
 */
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
-    // Any authenticated user can preview a coupon discount.
-    Route::post('coupons/validate', [CouponController::class, 'validateCode']);
+    // Any authenticated user can preview a coupon discount (rate-limited).
+    Route::post('coupons/validate', [CouponController::class, 'validateCode'])
+        ->middleware('throttle:sensitive');
 
     // Admin management.
     Route::prefix('admin/coupons')->middleware('permission:coupons.manage')->group(function () {

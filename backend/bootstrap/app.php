@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Rafeeq\Core\Exceptions\ApiExceptionRenderer;
 use Rafeeq\Core\Http\Middleware\ForceJsonResponse;
+use Rafeeq\Core\Http\Middleware\SecurityHeaders;
 use Rafeeq\Core\Http\Middleware\SetLocale;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -18,7 +19,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // API stateless middleware stack
         $middleware->api(prepend: [
             ForceJsonResponse::class,
+            SecurityHeaders::class,
             SetLocale::class,
+        ]);
+
+        // Global API throttle (per authenticated user, else per IP). Generous
+        // ceiling to stop abuse/scraping without affecting normal usage.
+        $middleware->api(append: [
+            'throttle:api',
         ]);
 
         // Named middleware aliases (RBAC, etc.)

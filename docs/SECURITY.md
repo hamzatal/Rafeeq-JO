@@ -6,7 +6,8 @@
 - **المصادقة**: Laravel Sanctum + رموز UUID + إبطال عند 401.
 - **الصلاحيات**: RBAC (أدوار/صلاحيات) + middleware `role:` و`permission:` على كل مسارات الإدارة.
 - **OTP**: مُخزّن مُجزّأً (hashed) + TTL + حد محاولات + cooldown + إبطال السابق.
-- **Throttling**: على مسارات auth/otp.
+- **Throttling**: `throttle:auth` على auth/otp (6/دقيقة per-phone) + **`throttle:api` عام (120/دقيقة per-user/IP)** على كل مسارات الـAPI + **`throttle:sensitive` (20/دقيقة)** على المسارات الحساسة (التحقق من الكوبونات).
+- **رؤوس أمنية (`SecurityHeaders` middleware)**: `X-Content-Type-Options: nosniff` · `X-Frame-Options: DENY` · `Referrer-Policy` · `Permissions-Policy` · `Content-Security-Policy` صارم (JSON-only) · **HSTS عند HTTPS فقط**.
 - **التدقيق**: `audit_logs` لكل عملية حساسة (دفع/رحلة/أمان...).
 - **حماية البيانات**: `$fillable` على كل النماذج (منع mass-assignment)، استعلامات Eloquent مُعاملة (parameterized) — لا حقن SQL.
 - **مفاتيح UUID** (لا تعداد تسلسلي للموارد).
