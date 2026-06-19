@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FinancialReport } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { useT } from '../../../src/lib/i18n';
 
 const jod = (fils: number) => `${(fils / 1000).toFixed(3)} د.أ`;
 
@@ -23,6 +24,7 @@ function StatCard({ label, value, hint }: { label: string; value: string; hint?:
 }
 
 export default function ReportsPage() {
+  const { t } = useT();
   const [from, setFrom] = useState(monthStart());
   const [to, setTo] = useState(today());
   const [report, setReport] = useState<FinancialReport | null>(null);
@@ -35,7 +37,7 @@ export default function ReportsPage() {
     api.reports
       .financial({ from, to })
       .then(setReport)
-      .catch(() => setError('تعذّر تحميل التقرير'))
+      .catch(() => setError(t('reports.loadError')))
       .finally(() => setLoading(false));
   }, [from, to]);
 
@@ -45,18 +47,18 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <h1 className="page-title mb-4">التقارير المالية</h1>
+      <h1 className="page-title mb-4">{t('nav.reports')}</h1>
 
       <div className="card mb-5 flex flex-wrap items-end gap-3">
         <div>
-          <label className="block text-xs mb-1 muted-text">من تاريخ</label>
+          <label className="block text-xs mb-1 muted-text">{t('reports.from')}</label>
           <input type="date" className="input" value={from} onChange={(e) => setFrom(e.target.value)} />
         </div>
         <div>
-          <label className="block text-xs mb-1 muted-text">إلى تاريخ</label>
+          <label className="block text-xs mb-1 muted-text">{t('reports.to')}</label>
           <input type="date" className="input" value={to} onChange={(e) => setTo(e.target.value)} />
         </div>
-        <button onClick={load} className="btn-primary">عرض</button>
+        <button onClick={load} className="btn-primary">{t('reports.show')}</button>
       </div>
 
       {error && (
@@ -64,37 +66,37 @@ export default function ReportsPage() {
       )}
 
       {loading ? (
-        <div className="card text-center text-muted">جارٍ التحميل...</div>
+        <div className="card text-center text-muted">{t('common.loading')}</div>
       ) : report ? (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
-            <StatCard label="عمولة المنصة (الإيراد)" value={jod(report.commission_fils)} hint="صافي ربح المنصة من الرحلات" />
-            <StatCard label="إجمالي الأجور المحصّلة" value={jod(report.gross_fare_fils)} />
-            <StatCard label="عدد الرحلات المدفوعة" value={String(report.rides_count)} />
-            <StatCard label="أرباح الكباتن" value={jod(report.captain_earnings_fils)} />
-            <StatCard label="السحوبات المدفوعة" value={jod(report.payouts_paid_fils)} />
-            <StatCard label="شحن المحافظ" value={jod(report.topups_fils)} />
-            <StatCard label="إيراد الاشتراكات" value={jod(report.subscription_revenue_fils)} />
+            <StatCard label={t('reports.commission')} value={jod(report.commission_fils)} hint={t('reports.commissionHint')} />
+            <StatCard label={t('reports.gross')} value={jod(report.gross_fare_fils)} />
+            <StatCard label={t('reports.ridesCount')} value={String(report.rides_count)} />
+            <StatCard label={t('reports.captainEarnings')} value={jod(report.captain_earnings_fils)} />
+            <StatCard label={t('reports.payoutsPaid')} value={jod(report.payouts_paid_fils)} />
+            <StatCard label={t('reports.topups')} value={jod(report.topups_fils)} />
+            <StatCard label={t('reports.subscriptionRevenue')} value={jod(report.subscription_revenue_fils)} />
           </div>
 
-          <h2 className="text-lg font-bold surface-text mb-2">التفصيل حسب المنطقة</h2>
+          <h2 className="text-lg font-bold surface-text mb-2">{t('reports.byZone')}</h2>
           <div className="card p-0 overflow-hidden">
             {report.by_zone.length === 0 ? (
-              <div className="p-6 text-center text-muted">لا توجد بيانات للفترة المحددة</div>
+              <div className="p-6 text-center text-muted">{t('reports.noData')}</div>
             ) : (
               <table className="w-full text-sm">
                 <thead className="table-head">
                   <tr>
-                    <th className="text-right p-3 font-medium">المنطقة</th>
-                    <th className="text-right p-3 font-medium">عدد الرحلات</th>
-                    <th className="text-right p-3 font-medium">الأجور</th>
-                    <th className="text-right p-3 font-medium">العمولة</th>
+                    <th className="text-right p-3 font-medium">{t('reports.colZone')}</th>
+                    <th className="text-right p-3 font-medium">{t('reports.colRides')}</th>
+                    <th className="text-right p-3 font-medium">{t('reports.colFares')}</th>
+                    <th className="text-right p-3 font-medium">{t('reports.colCommission')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.by_zone.map((z, i) => (
                     <tr key={z.zone_id ?? `none-${i}`} className="row-line">
-                      <td className="p-3 surface-text">{z.zone_id ?? 'بدون منطقة'}</td>
+                      <td className="p-3 surface-text">{z.zone_id ?? t('reports.noZone')}</td>
                       <td className="p-3 text-muted">{z.rides_count}</td>
                       <td className="p-3 text-muted">{jod(z.gross_fare_fils)}</td>
                       <td className="p-3 font-medium surface-text">{jod(z.commission_fils)}</td>

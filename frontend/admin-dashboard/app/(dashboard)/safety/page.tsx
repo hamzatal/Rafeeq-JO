@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { RiskScore } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { useT } from '../../../src/lib/i18n';
 
 const LEVEL_CLASS: Record<string, string> = {
   low: 'bg-white text-muted border-line',
@@ -12,6 +13,7 @@ const LEVEL_CLASS: Record<string, string> = {
 };
 
 export default function SafetyPage() {
+  const { t } = useT();
   const [risks, setRisks] = useState<RiskScore[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,22 +27,22 @@ export default function SafetyPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-1">مركز الأمان — درجات الخطورة</h1>
-      <p className="muted-text mb-4">أعلى الحسابات خطورة بناءً على علامات الاحتيال والإلغاءات (AI Fraud Monitor).</p>
+      <h1 className="text-2xl font-extrabold surface-text mb-1">{t('safety.title')}</h1>
+      <p className="muted-text mb-4">{t('safety.subtitle')}</p>
 
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
         ) : risks.length === 0 ? (
-          <div className="p-6 text-center text-muted">لا توجد حسابات عالية الخطورة حالياً ✓</div>
+          <div className="p-6 text-center text-muted">{t('safety.none')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">الحساب</th>
-                <th className="text-right p-3 font-medium">الدرجة</th>
-                <th className="text-right p-3 font-medium">المستوى</th>
-                <th className="text-right p-3 font-medium">العوامل</th>
+                <th className="text-right p-3 font-medium">{t('safety.colAccount')}</th>
+                <th className="text-right p-3 font-medium">{t('safety.colScore')}</th>
+                <th className="text-right p-3 font-medium">{t('safety.colLevel')}</th>
+                <th className="text-right p-3 font-medium">{t('safety.colFactors')}</th>
               </tr>
             </thead>
             <tbody>

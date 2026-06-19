@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Zone } from '@rafeeq/shared';
 import { RafeeqApiError, type ZonePayload } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
+import { useT } from '../../../src/lib/i18n';
 
 type Vertex = [number, number];
 
@@ -32,6 +33,7 @@ const emptyForm = (): FormState => ({
 });
 
 export default function ZonesPage() {
+  const { t } = useT();
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<FormState | null>(null);
@@ -90,8 +92,8 @@ export default function ZonesPage() {
     if (!form) return;
     setError(null);
 
-    if (!form.name_ar.trim() || !form.name_en.trim()) return setError('اسم المنطقة (عربي/إنجليزي) مطلوب');
-    if (form.boundary.length > 0 && form.boundary.length < 3) return setError('حدود المضلّع تحتاج 3 رؤوس على الأقل');
+    if (!form.name_ar.trim() || !form.name_en.trim()) return setError(t('zones.nameRequired'));
+    if (form.boundary.length > 0 && form.boundary.length < 3) return setError(t('zones.polygonMinVertices'));
 
     const payload: ZonePayload = {
       name_ar: form.name_ar.trim(),
@@ -111,14 +113,14 @@ export default function ZonesPage() {
       setForm(null);
       load();
     } catch (err) {
-      setError(err instanceof RafeeqApiError ? err.firstError() ?? err.message : 'تعذّر الحفظ');
+      setError(err instanceof RafeeqApiError ? err.firstError() ?? err.message : t('zones.saveFailed'));
     } finally {
       setBusy(false);
     }
   };
 
   const remove = async (z: Zone) => {
-    if (!window.confirm(`حذف منطقة "${z.name_ar}"؟`)) return;
+    if (!window.confirm(`${t('zones.deleteConfirm')} "${z.name_ar}"?`)) return;
     await api.zones.remove(z.id);
     load();
   };
@@ -126,26 +128,26 @@ export default function ZonesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="page-title">المناطق (Zones)</h1>
-        <button onClick={startCreate} className="btn-primary">+ منطقة جديدة</button>
+        <h1 className="page-title">{t('zones.title')}</h1>
+        <button onClick={startCreate} className="btn-primary">{t('zones.new')}</button>
       </div>
 
       <div className="card p-0 overflow-hidden mb-6">
         {loading ? (
-          <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
         ) : zones.length === 0 ? (
-          <div className="p-6 text-center text-muted">لا توجد مناطق</div>
+          <div className="p-6 text-center text-muted">{t('zones.none')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">المنطقة</th>
-                <th className="text-right p-3 font-medium">المدينة</th>
-                <th className="text-right p-3 font-medium">المركز</th>
-                <th className="text-right p-3 font-medium">النطاق</th>
-                <th className="text-right p-3 font-medium">الحدّ الجغرافي</th>
-                <th className="text-right p-3 font-medium">الحالة</th>
-                <th className="text-right p-3 font-medium">إجراءات</th>
+                <th className="text-right p-3 font-medium">{t('zones.colZone')}</th>
+                <th className="text-right p-3 font-medium">{t('zones.colCity')}</th>
+                <th className="text-right p-3 font-medium">{t('zones.colCenter')}</th>
+                <th className="text-right p-3 font-medium">{t('zones.colRadius')}</th>
+                <th className="text-right p-3 font-medium">{t('zones.colGeofence')}</th>
+                <th className="text-right p-3 font-medium">{t('zones.colStatus')}</th>
+                <th className="text-right p-3 font-medium">{t('zones.colActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -154,25 +156,25 @@ export default function ZonesPage() {
                   <td className="p-3 surface-text font-medium">{z.name_ar}<div className="text-xs text-muted">{z.name_en}</div></td>
                   <td className="p-3 text-muted">{z.city ?? '—'}</td>
                   <td className="p-3 text-muted text-xs">{z.center_lat.toFixed(4)}, {z.center_lng.toFixed(4)}</td>
-                  <td className="p-3 text-muted">{z.radius_km} كم</td>
+                  <td className="p-3 text-muted">{z.radius_km} {t('zones.km')}</td>
                   <td className="p-3">
                     {z.has_boundary ? (
-                      <span className="badge bg-primary/10 text-primary">مضلّع ({z.boundary?.length})</span>
+                      <span className="badge bg-primary/10 text-primary">{t('zones.polygon')} ({z.boundary?.length})</span>
                     ) : (
-                      <span className="badge bg-background text-muted">دائري</span>
+                      <span className="badge bg-background text-muted">{t('zones.circular')}</span>
                     )}
                   </td>
                   <td className="p-3">
                     {z.is_active ? (
-                      <span className="badge bg-success/10 text-success">مفعّلة</span>
+                      <span className="badge bg-success/10 text-success">{t('zones.active')}</span>
                     ) : (
-                      <span className="badge bg-background text-muted">معطّلة</span>
+                      <span className="badge bg-background text-muted">{t('zones.inactive')}</span>
                     )}
                   </td>
                   <td className="p-3">
                     <div className="flex gap-2">
-                      <button onClick={() => startEdit(z)} className="badge border border-line text-primary">تعديل</button>
-                      <button onClick={() => remove(z)} className="badge border border-line text-danger">حذف</button>
+                      <button onClick={() => startEdit(z)} className="badge border border-line text-primary">{t('zones.edit')}</button>
+                      <button onClick={() => remove(z)} className="badge border border-line text-danger">{t('zones.delete')}</button>
                     </div>
                   </td>
                 </tr>
@@ -184,7 +186,7 @@ export default function ZonesPage() {
 
       {form && (
         <div className="card">
-          <h2 className="text-lg font-bold surface-text mb-4">{form.id ? 'تعديل منطقة' : 'منطقة جديدة'}</h2>
+          <h2 className="text-lg font-bold surface-text mb-4">{form.id ? t('zones.editTitle') : t('zones.newTitle')}</h2>
 
           {error && (
             <div className="mb-4 rounded-lg border border-danger/30 bg-red-50 px-3 py-2 text-sm text-danger">{error}</div>
@@ -192,47 +194,47 @@ export default function ZonesPage() {
 
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="block text-xs mb-1 muted-text">الاسم (عربي)</label>
+              <label className="block text-xs mb-1 muted-text">{t('zones.nameAr')}</label>
               <input className="input" value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs mb-1 muted-text">الاسم (إنجليزي)</label>
+              <label className="block text-xs mb-1 muted-text">{t('zones.nameEn')}</label>
               <input className="input" value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs mb-1 muted-text">المدينة</label>
+              <label className="block text-xs mb-1 muted-text">{t('zones.city')}</label>
               <input className="input" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs mb-1 muted-text">نصف القطر (كم)</label>
+              <label className="block text-xs mb-1 muted-text">{t('zones.radiusKm')}</label>
               <input className="input" type="number" step="0.5" value={form.radius_km} onChange={(e) => setForm({ ...form, radius_km: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs mb-1 muted-text">خط العرض (Lat) للمركز</label>
+              <label className="block text-xs mb-1 muted-text">{t('zones.centerLat')}</label>
               <input className="input" type="number" step="0.0001" value={form.center_lat} onChange={(e) => setForm({ ...form, center_lat: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs mb-1 muted-text">خط الطول (Lng) للمركز</label>
+              <label className="block text-xs mb-1 muted-text">{t('zones.centerLng')}</label>
               <input className="input" type="number" step="0.0001" value={form.center_lng} onChange={(e) => setForm({ ...form, center_lng: e.target.value })} />
             </div>
           </div>
 
           <label className="flex items-center gap-2 text-sm surface-text mb-4">
             <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
-            منطقة مفعّلة
+            {t('zones.activeZone')}
           </label>
 
           <div className="border-t border-line pt-4 mb-4">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <div className="font-medium surface-text">حدود المضلّع (Geofence)</div>
-                <div className="text-xs text-muted">اختياري — 3 رؤوس على الأقل. يأخذ الأولوية على النطاق الدائري.</div>
+                <div className="font-medium surface-text">{t('zones.geofence')}</div>
+                <div className="text-xs text-muted">{t('zones.geofenceHint')}</div>
               </div>
-              <button type="button" onClick={addVertex} className="btn-outline px-3 py-1 text-xs">+ رأس</button>
+              <button type="button" onClick={addVertex} className="btn-outline px-3 py-1 text-xs">{t('zones.addVertex')}</button>
             </div>
 
             {form.boundary.length === 0 ? (
-              <div className="text-xs text-muted">لا توجد حدود — ستُستخدم الدائرة (المركز + النطاق).</div>
+              <div className="text-xs text-muted">{t('zones.noBoundary')}</div>
             ) : (
               <div className="space-y-2">
                 {form.boundary.map((v, idx) => (
@@ -254,7 +256,7 @@ export default function ZonesPage() {
                       value={v[1]}
                       onChange={(e) => updateVertex(idx, 1, e.target.value)}
                     />
-                    <button type="button" onClick={() => removeVertex(idx)} className="badge border border-line text-danger shrink-0">حذف</button>
+                    <button type="button" onClick={() => removeVertex(idx)} className="badge border border-line text-danger shrink-0">{t('zones.delete')}</button>
                   </div>
                 ))}
               </div>
@@ -262,8 +264,8 @@ export default function ZonesPage() {
           </div>
 
           <div className="flex gap-2">
-            <button onClick={save} disabled={busy} className="btn-primary">{busy ? '...' : 'حفظ'}</button>
-            <button onClick={() => setForm(null)} className="btn-outline">إلغاء</button>
+            <button onClick={save} disabled={busy} className="btn-primary">{busy ? '...' : t('common.save')}</button>
+            <button onClick={() => setForm(null)} className="btn-outline">{t('common.cancel')}</button>
           </div>
         </div>
       )}

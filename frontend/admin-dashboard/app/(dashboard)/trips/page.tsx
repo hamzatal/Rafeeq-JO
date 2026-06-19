@@ -3,15 +3,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Trip } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { useT } from '../../../src/lib/i18n';
 
-const STATUSES = [
-  { value: '', label: 'الكل' },
-  { value: 'pending', label: 'بانتظار كابتن' },
-  { value: 'scheduled', label: 'مجدولة' },
-  { value: 'started', label: 'جارية' },
-  { value: 'completed', label: 'مكتملة' },
-  { value: 'cancelled', label: 'ملغاة' },
-];
+const STATUSES = ['', 'pending', 'scheduled', 'started', 'completed', 'cancelled'];
 
 const tone = (status: string) =>
   status === 'completed' ? 'bg-green-100 text-success'
@@ -20,6 +14,7 @@ const tone = (status: string) =>
     : 'bg-slate-100 text-muted';
 
 export default function TripsPage() {
+  const { t } = useT();
   const [items, setItems] = useState<Trip[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
@@ -37,39 +32,39 @@ export default function TripsPage() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 className="text-2xl font-extrabold surface-text">مراقبة الرحلات</h1>
+        <h1 className="text-2xl font-extrabold surface-text">{t('nav.trips')}</h1>
         <select className="input max-w-[200px]" value={status} onChange={(e) => setStatus(e.target.value)}>
           {STATUSES.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
+            <option key={s} value={s}>{t(`trips.status.${s || 'all'}`)}</option>
           ))}
         </select>
       </div>
 
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
         ) : items.length === 0 ? (
-          <div className="p-6 text-center text-muted">لا توجد رحلات</div>
+          <div className="p-6 text-center text-muted">{t('trips.none')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">المسار</th>
-                <th className="text-right p-3 font-medium">الموعد</th>
-                <th className="text-right p-3 font-medium">الركاب</th>
-                <th className="text-right p-3 font-medium">السعة</th>
-                <th className="text-right p-3 font-medium">الحالة</th>
+                <th className="text-right p-3 font-medium">{t('trips.colRoute')}</th>
+                <th className="text-right p-3 font-medium">{t('trips.colTime')}</th>
+                <th className="text-right p-3 font-medium">{t('trips.colPassengers')}</th>
+                <th className="text-right p-3 font-medium">{t('trips.colCapacity')}</th>
+                <th className="text-right p-3 font-medium">{t('trips.colStatus')}</th>
               </tr>
             </thead>
             <tbody>
-              {items.map((t) => (
-                <tr key={t.id} className="row-line">
-                  <td className="p-3 font-medium surface-text">{t.route?.name ?? 'رحلة تجميع'}</td>
-                  <td className="p-3 text-muted font-mono">{t.scheduled_at ? new Date(t.scheduled_at).toLocaleString('ar') : '—'}</td>
-                  <td className="p-3 text-muted">{t.booked_count ?? 0}</td>
-                  <td className="p-3 text-muted">{t.capacity}</td>
+              {items.map((tr) => (
+                <tr key={tr.id} className="row-line">
+                  <td className="p-3 font-medium surface-text">{tr.route?.name ?? t('trips.poolTrip')}</td>
+                  <td className="p-3 text-muted font-mono">{tr.scheduled_at ? new Date(tr.scheduled_at).toLocaleString('ar') : '—'}</td>
+                  <td className="p-3 text-muted">{tr.booked_count ?? 0}</td>
+                  <td className="p-3 text-muted">{tr.capacity}</td>
                   <td className="p-3">
-                    <span className={`badge ${tone(t.status)}`}>{t.status_label}</span>
+                    <span className={`badge ${tone(tr.status)}`}>{tr.status_label}</span>
                   </td>
                 </tr>
               ))}

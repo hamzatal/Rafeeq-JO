@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Route, University } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
+import { useT } from '../../../src/lib/i18n';
 
 const EMPTY = { name: '', university_id: '', price_jod: '', capacity: '4', departure_time: '' };
 
 export default function RoutesPage() {
+  const { t } = useT();
   const [items, setItems] = useState<Route[]>([]);
   const [unis, setUnis] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ export default function RoutesPage() {
   const add = async () => {
     setError(null);
     if (!form.name || !form.university_id || !form.price_jod) {
-      setError('الاسم والجامعة والسعر مطلوبة');
+      setError(t('routes.required'));
       return;
     }
     setBusy(true);
@@ -45,7 +47,7 @@ export default function RoutesPage() {
       setForm({ ...EMPTY });
       load();
     } catch (e) {
-      setError(e instanceof RafeeqApiError ? e.firstError() ?? e.message : 'فشل الحفظ');
+      setError(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('routes.saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -53,47 +55,47 @@ export default function RoutesPage() {
 
   const toggle = (r: Route) => api.admin.updateRoute(r.id, { is_active: !r.is_active }).then(load);
   const remove = (r: Route) => {
-    if (confirm(`حذف المسار ${r.name}؟`)) api.admin.deleteRoute(r.id).then(load);
+    if (confirm(`${t('routes.deleteConfirm')} ${r.name}?`)) api.admin.deleteRoute(r.id).then(load);
   };
   const uniName = (id: string) => unis.find((u) => u.id === id)?.name_ar ?? '—';
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">المسارات</h1>
+      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('nav.routes')}</h1>
 
       <div className="card mb-5">
-        <h2 className="font-bold surface-text mb-3">إضافة مسار</h2>
+        <h2 className="font-bold surface-text mb-3">{t('routes.add')}</h2>
         {error && <div className="mb-3 rounded-lg border border-danger/30 bg-red-50 px-3 py-2 text-sm text-danger">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-          <input className="input" placeholder="اسم المسار" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input className="input" placeholder={t('routes.namePh')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <select className="input" value={form.university_id} onChange={(e) => setForm({ ...form, university_id: e.target.value })}>
-            <option value="">اختر الجامعة</option>
+            <option value="">{t('routes.selectUniversity')}</option>
             {unis.map((u) => (
               <option key={u.id} value={u.id}>{u.name_ar}</option>
             ))}
           </select>
-          <input className="input" type="number" placeholder="السعر (د.أ)" value={form.price_jod} onChange={(e) => setForm({ ...form, price_jod: e.target.value })} />
-          <input className="input" type="number" placeholder="السعة" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} />
-          <input className="input" placeholder="وقت الانطلاق 07:30" value={form.departure_time} onChange={(e) => setForm({ ...form, departure_time: e.target.value })} />
+          <input className="input" type="number" placeholder={t('routes.pricePh')} value={form.price_jod} onChange={(e) => setForm({ ...form, price_jod: e.target.value })} />
+          <input className="input" type="number" placeholder={t('routes.capacityPh')} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} />
+          <input className="input" placeholder={t('routes.departurePh')} value={form.departure_time} onChange={(e) => setForm({ ...form, departure_time: e.target.value })} />
         </div>
-        <button disabled={busy} onClick={add} className="btn-primary mt-3">إضافة</button>
+        <button disabled={busy} onClick={add} className="btn-primary mt-3">{t('routes.addBtn')}</button>
       </div>
 
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
         ) : items.length === 0 ? (
-          <div className="p-6 text-center text-muted">لا توجد مسارات</div>
+          <div className="p-6 text-center text-muted">{t('routes.none')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">المسار</th>
-                <th className="text-right p-3 font-medium">الجامعة</th>
-                <th className="text-right p-3 font-medium">السعر</th>
-                <th className="text-right p-3 font-medium">السعة</th>
-                <th className="text-right p-3 font-medium">الانطلاق</th>
-                <th className="text-right p-3 font-medium">الحالة</th>
+                <th className="text-right p-3 font-medium">{t('routes.colRoute')}</th>
+                <th className="text-right p-3 font-medium">{t('routes.colUniversity')}</th>
+                <th className="text-right p-3 font-medium">{t('routes.colPrice')}</th>
+                <th className="text-right p-3 font-medium">{t('routes.colCapacity')}</th>
+                <th className="text-right p-3 font-medium">{t('routes.colDeparture')}</th>
+                <th className="text-right p-3 font-medium">{t('routes.colStatus')}</th>
                 <th className="p-3"></th>
               </tr>
             </thead>
@@ -107,11 +109,11 @@ export default function RoutesPage() {
                   <td className="p-3 text-muted font-mono">{r.departure_time ?? '—'}</td>
                   <td className="p-3">
                     <button onClick={() => toggle(r)} className={`badge ${r.is_active ? 'bg-green-100 text-success' : 'bg-slate-100 text-muted'}`}>
-                      {r.is_active ? 'نشط' : 'متوقف'}
+                      {r.is_active ? t('routes.active') : t('routes.inactive')}
                     </button>
                   </td>
                   <td className="p-3 text-left">
-                    <button onClick={() => remove(r)} className="text-danger text-sm hover:underline">حذف</button>
+                    <button onClick={() => remove(r)} className="text-danger text-sm hover:underline">{t('routes.delete')}</button>
                   </td>
                 </tr>
               ))}

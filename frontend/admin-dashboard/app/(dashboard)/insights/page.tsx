@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { AdminInsights } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { useT } from '../../../src/lib/i18n';
 
 const jod = (fils: number) => `${(fils / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 
@@ -21,6 +22,7 @@ function Stat({ label, value, icon }: { label: string; value: string; icon: stri
 }
 
 export default function InsightsPage() {
+  const { t } = useT();
   const [data, setData] = useState<AdminInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export default function InsightsPage() {
     api.assistant
       .insights()
       .then(setData)
-      .catch(() => setError('تعذّر تحميل الرؤى. حاول مجدداً.'))
+      .catch(() => setError(t('insights.loadError')))
       .finally(() => setLoading(false));
   };
 
@@ -43,26 +45,26 @@ export default function InsightsPage() {
         <div>
           <h1 className="page-title flex items-center gap-2">
             <span className="material-symbols-outlined text-cyan-deep">neurology</span>
-            الرؤى الذكية
+            {t('nav.insights')}
           </h1>
-          <p className="muted-text mt-1">تحليل ذكي لأداء المنصّة وتوصيات قابلة للتنفيذ.</p>
+          <p className="muted-text mt-1">{t('insights.subtitle')}</p>
         </div>
         <button onClick={load} className="btn-primary flex items-center gap-2" disabled={loading}>
           <span className="material-symbols-outlined text-[18px]">refresh</span>
-          تحديث
+          {t('insights.refresh')}
         </button>
       </div>
 
       {error && <div className="rounded-lg border border-danger/30 bg-red-50 px-4 py-3 text-sm text-danger">{error}</div>}
 
       {loading ? (
-        <div className="card text-center text-muted py-10">جارٍ توليد الرؤى...</div>
+        <div className="card text-center text-muted py-10">{t('insights.generating')}</div>
       ) : data ? (
         <>
           {/* AI / rules badge */}
           <div className="flex items-center gap-2 text-xs">
             <span className={data.source === 'ai' ? 'pill-success' : 'badge bg-slate-100 text-muted'}>
-              {data.source === 'ai' ? 'تحليل بالذكاء الاصطناعي (GPT)' : 'تحليل قائم على القواعد'}
+              {data.source === 'ai' ? t('insights.sourceAi') : t('insights.sourceRules')}
             </span>
             <span className="text-muted font-mono">
               {new Date(data.generated_at).toLocaleString('ar')}
@@ -73,7 +75,7 @@ export default function InsightsPage() {
           <div className="card border-r-4 border-cyan">
             <h3 className="font-bold surface-text mb-2 flex items-center gap-2">
               <span className="material-symbols-outlined text-cyan-deep text-[20px]">insights</span>
-              التحليل
+              {t('insights.analysis')}
             </h3>
             <p className="surface-text leading-relaxed">{data.analysis}</p>
           </div>
@@ -83,7 +85,7 @@ export default function InsightsPage() {
             <div className="card">
               <h3 className="font-bold surface-text mb-3 flex items-center gap-2">
                 <span className="material-symbols-outlined text-success text-[20px]">recommend</span>
-                توصيات
+                {t('insights.recommendations')}
               </h3>
               <ul className="space-y-2">
                 {data.recommendations.map((r, i) => (
@@ -98,23 +100,23 @@ export default function InsightsPage() {
 
           {/* KPI grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            <Stat label="مستخدمون جدد (الشهر)" value={String(data.metrics.users.new_this_month)} icon="person_add" />
-            <Stat label="إجمالي المستخدمين" value={String(data.metrics.users.total)} icon="group" />
-            <Stat label="رحلات هذا الشهر" value={String(data.metrics.trips.this_month)} icon="directions_car" />
-            <Stat label="رحلات مكتملة" value={String(data.metrics.trips.completed)} icon="task_alt" />
-            <Stat label="رحلات ملغاة" value={String(data.metrics.trips.cancelled)} icon="cancel" />
-            <Stat label="اشتراكات فعّالة" value={String(data.metrics.subscriptions.active)} icon="card_membership" />
-            <Stat label="عمولة المنصّة (د.أ)" value={jod(data.metrics.finance.commission_fils)} icon="account_balance_wallet" />
-            <Stat label="إجمالي الأجور (د.أ)" value={jod(data.metrics.finance.gross_fare_fils)} icon="payments" />
-            <Stat label="كباتن بانتظار المراجعة" value={String(data.metrics.drivers.pending_review)} icon="how_to_reg" />
-            <Stat label="نزاعات مفتوحة" value={String(data.metrics.safety.open_disputes)} icon="gavel" />
-            <Stat label="علامات خطر مفتوحة" value={String(data.metrics.safety.unresolved_risk_flags)} icon="warning" />
-            <Stat label="مدفوعات معلّقة" value={String(data.metrics.safety.pending_payments)} icon="hourglass_top" />
+            <Stat label={t('insights.kpi.newUsers')} value={String(data.metrics.users.new_this_month)} icon="person_add" />
+            <Stat label={t('insights.kpi.totalUsers')} value={String(data.metrics.users.total)} icon="group" />
+            <Stat label={t('insights.kpi.tripsThisMonth')} value={String(data.metrics.trips.this_month)} icon="directions_car" />
+            <Stat label={t('insights.kpi.tripsCompleted')} value={String(data.metrics.trips.completed)} icon="task_alt" />
+            <Stat label={t('insights.kpi.tripsCancelled')} value={String(data.metrics.trips.cancelled)} icon="cancel" />
+            <Stat label={t('insights.kpi.activeSubs')} value={String(data.metrics.subscriptions.active)} icon="card_membership" />
+            <Stat label={t('insights.kpi.commission')} value={jod(data.metrics.finance.commission_fils)} icon="account_balance_wallet" />
+            <Stat label={t('insights.kpi.grossFare')} value={jod(data.metrics.finance.gross_fare_fils)} icon="payments" />
+            <Stat label={t('insights.kpi.driversPending')} value={String(data.metrics.drivers.pending_review)} icon="how_to_reg" />
+            <Stat label={t('insights.kpi.openDisputes')} value={String(data.metrics.safety.open_disputes)} icon="gavel" />
+            <Stat label={t('insights.kpi.openRiskFlags')} value={String(data.metrics.safety.unresolved_risk_flags)} icon="warning" />
+            <Stat label={t('insights.kpi.pendingPayments')} value={String(data.metrics.safety.pending_payments)} icon="hourglass_top" />
           </div>
 
           {!data.ai_enabled && (
             <div className="rounded-lg border border-line bg-background px-4 py-3 text-sm muted-text">
-              لتفعيل التحليل بالذكاء الاصطناعي، اضبط مفتاح OPENAI_API_KEY في إعدادات الخادم.
+              {t('insights.aiDisabledHint')}
             </div>
           )}
         </>

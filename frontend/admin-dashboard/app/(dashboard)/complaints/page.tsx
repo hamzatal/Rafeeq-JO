@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Complaint } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { useT } from '../../../src/lib/i18n';
 
 const SEVERITY_CLASS: Record<string, string> = {
   low: 'bg-white text-muted border-line',
@@ -12,6 +13,7 @@ const SEVERITY_CLASS: Record<string, string> = {
 };
 
 export default function ComplaintsPage() {
+  const { t } = useT();
   const [items, setItems] = useState<Complaint[]>([]);
   const [severity, setSeverity] = useState('');
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ export default function ComplaintsPage() {
   const setStatus = async (id: string, status: string, reinstate = false) => {
     setBusy(id);
     try {
-      const resolution = status === 'resolved' || status === 'dismissed' ? window.prompt('ملاحظة الحل؟') ?? undefined : undefined;
+      const resolution = status === 'resolved' || status === 'dismissed' ? window.prompt(t('complaints.resolutionPrompt')) ?? undefined : undefined;
       await api.complaints.setStatus(id, { status, resolution, reinstate });
       load();
     } finally {
@@ -42,7 +44,7 @@ export default function ComplaintsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">الشكاوى</h1>
+      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('nav.complaints')}</h1>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {['', 'critical', 'high', 'medium', 'low'].map((sv) => (
@@ -51,26 +53,26 @@ export default function ComplaintsPage() {
             onClick={() => setSeverity(sv)}
             className={`badge border ${severity === sv ? 'bg-primary text-white border-primary' : 'bg-white text-muted border-line'}`}
           >
-            {sv === '' ? 'الكل' : sv}
+            {sv === '' ? t('complaints.all') : sv}
           </button>
         ))}
       </div>
 
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
         ) : items.length === 0 ? (
-          <div className="p-6 text-center text-muted">لا توجد شكاوى</div>
+          <div className="p-6 text-center text-muted">{t('complaints.none')}</div>
         ) : (
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">الرقم</th>
-                <th className="text-right p-3 font-medium">الفئة</th>
-                <th className="text-right p-3 font-medium">الخطورة</th>
-                <th className="text-right p-3 font-medium">المُبلَّغ عنه</th>
-                <th className="text-right p-3 font-medium">الحالة</th>
-                <th className="text-right p-3 font-medium">إجراءات</th>
+                <th className="text-right p-3 font-medium">{t('complaints.colNumber')}</th>
+                <th className="text-right p-3 font-medium">{t('complaints.colCategory')}</th>
+                <th className="text-right p-3 font-medium">{t('complaints.colSeverity')}</th>
+                <th className="text-right p-3 font-medium">{t('complaints.colReported')}</th>
+                <th className="text-right p-3 font-medium">{t('complaints.colStatus')}</th>
+                <th className="text-right p-3 font-medium">{t('complaints.colActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -85,9 +87,9 @@ export default function ComplaintsPage() {
                   <td className="p-3 text-muted">{c.status_label}</td>
                   <td className="p-3">
                     <div className="flex flex-wrap gap-2">
-                      <button onClick={() => setStatus(c.id, 'investigating')} disabled={busy === c.id} className="btn-outline px-3 py-1 text-xs">تحقيق</button>
-                      <button onClick={() => setStatus(c.id, 'resolved')} disabled={busy === c.id} className="btn-primary px-3 py-1 text-xs">حل</button>
-                      <button onClick={() => setStatus(c.id, 'dismissed', true)} disabled={busy === c.id} className="btn-outline px-3 py-1 text-xs">رفض + استعادة</button>
+                      <button onClick={() => setStatus(c.id, 'investigating')} disabled={busy === c.id} className="btn-outline px-3 py-1 text-xs">{t('complaints.investigate')}</button>
+                      <button onClick={() => setStatus(c.id, 'resolved')} disabled={busy === c.id} className="btn-primary px-3 py-1 text-xs">{t('complaints.resolve')}</button>
+                      <button onClick={() => setStatus(c.id, 'dismissed', true)} disabled={busy === c.id} className="btn-outline px-3 py-1 text-xs">{t('complaints.dismissReinstate')}</button>
                     </div>
                   </td>
                 </tr>

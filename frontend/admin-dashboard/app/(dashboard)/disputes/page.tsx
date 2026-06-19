@@ -3,13 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Dispute, DisputeDetail } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
-
-const STATUS_LABEL: Record<string, string> = {
-  open: 'مفتوح',
-  investigating: 'قيد التحقيق',
-  resolved: 'تمت المعالجة',
-  dismissed: 'مرفوض (إيجابية كاذبة)',
-};
+import { useT } from '../../../src/lib/i18n';
 
 const SEVERITY_CLASS: Record<string, string> = {
   low: 'bg-background text-muted',
@@ -19,6 +13,7 @@ const SEVERITY_CLASS: Record<string, string> = {
 };
 
 export default function DisputesPage() {
+  const { t } = useT();
   const [items, setItems] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('open');
@@ -52,9 +47,9 @@ export default function DisputesPage() {
   };
 
   const resolve = async (id: string) => {
-    const resolution = window.prompt('ملخص القرار / المعالجة؟');
+    const resolution = window.prompt(t('disputes.resolvePrompt'));
     if (!resolution) return;
-    const action = window.prompt('الإجراء: cleared (تبرئة) / warning (تحذير) / banned (حظر) / frozen (تجميد) / none', 'cleared');
+    const action = window.prompt(t('disputes.actionPrompt'), 'cleared');
     if (!action) return;
     setBusy(true);
     try {
@@ -66,7 +61,7 @@ export default function DisputesPage() {
   };
 
   const dismiss = async (id: string) => {
-    const reason = window.prompt('سبب الرفض (إيجابية كاذبة)؟') ?? undefined;
+    const reason = window.prompt(t('disputes.dismissPrompt')) ?? undefined;
     setBusy(true);
     try {
       await api.disputes.dismiss(id, reason);
@@ -89,15 +84,15 @@ export default function DisputesPage() {
 
   return (
     <div>
-      <h1 className="page-title mb-4">مركز النزاعات والتحقيقات</h1>
+      <h1 className="page-title mb-4">{t('disputes.title')}</h1>
 
       <div className="flex flex-wrap gap-2 mb-4">
         {[
-          { v: 'open', l: 'مفتوح' },
-          { v: 'investigating', l: 'قيد التحقيق' },
-          { v: 'resolved', l: 'تمت المعالجة' },
-          { v: 'dismissed', l: 'مرفوض' },
-          { v: '', l: 'الكل' },
+          { v: 'open', l: t('disputes.f.open') },
+          { v: 'investigating', l: t('disputes.f.investigating') },
+          { v: 'resolved', l: t('disputes.f.resolved') },
+          { v: 'dismissed', l: t('disputes.f.dismissed') },
+          { v: '', l: t('disputes.f.all') },
         ].map((s) => (
           <button
             key={s.v}
@@ -113,18 +108,18 @@ export default function DisputesPage() {
         {/* List */}
         <div className="card p-0 overflow-hidden">
           {loading ? (
-            <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+            <div className="p-6 text-center text-muted">{t('common.loading')}</div>
           ) : items.length === 0 ? (
-            <div className="p-6 text-center text-muted">لا توجد نزاعات</div>
+            <div className="p-6 text-center text-muted">{t('disputes.none')}</div>
           ) : (
             <table className="w-full text-sm">
               <thead className="table-head">
                 <tr>
-                  <th className="text-right p-3 font-medium">الحساب</th>
-                  <th className="text-right p-3 font-medium">النوع</th>
-                  <th className="text-right p-3 font-medium">الخطورة</th>
-                  <th className="text-right p-3 font-medium">الخطر</th>
-                  <th className="text-right p-3 font-medium">الحالة</th>
+                  <th className="text-right p-3 font-medium">{t('disputes.colAccount')}</th>
+                  <th className="text-right p-3 font-medium">{t('disputes.colType')}</th>
+                  <th className="text-right p-3 font-medium">{t('disputes.colSeverity')}</th>
+                  <th className="text-right p-3 font-medium">{t('disputes.colRisk')}</th>
+                  <th className="text-right p-3 font-medium">{t('disputes.colStatus')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,7 +138,7 @@ export default function DisputesPage() {
                       <span className={`badge ${SEVERITY_CLASS[d.severity] ?? ''}`}>{d.severity_label}</span>
                     </td>
                     <td className="p-3 font-bold surface-text">{d.risk_score ?? '—'}</td>
-                    <td className="p-3 text-muted text-xs">{STATUS_LABEL[d.status] ?? d.status}</td>
+                    <td className="p-3 text-muted text-xs">{t(`disputes.status.${d.status}`, d.status)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -154,7 +149,7 @@ export default function DisputesPage() {
         {/* Detail + evidence */}
         <div className="card">
           {!detail ? (
-            <div className="text-center text-muted py-10">اختر نزاعاً لعرض الأدلّة والإجراءات</div>
+            <div className="text-center text-muted py-10">{t('disputes.selectPrompt')}</div>
           ) : (
             <div>
               <div className="flex items-start justify-between mb-3">
@@ -168,30 +163,30 @@ export default function DisputesPage() {
               </div>
 
               <div className="rounded-lg bg-background p-3 mb-3 text-sm">
-                <div className="flex justify-between"><span className="muted-text">النوع</span><span className="surface-text">{detail.dispute.type}</span></div>
-                <div className="flex justify-between"><span className="muted-text">الحالة</span><span className="surface-text">{STATUS_LABEL[detail.dispute.status]}</span></div>
-                <div className="flex justify-between"><span className="muted-text">درجة الخطر</span><span className="font-bold surface-text">{detail.evidence.risk.score} ({detail.evidence.risk.level})</span></div>
-                <div className="flex justify-between"><span className="muted-text">حالة الحساب</span><span className="surface-text">{detail.dispute.subject.status}</span></div>
+                <div className="flex justify-between"><span className="muted-text">{t('disputes.type')}</span><span className="surface-text">{detail.dispute.type}</span></div>
+                <div className="flex justify-between"><span className="muted-text">{t('disputes.statusLabel')}</span><span className="surface-text">{t(`disputes.status.${detail.dispute.status}`, detail.dispute.status)}</span></div>
+                <div className="flex justify-between"><span className="muted-text">{t('disputes.riskScore')}</span><span className="font-bold surface-text">{detail.evidence.risk.score} ({detail.evidence.risk.level})</span></div>
+                <div className="flex justify-between"><span className="muted-text">{t('disputes.accountStatus')}</span><span className="surface-text">{detail.dispute.subject.status}</span></div>
                 {detail.dispute.summary && <div className="muted-text mt-2">{detail.dispute.summary}</div>}
               </div>
 
               {/* Actions */}
               {detail.dispute.status !== 'resolved' && detail.dispute.status !== 'dismissed' && (
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <button disabled={busy} onClick={() => resolve(detail.dispute.id)} className="btn-primary px-3 py-1 text-xs">معالجة</button>
-                  <button disabled={busy} onClick={() => dismiss(detail.dispute.id)} className="btn-outline px-3 py-1 text-xs">رفض (إيجابية كاذبة)</button>
+                  <button disabled={busy} onClick={() => resolve(detail.dispute.id)} className="btn-primary px-3 py-1 text-xs">{t('disputes.resolve')}</button>
+                  <button disabled={busy} onClick={() => dismiss(detail.dispute.id)} className="btn-outline px-3 py-1 text-xs">{t('disputes.dismiss')}</button>
                   <button
                     disabled={busy}
                     onClick={() => toggleFreeze(detail.dispute.id, detail.dispute.subject.status === 'suspended')}
                     className="btn-outline px-3 py-1 text-xs"
                   >
-                    {detail.dispute.subject.status === 'suspended' ? 'رفع التجميد' : 'تجميد الحساب'}
+                    {detail.dispute.subject.status === 'suspended' ? t('disputes.unfreeze') : t('disputes.freeze')}
                   </button>
                 </div>
               )}
 
               {/* Evidence: risk flags */}
-              <h3 className="font-bold surface-text text-sm mb-2">علامات الخطر ({detail.evidence.risk_flags.length})</h3>
+              <h3 className="font-bold surface-text text-sm mb-2">{t('disputes.riskFlags')} ({detail.evidence.risk_flags.length})</h3>
               <div className="space-y-1 mb-4 max-h-48 overflow-auto">
                 {detail.evidence.risk_flags.map((f) => (
                   <div key={f.id} className="text-xs border border-line rounded-lg p-2">
@@ -202,23 +197,23 @@ export default function DisputesPage() {
                     {f.description && <div className="text-muted mt-1">{f.description}</div>}
                   </div>
                 ))}
-                {detail.evidence.risk_flags.length === 0 && <div className="text-xs text-muted">لا توجد</div>}
+                {detail.evidence.risk_flags.length === 0 && <div className="text-xs text-muted">{t('disputes.empty')}</div>}
               </div>
 
               {/* Evidence: cancellations */}
-              <h3 className="font-bold surface-text text-sm mb-2">سجل الإلغاءات ({detail.evidence.cancellations.length})</h3>
+              <h3 className="font-bold surface-text text-sm mb-2">{t('disputes.cancellations')} ({detail.evidence.cancellations.length})</h3>
               <div className="space-y-1 mb-2 max-h-40 overflow-auto">
                 {detail.evidence.cancellations.map((c) => (
                   <div key={c.id} className="text-xs border border-line rounded-lg p-2 flex justify-between">
-                    <span className="text-muted">{c.reason ?? 'بدون سبب'} · ركّاب: {c.passengers_count}</span>
+                    <span className="text-muted">{c.reason ?? t('disputes.noReason')} · {t('disputes.passengers')}: {c.passengers_count}</span>
                     <span className="text-muted">{c.created_at ? new Date(c.created_at).toLocaleDateString('ar') : ''}</span>
                   </div>
                 ))}
-                {detail.evidence.cancellations.length === 0 && <div className="text-xs text-muted">لا توجد</div>}
+                {detail.evidence.cancellations.length === 0 && <div className="text-xs text-muted">{t('disputes.empty')}</div>}
               </div>
 
               {detail.evidence.ghost_watches.length > 0 && (
-                <div className="text-xs text-danger">⚠ مراقبات رحلات وهمية: {detail.evidence.ghost_watches.length}</div>
+                <div className="text-xs text-danger">{t('disputes.ghostWatches')}: {detail.evidence.ghost_watches.length}</div>
               )}
             </div>
           )}
