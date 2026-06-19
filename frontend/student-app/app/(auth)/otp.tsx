@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { validators } from '@rafeeq/shared';
@@ -23,6 +23,13 @@ export default function Otp() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Dev (no SMS provider): the backend returns the real one-time code, which we
+  // auto-fill so the tester can just press Verify.
+  useEffect(() => {
+    if (params.debug && !code) setCode(String(params.debug));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.debug]);
 
   const onVerify = async () => {
     setFormError(null);
