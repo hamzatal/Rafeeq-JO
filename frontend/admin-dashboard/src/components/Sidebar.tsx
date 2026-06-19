@@ -22,6 +22,15 @@ const GROUPS: { title: string; links: NavLink[] }[] = [
     ],
   },
   {
+    title: 'النقل',
+    links: [
+      { href: '/routes', label: 'المسارات', icon: 'route' },
+      { href: '/plans', label: 'خطط الاشتراك', icon: 'card_membership' },
+      { href: '/subscriptions', label: 'الاشتراكات', icon: 'subscriptions' },
+      { href: '/trips', label: 'مراقبة الرحلات', icon: 'directions_car' },
+    ],
+  },
+  {
     title: 'الشبكة',
     links: [
       { href: '/drivers', label: 'الكباتن', icon: 'sports_motorsports' },

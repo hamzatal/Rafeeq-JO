@@ -21,7 +21,13 @@
 - ملف **`docs/DATABASE_SCHEMA.md`** (موصوف بالمجالات) + **`docs/DATABASE_SCHEMA.generated.md`** (مُولَّد آلياً) + أمر **`php artisan db:schema-doc`**.
 - تحسين تطبيعي: إزالة العمود المكرّر `student_profiles.reward_tier` (المصدر الوحيد الآن `reward_accounts.tier`، شكل الـ API بلا تغيير).
 
-**التالي — المهمة 6:** لوحة إدارة كاملة وشاملة + ذكية بـGPT.
+**التالي — المهمة 7:** نظام كوبونات وخصومات وحوافز شامل وذكي.
+
+**✅ تم (RFQ-209/210) — المهمة 6: لوحة إدارة كاملة + ذكية بـGPT:**
+- **رؤى ذكية (GPT)**: `AdminInsightsService` يجمع مؤشرات المنصة + تحليل وتوصيات بالعربية عبر GPT (fallback قاعدي بلا مفتاح) → `GET /admin/ai/insights` + صفحة `/insights` (تحليل + توصيات + 12 بطاقة مؤشر).
+- **إدارة النقل الكاملة**: صفحات `/routes` (CRUD) + `/plans` (CRUD) + `/subscriptions` (قائمة + تفعيل) + `/trips` (مراقبة) + endpoint `GET /admin/trips` جديد. مجموعة "النقل" في الـ Sidebar.
+- api-client: طرق admin للنقل (routes/plans/subscriptions/trips) + AssistantApi.insights + أنواع AdminInsights + ENDPOINTS.
+- التحقق: 91 اختبار باك أخضر + tsc أخضر لكل الفرونت + **E2E حقيقي** (دخول أدمن → insights + trips + routes + subscriptions كلها 200).
 
 **✅ تم (RFQ-208) — المهمة 5: تجهيز خرائط جوجل بالكامل:**
 - **الباك**: endpoint عام **`GET /api/v1/config`** (مفتاح الخرائط + المزود + المركز الافتراضي + flags) — مصدر واحد للمفتاح. **`MapsService`** (Geocoding + Distance Matrix بـ Google عند توفر المفتاح، fallback haversine دائم، لا يرمي أبداً).

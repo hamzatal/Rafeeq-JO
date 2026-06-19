@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Rafeeq\Modules\Trips\Controllers\AdminTripController;
 use Rafeeq\Modules\Trips\Controllers\DriverTripController;
 use Rafeeq\Modules\Trips\Controllers\StudentTripController;
 
@@ -27,4 +28,9 @@ Route::prefix('v1/trips')->middleware(['auth:sanctum', 'role:student'])->group(f
     Route::post('{trip}/book', [StudentTripController::class, 'book']);
     Route::get('{trip}/location', [StudentTripController::class, 'location']);
     Route::post('passengers/{passenger}/cancel', [StudentTripController::class, 'cancelBooking']);
+});
+
+// ── Admin: /api/v1/admin/trips (read-only monitor) ──────────────────
+Route::prefix('v1/admin/trips')->middleware(['auth:sanctum', 'role:admin,supervisor'])->group(function () {
+    Route::get('/', [AdminTripController::class, 'index']);
 });
