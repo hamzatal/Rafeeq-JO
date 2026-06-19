@@ -161,4 +161,13 @@ export class AdminApi {
   async deleteCoupon(id: string): Promise<void> {
     await this.http.delete(ENDPOINTS.admin.coupon(id));
   }
+
+  // ── Wallet: manual top-up (admin confirms a CliQ transfer) ───────
+  /**
+   * Credit a user's (student or captain) wallet manually.
+   * Backed by POST /admin/wallets/credit (permission: payments.approve).
+   */
+  async creditWallet(payload: { user_id: string; amount_fils: number; reference?: string }): Promise<void> {
+    await this.http.post(ENDPOINTS.admin.walletCredit, payload);
+  }
 }

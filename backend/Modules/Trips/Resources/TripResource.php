@@ -50,6 +50,10 @@ class TripResource extends JsonResource
                 'name' => $this->route->name,
                 'university_id' => $this->route->university_id,
             ]),
+            'university' => $this->whenLoaded('university', fn () => $this->university ? [
+                'id' => $this->university->id,
+                'name' => $this->university->name,
+            ] : null),
             'passengers' => TripPassengerResource::collection($this->whenLoaded('passengers')),
         ];
     }

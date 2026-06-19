@@ -6,17 +6,30 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Drivers\Models\Vehicle;
 use Rafeeq\Modules\Routes\Models\Route;
+use Rafeeq\Modules\Universities\Models\University;
+use Rafeeq\Modules\Zones\Models\Zone;
 use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Traits\HasUuid;
 
 /**
  * @property string $id
- * @property string $route_id
- * @property string $driver_id
+ * @property string|null $route_id
+ * @property string|null $driver_id
  * @property string|null $vehicle_id
+ * @property string|null $zone_id
+ * @property string|null $university_id
+ * @property string|null $type
+ * @property bool $is_express
+ * @property int|null $fare_fils
+ * @property int|null $base_fare_fils
+ * @property int|null $express_fee_fils
+ * @property float|null $surge_multiplier
  * @property TripStatus $status
  * @property \Illuminate\Support\Carbon $scheduled_at
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
  * @property int $capacity
  */
 class Trip extends Model
@@ -53,6 +66,24 @@ class Trip extends Model
     public function driver(): BelongsTo
     {
         return $this->belongsTo(DriverProfile::class, 'driver_id');
+    }
+
+    /** Vehicle assigned to a fixed-route trip (nullable for pooled trips). */
+    public function vehicle(): BelongsTo
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
+    }
+
+    /** Zone for pooled / door-to-door trips (nullable for fixed-route trips). */
+    public function zone(): BelongsTo
+    {
+        return $this->belongsTo(Zone::class, 'zone_id');
+    }
+
+    /** University for pooled / door-to-door trips (nullable for fixed-route trips). */
+    public function university(): BelongsTo
+    {
+        return $this->belongsTo(University::class, 'university_id');
     }
 
     public function passengers(): HasMany

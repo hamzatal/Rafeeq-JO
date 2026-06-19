@@ -22,8 +22,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-background dark:bg-dbg">
       <Sidebar />
-      {/* sidebar is fixed (w-64) on the right in RTL → offset main with mr-64 */}
-      <div className="mr-64 min-h-screen flex flex-col">
+      {/* sidebar is fixed (w-64) on the leading side; offset main with logical margin so it flips with dir */}
+      <div className="ms-64 min-h-screen flex flex-col">
         <Topbar />
         <main className="flex-1 p-6 lg:p-8">{children}</main>
       </div>
