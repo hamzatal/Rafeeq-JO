@@ -28,7 +28,7 @@
 |--------|----------------|------------------|
 | **OpenAI (GPT/Vision)** | `NullGptClient` بديل آمن | **P1** — وضع `OPENAI_API_KEY` (عندك) لتفعيل مساعد رفيق + تحقّق إيصالات CliQ بالرؤية |
 | **CliQ (الدفع)** | تدفّق المراجعة اليدوية جاهز | **P0** — حساب تاجر CliQ حقيقي + تجربة تحويل فعلية end-to-end + تأكيد الأرقام |
-| **OTP (واتساب/SMS)** | `LogSmsGateway` + بوّابة WhatsApp/OpenWA جاهزة بالكود | **P0** — تشغيل بوّابة فعلية (OpenWA على سيرفر + مسح QR) أو مزوّد SMS أردني |
+| **OTP (واتساب/SMS)** | `LogSmsGateway` + بوّابتان: **WhatsApp Cloud الرسمي (`whatsapp_cloud`)** + OpenWA | **P0** — ضبط `WHATSAPP_CLOUD_*` (توكن Meta + Phone ID + قالب authentication معتمد). دليل: `docs/WHATSAPP_OTP.md` |
 | **الإشعارات (FCM)** | `LogPushGateway` بديل | **P1** — مشروع Firebase + `google-services` + مفاتيح FCM |
 | **البثّ اللحظي (Reverb)** | حالياً polling (يعمل) | **P2** — تشغيل Reverb للتتبّع اللحظي الحقيقي بدل الـ polling |
 

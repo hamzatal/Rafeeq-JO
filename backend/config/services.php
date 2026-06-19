@@ -44,6 +44,19 @@ return [
         'timeout' => (int) env('WHATSAPP_TIMEOUT', 15),
     ],
 
+    // Official WhatsApp Business Cloud API (Meta) — production OTP channel.
+    // Set SMS_DRIVER=whatsapp_cloud. See docs/WHATSAPP_OTP.md for setup.
+    'whatsapp_cloud' => [
+        'api_version' => env('WHATSAPP_CLOUD_API_VERSION', 'v21.0'),
+        'phone_number_id' => env('WHATSAPP_CLOUD_PHONE_NUMBER_ID'),
+        'access_token' => env('WHATSAPP_CLOUD_ACCESS_TOKEN'),
+        'mode' => env('WHATSAPP_CLOUD_MODE', 'template'), // template | text
+        'template_name' => env('WHATSAPP_CLOUD_TEMPLATE', 'rafeeq_otp'),
+        'template_lang' => env('WHATSAPP_CLOUD_TEMPLATE_LANG', 'ar'),
+        'template_button' => (bool) env('WHATSAPP_CLOUD_TEMPLATE_BUTTON', true),
+        'timeout' => (int) env('WHATSAPP_CLOUD_TIMEOUT', 15),
+    ],
+
     'maps' => [
         'provider' => env('MAPS_PROVIDER', 'google'),
         'google_key' => env('GOOGLE_MAPS_KEY'),
