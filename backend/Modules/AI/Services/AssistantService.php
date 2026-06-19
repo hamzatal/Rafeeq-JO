@@ -53,7 +53,7 @@ class AssistantService extends BaseService
 
         $conversation->messages()->create(['role' => 'user', 'content' => $message]);
 
-        $reply = $this->generate($conversation, $message);
+        $reply = $this->generate($user, $conversation, $message);
         $tokens = $reply['tokens'] ?? 0;
 
         $assistantMessage = $conversation->messages()->create([
@@ -72,13 +72,21 @@ class AssistantService extends BaseService
     }
 
     /** @return array{content:string, ai:bool, tokens:int} */
-    private function generate(AiConversation $conversation, string $latest): array
+    private function generate(User $user, AiConversation $conversation, string $latest): array
     {
         if (! $this->gpt->isEnabled()) {
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
         }
 
         $messages = [['role' => 'system', 'content' => self::SYSTEM_PROMPT]];
+
+        // Inject a live snapshot of the student's account so answers are accurate
+        // (balance, subscription, next trip, points). Never throws.
+        $snapshot = $this->accountSnapshot($user);
+        if ($snapshot !== '') {
+            $messages[] = ['role' => 'system', 'content' => $snapshot];
+        }
+
         foreach ($conversation->messages()->latest()->take(self::HISTORY_LIMIT)->get()->reverse() as $m) {
             /** @var AiMessage $m */
             $messages[] = ['role' => $m->role, 'content' => $m->content];
@@ -94,6 +102,60 @@ class AssistantService extends BaseService
         } catch (\Throwable) {
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
         }
+    }
+
+    /**
+     * Build a compact, live snapshot of the user's Rafeeq account for the model.
+     * Read-only + fully guarded (returns '' on any failure) so it can never
+     * break the assistant.
+     */
+    private function accountSnapshot(User $user): string
+    {
+        return \Rafeeq\Core\Support\Safely::value(function () use ($user) {
+            $lines = [];
+
+            $balance = \Illuminate\Support\Facades\DB::table('wallets')
+                ->where('user_id', $user->id)->value('balance_fils');
+            if ($balance !== null) {
+                $lines[] = 'رصيد المحفظة: '.number_format($balance / 1000, 2).' د.أ';
+            }
+
+            $points = \Illuminate\Support\Facades\DB::table('reward_accounts')
+                ->where('user_id', $user->id)->value('points');
+            if ($points !== null) {
+                $lines[] = "نقاط المكافآت: {$points}";
+            }
+
+            $sub = \Illuminate\Support\Facades\DB::table('subscriptions')
+                ->join('subscription_plans', 'subscription_plans.id', '=', 'subscriptions.plan_id')
+                ->where('subscriptions.student_id', $user->id)
+                ->where('subscriptions.status', 'active')
+                ->select('subscription_plans.name', 'subscriptions.remaining_rides', 'subscriptions.ends_at')
+                ->first();
+            if ($sub) {
+                $rides = $sub->remaining_rides === null ? 'غير محدود' : $sub->remaining_rides;
+                $lines[] = "اشتراك فعّال: {$sub->name} (رحلات متبقية: {$rides})";
+            } else {
+                $lines[] = 'لا يوجد اشتراك فعّال حالياً.';
+            }
+
+            $nextTrip = \Illuminate\Support\Facades\DB::table('trip_passengers')
+                ->join('trips', 'trips.id', '=', 'trip_passengers.trip_id')
+                ->where('trip_passengers.student_id', $user->id)
+                ->whereIn('trips.status', ['scheduled', 'pending', 'started'])
+                ->where('trips.scheduled_at', '>=', now())
+                ->orderBy('trips.scheduled_at')
+                ->value('trips.scheduled_at');
+            if ($nextTrip) {
+                $lines[] = 'الرحلة القادمة: '.\Illuminate\Support\Carbon::parse($nextTrip)->format('Y-m-d H:i');
+            }
+
+            if (empty($lines)) {
+                return '';
+            }
+
+            return "بيانات حساب الطالب الحالية (استخدمها للإجابة بدقة، ولا تخترع غيرها):\n- ".implode("\n- ", $lines);
+        }, default: '', context: 'assistant.snapshot');
     }
 
     /** Helpful response when AI is not configured/available. */
