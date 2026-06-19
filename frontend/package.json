@@ -6,14 +6,12 @@
   "workspaces": [
     "student-app",
     "driver-app",
-    "guardian-app",
     "admin-dashboard",
     "packages/*"
   ],
   "scripts": {
     "student": "npm run start --workspace=student-app",
     "driver": "npm run start --workspace=driver-app",
-    "guardian": "npm run start --workspace=guardian-app",
     "admin": "npm run dev --workspace=admin-dashboard",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\""

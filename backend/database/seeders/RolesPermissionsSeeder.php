@@ -12,7 +12,6 @@ class RolesPermissionsSeeder extends Seeder
     private array $roles = [
         'student' => ['طالب', 'Student'],
         'driver' => ['كابتن', 'Driver'],
-        'guardian' => ['ولي أمر', 'Guardian'],
         'support' => ['دعم فني', 'Support'],
         'supervisor' => ['مشرف دعم', 'Supervisor'],
         'admin' => ['إدارة', 'Admin'],

@@ -1,5 +1,5 @@
 export type ColorScheme = 'light' | 'dark';
-export type ThemeRole = 'student' | 'driver' | 'admin' | 'guardian';
+export type ThemeRole = 'student' | 'driver' | 'admin';
 
 export interface ThemeColors {
   primary: string;
@@ -31,12 +31,10 @@ const status = {
 // Role accent (brand) per app.
 // student = Stitch "Rafeeq" → Deep Navy (#0B192C) + Heritage Gold (#FFBF00).
 // driver = captain HUD (navy + cyan). admin = enterprise (navy + cyan).
-// guardian = protective navy + gold.
 const roleAccent: Record<ThemeRole, { primary: string; primaryDark: string; accent: string; onPrimary: string }> = {
   student: { primary: '#0B192C', primaryDark: '#06101D', accent: '#FFBF00', onPrimary: '#FFFFFF' },
   driver: { primary: '#00E5FF', primaryDark: '#00B8CC', accent: '#00E5FF', onPrimary: '#06121F' },
   admin: { primary: '#0B192C', primaryDark: '#001F3F', accent: '#00E5FF', onPrimary: '#FFFFFF' },
-  guardian: { primary: '#0E2A47', primaryDark: '#08203A', accent: '#E6B23E', onPrimary: '#FFFFFF' },
 };
 
 /** hex (#RRGGBB) → rgba string at the given alpha. */
@@ -92,13 +90,9 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
     ? hexToRgba(accent.accent, scheme === 'dark' ? 0.18 : 0.12)
     : isDriverHud
       ? hexToRgba(accent.accent, 0.18)
-      : role === 'guardian'
-        ? scheme === 'dark'
-          ? 'rgba(14,42,71,0.28)'
-          : 'rgba(14,42,71,0.10)'
-        : scheme === 'dark'
-          ? 'rgba(0,229,255,0.18)'
-          : 'rgba(0,184,204,0.12)';
+      : scheme === 'dark'
+        ? 'rgba(0,229,255,0.18)'
+        : 'rgba(0,184,204,0.12)';
 
   return {
     primary,

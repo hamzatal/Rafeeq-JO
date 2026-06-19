@@ -29,18 +29,9 @@ export const ENDPOINTS = {
   },
   student: {
     profile: '/student/profile',
-    guardians: '/student/guardians',
-    guardian: (linkId: string) => `/student/guardians/${linkId}`,
     addresses: '/student/addresses',
     address: (id: string) => `/student/addresses/${id}`,
     addressDefault: (id: string) => `/student/addresses/${id}/default`,
-  },
-  guardian: {
-    children: '/guardian/children',
-    live: (studentUserId: string) => `/guardian/students/${studentUserId}/live`,
-    arrivals: (studentUserId: string) => `/guardian/students/${studentUserId}/arrivals`,
-    contactCaptain: (studentUserId: string) => `/guardian/students/${studentUserId}/contact-captain`,
-    sos: (studentUserId: string) => `/guardian/students/${studentUserId}/sos`,
   },
   chat: {
     conversations: '/chat/conversations',
