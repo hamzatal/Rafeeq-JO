@@ -68,6 +68,36 @@ services:
     ports:
       - "8080:8080"
 
+  # Processes queued work: bulk notifications, AI receipt verification, push
+  # fan-out, etc. Without this, anything dispatched to the queue never runs.
+  queue:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ../backend/.env.production
+    command: ["php", "artisan", "queue:work", "redis", "--queue=default", "--tries=3", "--timeout=600", "--sleep=3", "--max-jobs=1000", "--max-time=3600"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan queue:monitor default --max=10000 || exit 0"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # Runs Laravel's scheduler (OTP pruning + hourly fraud sweep). One instance only.
+  scheduler:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: ../backend/.env.production
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
 volumes:
   pgdata:
   redisdata:

@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-258 |
+| آخر Commit | RFQ-259 |
 | نسبة الإنجاز | ~99% (كود) · **Laravel 12 (أمان) + مساعد بـ function-calling + فواتير PDF + ترجمة backend واعية بالـ locale + حوكمة AI + مكافحة احتيال CliQ** · 135 اختبار |
 | المرحلة الحالية | **منصّة مكتملة المزايا، 30 وحدة backend · 71 اختبار · ~194 مسار. ✅ تشغيل فعلي مُتحقَّق على PostgreSQL 16 (migrate+seed+E2E). المتبقّي: التكاملات الخارجية + تلميع + إطلاق** |
 
@@ -14,6 +14,11 @@
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
 > **العمل الحالي:** خطة إصلاح شامل وتجهيز للإطلاق (11 مهمة) — **اكتملت كلها ✅** + تحسينات تصميم (RFQ-216). راجع `docs/LAUNCH_CHECKLIST.md` للمتبقّي التشغيلي.
+
+**✅ RFQ-259 — خدمتا queue worker + scheduler في compose الإنتاجي (P0 تشغيلي):**
+- أضفنا خدمة `queue` (`php artisan queue:work redis --tries=3 --timeout=600 --max-jobs=1000 --max-time=3600`) — بدونها لا يُنفّذ أي job مجدول (إشعارات جماعية، تحقّق إيصالات AI، fan-out للـ push).
+- أضفنا خدمة `scheduler` (`php artisan schedule:work`) — تشغّل `rafeeq:prune-otps` (ساعةً) و`rafeeq:fraud-sweep` (ساعةً).
+- كلاهما يعيد استخدام صورة `api` ويعتمد على postgres+redis. حدّثنا `docs/LAUNCH_CHECKLIST.md` (وصحّحنا سطر OTP لإزالة ذكر OpenWA).
 
 **✅ RFQ-258 — الإشعارات الجماعية عبر Queue job (سدّ الفجوة P1 #2):**
 - `BroadcastNotificationJob` (ShouldQueue, timeout=600, tries=3): يستقبل معايير الفئة (audience/user_ids/title/body/payload) ويعيد بناء الاستعلام ويوزّع على دفعات (chunkById 200). كل تسليم best-effort داخل `NotificationService` (لا يرمي استثناء).
