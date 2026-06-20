@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AppNotification, NotificationPreference } from '@rafeeq/shared';
+import { RafeeqApiError } from '@rafeeq/api-client';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
+import { useCoupon } from '../../src/store/coupon';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { Card, EmptyState, SectionTitle } from '../../src/components/ui';
 import { Icon, type IconName } from '../../src/components/Icon';
@@ -24,6 +26,20 @@ export default function Notifications() {
   const [items, setItems] = useState<AppNotification[]>([]);
   const [prefs, setPrefs] = useState<NotificationPreference | null>(null);
   const [showPrefs, setShowPrefs] = useState(false);
+  const [couponMsg, setCouponMsg] = useState<Record<string, { text: string; ok: boolean }>>({});
+  const activateCoupon = useCoupon((c) => c.activate);
+
+  const onActivateCoupon = async (id: string, code: string) => {
+    try {
+      // Validate against a nominal ride fare to confirm validity/expiry.
+      const res = await api.coupons.validate({ code, scope: 'ride', amount_fils: 1500 });
+      await activateCoupon(res.code);
+      setCouponMsg((m) => ({ ...m, [id]: { text: t('payments.couponActivated'), ok: true } }));
+    } catch (e) {
+      const text = e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error');
+      setCouponMsg((m) => ({ ...m, [id]: { text, ok: false } }));
+    }
+  };
 
   const load = async () => {
     try {
@@ -102,6 +118,22 @@ export default function Notifications() {
                 <Text style={s.title} numberOfLines={1}>{n.title}</Text>
                 <Text style={s.body} numberOfLines={2}>{n.body}</Text>
                 {n.created_at && <Text style={s.meta}>{new Date(n.created_at).toLocaleString(locale)}</Text>}
+                {typeof n.data?.coupon_code === 'string' && (
+                  <View style={s.couponBox}>
+                    <View style={s.couponRow}>
+                      <Text style={s.couponCode}>{String(n.data.coupon_code)}</Text>
+                      <Pressable onPress={() => onActivateCoupon(n.id, String(n.data!.coupon_code))} style={s.couponBtn}>
+                        <Icon name="gift" size={14} color="#FFFFFF" />
+                        <Text style={s.couponBtnText}>{t('payments.couponActivate')}</Text>
+                      </Pressable>
+                    </View>
+                    {couponMsg[n.id] && (
+                      <Text style={[s.couponMsg, { color: couponMsg[n.id].ok ? theme.colors.success : theme.colors.danger }]}>
+                        {couponMsg[n.id].text}
+                      </Text>
+                    )}
+                  </View>
+                )}
               </View>
               {!n.read && <View style={s.dot} />}
             </Pressable>
@@ -140,5 +172,11 @@ const makeStyles = (t: AppTheme) =>
     title: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     body: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 4 },
+    couponBox: { marginTop: 8, padding: 8, borderRadius: t.radius.md, backgroundColor: t.colors.background, borderWidth: 1, borderColor: t.colors.border, borderStyle: 'dashed' },
+    couponRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+    couponCode: { fontFamily: t.fontFamily.extrabold, fontSize: 15, color: t.colors.primary, letterSpacing: 1 },
+    couponBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingHorizontal: 12, paddingVertical: 7 },
+    couponBtnText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: '#FFFFFF' },
+    couponMsg: { fontFamily: t.fontFamily.medium, fontSize: 12, textAlign: 'right', marginTop: 6 },
     dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.primary, marginRight: 6, marginTop: 6 },
   });

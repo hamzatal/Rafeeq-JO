@@ -11,6 +11,7 @@ import { Icon } from '../../src/components/Icon';
 import { LiveMap } from '../../src/components/LiveMap';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
+import { useCoupon } from '../../src/store/coupon';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function RideRequestScreen() {
@@ -28,6 +29,39 @@ export default function RideRequestScreen() {
   const [mine, setMine] = useState<RideRequest[]>([]);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+
+  const couponCodeStore = useCoupon((c) => c.code);
+  const hydrateCoupon = useCoupon((c) => c.hydrate);
+  const activateCoupon = useCoupon((c) => c.activate);
+  const [coupon, setCoupon] = useState('');
+  const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null);
+
+  useEffect(() => {
+    void hydrateCoupon();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (couponCodeStore && !coupon) setCoupon(couponCodeStore);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [couponCodeStore]);
+
+  const applyCoupon = async () => {
+    const code = coupon.trim();
+    if (!code) return;
+    setCouponMsg(null);
+    try {
+      const amount = quote?.fare_fils ?? 1500;
+      const res = await api.coupons.validate({ code, scope: 'ride', amount_fils: amount });
+      await activateCoupon(res.code);
+      setCouponMsg({
+        text: `${t('payments.couponApplied')} — ${t('payments.couponDiscount')} ${(res.discount_fils / 1000).toFixed(3)} ${t('subscriptions.currency')}`,
+        ok: true,
+      });
+    } catch (e) {
+      setCouponMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'), ok: false });
+    }
+  };
 
   const load = async () => {
     try {
@@ -172,6 +206,21 @@ export default function RideRequestScreen() {
           </Card>
         )}
 
+        <Card style={{ marginTop: theme.spacing.base }}>
+          <SectionTitle title={t('payments.couponLabel')} />
+          <View style={s.couponRow}>
+            <View style={s.couponInput}>
+              <Input label="" value={coupon} onChangeText={setCoupon} placeholder={t('payments.couponPlaceholder')} autoCapitalize="characters" />
+            </View>
+            <Pressable onPress={applyCoupon} style={s.couponApply}>
+              <Text style={s.locText}>{t('payments.couponApply')}</Text>
+            </Pressable>
+          </View>
+          {couponMsg && (
+            <Text style={[s.couponMsg, { color: couponMsg.ok ? theme.colors.success : theme.colors.danger }]}>{couponMsg.text}</Text>
+          )}
+        </Card>
+
         <Button title={t('rideRequest.submit')} onPress={submit} loading={busy} style={s.submit} />
 
         <SectionTitle title={t('rideRequest.myRequests')} />
@@ -213,6 +262,10 @@ const makeStyles = (t: AppTheme) =>
     quoteText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     quoteVal: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.primary },
     submit: { marginTop: t.spacing.base },
+    couponRow: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: t.spacing.sm },
+    couponInput: { flex: 1 },
+    couponApply: { borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 12, paddingHorizontal: 18, alignItems: 'center', marginBottom: 2 },
+    couponMsg: { fontFamily: t.fontFamily.medium, fontSize: 13, textAlign: 'right', marginTop: t.spacing.sm },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
     cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
