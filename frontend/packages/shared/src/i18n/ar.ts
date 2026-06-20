@@ -352,6 +352,7 @@ export const ar = {
     time: 'الوقت المطلوب',
     typeScheduled: 'مجدولة',
     typeExpress: 'مستعجلة (Express)',
+    type: 'نوع الرحلة',
     estimate: 'تقدير الأجرة',
     estimatedFare: 'الأجرة التقديرية',
     surge: 'مضاعف الذروة',

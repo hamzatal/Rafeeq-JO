@@ -354,6 +354,7 @@ export const en: Translations = {
     time: 'Desired time',
     typeScheduled: 'Scheduled',
     typeExpress: 'Express',
+    type: 'Ride type',
     estimate: 'Estimate fare',
     estimatedFare: 'Estimated fare',
     surge: 'Surge multiplier',
