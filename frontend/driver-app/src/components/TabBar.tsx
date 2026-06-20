@@ -29,7 +29,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
         return (
           <Pressable key={route.key} onPress={onPress} style={s.item} hitSlop={4}>
-            <View style={[s.indicator, focused && { backgroundColor: t.colors.primary }]} />
+            <View style={[s.indicator, focused && { backgroundColor: t.colors.accent }]} />
             {options.tabBarIcon?.({ focused, color, size: 23 })}
             <Text style={[s.label, { color }, focused && s.labelOn]} numberOfLines={1}>{label}</Text>
           </Pressable>

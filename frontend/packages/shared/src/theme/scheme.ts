@@ -9,6 +9,8 @@ export interface ThemeColors {
   /** Tinted accent background (chips, soft highlights). */
   accentSoft: string;
   onPrimary: string;
+  /** Text/icon color that sits on the (lime) accent — always near-black. */
+  onAccent: string;
   background: string;
   surface: string;
   card: string;
@@ -44,20 +46,15 @@ const status = {
   info: '#0EA5E9',
 };
 
-// Role accent (brand) per app — Design System v4 (radical refresh).
-// A single modern INDIGO brand primary is shared across the whole platform for
-// a cohesive identity, with a per-role ACCENT for subtle differentiation.
-// The primary stays the brand colour in BOTH light and dark (the true-dark
-// canvas keeps indigo perfectly readable); a slightly brighter indigo is used
-// in dark mode for contrast.
-//   student → indigo + amber · driver → indigo + emerald · admin → indigo + cyan
-const roleAccent: Record<
-  ThemeRole,
-  { primary: string; primaryDark: string; primaryBright: string; accent: string }
-> = {
-  student: { primary: '#4F46E5', primaryDark: '#4338CA', primaryBright: '#6366F1', accent: '#FBBF24' },
-  driver: { primary: '#4F46E5', primaryDark: '#4338CA', primaryBright: '#6366F1', accent: '#34D399' },
-  admin: { primary: '#4F46E5', primaryDark: '#4338CA', primaryBright: '#6366F1', accent: '#22D3EE' },
+// Brand — Design System v5 (inDrive-inspired, not a copy).
+// Identity = clean neutral canvas + near-black ink for text/icons/dark panels,
+// with a single vivid LIME accent reserved for the primary action (lime button
+// with black text) and key highlights. Same simple, confident idea as inDrive.
+const ACCENT = '#C1F11D'; // signature lime
+const roleAccent: Record<ThemeRole, { accent: string }> = {
+  student: { accent: ACCENT },
+  driver: { accent: ACCENT },
+  admin: { accent: ACCENT },
 };
 
 /** hex (#RRGGBB) → rgba string at the given alpha. */
@@ -101,23 +98,25 @@ const neutralsDark = {
 
 /** Build a full semantic palette for a role + scheme. */
 export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
-  const accent = roleAccent[role];
+  const accent = roleAccent[role].accent;
   const isDark = scheme === 'dark';
   const neutrals = isDark ? neutralsDark : neutralsLight;
 
-  // The indigo brand primary is the primary action in BOTH modes (a brighter
-  // indigo in dark for contrast). White text always sits on it.
-  const primary = isDark ? accent.primaryBright : accent.primary;
-  const primarySoft = hexToRgba(accent.primary, isDark ? 0.24 : 0.1);
+  // inDrive-style: "primary" is a near-black ink in light (white in dark) — used
+  // for text, icons, active states and dark panels. The LIME accent is the
+  // primary ACTION color (buttons), always with near-black text on it.
+  const primary = isDark ? '#F4F4F6' : '#15171C';
+  const onPrimary = isDark ? '#0A0A0C' : '#FFFFFF';
   const softAlpha = isDark ? 0.2 : 0.12;
 
   return {
     primary,
-    primaryDark: accent.primaryDark,
-    primarySoft,
-    accent: accent.accent,
-    accentSoft: hexToRgba(accent.accent, isDark ? 0.22 : 0.14),
-    onPrimary: '#FFFFFF',
+    primaryDark: isDark ? '#FFFFFF' : '#000000',
+    primarySoft: hexToRgba(accent, isDark ? 0.24 : 0.16),
+    accent,
+    accentSoft: hexToRgba(accent, isDark ? 0.24 : 0.18),
+    onPrimary,
+    onAccent: '#0A0A0C',
     textInverse: '#FFFFFF',
     ...neutrals,
     ...status,

@@ -42,7 +42,9 @@ export function Button({
       ? theme.colors.primary
       : variant === 'ghost'
         ? theme.colors.text
-        : theme.colors.onPrimary;
+        : variant === 'danger'
+          ? theme.colors.textInverse
+          : theme.colors.onAccent;
 
   return (
     <Pressable
@@ -74,7 +76,7 @@ const makeStyles = (t: AppTheme) =>
     base: { height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.lg },
     md: { height: 46, borderRadius: t.radius.md },
     row: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
-    primary: { backgroundColor: t.colors.primary },
+    primary: { backgroundColor: t.colors.accent },
     danger: { backgroundColor: t.colors.danger },
     outline: { borderWidth: 1.5, borderColor: t.colors.primary, backgroundColor: 'transparent' },
     ghost: { backgroundColor: t.colors.hairline },
