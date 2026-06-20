@@ -44,17 +44,20 @@ const status = {
   info: '#0EA5E9',
 };
 
-// Role accent (brand) per app. All three personas share a navy + bright-accent
-// system: a deep navy is the primary action in LIGHT mode, and the bright
-// accent (gold / cyan) becomes the primary action in DARK mode so it stays
-// visible on the navy canvas.
-// student = Deep Navy (#0B192C) + Heritage Gold (#FFBF00).
-// driver  = Deep Navy (#0B2C42) + Cyan (#00E5FF).
-// admin   = Deep Navy (#0B192C) + Cyan (#00E5FF).
-const roleAccent: Record<ThemeRole, { primary: string; primaryDark: string; accent: string; onPrimary: string }> = {
-  student: { primary: '#0B192C', primaryDark: '#06101D', accent: '#FFBF00', onPrimary: '#FFFFFF' },
-  driver: { primary: '#0B2C42', primaryDark: '#06121F', accent: '#00E5FF', onPrimary: '#FFFFFF' },
-  admin: { primary: '#0B192C', primaryDark: '#001F3F', accent: '#00E5FF', onPrimary: '#FFFFFF' },
+// Role accent (brand) per app — Design System v4 (radical refresh).
+// A single modern INDIGO brand primary is shared across the whole platform for
+// a cohesive identity, with a per-role ACCENT for subtle differentiation.
+// The primary stays the brand colour in BOTH light and dark (the true-dark
+// canvas keeps indigo perfectly readable); a slightly brighter indigo is used
+// in dark mode for contrast.
+//   student → indigo + amber · driver → indigo + emerald · admin → indigo + cyan
+const roleAccent: Record<
+  ThemeRole,
+  { primary: string; primaryDark: string; primaryBright: string; accent: string }
+> = {
+  student: { primary: '#4F46E5', primaryDark: '#4338CA', primaryBright: '#6366F1', accent: '#FBBF24' },
+  driver: { primary: '#4F46E5', primaryDark: '#4338CA', primaryBright: '#6366F1', accent: '#34D399' },
+  admin: { primary: '#4F46E5', primaryDark: '#4338CA', primaryBright: '#6366F1', accent: '#22D3EE' },
 };
 
 /** hex (#RRGGBB) → rgba string at the given alpha. */
@@ -67,52 +70,45 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 const neutralsLight = {
-  background: '#F4F7FB',
+  background: '#F6F7F9',
   surface: '#FFFFFF',
   card: '#FFFFFF',
   elevated: '#FFFFFF',
-  text: '#0F172A',
-  textSecondary: '#475569',
-  muted: '#94A3B8',
-  border: '#E2E8F0',
-  hairline: '#EEF2F7',
-  overlay: 'rgba(11,25,44,0.45)',
-  scrim: 'rgba(11,25,44,0.55)',
+  text: '#15171C',
+  textSecondary: '#5A616E',
+  muted: '#9AA0AC',
+  border: '#ECEEF2',
+  hairline: '#F2F4F7',
+  overlay: 'rgba(15,18,28,0.45)',
+  scrim: 'rgba(15,18,28,0.55)',
 };
 
+// TRUE dark mode — a near-black, neutral charcoal canvas (NOT navy blue), with
+// layered elevation. This is the modern "real dark" the product needs.
 const neutralsDark = {
-  background: '#06121F',
-  surface: '#0E2747',
-  card: '#13314F',
-  elevated: '#173A5C',
-  text: '#E6EEF7',
-  textSecondary: '#90A4BC',
-  muted: '#5A6B7B',
-  border: '#1E3A5F',
-  hairline: '#16314E',
-  overlay: 'rgba(0,0,0,0.6)',
-  scrim: 'rgba(0,0,0,0.7)',
+  background: '#0A0A0C',
+  surface: '#141417',
+  card: '#1B1B20',
+  elevated: '#232329',
+  text: '#F4F4F6',
+  textSecondary: '#A1A1AC',
+  muted: '#6E6E78',
+  border: '#2A2A31',
+  hairline: '#202026',
+  overlay: 'rgba(0,0,0,0.55)',
+  scrim: 'rgba(0,0,0,0.72)',
 };
 
 /** Build a full semantic palette for a role + scheme. */
 export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   const accent = roleAccent[role];
-
-  // Light/dark is now honoured for ALL apps (including the captain app, which
-  // previously forced a dark HUD and ignored the user's preference).
-  const neutrals = scheme === 'dark' ? neutralsDark : neutralsLight;
   const isDark = scheme === 'dark';
+  const neutrals = isDark ? neutralsDark : neutralsLight;
 
-  // In dark mode the navy primary would vanish on the navy canvas, so the
-  // role's bright accent (gold for student, cyan for driver/admin) becomes the
-  // primary action instead.
-  let primary = accent.primary;
-  let onPrimary = accent.onPrimary;
-  if (isDark) {
-    primary = accent.accent;
-    onPrimary = '#06121F';
-  }
-  const primarySoft = hexToRgba(accent.accent, isDark ? 0.18 : 0.12);
+  // The indigo brand primary is the primary action in BOTH modes (a brighter
+  // indigo in dark for contrast). White text always sits on it.
+  const primary = isDark ? accent.primaryBright : accent.primary;
+  const primarySoft = hexToRgba(accent.primary, isDark ? 0.24 : 0.1);
   const softAlpha = isDark ? 0.2 : 0.12;
 
   return {
@@ -121,7 +117,7 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
     primarySoft,
     accent: accent.accent,
     accentSoft: hexToRgba(accent.accent, isDark ? 0.22 : 0.14),
-    onPrimary,
+    onPrimary: '#FFFFFF',
     textInverse: '#FFFFFF',
     ...neutrals,
     ...status,
