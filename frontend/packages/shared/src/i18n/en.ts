@@ -32,6 +32,12 @@ export const en: Translations = {
     d2Body: 'Track today’s earnings, your tier, and cash out easily.',
     d3Title: 'Verify your vehicle & go',
     d3Body: 'Complete your documents and vehicle once, then start earning.',
+    setupTitle: 'Complete your profile',
+    setupBody: 'Pick your university so we can show the right routes & passes.',
+    chooseUniversity: 'Your university',
+    studentNumberOptional: 'Student number (optional)',
+    noUniversities: 'No universities available right now',
+    finish: 'Done, let’s go',
   },
   permissions: {
     title: 'Two quick permissions',

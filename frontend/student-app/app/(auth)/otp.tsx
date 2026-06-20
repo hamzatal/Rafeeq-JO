@@ -37,8 +37,11 @@ export default function Otp() {
     if (err) return setFormError(err);
     setLoading(true);
     try {
-      await verifyOtp({ phone: params.phone, code: code.trim(), purpose: (params.purpose as 'register' | 'login') ?? 'register' });
-      router.replace('/(app)/home');
+      const purpose = (params.purpose as 'register' | 'login') ?? 'register';
+      await verifyOtp({ phone: params.phone, code: code.trim(), purpose });
+      // New accounts continue to a short profile setup (pick university);
+      // returning users go straight home.
+      router.replace(purpose === 'register' ? '/(onboarding)/profile-setup' : '/(app)/home');
     } catch (e) {
       setFormError(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
     } finally {

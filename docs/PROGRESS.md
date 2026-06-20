@@ -15,7 +15,12 @@
 ## الخطوة التالية (ابدأ من هنا) ▶️
 > **العمل الحالي:** **ري-ديزاين جذري شامل + إصلاح مشاكل تدفّق** (انظر القائمة). منجز: إصلاح تدفّق الدخول (OTP). التالي: نظام تصميم v4 (دارك حقيقي + هوية جديدة).
 
-**✅ RFQ-274 — دفع الاشتراك من رصيد المحفظة (تفعيل فوري):**
+**✅ RFQ-275 — اختيار الجامعة ضمن الـ onboarding:**
+- **`StudentApi` جديد بالـ api-client** (`getProfile`/`updateProfile`) موصول بـ `PATCH /v1/student/profile`، ومُسجّل في `RafeeqApi` (`api.student`).
+- **شاشة `(onboarding)/profile-setup.tsx`**: تحمّل الجامعات (`catalog.listUniversities`) كـ Chips + رقم جامعي اختياري → حفظ → الرئيسية (مع Skeleton للتحميل و«تخطّي»).
+- **التوجيه:** بعد تسجيل ناجح (purpose=register) → إعداد الملف؛ الدخول → الرئيسية مباشرة. i18n `onboarding.setup*`.
+
+
 - **الباك إند:** `POST /v1/subscriptions/{id}/pay-wallet` → خصم ذرّي من الرصيد (يرفض INSUFFICIENT_BALANCE) + تفعيل فوري للاشتراك. نوع محفظة جديد `subscription_payment` + هجرة محميّة لـ Postgres (no-op على sqlite).
 - **الواجهة (checkout):** شاشة «اختر طريقة الدفع» — **ادفع من المحفظة** (يعرض الرصيد، تفعيل فوري) أو **حوّل عبر CliQ** (رفع إيصال → بانتظار التأكيد). حالة نجاح خضراء «تم التفعيل 🎉».
 - **api-client:** `transport.paySubscriptionFromWallet(id)` + endpoint. + i18n `checkout.*`.
