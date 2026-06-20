@@ -21,22 +21,29 @@ export default function Register() {
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<{ fullName?: string; phone?: string }>({});
+  const [errors, setErrors] = useState<{ fullName?: string; phone?: string; password?: string }>({});
 
   const onSubmit = async () => {
     setFormError(null);
     const { valid, errors: e } = validateForm({
       fullName: () => validators.fullName(fullName),
       phone: () => validators.phone(phone),
+      password: () => (password.length < 8 ? t('auth.passwordMin') : null),
     });
     setErrors(e);
     if (!valid) return;
+    if (password !== confirm) {
+      setFormError(t('auth.passwordMismatch'));
+      return;
+    }
     const normalized = normalizeJordanPhone(phone)!;
     setLoading(true);
     try {
-      const otpDebug = await register({ full_name: fullName.trim(), phone: normalized });
+      const otpDebug = await register({ full_name: fullName.trim(), phone: normalized, password });
       router.push({ pathname: '/(auth)/otp', params: { phone: normalized, purpose: 'register', debug: otpDebug ?? '' } });
     } catch (err) {
       // The phone already belongs to a Rafeeq account (e.g. a student). Instead
@@ -64,6 +71,8 @@ export default function Register() {
       <Banner message={formError} />
       <Input label={t('auth.fullName')} value={fullName} onChangeText={setFullName} error={errors.fullName} autoCapitalize="words" />
       <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+      <Input label={t('auth.password')} value={password} onChangeText={setPassword} error={errors.password} secureTextEntry />
+      <Input label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
       <Button title={t('auth.sendCode')} onPress={onSubmit} loading={loading} />
     </Screen>
   );

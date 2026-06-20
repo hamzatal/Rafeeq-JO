@@ -63,6 +63,20 @@ export class AuthApi {
     return unwrap(data);
   }
 
+  /** Send a password-reset code (OTP) to the phone. */
+  async forgotPassword(phone: string): Promise<{ otp_debug?: string | null }> {
+    const { data } = await this.http.post<ApiSuccess<{ otp_debug?: string | null }>>(
+      ENDPOINTS.auth.forgotPassword,
+      { phone },
+    );
+    return unwrap(data) ?? {};
+  }
+
+  /** Reset the password using the phone + reset code. */
+  async resetPassword(payload: { phone: string; code: string; password: string; password_confirmation: string }): Promise<void> {
+    await this.http.post(ENDPOINTS.auth.resetPassword, payload);
+  }
+
   async me(): Promise<User> {
     const { data } = await this.http.get<ApiSuccess<User>>(ENDPOINTS.auth.me);
     return unwrap(data);
