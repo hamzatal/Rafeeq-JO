@@ -202,7 +202,7 @@ const makeStyles = (t: AppTheme) =>
     // Map-first hero
     mapHero: { marginBottom: t.spacing.lg },
     mapWrap: { borderRadius: t.radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.border },
-    whereToCard: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.elevated, borderRadius: t.radius.xl, padding: t.spacing.base, marginHorizontal: t.spacing.md, marginTop: -34, borderWidth: 1, borderColor: t.colors.border, ...t.shadow.md },
+    whereToCard: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.elevated, borderRadius: t.radius.xl, padding: t.spacing.base, marginHorizontal: t.spacing.md, marginTop: -34, borderWidth: 1, borderColor: t.colors.border, ...t.shadow.lg },
     whereToIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     whereToText: { flex: 1 },
     whereToTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 17, color: t.colors.text, textAlign: 'right' },

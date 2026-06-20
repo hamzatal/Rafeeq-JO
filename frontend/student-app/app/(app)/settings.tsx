@@ -9,6 +9,7 @@ import { useAuth } from '../../src/store/auth';
 import { usePrefs } from '../../src/store/prefs';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { Card, ListRow, SectionTitle } from '../../src/components/ui';
+import { SegmentedControl } from '../../src/components/kit';
 import { Icon, type IconName } from '../../src/components/Icon';
 
 export default function Settings() {
@@ -22,19 +23,6 @@ export default function Settings() {
   const setLocale = usePrefs((p) => p.setLocale);
   const setScheme = usePrefs((p) => p.setScheme);
   const logout = useAuth((a) => a.logout);
-
-  const Segment = <T extends string>({ value, options, onChange }: { value: T; options: { v: T; label: string }[]; onChange: (v: T) => void }) => (
-    <View style={s.segment}>
-      {options.map((o) => {
-        const active = o.v === value;
-        return (
-          <Pressable key={o.v} onPress={() => onChange(o.v)} style={[s.segItem, active && s.segActive]}>
-            <Text style={[s.segText, active && s.segTextActive]}>{o.label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
 
   const links: { icon: IconName; label: string; href: string }[] = [
     { icon: 'gift', label: t('home.rewards'), href: '/(app)/rewards' },
@@ -73,17 +61,17 @@ export default function Settings() {
         <SectionTitle title={t('settings.appearance')} />
         <Card>
           <Text style={s.label}>{t('settings.language')}</Text>
-          <Segment<Locale>
+          <SegmentedControl<Locale>
             value={locale}
             onChange={setLocale}
-            options={[{ v: 'ar', label: t('settings.arabic') }, { v: 'en', label: t('settings.english') }]}
+            options={[{ value: 'ar', label: t('settings.arabic') }, { value: 'en', label: t('settings.english') }]}
           />
           <View style={s.divider} />
           <Text style={s.label}>{t('settings.theme')}</Text>
-          <Segment<ColorScheme>
+          <SegmentedControl<ColorScheme>
             value={scheme}
             onChange={setScheme}
-            options={[{ v: 'light', label: t('settings.light') }, { v: 'dark', label: t('settings.dark') }]}
+            options={[{ value: 'light', label: t('settings.light') }, { value: 'dark', label: t('settings.dark') }]}
           />
         </Card>
 
@@ -108,11 +96,6 @@ const makeStyles = (t: AppTheme) =>
     name: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text },
     phone: { fontFamily: t.fontFamily.regular, fontSize: 14, color: t.colors.textSecondary, marginTop: 2 },
     label: { fontFamily: t.fontFamily.medium, fontSize: 15, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm },
-    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.background, borderRadius: t.radius.md, padding: 4, gap: 4 },
-    segItem: { flex: 1, paddingVertical: 8, borderRadius: t.radius.sm, alignItems: 'center' },
-    segActive: { backgroundColor: t.colors.primary },
-    segText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
-    segTextActive: { color: t.colors.onPrimary },
     divider: { height: 1, backgroundColor: t.colors.border, marginVertical: t.spacing.base },
     logoutBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: t.spacing.lg, paddingVertical: t.spacing.base, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.danger },
     logout: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.danger },
