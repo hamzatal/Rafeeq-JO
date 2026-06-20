@@ -1,5 +1,6 @@
 export const ar = {
   common: {
+    now: 'الآن',
     appName: 'رفيق',
     next: 'التالي',
     back: 'رجوع',
@@ -121,6 +122,12 @@ export const ar = {
     recentTrips: 'رحلاتك الأخيرة',
     tripFallback: 'رحلة',
     moreServices: 'خدمات أخرى',
+    labelHome: 'المنزل',
+    labelUniversity: 'الجامعة',
+    labelWork: 'العمل',
+    labelOther: 'وجهة',
+    addPlace: 'أضف وجهة',
+    services: 'الخدمات',
   },
   profile: {
     title: 'الملف الشخصي',

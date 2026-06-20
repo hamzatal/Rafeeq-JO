@@ -2,6 +2,7 @@ import type { Translations } from './ar';
 
 export const en: Translations = {
   common: {
+    now: 'Now',
     appName: 'Rafeeq',
     next: 'Next',
     back: 'Back',
@@ -123,6 +124,12 @@ export const en: Translations = {
     recentTrips: 'Your recent trips',
     tripFallback: 'Trip',
     moreServices: 'More services',
+    labelHome: 'Home',
+    labelUniversity: 'University',
+    labelWork: 'Work',
+    labelOther: 'Place',
+    addPlace: 'Add a place',
+    services: 'Services',
   },
   profile: {
     title: 'Profile',
