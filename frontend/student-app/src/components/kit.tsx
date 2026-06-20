@@ -314,3 +314,34 @@ export function TripTimeline({
     </View>
   );
 }
+
+
+/** ── ListSkeleton — placeholder rows while a list loads ────────────── */
+export function ListSkeleton({ rows = 4 }: { rows?: number }) {
+  const t = useTheme();
+  return (
+    <View style={{ gap: t.spacing.sm }}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <View
+          key={i}
+          style={{
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            gap: t.spacing.md,
+            backgroundColor: t.colors.card,
+            borderRadius: t.radius.lg,
+            borderWidth: 1,
+            borderColor: t.colors.border,
+            padding: t.spacing.base,
+          }}
+        >
+          <Skeleton width={44} height={44} radius={22} />
+          <View style={{ flex: 1, gap: 8 }}>
+            <Skeleton width="70%" height={14} />
+            <Skeleton width="45%" height={12} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}

@@ -8,6 +8,7 @@ import { api } from '../../src/lib/api';
 import { useCoupon } from '../../src/store/coupon';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { Card, EmptyState, SectionTitle } from '../../src/components/ui';
+import { ListSkeleton } from '../../src/components/kit';
 import { Icon, type IconName } from '../../src/components/Icon';
 
 const CATEGORY_ICON: Record<string, IconName> = {
@@ -26,6 +27,7 @@ export default function Notifications() {
   const [items, setItems] = useState<AppNotification[]>([]);
   const [prefs, setPrefs] = useState<NotificationPreference | null>(null);
   const [showPrefs, setShowPrefs] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [couponMsg, setCouponMsg] = useState<Record<string, { text: string; ok: boolean }>>({});
   const activateCoupon = useCoupon((c) => c.activate);
 
@@ -48,6 +50,8 @@ export default function Notifications() {
       setPrefs(p);
     } catch {
       /* silent */
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,7 +111,11 @@ export default function Notifications() {
         )}
 
         {items.length === 0 ? (
-          <EmptyState icon="bell" title={t('notifications.none')} />
+          loading ? (
+            <ListSkeleton rows={5} />
+          ) : (
+            <EmptyState icon="bell" title={t('notifications.none')} />
+          )
         ) : (
           items.map((n) => (
             <Pressable key={n.id} onPress={() => open(n)} style={[s.item, !n.read && s.unread]}>

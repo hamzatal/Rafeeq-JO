@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Subscription, SubscriptionPlan } from '@rafeeq/shared';
 import { EmptyState, SectionTitle } from '../../src/components/ui';
+import { ListSkeleton } from '../../src/components/kit';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
@@ -85,7 +86,7 @@ export default function Subscriptions() {
 
         <SectionTitle title={t('subscriptions.available')} />
         {loading ? (
-          <Text style={s.meta}>{t('common.loading')}</Text>
+          <ListSkeleton rows={3} />
         ) : plans.length === 0 ? (
           <EmptyState icon="calendar" title={t('subscriptions.none')} />
         ) : (
