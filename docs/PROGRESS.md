@@ -13,7 +13,16 @@
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-> **العمل الحالي:** **إعادة هيكلة شاملة (7 Increments)** — انظر `docs/EXECUTION_PLAN.md`. منجز: 1 (تصميم) + 2 (Onboarding) + 3 (خريطة-أولاً) + 4 (حساب موحّد). التالي: Increment 5 (اشتراك + دفع منطقي).
+> **العمل الحالي:** **إعادة هيكلة شاملة (7 Increments)** — انظر `docs/EXECUTION_PLAN.md`. منجز: 1 (تصميم) + 2 (Onboarding) + 3 (خريطة) + 4 (حساب موحّد) + 5 (اشتراك+دفع). التالي: Increment 6 (تتبّع رحلة + realtime).
+
+**✅ RFQ-267 — Increment 5: تدفّق اشتراك + دفع منطقي + محفظة موحّدة:**
+- **شاشة `checkout.tsx` جديدة (الطالب):** تدفّق فعلي = «اشترك وادفع» → `transport.subscribe` ثم `payments.create({purpose:'subscription', subscription_id})` → عرض تعليمات CliQ → «رفع الإيصال» (`submitProof`) → حالة **«بانتظار التأكيد»** واضحة. لا مزيد من «اشتراك وهمي» بلا دفع.
+- **`subscriptions.tsx`:** زر «اشترك» صار يفتح checkout (بملخّص الباقة) بدل إنشاء اشتراك صامت.
+- **`wallet.tsx` = المركز المالي الموحّد:** الرصيد + الشحن + الحركات + **قسم «طلبات الدفع»** (`payments.mine`) بحالاتها (بانتظار/مقبول/مرفوض) + رفع إيصال لكل طلب.
+- **`src/lib/proof.ts`** مساعد مشترك لاختيار إيصال CliQ (native/web، lazy، لا يرمي).
+- **i18n:** قسم `checkout.*` + `wallet.{paymentRequests,noPaymentRequests,uploadProof}` (عربي+إنجليزي). checkout مسجّل كتاب مخفي.
+
+
 
 **✅ RFQ-266 — Increment 4: حساب موحّد متعدد الأدوار (رقم واحد: طالب + كابتن):**
 - **الباك إند:** endpoint جديد `POST /v1/auth/become-driver` (مصادَق) يضيف دور `driver` + يُنشئ `driver_profile` (idempotent) للحساب الحالي دون إنشاء حساب ثانٍ. الطالب يحتفظ بدوره وبياناته.

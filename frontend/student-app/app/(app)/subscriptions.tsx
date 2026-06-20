@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import type { Subscription, SubscriptionPlan } from '@rafeeq/shared';
-import { RafeeqApiError } from '@rafeeq/api-client';
-import { Banner } from '../../src/components/Banner';
 import { EmptyState, SectionTitle } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
@@ -12,13 +11,12 @@ import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Subscriptions() {
   const { t } = useI18n();
+  const router = useRouter();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -33,25 +31,24 @@ export default function Subscriptions() {
 
   useEffect(() => { void load(); }, [load]);
 
-  const subscribe = async (planId: string) => {
-    setMsg(null);
-    setBusy(planId);
-    try {
-      await api.transport.subscribe(planId);
-      setMsg({ text: t('subscriptions.created'), ok: true });
-      await load();
-    } catch (e) {
-      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('subscriptions.failed'), ok: false });
-    } finally {
-      setBusy(null);
-    }
+  // Subscribing now goes through a real checkout (subscribe → pay) instead of
+  // silently creating an unpaid subscription.
+  const goCheckout = (p: SubscriptionPlan) => {
+    router.push({
+      pathname: '/(app)/checkout',
+      params: {
+        planId: p.id,
+        name: p.name,
+        price: String(p.price_jod),
+        includes: p.unlimited ? t('common.unlimited') : `${p.rides_count} ${t('subscriptions.rideWord')}`,
+      },
+    });
   };
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>{t('subscriptions.title')}</Text>
-        {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {subs.length > 0 && (
           <>
@@ -118,11 +115,10 @@ export default function Subscriptions() {
                   </View>
                 </View>
                 <Pressable
-                  onPress={() => subscribe(p.id)}
-                  disabled={busy === p.id}
+                  onPress={() => goCheckout(p)}
                   style={({ pressed }) => [s.subBtn, pressed && { opacity: 0.85 }]}
                 >
-                  <Text style={s.subBtnText}>{busy === p.id ? '...' : t('subscriptions.subscribe')}</Text>
+                  <Text style={s.subBtnText}>{t('subscriptions.subscribe')}</Text>
                 </Pressable>
               </View>
             </View>

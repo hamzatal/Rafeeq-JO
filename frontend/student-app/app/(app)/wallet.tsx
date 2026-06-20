@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { CliqInstructions, Wallet, WalletTransaction } from '@rafeeq/shared';
+import type { CliqInstructions, PaymentRequest, Wallet, WalletTransaction } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
 import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, SectionTitle } from '../../src/components/ui';
+import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
+import { pickProof } from '../../src/lib/proof';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function WalletScreen() {
@@ -19,16 +20,23 @@ export default function WalletScreen() {
 
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [txns, setTxns] = useState<WalletTransaction[]>([]);
+  const [payments, setPayments] = useState<PaymentRequest[]>([]);
   const [amount, setAmount] = useState('');
   const [instructions, setInstructions] = useState<CliqInstructions | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const load = async () => {
     try {
-      const [w, tx] = await Promise.all([api.wallet.show(), api.wallet.transactions()]);
+      const [w, tx, pays] = await Promise.all([
+        api.wallet.show(),
+        api.wallet.transactions(),
+        api.payments.mine().catch(() => [] as PaymentRequest[]),
+      ]);
       setWallet(w);
       setTxns(tx);
+      setPayments(pays);
     } catch {
       /* handled on actions */
     }
@@ -54,6 +62,27 @@ export default function WalletScreen() {
       setBusy(false);
     }
   };
+
+  const uploadProof = async (id: string) => {
+    const file = await pickProof();
+    if (!file) return;
+    setUploading(id);
+    setMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append('proof', file as Blob);
+      await api.payments.submitProof(id, fd);
+      setMsg({ text: t('payments.proofUploaded'), ok: true });
+      await load();
+    } catch (e) {
+      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'), ok: false });
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const canUpload = (status: string) => ['pending', 'submitted', 'under_review'].includes(status);
+  const payTone = (status: string) => (status === 'approved' ? 'success' : status === 'rejected' ? 'danger' : 'primary');
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -121,6 +150,29 @@ export default function WalletScreen() {
             );
           })
         )}
+
+        {/* Payment requests (subscriptions / top-ups awaiting confirmation) */}
+        <SectionTitle title={t('wallet.paymentRequests')} />
+        {payments.length === 0 ? (
+          <EmptyState icon="file-text" title={t('wallet.noPaymentRequests')} />
+        ) : (
+          payments.map((p) => (
+            <Card key={p.id}>
+              <View style={s.payHead}>
+                <Text style={s.payNumber}>{p.purpose_label}</Text>
+                <Badge label={p.status_label} tone={payTone(p.status)} />
+              </View>
+              <Text style={s.meta}>{p.amount_jod.toFixed(3)} {t('subscriptions.currency')} · {p.number}</Text>
+              {p.reject_reason ? <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text> : null}
+              {canUpload(p.status) && (
+                <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
+                  <Icon name="upload" size={16} color={theme.colors.primary} />
+                  <Text style={s.uploadText}>{uploading === p.id ? '...' : t('wallet.uploadProof')}</Text>
+                </Pressable>
+              )}
+            </Card>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -162,4 +214,8 @@ const makeStyles = (t: AppTheme) =>
     txnType: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
     txnAmount: { fontFamily: t.fontFamily.extrabold, fontSize: 15 },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 2 },
+    payHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+    payNumber: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
+    uploadBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10 },
+    uploadText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
   });

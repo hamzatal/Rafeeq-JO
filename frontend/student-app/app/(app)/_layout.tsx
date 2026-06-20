@@ -47,6 +47,7 @@ export default function AppLayout() {
 
       {/* Secondary screens — reachable via navigation, hidden from the tab bar */}
       <Tabs.Screen name="subscriptions" options={{ href: null }} />
+      <Tabs.Screen name="checkout" options={{ href: null }} />
       <Tabs.Screen name="chat" options={{ href: null }} />
       <Tabs.Screen name="addresses" options={{ href: null }} />
       <Tabs.Screen name="payments" options={{ href: null }} />
