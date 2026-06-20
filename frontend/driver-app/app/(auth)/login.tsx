@@ -8,18 +8,21 @@ import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
 import { useI18n } from '../../src/i18n';
-import { useAuth } from '../../src/store/auth';
+import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
+/**
+ * Captain login is OTP-based (phone only) — consistent with registration.
+ * Requests a login code, then continues on the OTP screen; the captain
+ * capability is ensured after verification (see auth store `apply`).
+ */
 export default function Login() {
   const { t } = useI18n();
   const router = useRouter();
-  const login = useAuth((s) => s.login);
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
 
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -27,11 +30,14 @@ export default function Login() {
     setFormError(null);
     const phoneErr = validators.phone(phone);
     if (phoneErr) return setFormError(phoneErr);
-    if (!password) return setFormError(t('validation.required'));
+    const normalized = normalizeJordanPhone(phone)!;
     setLoading(true);
     try {
-      await login({ phone: normalizeJordanPhone(phone)!, password });
-      router.replace('/(app)/dashboard');
+      const res = await api.auth.requestOtp(normalized);
+      router.push({
+        pathname: '/(auth)/otp',
+        params: { phone: normalized, purpose: 'login', debug: res.otp_debug ?? '' },
+      });
     } catch (e) {
       setFormError(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
     } finally {
@@ -41,17 +47,20 @@ export default function Login() {
 
   return (
     <Screen scroll>
-      <View style={s.header}><Text style={s.title}>{t('auth.login')}</Text></View>
+      <View style={s.header}>
+        <Text style={s.title}>{t('auth.login')}</Text>
+        <Text style={s.subtitle}>{t('auth.loginHint')}</Text>
+      </View>
       <Banner message={formError} />
       <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
-      <Input label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry />
-      <Button title={t('auth.login')} onPress={onSubmit} loading={loading} />
+      <Button title={t('auth.sendCode')} onPress={onSubmit} loading={loading} />
     </Screen>
   );
 }
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    header: { marginTop: t.spacing['2xl'], marginBottom: t.spacing.xl },
+    header: { marginTop: t.spacing['2xl'], marginBottom: t.spacing.xl, gap: t.spacing.xs },
     title: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right' },
+    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right' },
   });

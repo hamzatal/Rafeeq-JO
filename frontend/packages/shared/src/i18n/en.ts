@@ -59,6 +59,7 @@ export const en: Translations = {
     welcomeTitle: 'Welcome to Rafeeq',
     welcomeSubtitle: 'Smart university mobility & services',
     login: 'Log in',
+    loginHint: 'Enter your number and we’ll send you a login code',
     register: 'Create account',
     fullName: 'Full name',
     phone: 'Phone number',

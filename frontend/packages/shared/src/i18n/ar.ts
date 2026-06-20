@@ -57,6 +57,7 @@ export const ar = {
     welcomeTitle: 'أهلاً بك في رفيق',
     welcomeSubtitle: 'النقل والخدمات الجامعية الذكية',
     login: 'تسجيل الدخول',
+    loginHint: 'أدخل رقمك وسنرسل لك رمز تحقّق للدخول',
     register: 'إنشاء حساب',
     fullName: 'الاسم الكامل',
     phone: 'رقم الهاتف',
