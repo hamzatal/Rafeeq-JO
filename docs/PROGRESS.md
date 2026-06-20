@@ -13,7 +13,16 @@
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-> **العمل الحالي:** **إعادة هيكلة شاملة (7 Increments)** — انظر `docs/EXECUTION_PLAN.md`. منجز: Increment 1 (نظام التصميم v3). التالي: Increment 2 (Onboarding + أذونات).
+> **العمل الحالي:** **إعادة هيكلة شاملة (7 Increments)** — انظر `docs/EXECUTION_PLAN.md`. منجز: Increment 1 (نظام التصميم) + Increment 2 (Onboarding/أذونات). التالي: Increment 3 (خريطة-أولاً).
+
+**✅ RFQ-264 — Increment 2: Onboarding + تمهيد الأذونات (الطالب + الكابتن):**
+- **مكتبة أذونات آمنة** `src/lib/permissions.ts` (للتطبيقين): wrappers حول expo-location/expo-notifications، lazy + لا ترمي أبداً (web/simulator → unavailable).
+- **مجموعة `(onboarding)` جديدة** لكل تطبيق: `intro.tsx` (3 شرائح معرّفة بالخدمة + تخطّي) + `permissions.tsx` (تمهيد الموقع والإشعارات في سياقها مع شرح القيمة + «لاحقاً»).
+- **توجيه أول تشغيل:** `index.tsx` (للتطبيقين) يمرّ عبر onboarding أول مرة فقط (flag `introSeen` في prefs)، ولا يُجبر المستخدمين الحاليين عليه.
+- **مفاتيح i18n** `onboarding.*` و`permissions.*` (عربي + إنجليزي) — شرائح مختلفة للطالب (s1-3) والكابتن (d1-3) ونصوص أذونات مخصّصة لكل دور.
+- الديفولت عربي/لايت محفوظ؛ كل النصوص عبر i18n؛ لايت+دارك مدعومان.
+
+
 
 **✅ RFQ-263 — Increment 1: نظام التصميم الموحّد v3 (tokens + primitives):**
 - **`docs/EXECUTION_PLAN.md`** (جديد): خطة تنفيذ ملموسة بـ7 Increments قابلة للشحن، ملفات مستهدفة، ومعايير قبول لكل واحدة، مبنية على دراسة الكود الفعلي.

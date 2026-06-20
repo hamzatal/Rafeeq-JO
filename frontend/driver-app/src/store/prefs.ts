@@ -9,10 +9,12 @@ const KEY = 'rafeeq_driver_prefs';
 interface PrefsState {
   locale: Locale;
   scheme: ColorScheme;
+  introSeen: boolean;
   hydrated: boolean;
   hydrate: () => Promise<void>;
   setLocale: (locale: Locale) => Promise<void>;
   setScheme: (scheme: ColorScheme) => Promise<void>;
+  setIntroSeen: () => Promise<void>;
 }
 
 function applyRTL(locale: Locale) {
@@ -26,6 +28,7 @@ function applyRTL(locale: Locale) {
 export const usePrefs = create<PrefsState>((set, get) => ({
   locale: 'ar',
   scheme: 'light', // default = Arabic + light for all apps (user can switch to dark)
+  introSeen: false,
   hydrated: false,
 
   async hydrate() {
@@ -33,7 +36,7 @@ export const usePrefs = create<PrefsState>((set, get) => ({
       const raw = await AsyncStorage.getItem(KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        set({ locale: p.locale ?? 'ar', scheme: p.scheme ?? 'light' });
+        set({ locale: p.locale ?? 'ar', scheme: p.scheme ?? 'light', introSeen: p.introSeen ?? false });
       }
     } catch {
       /* ignore */
@@ -47,11 +50,22 @@ export const usePrefs = create<PrefsState>((set, get) => ({
     set({ locale });
     setApiLocale(locale);
     applyRTL(locale);
-    await AsyncStorage.setItem(KEY, JSON.stringify({ locale, scheme: get().scheme }));
+    await persist(get);
   },
 
   async setScheme(scheme) {
     set({ scheme });
-    await AsyncStorage.setItem(KEY, JSON.stringify({ locale: get().locale, scheme }));
+    await persist(get);
+  },
+
+  async setIntroSeen() {
+    set({ introSeen: true });
+    await persist(get);
   },
 }));
+
+/** Persist the current prefs snapshot. */
+async function persist(get: () => PrefsState) {
+  const { locale, scheme, introSeen } = get();
+  await AsyncStorage.setItem(KEY, JSON.stringify({ locale, scheme, introSeen }));
+}
