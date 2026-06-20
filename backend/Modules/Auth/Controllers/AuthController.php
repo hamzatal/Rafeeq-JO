@@ -16,7 +16,9 @@ use Rafeeq\Modules\Auth\Requests\VerifyMfaRequest;
 use Rafeeq\Modules\Auth\Requests\ConfirmMfaRequest;
 use Rafeeq\Modules\Auth\Resources\UserResource;
 use Rafeeq\Modules\Auth\Services\AuthService;
+use Rafeeq\Modules\Drivers\Services\DriverService;
 use Rafeeq\Shared\Enums\OtpChannel;
+use Rafeeq\Shared\Enums\UserType;
 
 class AuthController extends Controller
 {
@@ -158,6 +160,32 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return $this->ok(new UserResource($request->user()->load('roles')));
+    }
+
+    /**
+     * Add the "captain" (driver) capability to the CURRENT account.
+     *
+     * Enables one phone number to be both a student and a captain: instead of
+     * forcing a separate account, an authenticated user gains the `driver`
+     * role and a driver profile (idempotent). The student keeps their existing
+     * roles/data. This is what the captain app calls after a user with an
+     * existing Rafeeq account signs in.
+     */
+    public function becomeDriver(Request $request, DriverService $drivers): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->hasRole(UserType::Driver->value)) {
+            $user->assignRole(UserType::Driver->value);
+        }
+
+        // Ensure a driver profile exists (firstOrCreate — safe to repeat).
+        $drivers->forUser($user);
+
+        return $this->ok(
+            new UserResource($user->fresh('roles')),
+            'تم تفعيل صفة الكابتن لحسابك.',
+        );
     }
 
     public function logout(Request $request): JsonResponse

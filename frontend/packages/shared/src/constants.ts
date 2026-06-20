@@ -22,6 +22,7 @@ export const ENDPOINTS = {
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
     me: '/auth/me',
+    becomeDriver: '/auth/become-driver',
     logout: '/auth/logout',
     logoutAll: '/auth/logout-all',
   },

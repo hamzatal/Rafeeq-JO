@@ -25,6 +25,7 @@ Route::prefix('v1/auth')->group(function () {
     // Authenticated
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
+        Route::post('become-driver', [AuthController::class, 'becomeDriver']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('logout-all', [AuthController::class, 'logoutAll']);
 

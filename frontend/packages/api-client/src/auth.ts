@@ -68,6 +68,15 @@ export class AuthApi {
     return unwrap(data);
   }
 
+  /**
+   * Add the captain (driver) capability to the current account — enables one
+   * phone to be both a student and a captain. Idempotent on the backend.
+   */
+  async becomeDriver(): Promise<User> {
+    const { data } = await this.http.post<ApiSuccess<User>>(ENDPOINTS.auth.becomeDriver);
+    return unwrap(data);
+  }
+
   /* ── Two-factor authentication (staff/admin) ─────────────────────── */
 
   /** Complete an MFA login challenge with a TOTP/recovery code → token. */

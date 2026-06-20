@@ -29,6 +29,14 @@ export const useAuth = create<AuthState>((set, get) => {
   const apply = async (result: AuthResult) => {
     await tokenStorage.set(result.token);
     set({ user: result.user, status: 'authenticated' });
+    // One phone = student + captain: ensure this account has the captain
+    // capability (driver role + profile). Idempotent; non-fatal on failure.
+    try {
+      const user = await api.auth.becomeDriver();
+      set({ user });
+    } catch {
+      /* existing drivers / transient — refreshDriver below still loads state */
+    }
     await get().refreshDriver();
     void registerForPush();
   };

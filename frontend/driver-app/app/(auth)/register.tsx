@@ -9,6 +9,7 @@ import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
+import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Register() {
@@ -38,6 +39,19 @@ export default function Register() {
       const otpDebug = await register({ full_name: fullName.trim(), phone: normalized });
       router.push({ pathname: '/(auth)/otp', params: { phone: normalized, purpose: 'register', debug: otpDebug ?? '' } });
     } catch (err) {
+      // The phone already belongs to a Rafeeq account (e.g. a student). Instead
+      // of blocking, sign them in via a login OTP — the captain capability is
+      // added automatically after verification (one phone = student + captain).
+      if (err instanceof RafeeqApiError && err.status === 422 && err.errors?.phone) {
+        try {
+          const res = await api.auth.requestOtp(normalized);
+          router.push({ pathname: '/(auth)/otp', params: { phone: normalized, purpose: 'login', debug: res.otp_debug ?? '' } });
+          return;
+        } catch (e2) {
+          setFormError(e2 instanceof RafeeqApiError ? e2.firstError() ?? e2.message : t('common.error'));
+          return;
+        }
+      }
       setFormError(err instanceof RafeeqApiError ? err.firstError() ?? err.message : t('common.error'));
     } finally {
       setLoading(false);
