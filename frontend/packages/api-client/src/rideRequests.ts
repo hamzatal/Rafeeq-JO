@@ -16,6 +16,7 @@ export interface CreateRideRequestInput {
   desired_time: string;
   type?: RideType;
   notes?: string;
+  coupon_code?: string;
 }
 
 export interface EstimateInput {

@@ -122,6 +122,7 @@ export default function RideRequestScreen() {
         pickup_address: address || undefined,
         desired_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         type,
+        coupon_code: coupon.trim() || undefined,
       });
       setMsg({ text: t('rideRequest.created'), ok: true });
       await load();

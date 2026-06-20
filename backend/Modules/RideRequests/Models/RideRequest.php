@@ -29,7 +29,7 @@ class RideRequest extends Model
     protected $fillable = [
         'student_id', 'zone_id', 'university_id', 'subscription_id', 'trip_id',
         'pickup_lat', 'pickup_lng', 'pickup_address', 'desired_time',
-        'type', 'is_express', 'express_fee_fils', 'status', 'notes',
+        'type', 'is_express', 'express_fee_fils', 'status', 'notes', 'coupon_code',
     ];
 
     protected function casts(): array

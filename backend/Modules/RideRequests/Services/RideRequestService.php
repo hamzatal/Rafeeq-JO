@@ -50,6 +50,7 @@ class RideRequestService extends BaseService
             'express_fee_fils' => $isExpress ? (int) config('rafeeq.express_fee_fils', 1500) : 0,
             'status' => RideRequestStatus::Pending,
             'notes' => $data['notes'] ?? null,
+            'coupon_code' => ! empty($data['coupon_code']) ? mb_strtoupper(trim($data['coupon_code'])) : null,
         ]);
 
         $this->audit->log('ride_request.created', $student, auditable: $request);

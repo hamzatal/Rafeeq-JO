@@ -104,6 +104,7 @@ class MatchingService extends BaseService
                     'pickup_lng' => $request->pickup_lng,
                     'pickup_order' => $index,
                     'status' => TripPassengerStatus::Booked,
+                    'coupon_code' => $request->coupon_code,
                     'boarding_code' => $this->uniqueCode($usedBoarding),
                     'dropoff_code' => $this->uniqueCode($usedDropoff),
                 ]);

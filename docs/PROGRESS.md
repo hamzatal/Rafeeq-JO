@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-254 |
+| آخر Commit | RFQ-257 |
 | نسبة الإنجاز | ~99% (كود) · **Laravel 12 (أمان) + مساعد بـ function-calling + فواتير PDF + ترجمة backend واعية بالـ locale + حوكمة AI + مكافحة احتيال CliQ** · 135 اختبار |
 | المرحلة الحالية | **منصّة مكتملة المزايا، 30 وحدة backend · 71 اختبار · ~194 مسار. ✅ تشغيل فعلي مُتحقَّق على PostgreSQL 16 (migrate+seed+E2E). المتبقّي: التكاملات الخارجية + تلميع + إطلاق** |
 
@@ -14,6 +14,14 @@
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
 > **العمل الحالي:** خطة إصلاح شامل وتجهيز للإطلاق (11 مهمة) — **اكتملت كلها ✅** + تحسينات تصميم (RFQ-216). راجع `docs/LAUNCH_CHECKLIST.md` للمتبقّي التشغيلي.
+
+**✅ RFQ-257 — ربط خصم الكوبون بأجرة الرحلة (سدّ الفجوة P1 #1):**
+- مهاجرة `add_coupon_to_trips_billing`: عمود `coupon_code` على `ride_requests`، و`coupon_code`+`coupon_discount_fils` على `trip_passengers`.
+- `RideRequestService.create` يخزّن `coupon_code` (بحروف كبيرة)، و`CreateRideRequestRequest` يتحقّق منه (nullable, max:40).
+- `MatchingService` ينسخ الكود من الطلب إلى الراكب.
+- `RideBillingService.chargeForBoarding` يطبّق الخصم وقت التحصيل: الطالب يدفع `fare - discount`، الكابتن يأخذ حصّته كاملة، والمنصّة تتحمّل الخصم من عمولتها (`commission = max(0, commission - discount)`). كوبون غير صالح/منتهٍ لا يوقف الرحلة أبداً (try/catch). يُستهلك الكوبون (`context='trip'`) عند نجاح التحصيل.
+- الفرونت: `coupon_code?` في `CreateRideRequestInput` + تمريره من شاشة طلب الرحلة في تطبيق الطالب.
+- ✅ 134 اختبار backend + type-check أخضر (api-client + student-app).
 
 ### 📊 نسبة الإنجاز الحقيقية (صادقة، بلا تجميل)
 | البُعد | النسبة | الحالة الفعلية |

@@ -23,6 +23,7 @@ class CreateRideRequestRequest extends FormRequest
             'desired_time' => ['required', 'date', 'after_or_equal:now'],
             'type' => ['sometimes', Rule::in(RideType::values())],
             'notes' => ['nullable', 'string', 'max:255'],
+            'coupon_code' => ['nullable', 'string', 'max:40'],
         ];
     }
 }
