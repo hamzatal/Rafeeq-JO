@@ -45,6 +45,14 @@ export const ar = {
     continue: 'متابعة',
     later: 'لاحقاً',
   },
+  map: {
+    openInMap: 'فتح في الخريطة',
+    pickHint: 'اضغط على الخريطة لتحديد الموقع',
+    captain: 'الكابتن',
+    pickup: 'نقطة الالتقاط',
+    destination: 'الوجهة',
+    origin: 'الانطلاق',
+  },
   auth: {
     welcomeTitle: 'أهلاً بك في رفيق',
     welcomeSubtitle: 'النقل والخدمات الجامعية الذكية',

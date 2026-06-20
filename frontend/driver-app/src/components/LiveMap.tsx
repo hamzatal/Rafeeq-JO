@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme, type AppTheme } from '../theme';
+import { useI18n } from '../i18n';
 import { getMapsKey } from '../lib/appConfig';
 import { Icon } from './Icon';
 
@@ -33,6 +34,7 @@ const IRBID = { lat: 32.5556, lng: 35.85 };
 
 export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMapProps) {
   const theme = useTheme();
+  const { t } = useI18n();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const webRef = useRef<any>(null);
 
@@ -71,7 +73,7 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
             }
             style={s.webBtn}
           >
-            <Text style={s.webBtnText}>فتح في الخريطة</Text>
+            <Text style={s.webBtnText}>{t('map.openInMap')}</Text>
           </Pressable>
         </View>
         {showLegend && <Legend s={s} colors={colors} kinds={kinds} />}
@@ -126,7 +128,7 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
         {onPick && (
           <View style={s.pickHint} pointerEvents="none">
             <Icon name="crosshair" size={13} color={theme.colors.onPrimary} />
-            <Text style={s.pickHintText}>اضغط على الخريطة لتحديد الموقع</Text>
+            <Text style={s.pickHintText}>{t('map.pickHint')}</Text>
           </View>
         )}
       </View>
@@ -144,11 +146,12 @@ function Legend({
   colors: Record<string, string>;
   kinds: Set<string>;
 }) {
+  const { t } = useI18n();
   const labels: Record<string, string> = {
-    captain: 'الكابتن',
-    pickup: 'نقطة الالتقاط',
-    destination: 'الوجهة',
-    origin: 'الانطلاق',
+    captain: t('map.captain'),
+    pickup: t('map.pickup'),
+    destination: t('map.destination'),
+    origin: t('map.origin'),
   };
   return (
     <View style={s.legend}>

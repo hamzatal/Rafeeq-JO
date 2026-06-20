@@ -47,6 +47,14 @@ export const en: Translations = {
     continue: 'Continue',
     later: 'Maybe later',
   },
+  map: {
+    openInMap: 'Open in map',
+    pickHint: 'Tap the map to set the location',
+    captain: 'Captain',
+    pickup: 'Pickup',
+    destination: 'Destination',
+    origin: 'Origin',
+  },
   auth: {
     welcomeTitle: 'Welcome to Rafeeq',
     welcomeSubtitle: 'Smart university mobility & services',
