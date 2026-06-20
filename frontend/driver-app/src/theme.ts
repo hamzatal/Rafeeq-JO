@@ -27,4 +27,4 @@ export function useTheme(): AppTheme {
   return { colors, spacing, radius, shadow, typography, fontFamily, scheme };
 }
 
-export const staticColors = buildTheme('driver', 'dark');
+export const staticColors = buildTheme('driver', 'light');

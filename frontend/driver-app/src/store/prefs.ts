@@ -25,7 +25,7 @@ function applyRTL(locale: Locale) {
 
 export const usePrefs = create<PrefsState>((set, get) => ({
   locale: 'ar',
-  scheme: 'dark', // captain default is the dark navy experience
+  scheme: 'light', // default = Arabic + light for all apps (user can switch to dark)
   hydrated: false,
 
   async hydrate() {
@@ -33,7 +33,7 @@ export const usePrefs = create<PrefsState>((set, get) => ({
       const raw = await AsyncStorage.getItem(KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        set({ locale: p.locale ?? 'ar', scheme: p.scheme ?? 'dark' });
+        set({ locale: p.locale ?? 'ar', scheme: p.scheme ?? 'light' });
       }
     } catch {
       /* ignore */

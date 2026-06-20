@@ -28,12 +28,16 @@ const status = {
   info: '#0EA5E9',
 };
 
-// Role accent (brand) per app.
-// student = Stitch "Rafeeq" → Deep Navy (#0B192C) + Heritage Gold (#FFBF00).
-// driver = captain HUD (navy + cyan). admin = enterprise (navy + cyan).
+// Role accent (brand) per app. All three personas share a navy + bright-accent
+// system: a deep navy is the primary action in LIGHT mode, and the bright
+// accent (gold / cyan) becomes the primary action in DARK mode so it stays
+// visible on the navy canvas.
+// student = Deep Navy (#0B192C) + Heritage Gold (#FFBF00).
+// driver  = Deep Navy (#0B2C42) + Cyan (#00E5FF).
+// admin   = Deep Navy (#0B192C) + Cyan (#00E5FF).
 const roleAccent: Record<ThemeRole, { primary: string; primaryDark: string; accent: string; onPrimary: string }> = {
   student: { primary: '#0B192C', primaryDark: '#06101D', accent: '#FFBF00', onPrimary: '#FFFFFF' },
-  driver: { primary: '#00E5FF', primaryDark: '#00B8CC', accent: '#00E5FF', onPrimary: '#06121F' },
+  driver: { primary: '#0B2C42', primaryDark: '#06121F', accent: '#00E5FF', onPrimary: '#FFFFFF' },
   admin: { primary: '#0B192C', primaryDark: '#001F3F', accent: '#00E5FF', onPrimary: '#FFFFFF' },
 };
 
@@ -72,27 +76,20 @@ const neutralsDark = {
 export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   const accent = roleAccent[role];
 
-  // The captain (driver) app is a fixed dark navy HUD (Stitch captain screens),
-  // regardless of the device light/dark preference.
-  const isDriverHud = role === 'driver';
-  const neutrals = scheme === 'dark' || isDriverHud ? neutralsDark : neutralsLight;
+  // Light/dark is now honoured for ALL apps (including the captain app, which
+  // previously forced a dark HUD and ignored the user's preference).
+  const neutrals = scheme === 'dark' ? neutralsDark : neutralsLight;
 
   // In dark mode the navy primary would vanish on the navy canvas, so the
-  // role's bright accent (gold for student, cyan for admin) becomes the action.
-  const navyPersona = role === 'student' || role === 'admin';
+  // role's bright accent (gold for student, cyan for driver/admin) becomes the
+  // primary action instead.
   let primary = accent.primary;
   let onPrimary = accent.onPrimary;
-  if (scheme === 'dark' && navyPersona) {
+  if (scheme === 'dark') {
     primary = accent.accent;
     onPrimary = '#06121F';
   }
-  const primarySoft = navyPersona
-    ? hexToRgba(accent.accent, scheme === 'dark' ? 0.18 : 0.12)
-    : isDriverHud
-      ? hexToRgba(accent.accent, 0.18)
-      : scheme === 'dark'
-        ? 'rgba(0,229,255,0.18)'
-        : 'rgba(0,184,204,0.12)';
+  const primarySoft = hexToRgba(accent.accent, scheme === 'dark' ? 0.18 : 0.12);
 
   return {
     primary,

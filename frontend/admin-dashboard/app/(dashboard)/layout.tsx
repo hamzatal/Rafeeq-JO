@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../src/lib/auth';
 import { Sidebar } from '../../src/components/Sidebar';
 import { Topbar } from '../../src/components/Topbar';
-import { BrandSplash } from '../../src/components/BrandSplash';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { status } = useAuth();
@@ -16,7 +15,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [status, router]);
 
   if (status !== 'authenticated') {
-    return <BrandSplash />;
+    // No splash screen — a minimal, neutral loading indicator while the
+    // session is validated (or until the redirect to /login kicks in).
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background dark:bg-dbg">
+        <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+      </div>
+    );
   }
 
   return (
