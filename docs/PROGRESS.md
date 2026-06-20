@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | الفرع الحالي | `foundation/phase-0-1` |
-| آخر Commit | RFQ-257 |
+| آخر Commit | RFQ-258 |
 | نسبة الإنجاز | ~99% (كود) · **Laravel 12 (أمان) + مساعد بـ function-calling + فواتير PDF + ترجمة backend واعية بالـ locale + حوكمة AI + مكافحة احتيال CliQ** · 135 اختبار |
 | المرحلة الحالية | **منصّة مكتملة المزايا، 30 وحدة backend · 71 اختبار · ~194 مسار. ✅ تشغيل فعلي مُتحقَّق على PostgreSQL 16 (migrate+seed+E2E). المتبقّي: التكاملات الخارجية + تلميع + إطلاق** |
 
@@ -14,6 +14,12 @@
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
 > **العمل الحالي:** خطة إصلاح شامل وتجهيز للإطلاق (11 مهمة) — **اكتملت كلها ✅** + تحسينات تصميم (RFQ-216). راجع `docs/LAUNCH_CHECKLIST.md` للمتبقّي التشغيلي.
+
+**✅ RFQ-258 — الإشعارات الجماعية عبر Queue job (سدّ الفجوة P1 #2):**
+- `BroadcastNotificationJob` (ShouldQueue, timeout=600, tries=3): يستقبل معايير الفئة (audience/user_ids/title/body/payload) ويعيد بناء الاستعلام ويوزّع على دفعات (chunkById 200). كل تسليم best-effort داخل `NotificationService` (لا يرمي استثناء).
+- `AdminNotificationController.send` لم يعد يرسل بشكل متزامن: يحسب عدد الفئة (COUNT رخيص) ثم يطلق الـ job ويرجّع فوراً `{queued:true, estimated}` — إرسال لفئة كبيرة لا يحبس طلب الأدمن أبداً.
+- الفرونت: نوع `sendNotification` أصبح `{queued, estimated}` + رسالة `notify.queuedFor` (ar/en) في لوحة الأدمن.
+- ✅ 134 اختبار backend (حدّثنا `AdminBroadcastTest` ليتحقّق من `queued`+`estimated`؛ الطابور sync بالاختبارات فيعمل inline) + type-check أخضر.
 
 **✅ RFQ-257 — ربط خصم الكوبون بأجرة الرحلة (سدّ الفجوة P1 #1):**
 - مهاجرة `add_coupon_to_trips_billing`: عمود `coupon_code` على `ride_requests`، و`coupon_code`+`coupon_discount_fils` على `trip_passengers`.

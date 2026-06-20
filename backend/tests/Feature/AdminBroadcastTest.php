@@ -50,8 +50,10 @@ class AdminBroadcastTest extends TestCase
         ]);
 
         $res->assertOk();
-        $res->assertJsonPath('data.sent', 2); // only the 2 students, not the captain
+        $res->assertJsonPath('data.queued', true);
+        $res->assertJsonPath('data.estimated', 2); // only the 2 students, not the captain
 
+        // Queue runs inline in tests (sync), so the fan-out already happened.
         $n = Notification::where('user_id', $s1->id)->first();
         $this->assertNotNull($n);
         $this->assertSame('WELCOME10', $n->data['coupon_code']);

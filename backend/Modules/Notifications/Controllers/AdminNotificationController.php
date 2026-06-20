@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Auth\Models\User;
-use Rafeeq\Modules\Notifications\Services\NotificationService;
+use Rafeeq\Modules\Notifications\Jobs\BroadcastNotificationJob;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
 
@@ -19,7 +19,6 @@ use Rafeeq\Shared\Enums\UserType;
 class AdminNotificationController extends Controller
 {
     public function __construct(
-        private readonly NotificationService $notifications,
         private readonly AuditLogger $audit,
     ) {}
 
@@ -57,17 +56,28 @@ class AdminNotificationController extends Controller
             $payload['coupon_code'] = strtoupper(trim($data['coupon_code']));
         }
 
-        $sent = 0;
-        $query->select(['id', 'type', 'status'])->chunkById(200, function ($users) use (&$sent, $data, $payload) {
-            $sent += $this->notifications->broadcast($users, $data['title'], $data['body'], $payload);
-        });
+        // Estimate the audience now (cheap COUNT), then fan-out off the request
+        // cycle so a large send never blocks/timeouts the admin's HTTP request.
+        $estimated = (clone $query)->count();
+
+        BroadcastNotificationJob::dispatch(
+            $data['audience'],
+            $data['audience'] === 'users' ? ($data['user_ids'] ?? []) : [],
+            $data['title'],
+            $data['body'],
+            $payload,
+        );
 
         $this->audit->log('notifications.broadcast', $request->user(), changes: [
             'audience' => $data['audience'],
-            'sent' => $sent,
+            'estimated' => $estimated,
             'coupon' => $payload['coupon_code'] ?? null,
+            'queued' => true,
         ]);
 
-        return $this->ok(['sent' => $sent], "تم إرسال الإشعار إلى {$sent} مستخدم.");
+        return $this->ok(
+            ['queued' => true, 'estimated' => $estimated],
+            "تم جدولة إرسال الإشعار إلى {$estimated} مستخدم. سيصل خلال لحظات."
+        );
     }
 }

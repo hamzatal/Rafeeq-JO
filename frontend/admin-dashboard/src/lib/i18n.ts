@@ -68,6 +68,7 @@ const DICT: Dict = {
   'notify.couponHint': { ar: 'عند الإرفاق، يظهر للمستخدم زر تفعيل الكوبون داخل الإشعار.', en: 'When attached, users see an "activate coupon" action inside the notification.' },
   'notify.send': { ar: 'إرسال الإشعار', en: 'Send notification' },
   'notify.sentTo': { ar: 'تم الإرسال إلى', en: 'Sent to' },
+  'notify.queuedFor': { ar: 'تمت جدولة الإرسال إلى', en: 'Queued for' },
   'notify.users': { ar: 'مستخدم', en: 'users' },
 
   // Profile page

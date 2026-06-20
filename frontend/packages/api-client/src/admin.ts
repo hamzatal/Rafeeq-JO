@@ -228,8 +228,8 @@ export class AdminApi {
     title: string;
     body: string;
     coupon_code?: string;
-  }): Promise<{ sent: number }> {
-    const { data } = await this.http.post<ApiSuccess<{ sent: number }>>(ENDPOINTS.admin.notify, payload);
+  }): Promise<{ queued: boolean; estimated: number }> {
+    const { data } = await this.http.post<ApiSuccess<{ queued: boolean; estimated: number }>>(ENDPOINTS.admin.notify, payload);
     return unwrap(data);
   }
 }

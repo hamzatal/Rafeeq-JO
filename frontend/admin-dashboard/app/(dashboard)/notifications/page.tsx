@@ -26,13 +26,13 @@ export default function NotificationsPage() {
     setSending(true);
     setMsg(null);
     try {
-      const { sent } = await api.admin.sendNotification({
+      const { estimated } = await api.admin.sendNotification({
         audience,
         title: title.trim(),
         body: body.trim(),
         coupon_code: coupon.trim() || undefined,
       });
-      setMsg({ kind: 'ok', text: `${t('notify.sentTo')} ${sent} ${t('notify.users')}` });
+      setMsg({ kind: 'ok', text: `${t('notify.queuedFor')} ${estimated} ${t('notify.users')}` });
       setTitle('');
       setBody('');
       setCoupon('');
