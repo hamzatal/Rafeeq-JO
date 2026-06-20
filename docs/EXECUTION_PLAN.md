@@ -1,70 +1,107 @@
-# خطة التنفيذ الرئيسية — رفيق (Rafeeq) · من الوضع الحالي إلى الإطلاق الرسمي
+# خطة التنفيذ الملموسة — إعادة هيكلة رفيق (Execution Plan)
 
-> **هذا هو المرجع الرئيسي للتقدّم.** يُحدَّث مع كل دفعة عمل.
-> اقرأه مع `docs/PROGRESS.md` (تفصيل لكل موديول) و`docs/ROADMAP.md` (الخطة الكاملة) و`docs/HANDOFF.md` (رسالة الاستئناف + التكاملات).
+> خطة تشغيلية مبنية على دراسة الكود الفعلي. كل "Increment" قابل للشحن وحده (commit + push + توثيق)، وله: الهدف، الملفات المستهدفة، التفاصيل التقنية، ومعايير القبول.
+> مرتبطة بـ `REVAMP_PLAN.md` (الرؤية) و`BENCHMARK.md` (المراجع). آخر تحديث: يونيو 2026.
 
-الرموز: ✅ منجز · 🔄 جارٍ · ⏳ متبقٍ
+## مبادئ التنفيذ (Engineering Rules)
+1. **التصميم خط أحمر**: كل شاشة جديدة تتبع نظام التصميم v3 (tokens موحّدة، RTL، i18n، لايت+دارك).
+2. **لا واجهات صامتة**: كل زر/شاشة موصولة بـ `@rafeeq/api-client` فعلياً (endpoints موجودة بالكامل — تحقّقنا).
+3. **التدهور الآمن (graceful degradation)**: أي فشل تكامل (خريطة/دفع/realtime) لا يكسر الشاشة (نمط `Safely` موجود).
+4. **عربي + لايت ديفولت** عبر التطبيقين.
+5. **تكامل بين التطبيقات**: طلب الطالب يظهر للكابتن، وحالة الكابتن تنعكس للطالب (عبر REST + Reverb realtime).
+6. **commit مرقّم [RFQ-###]** + تحديث `PROGRESS.md` مع كل دفعة.
 
-| | |
-|---|---|
-| الفرع | `foundation/phase-0-1` |
-| نقطة البداية لهذه الخطة | RFQ-073 (~43%) |
-| الهدف | 100% — جاهز للإطلاق الرسمي |
-
----
-
-## نظرة عامة على الدفعات (Milestones)
-
-| الدفعة | المحتوى | الحالة | التقدّم بعدها |
-|---|---|---|---|
-| الدفعة | المحتوى | الحالة | التقدّم بعدها |
-|---|---|---|---|
-| **M1** | المدفوعات (CliQ + GPT Vision) + بنية الـ AI (Gpt) | ✅ backend + UI | ~52% |
-| **M2** | الإشعارات (FCM + SMS fallback) + التقييم الثنائي | ✅ backend + UI | ~58% |
-| **M3** | التتبّع الحيّ (عميل Echo) + الخرائط + Express (تسعير ديناميكي + min-fill) | 🔄 Express ✅ / عميل Echo ✅ / خرائط ⏳ | ~64% |
-| **M4** | لوحة الإدارة للنقل + مركز الأمان + مراجعة CliQ + شحن المحافظ | ⏳ | ~72% |
-| **M5** | تجربة الطالب والكابتن الكاملة (طلب باب-لباب، عروض، محفظة، SOS) | ⏳ | ~78% |
-| **M6** | الدعم (L1–L4) + الشكاوى (تجميد بالحرج) + مركز النزاعات | 🔄 backend ✅ / UI جزئي | ~84% |
-| **M7** | محرّك الذكاء الاصطناعي (مساعد رفيق + Fraud Monitor + Route Intelligence + Vision) | ⏳ | ~89% |
-| **M8** | الخدمات الإضافية (Parcels + Lost&Found + Rewards + Exchange) | ✅ backend + شاشات الطالب | ~94% |
-| **M9** | المزايا الداعمة + التشغيل المالي (نسائي، No-show، إحالات، cash-out، Settings، Analytics، Audit UI) | ⏳ | ~97% |
-| **M10** | تجهيز الإطلاق (PostGIS، اختبارات، CI، Docker، monitoring، OpenAPI، PWA، قانوني، أمان) | ⏳ | **100%** |
+## الأساس الجاهز الذي نبني عليه (موجود فعلاً)
+- **Backend غني**: 30 وحدة، endpoints كاملة للمصادقة/المواصلات/الدفع/المحفظة/طلبات الرحلة/السائق.
+- **`LiveMap`** متقدّم (Google JS أو Leaflet/OSM، كابتن متحرّك، polyline، onPick) → خريطة-أولاً ممكنة فوراً.
+- **`User.roles[]`** موجود بالموديل → multi-role ممكن.
+- **`payments.create({purpose:'subscription', subscription_id})`** → دفع الاشتراك مدعوم، فقط غير موصول بالواجهة.
+- **`StudentProfile.onboarded` + `university_id`** → onboarding ممكن عبر `profile.updateStudentProfile`.
 
 ---
 
-## M1 — المدفوعات + بنية الـ AI ✅ (backend)
+## الخريطة الزمنية (7 Increments)
 
-| # | البند | الحالة |
-|---|---|---|
-| 1.1 | `Infrastructure/Gpt` — عميل OpenAI (chat + vision) + fallback آمن بدون مفتاح + binding | ✅ |
-| 1.2 | Payments: migrations (`payment_requests` + `payments`) | ✅ |
-| 1.3 | Payments: Enums (`PaymentPurpose`, `PaymentStatus`) + Models | ✅ |
-| 1.4 | Payments: `AI/PaymentVerificationService` (استخراج المبلغ/الوقت/المرجع + درجة ثقة) | ✅ |
-| 1.5 | Payments: `PaymentService` (إنشاء طلب + رفع إشعار + تحقق + اعتماد/رفض + تفعيل تلقائي للاشتراك/شحن المحفظة) | ✅ |
-| 1.6 | Payments: Controller + Requests + Resources + Routes + Provider + تسجيل + صلاحيات | ✅ |
-| 1.7 | مركز الشفافية المالية (سجل الطالب + طابور مراجعة الإدارة) — endpoints | ✅ |
-| 1.8 | واجهات الطالب/الإدارة للدفع (Frontend) | ⏳ |
-
-## M2 — الإشعارات + التقييم ✅ (backend)
-
-| # | البند | الحالة |
-|---|---|---|
-| 2.1 | `Infrastructure/Push` — Firebase FCM gateway (OAuth2/JWT) + fallback log | ✅ |
-| 2.2 | Notifications: جدول + تفضيلات لكل مستخدم + `NotificationService` (DB + FCM + SMS fallback للحرج) | ✅ |
-| 2.3 | Notifications: Controller + Routes + Provider (قائمة/تعليم كمقروء/تفضيلات/رموز الأجهزة) | ✅ |
-| 2.4 | Ratings: جدول + `RatingService` (تقييم ثنائي + تحديث متوسط الكابتن) + Controller/Routes/Provider | ✅ |
-| 2.5 | ربط الإشعارات بالتدفقات (دفع/رحلة/أمان) + إشعار التقييم بعد الإنهاء | ✅ |
-| 2.6 | واجهات الإشعارات/التقييم (Frontend) | ⏳ |
-
-> M3–M10: التفاصيل في `docs/ROADMAP.md`. تُفصّل هنا عند بدء كل دفعة.
+| # | Increment | الأثر | الخطر |
+|---|-----------|-------|-------|
+| 1 | نظام التصميم v3 (tokens + primitives) | عالٍ (أساس كل شي) | منخفض (إضافي) |
+| 2 | Onboarding + أذونات | عالٍ (شكوى مباشرة) | منخفض (شاشات جديدة) |
+| 3 | خريطة-أولاً (رئيسية الطالب + الكابتن) | عالٍ جداً (بصري) | متوسط (يستبدل home) |
+| 4 | حساب موحّد متعدد الأدوار | عالٍ (شكوى الكابتن) | متوسط (backend+tests) |
+| 5 | اشتراك + دفع منطقي + محفظة موحّدة | عالٍ جداً (شكوى مباشرة) | متوسط |
+| 6 | تتبّع رحلة timeline + realtime | عالٍ | متوسط |
+| 7 | تلميع نهائي + a11y | متوسط | منخفض |
 
 ---
 
-## سجل الدفعات المنفّذة
-| الدفعة | الـ Commits | ملخّص |
-|---|---|---|
-| M1+M2 (backend) | RFQ-074 → RFQ-079 | بنية GPT (Gpt client + fallback) · موديول Payments (CliQ + GPT Vision + اعتماد تلقائي/يدوي + تفعيل اشتراك/شحن محفظة) · بنية Push (FCM) · موديول Notifications (DB + FCM + SMS fallback + تفضيلات + أجهزة) · موديول Ratings (تقييم ثنائي + متوسط الكابتن) · ربط الإشعارات بتدفقات الدفع/الرحلة/الطوارئ |
-| Fixes (frontend) | RFQ-080 → RFQ-085 | عزل كاش Metro (حل مشكلة فتح الكابتن) · راوتنج الأدمن (404) · لوجو أردني جديد · سبلاش بسيارة · إصلاح خلط اللغة · مراجعة أمان + مواءمة TypeScript |
-| M3 + UIs | RFQ-086 → RFQ-094 | تسعير Express الديناميكي + min-fill + تقدير الأجرة · عميل API كامل (محفظة/دفع/إشعارات/تقييم/طلبات/عروض) · شاشات الطالب (محفظة/دفع/إشعارات/طلب باب-لباب/تقييم) · شاشات الكابتن (أرباح/عروض) · صفحات الإدارة (مراجعة المدفوعات/مراقبة الطلبات/تشغيل التجميع) |
-| M6 + Realtime | RFQ-095 → RFQ-101 | موديول الدعم (تذاكر L1–L4 + تصعيد) · موديول الشكاوى (تصنيف خطورة + تجميد فوري بالحرج + تنبيه فريق السلامة) · عملاء API (Support/Complaints) · صفحات الإدارة (دعم/شكاوى) · شاشة دعم الطالب · عميل Laravel Echo (Reverb) + تتبّع حيّ لرحلات الطالب |
-| M8 الخدمات الإضافية | RFQ-102 → RFQ-110 | الطرود (سلسلة عهدة بـ OTP مزدوج + كابتن/أحداث) · النقاط/المكافآت (نقاط+مستويات + كسب تلقائي عند الرحلة) · المفقودات (مطابقة بالكلمات) · التبادل الطلابي · عملاء API + الأنواع + ENDPOINTS · شاشات الطالب (نقاط/طرود/مفقودات/تبادل) |
+## Increment 1 — نظام التصميم الموحّد v3
+**الهدف:** أساس بصري متّسق وفاخر يستخدمه التطبيقان، دون كسر الموجود.
+**الملفات:**
+- `packages/shared/src/theme/scheme.ts` — توسيع `ThemeColors` بـ tokens دلالية (elevation/overlay/successSoft/warningSoft/dangerSoft/infoSoft/hairline/scrim).
+- `packages/shared/src/theme/elevation.ts` (جديد) — مستويات ظلّ موحّدة لايت/دارك.
+- `student-app/src/components/ui-kit.tsx` + `driver-app/src/components/ui-kit.tsx` (جديد) — primitives فاخرة: `PressableScale`, `Sheet` (bottom sheet), `SegmentedControl`, `Stepper`, `Chip`, `Divider`, `Skeleton`, `KeyValue`, `Sheetهيدر`.
+- تحسين `Button` (إضافة variants: `solid|outline|ghost|danger` + أحجام + أيقونة) دون كسر الواجهة الحالية.
+**القبول:** يبني tsc منطقياً؛ الشاشات الحالية تعمل كما هي؛ الـ primitives الجديدة جاهزة للاستخدام في Increments التالية؛ لايت+دارك صحيحان.
+
+## Increment 2 — Onboarding + تمهيد الأذونات
+**الهدف:** أول تجربة عالمية: تعريف موجز + طلب الموقع/الإشعارات في سياقها + اختيار اللغة/الجامعة.
+**الملفات:**
+- `student-app/app/(onboarding)/_layout.tsx` + `intro.tsx` (3 شرائح) + `permissions.tsx` (موقع/إشعارات priming) + `profile-setup.tsx` (الجامعة + نقطة الانطلاق).
+- `driver-app/app/(onboarding)/...` مماثل (موقع/إشعارات + ملخّص الكابتن).
+- `student-app/src/lib/permissions.ts` (جديد) — wrappers آمنة حول expo-location/expo-notifications (لا ترمي أبداً).
+- `student-app/src/store/prefs.ts` — إضافة `onboardingDone` flag + ربط بـ `StudentProfile.onboarded`.
+- توجيه: `app/index.tsx` → onboarding إن لم يكتمل، وإلا home.
+- i18n: مفاتيح `onboarding.*`, `permissions.*` في `packages/shared/src/i18n/ar.ts|en.ts`.
+**القبول:** أول فتح → شرائح → أذونات (مع شرح) → اختيار جامعة → home؛ تخطّي مسموح؛ يُطلب الموقع في سياقه؛ يعمل عربي/إنجليزي.
+
+## Increment 3 — خريطة-أولاً
+**الهدف:** الرئيسية محورها خريطة + فعل أساسي مهيمن.
+**الملفات:**
+- `student-app/app/(app)/home.tsx` — إعادة بناء: خريطة ملء الشاشة (`LiveMap`) + bottom `Sheet`: «إلى أين؟ (جامعتك)» + «اطلب رحلة الآن» (يستدعي `rideRequests.estimate` ثم `create`) + بطاقة الاشتراك/المحفظة مختصرة + صف خدمات أفقي. نقل الخدمات الثانوية لـ«المزيد».
+- `student-app/app/(app)/services.tsx` (جديد) — صفحة الخدمات الإضافية (طرود/مفقودات/تبادل/مساعد/طوارئ/مكافآت).
+- `driver-app/app/(app)/dashboard.tsx` — إعادة بناء: خريطة + مفتاح **Online/Offline** كبير + الطلب الحالي + ملخّص أرباح اليوم.
+- `driver-app/src/store/availability.ts` (جديد) — حالة الاتصال + بثّ الموقع.
+- i18n + تنظيف نصوص `LiveMap` العربية → مفاتيح.
+**القبول:** فتح التطبيق يُظهر خريطة فوراً؛ زر واحد مهيمن؛ الكابتن يبدّل online/offline ويراها الباك إند؛ يعمل مع/بدون مفتاح خرائط (fallback).
+
+## Increment 4 — حساب موحّد متعدد الأدوار (رقم واحد: طالب+كابتن)
+**الهدف:** نفس الرقم يعمل على المنصتين بلا رفض.
+**الملفات (Backend):**
+- `backend/Modules/Auth/Requests/RegisterRequest.php` — عدم رفض رقم موجود عند طلب صفة كابتن.
+- `backend/Modules/Auth/Services/AuthService.php` — منطق: إن وُجد المستخدم → أضف دور `driver` + أنشئ `driver_profile` (إن لم يوجد) بدل خطأ التفرّد.
+- مسار `POST /v1/auth/become-driver` (أو توسيع register) + Policy.
+- اختبارات: `backend/Modules/Auth/Tests/...` — «رقم طالب يصبح كابتن»، «منع تكرار driver_profile».
+**الملفات (Frontend):**
+- `driver-app/app/(auth)/login.tsx` + `register.tsx` — رسالة «لديك حساب رفيق؟ فعّل صفة الكابتن» بدل «الرقم مسجّل».
+- `driver-app/src/store/auth.ts` — مسار التفعيل.
+**القبول:** رقم مسجّل كطالب يسجّل دخول الكابتن بنجاح (بعد OTP) ويُنشأ له driver_profile؛ الاختبارات تمرّ؛ لا كسر لتسجيل جديد.
+
+## Increment 5 — اشتراك + دفع منطقي + محفظة موحّدة
+**الهدف:** مسار اشتراك واضح بخطوة دفع فعلية + مركز مالي موحّد.
+**الملفات:**
+- `student-app/app/(app)/subscriptions.tsx` — إعادة بناء: اختيار جامعة/مسار → خطط مفهومة (سعر/عدد رحلات/مدة) → «اشترك» → شاشة تأكيد ودفع.
+- `student-app/app/(app)/checkout.tsx` (جديد) — يستدعي `transport.subscribe` ثم `payments.create({purpose:'subscription', subscription_id})` → عرض `CliqInstructions` + رفع إيصال (`submitProof`) → حالة «بانتظار التأكيد».
+- `student-app/app/(app)/wallet.tsx` — مركز مالي موحّد: الرصيد + الشحن (`wallet.topupInstructions`) + العمليات (`wallet.transactions`) + طلبات الدفع (`payments.mine`) بحالة timeline.
+- دمج `payments.tsx` ضمن wallet.
+- i18n `subscriptions.*`, `wallet.*`, `payments.*`.
+**القبول:** الطالب يشترك → يُوجَّه لدفع فعلي (CliQ/إيصال) → الاشتراك «pending» بحالة واضحة؛ المحفظة تعرض الرصيد والعمليات وطلبات الدفع؛ لا «اشتراك وهمي» بلا دفع.
+
+## Increment 6 — تتبّع الرحلة timeline + تكامل الطلب
+**الهدف:** تكامل حيّ بين الطالب والكابتن.
+**الملفات:**
+- `student-app/app/(app)/ride-request.tsx` + `trips.tsx` — حالة الرحلة timeline (بانتظار سائق→مُسند→بالطريق→بالرحلة→وصلت) + خريطة حيّة (`transport.tripLocation`/realtime) + كود الصعود.
+- `driver-app/app/(app)/offers.tsx` + `trip/[id].tsx` — استقبال طلب من خريطة + قبول → ملاحة → إتمام.
+- `student-app/src/lib/realtime.ts` / `driver-app` — قنوات Reverb للطلب/الموقع.
+**القبول:** طلب الطالب يظهر للكابتن؛ قبول الكابتن ينعكس فوراً عند الطالب؛ الموقع يتحرّك حيّاً؛ يعمل بتدهور آمن لو realtime معطّل (polling).
+
+## Increment 7 — تلميع نهائي + a11y
+- `Skeleton` لكل قوائم؛ `EmptyState` موحّد؛ انتقالات؛ تدقيق تباين WCAG (4.5:1/3:1)؛ مراجعة دارك/لايت وعربي/إنجليزي لكل شاشة؛ إزالة كل النصوص الـhardcoded.
+**القبول:** لا نص عربي مكتوب في الكود؛ كل شاشة تمرّ لايت+دارك+عربي+إنجليزي؛ حالات تحميل/فارغة موحّدة.
+
+---
+
+## ملاحظة تحقّق (مهمة)
+بيئة العمل لا تشغّل تطبيقات Expo/React Native (لا node_modules). لذلك:
+- الكود يُكتب متّسقاً مع الأنماط والأنواع الموجودة، ويُراجَع منطقياً.
+- **التحقّق النهائي بصرياً/وظيفياً يتمّ عند المالك** عبر `expo start` بعد كل دفعة.
+- نُبقي كل تغيير صغيراً وقابلاً للتراجع، ومدفوعاً تدريجياً ليراجعه المالك على GitHub.

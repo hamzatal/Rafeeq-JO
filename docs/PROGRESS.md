@@ -13,7 +13,15 @@
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-> **العمل الحالي:** **خطة إعادة تصميم شاملة لتطبيقي الطالب والكابتن** — انظر `docs/REVAMP_PLAN.md` (تشخيص صادق + دراسة معيارية لـ20+ تطبيق + خطة مراحل A→E). بانتظار موافقة المالك على المراحل الكبيرة.
+> **العمل الحالي:** **إعادة هيكلة شاملة (7 Increments)** — انظر `docs/EXECUTION_PLAN.md`. منجز: Increment 1 (نظام التصميم v3). التالي: Increment 2 (Onboarding + أذونات).
+
+**✅ RFQ-263 — Increment 1: نظام التصميم الموحّد v3 (tokens + primitives):**
+- **`docs/EXECUTION_PLAN.md`** (جديد): خطة تنفيذ ملموسة بـ7 Increments قابلة للشحن، ملفات مستهدفة، ومعايير قبول لكل واحدة، مبنية على دراسة الكود الفعلي.
+- **توسيع `packages/shared/src/theme/scheme.ts`** (إضافي وآمن): tokens دلالية جديدة على `ThemeColors` — `accentSoft`, `elevated`, `textInverse`, `hairline`, `scrim`, و`successSoft/warningSoft/dangerSoft/infoSoft` — مع قيم لايت/دارك. لا يكسر أي شاشة قائمة.
+- **مكتبة primitives فاخرة جديدة `src/components/kit.tsx`** (للطالب والكابتن): `PressableScale`, `Sheet` (bottom sheet + scrim), `SegmentedControl`, `Stepper`, `Chip`, `Divider`, `Skeleton`, `KeyValue` — كلها theme-aware + RTL + بلا نصوص hardcoded.
+- **تطوير `Button`** (الطالب والكابتن): variants `primary|outline|ghost|danger` + أحجام `md|lg` + أيقونة، مع إبقاء الواجهة القديمة متوافقة.
+
+
 
 **✅ RFQ-262 — دراسة معيارية معمّقة لـ20 تطبيق (Benchmark):**
 - **وثيقة جديدة `docs/BENCHMARK.md`**: دراسة تطبيق-تطبيق لـ20 تطبيق (10 عالمي: Uber/Lyft/Bolt/DiDi/inDrive/Grab/Gojek/Talabat/Deliveroo/DoorDash + 10 أردني/إقليمي: Jeeny/Careem/Uber JO/inDrive JO/Petra Ride/TaxiF/Tawseela/Careem Food/TolApp JO/فوم) — لكل تطبيق: ما هو + أنماط التصميم + الدرس المطبّق على رفيق، + جدول مقارنة + الدروس المُجمّعة للطالب والكابتن، + مصادر موثّقة بالروابط.
