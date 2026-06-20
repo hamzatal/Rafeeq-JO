@@ -102,8 +102,8 @@ export default function Dashboard() {
               <Switch
                 value={online}
                 onValueChange={(v) => void setOnline(v)}
-                trackColor={{ true: theme.colors.primary, false: theme.colors.border }}
-                thumbColor={theme.colors.surface}
+                trackColor={{ true: theme.colors.accent, false: theme.colors.border }}
+                thumbColor={online ? theme.colors.onAccent : theme.colors.surface}
               />
             </View>
 
@@ -170,7 +170,7 @@ const makeStyles = (t: AppTheme) =>
 
     mapWrap: { borderRadius: t.radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.border, marginBottom: t.spacing.md },
     toggleCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base, ...t.shadow.sm },
-    toggleCardOn: { borderColor: t.colors.primary },
+    toggleCardOn: { borderColor: t.colors.accent },
     statusDot: { width: 12, height: 12, borderRadius: 6 },
     toggleTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
     toggleHint: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
