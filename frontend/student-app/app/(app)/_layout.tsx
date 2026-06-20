@@ -2,12 +2,11 @@ import { Redirect, Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../src/store/auth';
 import { useI18n } from '../../src/i18n';
-import { useTheme } from '../../src/theme';
+import { TabBar } from '../../src/components/TabBar';
 
 export default function AppLayout() {
   const status = useAuth((s) => s.status);
   const { t } = useI18n();
-  const theme = useTheme();
 
   if (status === 'unauthenticated') {
     return <Redirect href="/(auth)/welcome" />;
@@ -18,26 +17,8 @@ export default function AppLayout() {
 
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.muted,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          height: 68,
-          paddingBottom: 12,
-          paddingTop: 8,
-          shadowColor: '#0B192C',
-          shadowOpacity: 0.08,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: -4 },
-          elevation: 12,
-        },
-        tabBarLabelStyle: { fontFamily: theme.fontFamily.bold, fontSize: 11 },
-      }}
+      tabBar={(props) => <TabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen name="home" options={{ title: t('home.title'), tabBarIcon: tab('home') }} />
       <Tabs.Screen name="trips" options={{ title: t('home.trips'), tabBarIcon: tab('navigation') }} />

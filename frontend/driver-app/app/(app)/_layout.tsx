@@ -2,12 +2,11 @@ import { Redirect, Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../src/store/auth';
 import { useI18n } from '../../src/i18n';
-import { useTheme } from '../../src/theme';
+import { TabBar } from '../../src/components/TabBar';
 
 export default function AppLayout() {
   const status = useAuth((s) => s.status);
   const { t } = useI18n();
-  const theme = useTheme();
 
   if (status === 'unauthenticated') {
     return <Redirect href="/(auth)/welcome" />;
@@ -18,19 +17,8 @@ export default function AppLayout() {
 
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.muted,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
-          height: 64,
-          paddingBottom: 10,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: { fontFamily: theme.fontFamily.medium, fontSize: 11 },
-      }}
+      tabBar={(props) => <TabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen name="dashboard" options={{ title: t('driver.dashboard'), tabBarIcon: tab('grid') }} />
       <Tabs.Screen name="offers" options={{ title: t('driver.offers'), tabBarIcon: tab('inbox') }} />
