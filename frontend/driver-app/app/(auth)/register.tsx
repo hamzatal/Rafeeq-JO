@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { normalizeJordanPhone, validators, validateForm } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Screen } from '../../src/components/Screen';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
+import { AuthShell } from '../../src/components/AuthShell';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
@@ -15,9 +15,9 @@ import { useTheme, type AppTheme } from '../../src/theme';
 export default function Register() {
   const { t } = useI18n();
   const router = useRouter();
-  const register = useAuth((s) => s.register);
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
+  const register = useAuth((a) => a.register);
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -46,9 +46,8 @@ export default function Register() {
       const otpDebug = await register({ full_name: fullName.trim(), phone: normalized, password });
       router.push({ pathname: '/(auth)/otp', params: { phone: normalized, purpose: 'register', debug: otpDebug ?? '' } });
     } catch (err) {
-      // The phone already belongs to a Rafeeq account (e.g. a student). Instead
-      // of blocking, sign them in via a login OTP — the captain capability is
-      // added automatically after verification (one phone = student + captain).
+      // Phone already belongs to a Rafeeq account → sign in via login OTP; the
+      // captain capability is added automatically after verification.
       if (err instanceof RafeeqApiError && err.status === 422 && err.errors?.phone) {
         try {
           const res = await api.auth.requestOtp(normalized);
@@ -66,20 +65,23 @@ export default function Register() {
   };
 
   return (
-    <Screen scroll>
-      <View style={s.header}><Text style={s.title}>{t('auth.register')}</Text></View>
-      <Banner message={formError} />
-      <Input label={t('auth.fullName')} value={fullName} onChangeText={setFullName} error={errors.fullName} autoCapitalize="words" />
-      <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
-      <Input label={t('auth.password')} value={password} onChangeText={setPassword} error={errors.password} secureTextEntry />
-      <Input label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
+    <AuthShell title={t('auth.register')} subtitle={t('auth.captainSignupSub')}>
+      {formError ? <Banner message={formError} variant="error" /> : null}
+      <Input onDark label={t('auth.fullName')} value={fullName} onChangeText={setFullName} error={errors.fullName} autoCapitalize="words" />
+      <Input onDark label={t('auth.phone')} value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+      <Input onDark label={t('auth.password')} value={password} onChangeText={setPassword} error={errors.password} secureTextEntry />
+      <Input onDark label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
       <Button title={t('auth.sendCode')} onPress={onSubmit} loading={loading} />
-    </Screen>
+
+      <Pressable onPress={() => router.push('/(auth)/login')} hitSlop={8} style={s.bottomLink}>
+        <Text style={s.bottomLinkText}>{t('auth.haveAccount')}</Text>
+      </Pressable>
+    </AuthShell>
   );
 }
 
-const makeStyles = (t: AppTheme) =>
+const makeStyles = (_t: AppTheme) =>
   StyleSheet.create({
-    header: { marginTop: t.spacing['2xl'], marginBottom: t.spacing.xl },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right' },
+    bottomLink: { alignItems: 'center', marginTop: 24 },
+    bottomLinkText: { fontFamily: _t.fontFamily.semibold, fontSize: 14, color: 'rgba(255,255,255,0.8)' },
   });

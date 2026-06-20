@@ -3,16 +3,16 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { normalizeJordanPhone, validators } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Screen } from '../../src/components/Screen';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
+import { AuthShell } from '../../src/components/AuthShell';
+import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-/** Password-first captain login (OTP fallback + password reset). */
 export default function Login() {
   const { t } = useI18n();
   const router = useRouter();
@@ -59,40 +59,55 @@ export default function Login() {
   };
 
   return (
-    <Screen scroll>
-      <View style={s.header}>
-        <Text style={s.title}>{t('auth.login')}</Text>
-        <Text style={s.subtitle}>{t('auth.loginHint')}</Text>
-      </View>
-      <Banner message={formError} />
-      <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
-      <Input label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry />
+    <AuthShell title={t('auth.login')} subtitle={t('auth.captainSigninSub')}>
+      {formError ? <Banner message={formError} variant="error" /> : null}
+      <Input onDark label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+      <Input onDark label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry />
 
       <Pressable onPress={() => router.push('/(auth)/forgot-password')} hitSlop={8} style={s.forgot}>
-        <Text style={[s.forgotText, { color: theme.colors.primary }]}>{t('auth.forgotPassword')}</Text>
+        <Text style={s.forgotText}>{t('auth.forgotPassword')}</Text>
       </Pressable>
 
       <Button title={t('auth.login')} onPress={onSubmit} loading={loading} />
 
       <View style={s.divider}>
-        <View style={[s.line, { backgroundColor: theme.colors.border }]} />
-        <Text style={[s.or, { color: theme.colors.muted }]}>—</Text>
-        <View style={[s.line, { backgroundColor: theme.colors.border }]} />
+        <View style={s.line} />
+        <Text style={s.or}>{t('common.or')}</Text>
+        <View style={s.line} />
       </View>
 
-      <Button title={t('auth.loginWithOtp')} onPress={onOtp} loading={otpLoading} variant="outline" icon="message-square" />
-    </Screen>
+      <Pressable onPress={onOtp} disabled={otpLoading} style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
+        <Icon name="message-square" size={18} color="#FFFFFF" />
+        <Text style={s.secondaryText}>{otpLoading ? '...' : t('auth.loginWithOtp')}</Text>
+      </Pressable>
+
+      <Pressable onPress={() => router.push('/(auth)/register')} hitSlop={8} style={s.bottomLink}>
+        <Text style={s.bottomLinkText}>{t('auth.noAccount')}</Text>
+      </Pressable>
+    </AuthShell>
   );
 }
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    header: { marginTop: t.spacing['2xl'], marginBottom: t.spacing.xl, gap: t.spacing.xs },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right' },
-    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right' },
-    forgot: { alignSelf: 'flex-start', marginBottom: 12, marginTop: 2 },
-    forgotText: { fontSize: 13, fontWeight: '700' },
-    divider: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 16 },
-    line: { flex: 1, height: 1 },
-    or: { fontSize: 12 },
+    forgot: { alignSelf: 'flex-start', marginBottom: t.spacing.base, marginTop: 2 },
+    forgotText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.accent },
+    divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: t.spacing.lg },
+    line: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: 'rgba(255,255,255,0.2)' },
+    or: { fontFamily: t.fontFamily.medium, fontSize: 13, color: 'rgba(255,255,255,0.5)' },
+    secondary: {
+      flexDirection: 'row-reverse',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      height: 54,
+      borderRadius: t.radius.lg,
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.25)',
+      backgroundColor: 'rgba(255,255,255,0.05)',
+    },
+    secondaryText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: '#FFFFFF' },
+    pressed: { opacity: 0.7 },
+    bottomLink: { alignItems: 'center', marginTop: t.spacing.xl },
+    bottomLinkText: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: 'rgba(255,255,255,0.8)' },
   });

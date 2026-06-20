@@ -3,6 +3,7 @@ import type { Translations } from './ar';
 export const en: Translations = {
   common: {
     now: 'Now',
+    or: 'or',
     appName: 'Rafeeq',
     next: 'Next',
     back: 'Back',
@@ -64,7 +65,11 @@ export const en: Translations = {
   },
   auth: {
     welcomeTitle: 'Welcome to Rafeeq',
-    welcomeSubtitle: 'Smart university mobility & services',
+    welcomeSubtitle: 'Smart campus mobility — simpler, cheaper, safer',
+    studentSigninSub: 'Welcome back — continue your campus journey',
+    studentSignupSub: 'Create your account and ride in minutes',
+    captainSigninSub: 'Ready to start your day and earn more?',
+    captainSignupSub: 'Join the Rafeeq captains and start getting requests',
     login: 'Log in',
     loginHint: 'Enter your number and password to sign in',
     register: 'Create account',

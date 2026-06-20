@@ -7,11 +7,7 @@ import { useI18n } from '../../src/i18n';
 import { Button } from '../../src/components/Button';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-/**
- * Minimal, premium welcome — restrained neutral canvas, a single clear
- * headline and one primary action (the world-class app pattern), instead of a
- * busy image/scrim/animated-slogans layout.
- */
+/** Unified premium landing — dark canvas, soft lime glow, brand mark, one CTA. */
 export default function Welcome() {
   const { t } = useI18n();
   const router = useRouter();
@@ -20,11 +16,13 @@ export default function Welcome() {
 
   return (
     <View style={s.root}>
-      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="light" />
+      <View style={s.glow} />
+      <View style={s.glow2} />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <View style={s.body}>
-          <View style={s.logo}>
-            <Text style={s.logoLetter}>ر</Text>
+          <View style={s.mark}>
+            <Text style={s.markLetter}>ر</Text>
           </View>
           <Text style={s.brand}>رفيق</Text>
           <Text style={s.tagline}>{t('auth.welcomeSubtitle')}</Text>
@@ -32,8 +30,8 @@ export default function Welcome() {
 
         <View style={s.actions}>
           <Button title={t('auth.register')} onPress={() => router.push('/(auth)/register')} />
-          <Pressable onPress={() => router.push('/(auth)/login')} style={s.loginRow} hitSlop={8}>
-            <Text style={s.loginMuted}>{t('auth.haveAccount')}</Text>
+          <Pressable onPress={() => router.push('/(auth)/login')} style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
+            <Text style={s.secondaryText}>{t('auth.login')}</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -43,30 +41,17 @@ export default function Welcome() {
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.colors.background },
+    root: { flex: 1, backgroundColor: '#0E0F12', overflow: 'hidden' },
+    glow: { position: 'absolute', top: -110, right: -80, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.18 },
+    glow2: { position: 'absolute', bottom: -150, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.08 },
     safe: { flex: 1, paddingHorizontal: t.spacing.lg },
     body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: t.spacing.md },
-    logo: {
-      width: 92,
-      height: 92,
-      borderRadius: 24,
-      backgroundColor: t.colors.accent,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: t.spacing.sm,
-    },
-    logoImg: { width: 56, height: 56, tintColor: '#FFFFFF' },
-    logoLetter: { fontFamily: t.fontFamily.extrabold, fontSize: 52, color: t.colors.onAccent, lineHeight: 60 },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: t.colors.text, letterSpacing: 0.5 },
-    tagline: {
-      fontFamily: t.fontFamily.regular,
-      fontSize: 16,
-      lineHeight: 26,
-      color: t.colors.textSecondary,
-      textAlign: 'center',
-      maxWidth: 300,
-    },
-    actions: { gap: t.spacing.base, paddingBottom: t.spacing.lg },
-    loginRow: { alignItems: 'center', paddingVertical: 6 },
-    loginMuted: { fontFamily: t.fontFamily.semibold, fontSize: 15, color: t.colors.primary },
+    mark: { width: 96, height: 96, borderRadius: 28, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm },
+    markLetter: { fontFamily: t.fontFamily.extrabold, fontSize: 56, color: t.colors.onAccent, lineHeight: 64 },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 42, color: '#FFFFFF', letterSpacing: 0.5 },
+    tagline: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 26, color: 'rgba(255,255,255,0.7)', textAlign: 'center', maxWidth: 300 },
+    actions: { gap: t.spacing.md, paddingBottom: t.spacing.lg },
+    secondary: { height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.25)', backgroundColor: 'rgba(255,255,255,0.05)' },
+    secondaryText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: '#FFFFFF' },
+    pressed: { opacity: 0.75 },
   });

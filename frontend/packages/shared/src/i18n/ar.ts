@@ -1,6 +1,7 @@
 export const ar = {
   common: {
     now: 'الآن',
+    or: 'أو',
     appName: 'رفيق',
     next: 'التالي',
     back: 'رجوع',
@@ -62,7 +63,11 @@ export const ar = {
   },
   auth: {
     welcomeTitle: 'أهلاً بك في رفيق',
-    welcomeSubtitle: 'النقل والخدمات الجامعية الذكية',
+    welcomeSubtitle: 'النقل الجامعي الذكي — أبسط، أوفر، وأأمن',
+    studentSigninSub: 'أهلاً بعودتك — تابع رحلتك الجامعية',
+    studentSignupSub: 'أنشئ حسابك وابدأ أول رحلة خلال دقائق',
+    captainSigninSub: 'جاهز تبدأ يومك وتزيد دخلك؟',
+    captainSignupSub: 'انضمّ لفريق كباتن رفيق وابدأ استقبال الطلبات',
     login: 'تسجيل الدخول',
     loginHint: 'أدخل رقمك وكلمة المرور للدخول',
     register: 'إنشاء حساب',
