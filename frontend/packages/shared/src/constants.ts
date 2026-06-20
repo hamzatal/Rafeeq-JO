@@ -80,6 +80,7 @@ export const ENDPOINTS = {
     vehicles: '/driver/vehicles',
     performance: '/driver/performance',
     withdrawals: '/driver/wallet/withdrawals',
+    location: '/driver/location',
   },
   adminWithdrawals: {
     list: '/admin/withdrawals',

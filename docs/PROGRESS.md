@@ -13,7 +13,16 @@
 ---
 
 ## الخطوة التالية (ابدأ من هنا) ▶️
-> **العمل الحالي:** **إعادة هيكلة شاملة (7 Increments)** — انظر `docs/EXECUTION_PLAN.md`. منجز: Increment 1 (نظام التصميم) + Increment 2 (Onboarding/أذونات). التالي: Increment 3 (خريطة-أولاً).
+> **العمل الحالي:** **إعادة هيكلة شاملة (7 Increments)** — انظر `docs/EXECUTION_PLAN.md`. منجز: Increment 1 (تصميم) + 2 (Onboarding/أذونات) + 3 (خريطة-أولاً). التالي: Increment 4 (حساب موحّد متعدد الأدوار).
+
+**✅ RFQ-265 — Increment 3: خريطة-أولاً (الطالب + الكابتن):**
+- **رئيسية الطالب `home.tsx`** أُعيد بناؤها لتكون خريطة-أولاً: `LiveMap` بارزة تتمركز على موقع الطالب (عبر `getCurrentLocation` بتدهور آمن) + بطاقة «إلى أين؟» عائمة تفتح طلب الرحلة، ثم اشتراك مختصر + محفظة + صف خدمات أفقي + آخر الرحلات. كل النصوص i18n.
+- **رئيسية الكابتن `dashboard.tsx`** أُعيد بناؤها لتكون خريطة-أولاً: خريطة بموقع الكابتن + **مفتاح Online/Offline حقيقي** (`Switch`) + أرباح اليوم + تقييم/رحلات + روابط. الاعتماد (pending/approved) محفوظ.
+- **توفّر الكابتن فعلي:** `driver-app/src/store/availability.ts` — عند «متصل» يبثّ الموقع كل 15ث عبر `POST /driver/location` (endpoint موجود بالباك إند، أُضيف للـ api-client + constants).
+- **api-client:** `DriverApi.pushLocation(lat,lng,speed?)` + `ENDPOINTS.driver.location`.
+- **i18n:** `home.{whereTo,requestRideCta,nearby,activeSubscription,viewAll,noActiveSub,remainingRides,endsIn,recentTrips,moreServices,...}` + `driver.{online,offline,goOnline,goOffline,onlineHint,offlineHint,todayEarnings,locationNeeded}` (عربي+إنجليزي).
+
+
 
 **✅ RFQ-264 — Increment 2: Onboarding + تمهيد الأذونات (الطالب + الكابتن):**
 - **مكتبة أذونات آمنة** `src/lib/permissions.ts` (للتطبيقين): wrappers حول expo-location/expo-notifications، lazy + لا ترمي أبداً (web/simulator → unavailable).

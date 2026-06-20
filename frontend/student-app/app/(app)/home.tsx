@@ -6,9 +6,21 @@ import type { Subscription, TripPassenger, Wallet } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
+import { getCurrentLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { Icon, type IconName } from '../../src/components/Icon';
-import { ServiceTile } from '../../src/components/ui';
+import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
+import { PressableScale } from '../../src/components/kit';
+
+const SECONDARY: { key: string; icon: IconName; href: string }[] = [
+  { key: 'parcels', icon: 'package', href: '/(app)/parcels' },
+  { key: 'lostFound', icon: 'search', href: '/(app)/lost-found' },
+  { key: 'rewards', icon: 'gift', href: '/(app)/rewards' },
+  { key: 'exchange', icon: 'repeat', href: '/(app)/exchange' },
+  { key: 'support', icon: 'help-circle', href: '/(app)/support' },
+  { key: 'assistant', icon: 'message-circle', href: '/(app)/assistant' },
+  { key: 'emergency', icon: 'alert-triangle', href: '/(app)/emergency' },
+];
 
 export default function Home() {
   const { t } = useI18n();
@@ -21,6 +33,7 @@ export default function Home() {
   const [unread, setUnread] = useState(0);
   const [sub, setSub] = useState<Subscription | null>(null);
   const [trips, setTrips] = useState<TripPassenger[]>([]);
+  const [myLoc, setMyLoc] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     api.wallet.show().then(setWallet).catch(() => undefined);
@@ -33,24 +46,16 @@ export default function Home() {
       .myTrips()
       .then((list) => setTrips(list.slice(0, 3)))
       .catch(() => undefined);
+    // Center the map on the rider (graceful: stays on default area if denied).
+    void getCurrentLocation().then((loc) => loc && setMyLoc(loc));
   }, []);
-
-  const services: { key: string; icon: IconName; href?: string }[] = [
-    { key: 'subscriptions', icon: 'calendar', href: '/(app)/subscriptions' },
-    { key: 'payments', icon: 'dollar-sign', href: '/(app)/payments' },
-    { key: 'parcels', icon: 'package', href: '/(app)/parcels' },
-    { key: 'lostFound', icon: 'search', href: '/(app)/lost-found' },
-    { key: 'rewards', icon: 'gift', href: '/(app)/rewards' },
-    { key: 'exchange', icon: 'repeat', href: '/(app)/exchange' },
-    { key: 'support', icon: 'help-circle', href: '/(app)/support' },
-    { key: 'assistant', icon: 'message-circle', href: '/(app)/assistant' },
-    { key: 'emergency', icon: 'alert-triangle', href: '/(app)/emergency' },
-  ];
 
   const fmtTime = (iso: string | null) =>
     iso ? new Date(iso).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '—';
   const fmtDate = (iso: string | null) =>
     iso ? new Date(iso).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) : '';
+
+  const mapPoints: MapPoint[] = myLoc ? [{ lat: myLoc.lat, lng: myLoc.lng, kind: 'origin', label: t('home.nearby') }] : [];
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -70,26 +75,28 @@ export default function Home() {
           </View>
         </View>
 
-        {/* Hero: where to? → request ride */}
-        <Pressable
-          onPress={() => router.push('/(app)/ride-request')}
-          style={({ pressed }) => [s.hero, pressed && s.pressed]}
-        >
-          <View style={s.heroIcon}>
-            <Icon name="navigation" size={22} color={theme.colors.onPrimary} />
+        {/* Map-first hero: live map + floating "where to?" CTA */}
+        <View style={s.mapHero}>
+          <View style={s.mapWrap}>
+            <LiveMap points={mapPoints} legend={false} height={300} />
           </View>
-          <View style={s.heroText}>
-            <Text style={s.heroTitle}>إلى أين نتجه اليوم؟</Text>
-            <Text style={s.heroSub}>{t('home.rideRequest')}</Text>
-          </View>
-          <Icon name="chevron-left" size={22} color={theme.colors.muted} />
-        </Pressable>
+          <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.whereToCard}>
+            <View style={s.whereToIcon}>
+              <Icon name="navigation" size={20} color={theme.colors.onPrimary} />
+            </View>
+            <View style={s.whereToText}>
+              <Text style={s.whereToTitle}>{t('home.whereTo')}</Text>
+              <Text style={s.whereToSub}>{t('home.requestRideCta')}</Text>
+            </View>
+            <Icon name="chevron-left" size={22} color={theme.colors.muted} />
+          </PressableScale>
+        </View>
 
-        {/* Active subscription — premium navy card */}
+        {/* Active subscription */}
         <View style={s.sectionRow}>
-          <Text style={s.section}>اشتراكاتي الفعّالة</Text>
+          <Text style={s.section}>{t('home.activeSubscription')}</Text>
           <Pressable onPress={() => router.push('/(app)/subscriptions')}>
-            <Text style={s.link}>عرض الكل</Text>
+            <Text style={s.link}>{t('home.viewAll')}</Text>
           </Pressable>
         </View>
         {sub ? (
@@ -100,7 +107,7 @@ export default function Home() {
                   <Icon name="check-circle" size={13} color={theme.colors.primary} />
                   <Text style={s.activePillText}>{sub.status_label}</Text>
                 </View>
-                <Text style={s.premiumTitle} numberOfLines={1}>{sub.plan?.name ?? 'اشتراك رفيق'}</Text>
+                <Text style={s.premiumTitle} numberOfLines={1}>{sub.plan?.name ?? t('home.subscriptions')}</Text>
               </View>
               <View style={s.premiumIcon}>
                 <Icon name="navigation" size={22} color={theme.colors.primary} />
@@ -108,12 +115,12 @@ export default function Home() {
             </View>
             <View style={s.premiumStats}>
               <View style={{ flex: 1 }}>
-                <Text style={s.pStatLabel}>الرحلات المتبقية</Text>
+                <Text style={s.pStatLabel}>{t('home.remainingRides')}</Text>
                 <Text style={s.pStatValue}>{sub.remaining_rides ?? '∞'}</Text>
               </View>
               <View style={s.pDivider} />
               <View style={{ flex: 1 }}>
-                <Text style={s.pStatLabel}>تنتهي في</Text>
+                <Text style={s.pStatLabel}>{t('home.endsIn')}</Text>
                 <Text style={s.pStatValueSm}>{fmtDate(sub.ends_at)}</Text>
               </View>
             </View>
@@ -121,7 +128,7 @@ export default function Home() {
         ) : (
           <Pressable onPress={() => router.push('/(app)/subscriptions')} style={s.emptySub}>
             <Icon name="calendar" size={20} color={theme.colors.primary} />
-            <Text style={s.emptySubText}>لا يوجد اشتراك فعّال — اشترك الآن</Text>
+            <Text style={s.emptySubText}>{t('home.noActiveSub')}</Text>
             <Icon name="chevron-left" size={20} color={theme.colors.muted} />
           </Pressable>
         )}
@@ -140,23 +147,23 @@ export default function Home() {
           <Icon name="chevron-left" size={20} color={theme.colors.muted} />
         </Pressable>
 
-        {/* Services */}
-        <Text style={[s.section, { marginTop: theme.spacing.lg }]}>{t('home.services')}</Text>
-        <View style={s.grid}>
-          {services.map((item) => (
-            <ServiceTile
-              key={item.key}
-              icon={item.icon}
-              label={t(`home.${item.key}`)}
-              onPress={() => item.href && router.push(item.href as never)}
-            />
+        {/* Secondary services — horizontal row keeps the home focused */}
+        <Text style={[s.section, { marginTop: theme.spacing.lg }]}>{t('home.moreServices')}</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.servicesRow}>
+          {SECONDARY.map((item) => (
+            <PressableScale key={item.key} onPress={() => router.push(item.href as never)} style={s.serviceTile}>
+              <View style={s.serviceIcon}>
+                <Icon name={item.icon} size={22} color={theme.colors.primary} />
+              </View>
+              <Text style={s.serviceLabel} numberOfLines={1}>{t(`home.${item.key}`)}</Text>
+            </PressableScale>
           ))}
-        </View>
+        </ScrollView>
 
         {/* Recent trips */}
         {trips.length > 0 && (
           <>
-            <Text style={[s.section, { marginTop: theme.spacing.lg }]}>رحلات سابقة</Text>
+            <Text style={[s.section, { marginTop: theme.spacing.lg }]}>{t('home.recentTrips')}</Text>
             <View style={{ gap: theme.spacing.sm }}>
               {trips.map((p) => (
                 <Pressable key={p.id} onPress={() => router.push('/(app)/trips')} style={s.tripItem}>
@@ -164,7 +171,7 @@ export default function Home() {
                     <Icon name="map-pin" size={18} color={theme.colors.accent} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.tripTitle} numberOfLines={1}>{p.trip?.route?.name ?? 'رحلة'}</Text>
+                    <Text style={s.tripTitle} numberOfLines={1}>{p.trip?.route?.name ?? t('home.tripFallback')}</Text>
                     <Text style={s.tripSub}>{p.status_label} • {fmtTime(p.trip?.scheduled_at ?? null)}</Text>
                   </View>
                   <Icon name="chevron-left" size={18} color={theme.colors.muted} />
@@ -183,7 +190,7 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
-    header: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: t.spacing.lg },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: t.spacing.base },
     avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginRight: t.spacing.md },
     avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.onPrimary },
     headerText: { flex: 1 },
@@ -192,12 +199,14 @@ const makeStyles = (t: AppTheme) =>
     bell: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, alignItems: 'center', justifyContent: 'center' },
     dot: { position: 'absolute', top: 10, right: 12, width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.danger, borderWidth: 1.5, borderColor: t.colors.surface },
 
-    hero: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.xl, padding: t.spacing.base, borderWidth: 1, borderColor: t.colors.border, marginBottom: t.spacing.lg, ...t.shadow.sm },
-    heroIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
-    heroText: { flex: 1 },
-    heroTitle: { fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
-    heroSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
-    pressed: { opacity: 0.9 },
+    // Map-first hero
+    mapHero: { marginBottom: t.spacing.lg },
+    mapWrap: { borderRadius: t.radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.border },
+    whereToCard: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.elevated, borderRadius: t.radius.xl, padding: t.spacing.base, marginHorizontal: t.spacing.md, marginTop: -34, borderWidth: 1, borderColor: t.colors.border, ...t.shadow.md },
+    whereToIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
+    whereToText: { flex: 1 },
+    whereToTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
+    whereToSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
     sectionRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm },
     section: { fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
@@ -223,7 +232,10 @@ const makeStyles = (t: AppTheme) =>
     walletLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right' },
     walletValue: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text, textAlign: 'right', marginTop: 2 },
 
-    grid: { flexDirection: 'row-reverse', flexWrap: 'wrap', justifyContent: 'space-between' },
+    servicesRow: { flexDirection: 'row-reverse', gap: t.spacing.md, paddingVertical: 2 },
+    serviceTile: { width: 84, alignItems: 'center', gap: 6 },
+    serviceIcon: { width: 60, height: 60, borderRadius: 20, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
+    serviceLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text, textAlign: 'center' },
 
     tripItem: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, padding: t.spacing.sm, borderWidth: 1, borderColor: t.colors.border },
     tripIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },

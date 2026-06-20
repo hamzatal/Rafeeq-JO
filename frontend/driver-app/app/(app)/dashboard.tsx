@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { DriverStatus, DriverPerformance } from '@rafeeq/shared';
@@ -8,9 +8,12 @@ import { Banner } from '../../src/components/Banner';
 import { Button } from '../../src/components/Button';
 import { Card, ListRow, SectionTitle, Badge } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
+import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
+import { useAvailability } from '../../src/store/availability';
 import { api } from '../../src/lib/api';
+import { getCurrentLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 const statusMeta: Record<DriverStatus, { key: string; tone: 'warning' | 'primary' | 'success' | 'danger' }> = {
@@ -30,9 +33,13 @@ export default function Dashboard() {
   const driver = useAuth((a) => a.driver);
   const refreshDriver = useAuth((a) => a.refreshDriver);
 
+  const online = useAvailability((a) => a.online);
+  const setOnline = useAvailability((a) => a.setOnline);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [perf, setPerf] = useState<DriverPerformance | null>(null);
+  const [loc, setLoc] = useState<{ lat: number; lng: number } | null>(null);
 
   const status = driver?.status ?? 'pending';
   const meta = statusMeta[status];
@@ -42,20 +49,27 @@ export default function Dashboard() {
   useEffect(() => {
     if (approved) {
       api.payouts.performance().then(setPerf).catch(() => undefined);
+      void getCurrentLocation().then((l) => l && setLoc(l));
     }
   }, [approved]);
 
+  // Turn the captain Offline when leaving / unmounting is handled by the store.
   const jod = (fils: number) => (fils / 1000).toFixed(3);
 
   const onSubmit = async () => {
-    setError(null); setSubmitting(true);
+    setError(null);
+    setSubmitting(true);
     try {
       await api.driver.submitForReview();
       await refreshDriver();
     } catch (e) {
       setError(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
-    } finally { setSubmitting(false); }
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const mapPoints: MapPoint[] = loc ? [{ lat: loc.lat, lng: loc.lng, kind: 'captain', label: user?.full_name ?? '' }] : [];
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -73,45 +87,58 @@ export default function Dashboard() {
         {error ? <Banner message={error} variant="error" /> : null}
 
         {approved && (
-          <View style={s.hero}>
-            <View style={s.heroGlow} />
-            <View style={s.heroTopRow}>
-              <Text style={s.heroLabel}>{t('driver.earnings')}</Text>
-              {perf ? (
-                <View style={s.tierChip}>
-                  <Icon name="award" size={13} color={theme.colors.primary} />
-                  <Text style={s.tierChipText}>{perf.tier_label}</Text>
-                </View>
-              ) : null}
-            </View>
-            <Text style={s.heroValue}>
-              {perf ? jod(perf.available_earnings_fils) : '—'}
-              <Text style={s.heroCur}> {t('subscriptions.currency')}</Text>
-            </Text>
-            <Button title={t('driver.earnings')} onPress={() => router.push('/(app)/earnings')} style={s.heroBtn} />
-          </View>
-        )}
-
-        {approved && (
-          <View style={s.statsRow}>
-            <View style={s.statBox}>
-              <Icon name="star" size={18} color={theme.colors.accent} />
-              <Text style={s.statVal}>{perf?.rating?.toFixed(1) ?? driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
-              <Text style={s.statLbl}>{t('driver.myRating')}</Text>
-            </View>
-            <View style={s.statBox}>
-              <Icon name="navigation" size={18} color={theme.colors.primary} />
-              <Text style={s.statVal}>{perf?.total_trips ?? driver?.total_trips ?? 0}</Text>
-              <Text style={s.statLbl}>{t('driver.myTrips')}</Text>
-            </View>
-          </View>
-        )}
-
-        {approved && (
           <>
-            <SectionTitle title={t('driver.dashboard')} />
+            {/* Map-first: captain location + online/offline */}
+            <View style={s.mapWrap}>
+              <LiveMap points={mapPoints} legend={false} height={280} />
+            </View>
+
+            <View style={[s.toggleCard, online && s.toggleCardOn]}>
+              <View style={[s.statusDot, { backgroundColor: online ? theme.colors.success : theme.colors.muted }]} />
+              <View style={{ flex: 1 }}>
+                <Text style={s.toggleTitle}>{online ? t('driver.online') : t('driver.offline')}</Text>
+                <Text style={s.toggleHint} numberOfLines={2}>{online ? t('driver.onlineHint') : t('driver.offlineHint')}</Text>
+              </View>
+              <Switch
+                value={online}
+                onValueChange={(v) => void setOnline(v)}
+                trackColor={{ true: theme.colors.primary, false: theme.colors.border }}
+                thumbColor={theme.colors.surface}
+              />
+            </View>
+
+            {online && (
+              <Card style={{ padding: 6 }}>
+                <ListRow
+                  icon="inbox"
+                  title={t('driver.offers')}
+                  trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />}
+                  onPress={() => router.push('/(app)/offers')}
+                />
+              </Card>
+            )}
+
+            {/* Today earnings + stats */}
+            <View style={s.statsRow}>
+              <View style={s.statBoxWide}>
+                <Text style={s.statLbl}>{t('driver.todayEarnings')}</Text>
+                <Text style={s.statValBig}>{perf ? jod(perf.available_earnings_fils) : '—'} <Text style={s.cur}>{t('subscriptions.currency')}</Text></Text>
+              </View>
+            </View>
+            <View style={s.statsRow}>
+              <View style={s.statBox}>
+                <Icon name="star" size={18} color={theme.colors.accent} />
+                <Text style={s.statVal}>{perf?.rating?.toFixed(1) ?? driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
+                <Text style={s.statLbl}>{t('driver.myRating')}</Text>
+              </View>
+              <View style={s.statBox}>
+                <Icon name="navigation" size={18} color={theme.colors.primary} />
+                <Text style={s.statVal}>{perf?.total_trips ?? driver?.total_trips ?? 0}</Text>
+                <Text style={s.statLbl}>{t('driver.myTrips')}</Text>
+              </View>
+            </View>
+
             <Card style={{ padding: 6 }}>
-              <ListRow icon="inbox" title={t('driver.offers')} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/offers')} />
               <ListRow icon="navigation" title={t('driver.myTrips')} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/trips')} />
               <ListRow icon="credit-card" title={t('driver.earnings')} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/earnings')} />
             </Card>
@@ -140,18 +167,20 @@ const makeStyles = (t: AppTheme) =>
     headerText: { flex: 1 },
     greeting: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
     name: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'right' },
-    statsRow: { flexDirection: 'row-reverse', gap: t.spacing.base, marginBottom: t.spacing.sm },
-    hero: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.primary + '44', padding: t.spacing.lg, marginBottom: t.spacing.base, overflow: 'hidden', ...t.shadow.md },
-    heroGlow: { position: 'absolute', top: -40, left: -30, width: 150, height: 150, borderRadius: 75, backgroundColor: t.colors.primary, opacity: 0.12 },
-    heroTopRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.xs },
-    heroLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
-    tierChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, backgroundColor: t.colors.primary, paddingHorizontal: 10, paddingVertical: 3, borderRadius: t.radius.full },
-    tierChipText: { fontFamily: t.fontFamily.bold, fontSize: 11, color: t.colors.onPrimary },
-    heroValue: { fontFamily: t.fontFamily.extrabold, fontSize: 36, color: t.colors.primary, textAlign: 'right' },
-    heroCur: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.textSecondary },
-    heroBtn: { marginTop: t.spacing.md },
+
+    mapWrap: { borderRadius: t.radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.border, marginBottom: t.spacing.md },
+    toggleCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base, ...t.shadow.sm },
+    toggleCardOn: { borderColor: t.colors.primary },
+    statusDot: { width: 12, height: 12, borderRadius: 6 },
+    toggleTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
+    toggleHint: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
+
+    statsRow: { flexDirection: 'row-reverse', gap: t.spacing.base, marginBottom: t.spacing.base },
+    statBoxWide: { flex: 1, backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, ...t.shadow.md },
+    statValBig: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: t.colors.onPrimary, textAlign: 'right', marginTop: 4 },
+    cur: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onPrimary },
     statBox: { flex: 1, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, alignItems: 'center', ...t.shadow.sm },
     statVal: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, marginTop: 4 },
-    statLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, marginTop: 2 },
+    statLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, marginTop: 2, textAlign: 'right' },
     submit: { marginTop: t.spacing.lg },
   });

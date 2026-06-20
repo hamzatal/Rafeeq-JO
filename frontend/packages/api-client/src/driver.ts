@@ -61,4 +61,12 @@ export class DriverApi {
     );
     return unwrap(data);
   }
+
+  /**
+   * Ping the captain's live location to the backend (safety / availability).
+   * Best-effort: callers should ignore failures so it never breaks the UI.
+   */
+  async pushLocation(lat: number, lng: number, speed?: number): Promise<void> {
+    await this.http.post(ENDPOINTS.driver.location, { lat, lng, speed });
+  }
 }
