@@ -235,6 +235,12 @@ export const en: Translations = {
     bookFailed: 'Booking failed',
     noLocation: 'No location yet',
     locationError: 'Could not fetch location',
+    tlStatus: 'Your trip status',
+    tlBooked: 'Booked',
+    tlOnboard: 'On board',
+    tlArrived: 'Arrived',
+    tlCancelled: 'Cancelled',
+    live: 'Live',
     defaultName: 'Trip',
   },
   wallet: {

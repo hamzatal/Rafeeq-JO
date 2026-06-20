@@ -12,6 +12,7 @@ import { Icon } from '../../../src/components/Icon';
 import { LiveMap, type MapPoint } from '../../../src/components/LiveMap';
 import { useI18n } from '../../../src/i18n';
 import { api } from '../../../src/lib/api';
+import { getCurrentLocation } from '../../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../../src/theme';
 
 export default function TripDetail() {
@@ -34,6 +35,25 @@ export default function TripDetail() {
   }, [id]);
 
   useEffect(() => { void load(); }, [load]);
+
+  // While the trip is in progress, broadcast the captain's live location so
+  // riders can track it (feeds GET /trips/{id}/location). Best-effort + safe.
+  useEffect(() => {
+    if (trip?.status !== 'started') return;
+    const ping = async () => {
+      const loc = await getCurrentLocation();
+      if (loc) {
+        try {
+          await api.driverTrips.pushLocation(id, loc.lat, loc.lng);
+        } catch {
+          /* best-effort */
+        }
+      }
+    };
+    void ping();
+    const timer = setInterval(() => void ping(), 12000);
+    return () => clearInterval(timer);
+  }, [trip?.status, id]);
 
   // Pickup points for the captain's navigation map (passengers with coords).
   const mapPoints = useMemo<MapPoint[]>(

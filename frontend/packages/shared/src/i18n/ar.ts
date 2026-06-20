@@ -233,6 +233,12 @@ export const ar = {
     bookFailed: 'فشل الحجز',
     noLocation: 'لا يوجد موقع بعد',
     locationError: 'تعذّر جلب الموقع',
+    tlStatus: 'حالة رحلتك',
+    tlBooked: 'تم الحجز',
+    tlOnboard: 'بالرحلة',
+    tlArrived: 'وصلت',
+    tlCancelled: 'أُلغيت',
+    live: 'مباشر',
     defaultName: 'رحلة',
   },
   wallet: {

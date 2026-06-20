@@ -252,3 +252,65 @@ const makeStyles = (t: AppTheme) =>
     grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: t.colors.border, marginBottom: t.spacing.md },
     sheetTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.md },
   });
+
+
+/** ── TripTimeline — reassuring horizontal status stepper ───────────── */
+export function TripTimeline({
+  steps,
+  current,
+  cancelled,
+  title,
+}: {
+  steps: string[];
+  current: number;
+  cancelled?: boolean;
+  title?: string;
+}) {
+  const t = useTheme();
+  return (
+    <View style={{ marginTop: t.spacing.sm }}>
+      {title ? (
+        <Text style={{ fontFamily: t.fontFamily.semibold, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginBottom: 10 }}>{title}</Text>
+      ) : null}
+      <View style={{ flexDirection: 'row-reverse', alignItems: 'flex-start' }}>
+        {steps.map((label, i) => {
+          const done = !cancelled && i < current;
+          const active = !cancelled && i === current;
+          const dotColor = cancelled ? t.colors.danger : done || active ? t.colors.primary : t.colors.border;
+          const lineColor = !cancelled && i < current ? t.colors.primary : t.colors.border;
+          return (
+            <View key={i} style={{ flex: 1, alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row-reverse', alignItems: 'center', width: '100%' }}>
+                {/* line to the next step (skip on last) */}
+                {i < steps.length - 1 ? <View style={{ flex: 1, height: 2, backgroundColor: lineColor }} /> : <View style={{ flex: 1 }} />}
+                <View
+                  style={{
+                    width: active ? 16 : 12,
+                    height: active ? 16 : 12,
+                    borderRadius: 8,
+                    backgroundColor: done || active ? dotColor : t.colors.surface,
+                    borderWidth: 2,
+                    borderColor: dotColor,
+                  }}
+                />
+                {i > 0 ? <View style={{ flex: 1, height: 2, backgroundColor: i <= current && !cancelled ? t.colors.primary : t.colors.border }} /> : <View style={{ flex: 1 }} />}
+              </View>
+              <Text
+                style={{
+                  fontFamily: active ? t.fontFamily.bold : t.fontFamily.regular,
+                  fontSize: 11,
+                  color: cancelled ? t.colors.danger : done || active ? t.colors.text : t.colors.muted,
+                  textAlign: 'center',
+                  marginTop: 6,
+                }}
+                numberOfLines={1}
+              >
+                {label}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}

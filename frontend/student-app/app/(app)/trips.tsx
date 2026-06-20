@@ -8,9 +8,10 @@ import { Banner } from '../../src/components/Banner';
 import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
 import { LiveMap } from '../../src/components/LiveMap';
+import { TripTimeline } from '../../src/components/kit';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { subscribeToTrip } from '../../src/lib/realtime';
+import { subscribeToTrip, realtimeEnabled } from '../../src/lib/realtime';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Trips() {
@@ -51,6 +52,26 @@ export default function Trips() {
       );
     return () => unsubs.forEach((u) => u());
   }, [mine]);
+
+  // Fallback live tracking when Reverb isn't configured: poll active trips.
+  useEffect(() => {
+    if (realtimeEnabled()) return;
+    const active = mine.filter((p) => p.trip && (p.status === 'booked' || p.status === 'onboard'));
+    if (active.length === 0) return;
+    const id = setInterval(() => {
+      active.forEach((p) => void track(p.trip_id));
+    }, 12000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mine]);
+
+  // Map a passenger's status to a timeline step (booked → onboard → arrived).
+  const stepFor = (p: TripPassenger) => {
+    if (p.status === 'onboard') return 1;
+    if (p.status === 'dropped' || p.trip?.status === 'completed') return 2;
+    return 0;
+  };
+  const isCancelled = (p: TripPassenger) => p.status === 'cancelled' || p.status === 'no_show';
 
   const book = async (tripId: string) => {
     setMsg(null); setBusy(tripId);
@@ -101,6 +122,14 @@ export default function Trips() {
                 <Badge label={p.status_label} tone={p.trip?.status === 'completed' ? 'success' : 'primary'} />
               </View>
               {p.trip?.scheduled_at && <Text style={s.meta}>{new Date(p.trip.scheduled_at).toLocaleString(locale)}</Text>}
+
+              {/* Reassuring status timeline */}
+              <TripTimeline
+                title={t('trips.tlStatus')}
+                steps={[t('trips.tlBooked'), t('trips.tlOnboard'), t('trips.tlArrived')]}
+                current={stepFor(p)}
+                cancelled={isCancelled(p)}
+              />
 
               {p.boarding_code && p.status === 'booked' && (
                 <View style={s.codeBox}>
