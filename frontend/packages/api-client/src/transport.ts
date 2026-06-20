@@ -36,6 +36,14 @@ export class TransportApi {
     await this.http.post(ENDPOINTS.transport.cancelSubscription(id));
   }
 
+  /** Pay for a pending subscription from wallet balance (instant activation). */
+  async paySubscriptionFromWallet(id: string): Promise<Subscription> {
+    const { data } = await this.http.post<ApiSuccess<Subscription>>(
+      ENDPOINTS.transport.paySubscriptionWallet(id),
+    );
+    return unwrap(data);
+  }
+
   async availableTrips(routeId?: string): Promise<Trip[]> {
     const { data } = await this.http.get<ApiSuccess<Trip[]>>(ENDPOINTS.transport.availableTrips, {
       params: { route_id: routeId },

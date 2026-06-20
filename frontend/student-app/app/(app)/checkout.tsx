@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { CliqInstructions, PaymentRequest } from '@rafeeq/shared';
@@ -13,7 +13,7 @@ import { api } from '../../src/lib/api';
 import { pickProof } from '../../src/lib/proof';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-type Step = 'review' | 'instructions' | 'done';
+type Step = 'review' | 'instructions' | 'pending' | 'active';
 
 export default function Checkout() {
   const { t } = useI18n();
@@ -29,18 +29,39 @@ export default function Checkout() {
   }>();
 
   const [step, setStep] = useState<Step>('review');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<null | 'wallet' | 'cliq'>(null);
   const [uploading, setUploading] = useState(false);
   const [payment, setPayment] = useState<PaymentRequest | null>(null);
   const [instructions, setInstructions] = useState<CliqInstructions | null>(null);
+  const [balanceJod, setBalanceJod] = useState<number | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
+  const priceJod = Number(params.price ?? '0');
   const priceLabel = `${params.price ?? '—'} ${t('subscriptions.currency')}`;
+  const canWallet = balanceJod != null && balanceJod >= priceJod && priceJod > 0;
 
-  // Subscribe (creates a pending subscription) → create a subscription payment
-  // → show CliQ transfer instructions. This is the real, wired payment step.
-  const subscribeAndPay = async () => {
-    setBusy(true);
+  useEffect(() => {
+    api.wallet.show().then((w) => setBalanceJod(w.balance_jod)).catch(() => setBalanceJod(null));
+  }, []);
+
+  // Pay directly from wallet balance → instant activation.
+  const payWallet = async () => {
+    setBusy('wallet');
+    setMsg(null);
+    try {
+      const sub = await api.transport.subscribe(params.planId);
+      await api.transport.paySubscriptionFromWallet(sub.id);
+      setStep('active');
+    } catch (e) {
+      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('checkout.failed'), ok: false });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // Pay via CliQ transfer → create a subscription payment + show instructions.
+  const payCliq = async () => {
+    setBusy('cliq');
     setMsg(null);
     try {
       const sub = await api.transport.subscribe(params.planId);
@@ -54,7 +75,7 @@ export default function Checkout() {
     } catch (e) {
       setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('checkout.failed'), ok: false });
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -68,7 +89,7 @@ export default function Checkout() {
       const fd = new FormData();
       fd.append('proof', file as Blob);
       await api.payments.submitProof(payment.id, fd);
-      setStep('done');
+      setStep('pending');
     } catch (e) {
       setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'), ok: false });
     } finally {
@@ -82,7 +103,7 @@ export default function Checkout() {
         <Text style={s.h1}>{t('checkout.title')}</Text>
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
-        {/* Summary (always visible) */}
+        {/* Summary */}
         <View style={s.card}>
           <Text style={s.cardTitle}>{t('checkout.summary')}</Text>
           <KeyValue label={t('checkout.includes')} value={params.name ?? t('subscriptions.defaultName')} />
@@ -94,7 +115,47 @@ export default function Checkout() {
         </View>
 
         {step === 'review' && (
-          <Button title={t('checkout.subscribeAndPay')} icon="credit-card" onPress={subscribeAndPay} loading={busy} style={s.cta} />
+          <>
+            <Text style={s.choose}>{t('checkout.choosePay')}</Text>
+
+            {/* Pay from wallet */}
+            <Pressable
+              onPress={canWallet ? payWallet : undefined}
+              disabled={!canWallet || busy !== null}
+              style={({ pressed }) => [s.method, canWallet && s.methodOn, pressed && canWallet && s.pressed]}
+            >
+              <View style={[s.methodIcon, { backgroundColor: theme.colors.primarySoft }]}>
+                <Icon name="credit-card" size={22} color={theme.colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.methodTitle}>{t('checkout.payFromWallet')}</Text>
+                <Text style={[s.methodSub, !canWallet && { color: theme.colors.danger }]}>
+                  {balanceJod == null
+                    ? '—'
+                    : canWallet
+                      ? `${t('checkout.walletBalance')}: ${balanceJod.toFixed(3)} ${t('subscriptions.currency')}`
+                      : t('checkout.insufficient')}
+                </Text>
+              </View>
+              {busy === 'wallet' ? <Icon name="loader" size={20} color={theme.colors.primary} /> : <Icon name="chevron-left" size={20} color={theme.colors.muted} />}
+            </Pressable>
+
+            {/* Pay via CliQ */}
+            <Pressable
+              onPress={busy === null ? payCliq : undefined}
+              disabled={busy !== null}
+              style={({ pressed }) => [s.method, pressed && s.pressed]}
+            >
+              <View style={[s.methodIcon, { backgroundColor: theme.colors.accentSoft }]}>
+                <Icon name="smartphone" size={22} color={theme.colors.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={s.methodTitle}>{t('checkout.payViaCliqOption')}</Text>
+                <Text style={s.methodSub}>{t('checkout.transferred')}</Text>
+              </View>
+              {busy === 'cliq' ? <Icon name="loader" size={20} color={theme.colors.primary} /> : <Icon name="chevron-left" size={20} color={theme.colors.muted} />}
+            </Pressable>
+          </>
         )}
 
         {step === 'instructions' && instructions && (
@@ -115,15 +176,27 @@ export default function Checkout() {
           </>
         )}
 
-        {step === 'done' && (
+        {step === 'pending' && (
           <View style={s.doneWrap}>
-            <View style={s.doneIcon}>
+            <View style={[s.doneIcon, { backgroundColor: theme.colors.warningSoft }]}>
               <Icon name="clock" size={40} color={theme.colors.warning} />
             </View>
             <Text style={s.doneTitle}>{t('checkout.pendingTitle')}</Text>
             <Text style={s.doneBody}>{t('checkout.pendingBody')}</Text>
             <Button title={t('checkout.viewSubscriptions')} onPress={() => router.replace('/(app)/subscriptions')} style={s.cta} />
             <Button title={t('checkout.goWallet')} variant="ghost" onPress={() => router.replace('/(app)/wallet')} style={{ marginTop: theme.spacing.sm }} />
+          </View>
+        )}
+
+        {step === 'active' && (
+          <View style={s.doneWrap}>
+            <View style={[s.doneIcon, { backgroundColor: theme.colors.successSoft }]}>
+              <Icon name="check-circle" size={40} color={theme.colors.success} />
+            </View>
+            <Text style={s.doneTitle}>{t('checkout.activatedTitle')}</Text>
+            <Text style={s.doneBody}>{t('checkout.activatedBody')}</Text>
+            <Button title={t('checkout.viewSubscriptions')} onPress={() => router.replace('/(app)/subscriptions')} style={s.cta} />
+            <Button title={t('home.requestRideCta')} variant="ghost" onPress={() => router.replace('/(app)/ride-request')} style={{ marginTop: theme.spacing.sm }} />
           </View>
         )}
       </ScrollView>
@@ -142,10 +215,17 @@ const makeStyles = (t: AppTheme) =>
     totalRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.sm, paddingTop: t.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.colors.border },
     totalLabel: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     totalValue: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.primary },
+    choose: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.sm },
+    method: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.md, ...t.shadow.sm },
+    methodOn: { borderColor: t.colors.primary },
+    methodIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+    methodTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right' },
+    methodSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
     hint: { fontFamily: t.fontFamily.regular, fontSize: 13, lineHeight: 20, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.sm },
     cta: { marginTop: t.spacing.sm },
+    pressed: { opacity: 0.9 },
     doneWrap: { alignItems: 'center', paddingTop: t.spacing.xl, gap: t.spacing.sm },
-    doneIcon: { width: 88, height: 88, borderRadius: 44, backgroundColor: t.colors.warningSoft, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm },
+    doneIcon: { width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm },
     doneTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'center' },
     doneBody: { fontFamily: t.fontFamily.regular, fontSize: 14, lineHeight: 22, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 320, marginBottom: t.spacing.base },
   });

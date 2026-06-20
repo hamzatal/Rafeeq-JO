@@ -11,6 +11,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Student subscriptions
     Route::get('subscriptions', [SubscriptionController::class, 'mine']);
     Route::post('subscriptions', [SubscriptionController::class, 'subscribe']);
+    Route::post('subscriptions/{subscription}/pay-wallet', [SubscriptionController::class, 'payWallet']);
     Route::post('subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel']);
 
     // Admin

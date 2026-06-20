@@ -48,6 +48,14 @@ class SubscriptionController extends Controller
         return $this->ok(new SubscriptionResource($this->service->cancel($subscription)), 'تم إلغاء الاشتراك.');
     }
 
+    /** Student: pay for a pending subscription from wallet balance (instant activation). */
+    public function payWallet(Request $request, Subscription $subscription): JsonResponse
+    {
+        $activated = $this->service->payWithWallet($request->user(), $subscription);
+
+        return $this->ok(new SubscriptionResource($activated), 'تم تفعيل اشتراكك من رصيد المحفظة.');
+    }
+
     // ── Admin ────────────────────────────────────────────────────────
     public function index(Request $request): JsonResponse
     {

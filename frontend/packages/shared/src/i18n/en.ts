@@ -228,6 +228,13 @@ export const en: Translations = {
     pendingBody: 'We received your request. We’ll verify the transfer and activate your subscription shortly — you’ll get a notification.',
     viewSubscriptions: 'View my subscriptions',
     goWallet: 'Financial center',
+    choosePay: 'Choose a payment method',
+    payFromWallet: 'Pay from wallet',
+    payViaCliqOption: 'Transfer via CliQ',
+    walletBalance: 'Your wallet balance',
+    insufficient: 'Balance is too low — top up or pay via CliQ',
+    activatedTitle: 'Subscription activated 🎉',
+    activatedBody: 'Paid from your balance — your subscription is now active. Enjoy!',
     failed: 'Could not complete the operation',
   },
   trips: {

@@ -57,6 +57,7 @@ export const ENDPOINTS = {
     plans: '/plans',
     subscriptions: '/subscriptions',
     cancelSubscription: (id: string) => `/subscriptions/${id}/cancel`,
+    paySubscriptionWallet: (id: string) => `/subscriptions/${id}/pay-wallet`,
     availableTrips: '/trips/available',
     myTrips: '/trips/mine',
     bookTrip: (tripId: string) => `/trips/${tripId}/book`,

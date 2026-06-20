@@ -226,6 +226,13 @@ export const ar = {
     pendingBody: 'استلمنا طلبك. سنراجع الحوالة ونفعّل اشتراكك خلال وقت قصير، وسيصلك إشعار.',
     viewSubscriptions: 'عرض اشتراكاتي',
     goWallet: 'المركز المالي',
+    choosePay: 'اختر طريقة الدفع',
+    payFromWallet: 'ادفع من المحفظة',
+    payViaCliqOption: 'حوّل عبر CliQ',
+    walletBalance: 'رصيد محفظتك',
+    insufficient: 'الرصيد لا يكفي — اشحن محفظتك أو ادفع عبر CliQ',
+    activatedTitle: 'تم تفعيل اشتراكك 🎉',
+    activatedBody: 'تم الدفع من رصيدك، واشتراكك فعّال الآن. رحلة سعيدة!',
     failed: 'تعذّر إتمام العملية',
   },
   trips: {

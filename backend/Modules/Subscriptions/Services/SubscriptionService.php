@@ -3,16 +3,22 @@
 namespace Rafeeq\Modules\Subscriptions\Services;
 
 use Rafeeq\Core\Audit\AuditLogger;
+use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Models\SubscriptionPlan;
+use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\SubscriptionStatus;
+use Rafeeq\Shared\Enums\WalletTxnType;
 
 class SubscriptionService extends BaseService
 {
-    public function __construct(private readonly AuditLogger $audit) {}
+    public function __construct(
+        private readonly AuditLogger $audit,
+        private readonly WalletService $wallets,
+    ) {}
 
     /**
      * Create a PENDING subscription for a student. It is activated after
@@ -53,6 +59,43 @@ class SubscriptionService extends BaseService
         $this->audit->log('subscription.activated', auditable: $subscription);
 
         return $subscription->fresh('plan');
+    }
+
+    /**
+     * Pay for a PENDING subscription directly from the student's wallet
+     * balance and activate it immediately. Atomic: the debit (which throws
+     * INSUFFICIENT_BALANCE when the balance is too low) and the activation
+     * happen in one transaction.
+     */
+    public function payWithWallet(User $student, Subscription $subscription): Subscription
+    {
+        if ($subscription->student_id !== $student->id) {
+            throw new AuthorizationException('غير مصرّح.');
+        }
+        if ($subscription->status === SubscriptionStatus::Active) {
+            return $subscription->load('plan');
+        }
+        if ($subscription->status !== SubscriptionStatus::Pending) {
+            throw new BusinessRuleException('لا يمكن دفع هذا الاشتراك.', 'SUBSCRIPTION_NOT_PAYABLE');
+        }
+
+        $price = (int) $subscription->plan->price_fils;
+
+        return $this->transaction(function () use ($student, $subscription, $price) {
+            $wallet = $this->wallets->forUser($student);
+            $this->wallets->debit(
+                $wallet,
+                $price,
+                WalletTxnType::SubscriptionPayment,
+                'دفع اشتراك من المحفظة',
+                $subscription->id,
+            );
+
+            $activated = $this->activate($subscription);
+            $this->audit->log('subscription.paid_wallet', $student, auditable: $activated, changes: ['amount_fils' => $price]);
+
+            return $activated;
+        });
     }
 
     public function cancel(Subscription $subscription): Subscription
