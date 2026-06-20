@@ -52,7 +52,17 @@ class OtpService extends BaseService
             'user_agent' => $request ? substr((string) $request->userAgent(), 0, 500) : null,
         ]);
 
-        $this->dispatch($identifier, $channel, $code, $purpose);
+        // Sending is best-effort: a missing/failing provider (e.g. no WhatsApp
+        // gateway yet) must never block sign-in. In non-production the code is
+        // returned in the API response and auto-filled by the apps.
+        try {
+            $this->dispatch($identifier, $channel, $code, $purpose);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('otp.dispatch_failed', [
+                'purpose' => $purpose->value,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return config('otp.debug_return_code') ? $code : null;
     }

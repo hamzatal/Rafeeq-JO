@@ -115,13 +115,13 @@ export function Sidebar() {
       <div className="px-5 py-5 flex items-center gap-3 border-b border-white/10">
         <LogoMark size={42} />
         <div>
-          <div className="text-lg font-extrabold font-display text-cyan-soft leading-tight">رفيق JO</div>
+          <div className="text-lg font-extrabold font-display text-cyan-soft leading-tight">Rafeeq JO</div>
           <div className="text-[11px] text-white/60">{t('brand.tagline')}</div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-1">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-1">
         {GROUPS.map((g) => (
           <div key={g.titleKey} className="mb-3">
             <div className="px-5 mb-1 text-[10px] font-bold uppercase tracking-widest text-white/30">
@@ -135,17 +135,12 @@ export function Sidebar() {
                   key={l.href}
                   href={l.href}
                   title={HINTS[l.href] ?? ''}
-                  className={`nav-item group/nav relative ${active ? 'nav-item-active' : ''}`}
+                  className={`nav-item ${active ? 'nav-item-active' : ''}`}
                 >
                   <span className={`material-symbols-outlined text-[20px] ${active ? 'icon-fill' : ''}`}>
                     {l.icon}
                   </span>
                   <span className="truncate">{t(l.labelKey)}</span>
-                  {HINTS[l.href] && (
-                    <span className="pointer-events-none absolute start-full top-1/2 -translate-y-1/2 ms-2 z-[90] w-52 rounded-lg bg-navy-deep border border-white/10 px-3 py-2 text-[11px] leading-snug text-white/90 shadow-lift opacity-0 scale-95 transition-all duration-150 delay-300 group-hover/nav:opacity-100 group-hover/nav:scale-100">
-                      {HINTS[l.href]}
-                    </span>
-                  )}
                 </Link>
               );
             })}

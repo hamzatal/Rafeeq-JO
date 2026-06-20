@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { Animated, Easing, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useI18n } from '../../src/i18n';
@@ -47,9 +47,9 @@ export default function Welcome() {
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <Animated.View style={[s.hero, { opacity: enter, transform: [{ translateY }] }]}>
           <View style={s.logo}>
-            <Text style={s.glyph}>ر</Text>
+            <Image source={require('../../assets/r-logo.png')} style={s.logoImg} resizeMode="contain" />
           </View>
-          <Text style={s.brand}>رفيق</Text>
+          <Text style={s.brand}>Rafeeq</Text>
           <Text style={s.badge}>{t('driver.badge')}</Text>
           <Animated.Text style={[s.phrase, { opacity: phraseFade }]}>
             {locale === 'ar' ? PHRASES[phrase].ar : PHRASES[phrase].en}
@@ -83,7 +83,7 @@ const makeStyles = (t: AppTheme) =>
 
     hero: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     logo: { width: 110, height: 110, borderRadius: 55, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.base, borderWidth: 3, borderColor: t.colors.primary },
-    glyph: { fontFamily: t.fontFamily.extrabold, fontSize: 56, color: t.colors.background, marginTop: -4 },
+    logoImg: { width: 74, height: 74 },
     brand: { fontFamily: t.fontFamily.extrabold, fontSize: 42, color: '#FFFFFF', letterSpacing: 1 },
     badge: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.primary, letterSpacing: 3, marginTop: 4, marginBottom: t.spacing.base },
     phrase: { fontFamily: t.fontFamily.bold, fontSize: 19, color: '#FFFFFF', textAlign: 'center', lineHeight: 30, maxWidth: 320, minHeight: 64 },

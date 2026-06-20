@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Sans_Arabic, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { Cairo, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '../src/lib/auth';
 import { PrefsProvider } from '../src/lib/prefs';
 
-const sansArabic = IBM_Plex_Sans_Arabic({
+const sansArabic = Cairo({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-tajawal',
 });
@@ -26,8 +26,8 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'رفيق JO | مركز القيادة',
-  description: 'لوحة إدارة منصة رفيق — مركز القيادة والعمليات',
+  title: 'Rafeeq JO | Command Center',
+  description: 'Rafeeq platform admin — command & operations center',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

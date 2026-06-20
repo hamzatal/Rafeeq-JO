@@ -4,11 +4,11 @@
  */
 
 export const fontFamily = {
-  regular: 'IBMPlexSansArabic_400Regular',
-  medium: 'IBMPlexSansArabic_500Medium',
-  semibold: 'IBMPlexSansArabic_600SemiBold',
-  bold: 'IBMPlexSansArabic_700Bold',
-  extrabold: 'IBMPlexSansArabic_700Bold',
+  regular: 'Cairo_400Regular',
+  medium: 'Cairo_500Medium',
+  semibold: 'Cairo_600SemiBold',
+  bold: 'Cairo_700Bold',
+  extrabold: 'Cairo_800ExtraBold',
 } as const;
 
 export const fontWeight = {

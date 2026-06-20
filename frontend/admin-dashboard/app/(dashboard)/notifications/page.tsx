@@ -50,11 +50,12 @@ export default function NotificationsPage() {
   ];
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <h1 className="text-2xl font-extrabold surface-text mb-1">{t('notify.title')}</h1>
       <p className="text-sm text-muted mb-6">{t('notify.intro')}</p>
 
-      <form onSubmit={send} className="card">
+      <div className="grid gap-6 lg:grid-cols-3 items-start">
+        <form onSubmit={send} className="card lg:col-span-2">
         <label className="block mb-4">
           <span className="text-xs text-muted">{t('notify.audience')}</span>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -94,6 +95,17 @@ export default function NotificationsPage() {
           {msg && <span className={`text-sm ${msg.kind === 'ok' ? 'text-success' : 'text-danger'}`}>{msg.text}</span>}
         </div>
       </form>
+
+        <aside className="card">
+          <h3 className="font-bold surface-text mb-3">{t('notify.audience')}</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between"><span className="text-muted">{t('notify.all')}</span><span className="font-bold surface-text">{counts?.all ?? '—'}</span></div>
+            <div className="flex items-center justify-between"><span className="text-muted">{t('notify.students')}</span><span className="font-bold surface-text">{counts?.students ?? '—'}</span></div>
+            <div className="flex items-center justify-between"><span className="text-muted">{t('notify.drivers')}</span><span className="font-bold surface-text">{counts?.drivers ?? '—'}</span></div>
+          </div>
+          <p className="text-[12px] text-muted mt-4 leading-relaxed">{t('notify.couponHint')}</p>
+        </aside>
+      </div>
     </div>
   );
 }

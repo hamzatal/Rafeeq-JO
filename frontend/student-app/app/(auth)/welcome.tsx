@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { Animated, Easing, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useI18n } from '../../src/i18n';
@@ -47,9 +47,9 @@ export default function Welcome() {
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <Animated.View style={[s.hero, { opacity: enter, transform: [{ translateY }] }]}>
           <View style={s.logo}>
-            <Text style={s.glyph}>ر</Text>
+            <Image source={require('../../assets/r-logo.png')} style={s.logoImg} resizeMode="contain" />
           </View>
-          <Text style={s.brand}>رفيق</Text>
+          <Text style={s.brand}>Rafeeq</Text>
           <Animated.Text style={[s.phrase, { opacity: phraseFade }]}>
             {locale === 'ar' ? PHRASES[phrase].ar : PHRASES[phrase].en}
           </Animated.Text>
@@ -82,7 +82,7 @@ const makeStyles = (t: AppTheme) =>
 
     hero: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     logo: { width: 110, height: 110, borderRadius: 55, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.lg, borderWidth: 3, borderColor: t.colors.accent },
-    glyph: { fontFamily: t.fontFamily.extrabold, fontSize: 58, color: t.colors.primary, marginTop: -4 },
+    logoImg: { width: 74, height: 74 },
     brand: { fontFamily: t.fontFamily.extrabold, fontSize: 44, color: '#FFFFFF', marginBottom: t.spacing.lg, letterSpacing: 1 },
     phrase: { fontFamily: t.fontFamily.bold, fontSize: 19, color: '#FFFFFF', textAlign: 'center', lineHeight: 30, maxWidth: 320, minHeight: 64 },
     dots: { flexDirection: 'row', gap: 7, marginTop: t.spacing.base },

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
 import { palette, fontFamily } from '@rafeeq/shared';
 
 /**
@@ -52,11 +52,11 @@ export function BrandSplash() {
           <Animated.View style={[styles.glow, { opacity: glow, transform: [{ scale: glowScale }] }]} />
           <Animated.View style={[styles.ring, { transform: [{ rotate }] }]} />
           <View style={styles.emblem}>
-            <Text style={styles.glyph}>ر</Text>
+            <Image source={require('../../assets/r-logo.png')} style={styles.logoImg} resizeMode="contain" />
           </View>
         </View>
 
-        <Text style={styles.word}>رفيق</Text>
+        <Text style={styles.word}>Rafeeq</Text>
         <Text style={styles.tag}>كابتن</Text>
 
         <View style={styles.dots}>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   glow: { position: 'absolute', width: 132, height: 132, borderRadius: 66, backgroundColor: GOLD },
   ring: { position: 'absolute', width: 122, height: 122, borderRadius: 61, borderWidth: 2.5, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
   emblem: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 } },
-  glyph: { fontFamily: fontFamily.extrabold, fontSize: 56, color: palette.navy, marginTop: -4 },
+  logoImg: { width: 66, height: 66 },
   word: { fontFamily: fontFamily.extrabold, fontSize: 38, color: '#FFFFFF', textAlign: 'center', letterSpacing: 1 },
   tag: { fontFamily: fontFamily.medium, fontSize: 14, color: GOLD, marginTop: 6, textAlign: 'center' },
   dots: { flexDirection: 'row', gap: 8, marginTop: 28 },

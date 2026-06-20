@@ -73,8 +73,8 @@ export default function LoginPage() {
           <div className="flex items-center gap-3">
             <LogoMark size={52} />
             <div>
-              <div className="text-2xl font-extrabold text-cyan-soft leading-tight">رفيق JO</div>
-              <div className="text-xs text-white/60">مركز قيادة المنصّة</div>
+              <div className="text-2xl font-extrabold text-cyan-soft leading-tight">Rafeeq JO</div>
+              <div className="text-xs text-white/60">Platform Command Center</div>
             </div>
           </div>
 
@@ -109,7 +109,7 @@ export default function LoginPage() {
         <div className="flex items-center justify-center p-6 sm:p-10">
           <div className="w-full max-w-md rounded-2xl bg-white/95 backdrop-blur shadow-lift p-7 sm:p-9">
             <div className="text-center mb-6">
-              <div className="lg:hidden text-3xl font-extrabold text-primary mb-1">رفيق</div>
+              <div className="lg:hidden text-3xl font-extrabold text-primary mb-1">Rafeeq JO</div>
               <div className="text-xl font-extrabold text-ink">تسجيل دخول الموظفين</div>
               <div className="text-sm muted-text mt-1">لوحة الإدارة — مركز القيادة</div>
             </div>

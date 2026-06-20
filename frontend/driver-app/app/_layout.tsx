@@ -5,11 +5,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   useFonts,
-  IBMPlexSansArabic_400Regular,
-  IBMPlexSansArabic_500Medium,
-  IBMPlexSansArabic_600SemiBold,
-  IBMPlexSansArabic_700Bold,
-} from '@expo-google-fonts/ibm-plex-sans-arabic';
+  Cairo_400Regular,
+  Cairo_500Medium,
+  Cairo_600SemiBold,
+  Cairo_700Bold,
+  Cairo_800ExtraBold,
+} from '@expo-google-fonts/cairo';
 import { I18nProvider } from '../src/i18n';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { useAuth } from '../src/store/auth';
@@ -20,10 +21,11 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    IBMPlexSansArabic_400Regular,
-    IBMPlexSansArabic_500Medium,
-    IBMPlexSansArabic_600SemiBold,
-    IBMPlexSansArabic_700Bold,
+    Cairo_400Regular,
+    Cairo_500Medium,
+    Cairo_600SemiBold,
+    Cairo_700Bold,
+    Cairo_800ExtraBold,
   });
 
   const bootstrap = useAuth((s) => s.bootstrap);
