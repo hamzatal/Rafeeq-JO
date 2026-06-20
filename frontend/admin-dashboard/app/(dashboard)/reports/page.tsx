@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { FinancialReport } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { downloadBlob, stamp } from '../../../src/lib/download';
 
 const jod = (fils: number) => `${(fils / 1000).toFixed(3)} د.أ`;
 
@@ -30,6 +31,19 @@ export default function ReportsPage() {
   const [report, setReport] = useState<FinancialReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const blob = await api.admin.exportFinancialCsv({ from, to });
+      downloadBlob(blob, `financial-${stamp()}.csv`);
+    } catch {
+      setError(t('reports.loadError'));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const load = useCallback(() => {
     setLoading(true);
@@ -59,6 +73,10 @@ export default function ReportsPage() {
           <input type="date" className="input" value={to} onChange={(e) => setTo(e.target.value)} />
         </div>
         <button onClick={load} className="btn-primary">{t('reports.show')}</button>
+        <button onClick={exportCsv} disabled={exporting} className="btn-outline inline-flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[18px]">download</span>
+          {exporting ? t('common.loading') : t('reports.exportCsv')}
+        </button>
       </div>
 
       {error && (

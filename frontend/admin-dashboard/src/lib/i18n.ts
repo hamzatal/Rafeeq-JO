@@ -53,6 +53,7 @@ const DICT: Dict = {
   'nav.security': { ar: 'الأمان (MFA)', en: 'Security (MFA)' },
   'nav.admins': { ar: 'فريق الإدارة', en: 'Admin Team' },
   'nav.notify': { ar: 'إرسال إشعارات', en: 'Send notifications' },
+  'nav.audit': { ar: 'سجلّ التدقيق', en: 'Audit log' },
   'nav.profile': { ar: 'ملفي الشخصي', en: 'My Profile' },
 
   // Broadcast notifications
@@ -394,6 +395,7 @@ const DICT: Dict = {
   'reports.from': { ar: 'من تاريخ', en: 'From date' },
   'reports.to': { ar: 'إلى تاريخ', en: 'To date' },
   'reports.show': { ar: 'عرض', en: 'View' },
+  'reports.exportCsv': { ar: 'تصدير CSV', en: 'Export CSV' },
   'reports.commission': { ar: 'عمولة المنصة (الإيراد)', en: 'Platform commission (revenue)' },
   'reports.commissionHint': { ar: 'صافي ربح المنصة من الرحلات', en: 'Net platform profit from rides' },
   'reports.gross': { ar: 'إجمالي الأجور المحصّلة', en: 'Total fares collected' },
@@ -408,6 +410,20 @@ const DICT: Dict = {
   'reports.colRides': { ar: 'عدد الرحلات', en: 'Rides count' },
   'reports.colFares': { ar: 'الأجور', en: 'Fares' },
   'reports.colCommission': { ar: 'العمولة', en: 'Commission' },
+
+  // Audit log viewer
+  'audit.title': { ar: 'سجلّ التدقيق', en: 'Audit log' },
+  'audit.intro': { ar: 'كل إجراء حسّاس في المنصّة مُسجَّل بشكل غير قابل للتعديل — مع فلترة وتصدير.', en: 'Every sensitive platform action is recorded immutably — filter and export.' },
+  'audit.action': { ar: 'الإجراء', en: 'Action' },
+  'audit.allActions': { ar: 'كل الإجراءات', en: 'All actions' },
+  'audit.user': { ar: 'المستخدم', en: 'User' },
+  'audit.target': { ar: 'العنصر', en: 'Target' },
+  'audit.changes': { ar: 'التفاصيل', en: 'Details' },
+  'audit.ip': { ar: 'IP', en: 'IP' },
+  'audit.when': { ar: 'التاريخ', en: 'When' },
+  'audit.filter': { ar: 'فلترة', en: 'Filter' },
+  'audit.empty': { ar: 'لا توجد سجلّات مطابقة', en: 'No matching records' },
+  'audit.loadError': { ar: 'تعذّر تحميل السجلّ', en: 'Could not load the log' },
   'reports.noZone': { ar: 'بدون منطقة', en: 'No zone' },
 
   // Safety

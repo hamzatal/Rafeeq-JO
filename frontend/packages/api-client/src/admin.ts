@@ -232,10 +232,48 @@ export class AdminApi {
     const { data } = await this.http.post<ApiSuccess<{ queued: boolean; estimated: number }>>(ENDPOINTS.admin.notify, payload);
     return unwrap(data);
   }
+
+  // ── Audit trail (permission: audit.view) ─────────────────────────
+  async listAuditLogs(
+    params: { action?: string; user_id?: string; auditable_type?: string; from?: string; to?: string; page?: number; per_page?: number } = {},
+  ): Promise<{ items: AuditLogEntry[]; meta: ApiSuccess<AuditLogEntry[]>['meta'] }> {
+    const { data } = await this.http.get<ApiSuccess<AuditLogEntry[]>>(ENDPOINTS.admin.auditLogs, { params });
+    return { items: data.data, meta: data.meta };
+  }
+
+  async auditActions(): Promise<string[]> {
+    const { data } = await this.http.get<ApiSuccess<string[]>>(ENDPOINTS.admin.auditLogActions);
+    return unwrap(data);
+  }
+
+  /** Download the audit trail as a CSV blob (respects the same filters). */
+  async exportAuditCsv(params: { action?: string; user_id?: string; from?: string; to?: string } = {}): Promise<Blob> {
+    const res = await this.http.get(ENDPOINTS.admin.auditLogsExport, { params, responseType: 'blob' });
+    return res.data as Blob;
+  }
+
+  /** Download the financial report as a CSV blob. */
+  async exportFinancialCsv(params: { from?: string; to?: string; zone_id?: string } = {}): Promise<Blob> {
+    const res = await this.http.get(ENDPOINTS.admin.reportsFinancialExport, { params, responseType: 'blob' });
+    return res.data as Blob;
+  }
 }
 
 export interface CliqSettings {
   alias: string | null;
   beneficiary_name: string | null;
   bank_name: string | null;
+}
+
+
+export interface AuditLogEntry {
+  id: string;
+  user_id: string | null;
+  action: string;
+  auditable_type: string | null;
+  auditable_id: string | null;
+  changes: Record<string, unknown> | null;
+  ip: string | null;
+  user_agent: string | null;
+  created_at: string;
 }
