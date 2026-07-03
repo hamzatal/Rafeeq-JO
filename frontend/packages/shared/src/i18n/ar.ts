@@ -354,6 +354,9 @@ export const ar = {
   notifications: {
     title: 'الإشعارات',
     none: 'لا توجد إشعارات',
+    today: 'اليوم',
+    yesterday: 'أمس',
+    earlier: 'أقدم',
     markAllRead: 'تعليم الكل كمقروء',
     preferences: 'تفضيلات الإشعارات',
     push: 'إشعارات الجهاز',

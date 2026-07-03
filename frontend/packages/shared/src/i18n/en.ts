@@ -356,6 +356,9 @@ export const en: Translations = {
   notifications: {
     title: 'Notifications',
     none: 'No notifications',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    earlier: 'Earlier',
     markAllRead: 'Mark all read',
     preferences: 'Notification preferences',
     push: 'Push notifications',

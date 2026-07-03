@@ -82,6 +82,55 @@ export default function Notifications() {
     }
   };
 
+  // Group notifications by day (Today / Yesterday / Earlier).
+  const groups = useMemo(() => {
+    const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const todayStart = startOfDay(new Date());
+    const dayMs = 86400000;
+    const buckets: { key: string; label: string; items: AppNotification[] }[] = [
+      { key: 'today', label: t('notifications.today'), items: [] },
+      { key: 'yesterday', label: t('notifications.yesterday'), items: [] },
+      { key: 'earlier', label: t('notifications.earlier'), items: [] },
+    ];
+    for (const n of items) {
+      const ts = n.created_at ? new Date(n.created_at).getTime() : 0;
+      if (ts >= todayStart) buckets[0].items.push(n);
+      else if (ts >= todayStart - dayMs) buckets[1].items.push(n);
+      else buckets[2].items.push(n);
+    }
+    return buckets.filter((b) => b.items.length > 0);
+  }, [items, t]);
+
+  const renderNotif = (n: AppNotification) => (
+    <Pressable key={n.id} onPress={() => open(n)} style={[s.item, !n.read && s.unread]}>
+      <View style={[s.iconWrap, !n.read && s.iconWrapUnread]}>
+        <Icon name={CATEGORY_ICON[n.category] ?? 'bell'} size={18} color={n.is_critical ? theme.colors.danger : theme.colors.primary} />
+      </View>
+      <View style={s.itemBody}>
+        <Text style={s.title} numberOfLines={1}>{n.title}</Text>
+        <Text style={s.body} numberOfLines={2}>{n.body}</Text>
+        {n.created_at && <Text style={s.meta}>{new Date(n.created_at).toLocaleString(locale)}</Text>}
+        {typeof n.data?.coupon_code === 'string' && (
+          <View style={s.couponBox}>
+            <View style={s.couponRow}>
+              <Text style={s.couponCode}>{String(n.data.coupon_code)}</Text>
+              <Pressable onPress={() => onActivateCoupon(n.id, String(n.data!.coupon_code))} style={s.couponBtn}>
+                <Icon name="gift" size={14} color={theme.colors.onPrimary} />
+                <Text style={s.couponBtnText}>{t('payments.couponActivate')}</Text>
+              </Pressable>
+            </View>
+            {couponMsg[n.id] && (
+              <Text style={[s.couponMsg, { color: couponMsg[n.id].ok ? theme.colors.success : theme.colors.danger }]}>
+                {couponMsg[n.id].text}
+              </Text>
+            )}
+          </View>
+        )}
+      </View>
+      {!n.read && <View style={s.dot} />}
+    </Pressable>
+  );
+
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -110,41 +159,16 @@ export default function Notifications() {
           </Card>
         )}
 
-        {items.length === 0 ? (
-          loading ? (
-            <ListSkeleton rows={5} />
-          ) : (
-            <EmptyState icon="bell" title={t('notifications.none')} />
-          )
+        {loading && items.length === 0 ? (
+          <ListSkeleton rows={5} />
+        ) : items.length === 0 ? (
+          <EmptyState icon="bell" title={t('notifications.none')} />
         ) : (
-          items.map((n) => (
-            <Pressable key={n.id} onPress={() => open(n)} style={[s.item, !n.read && s.unread]}>
-              <View style={[s.iconWrap, !n.read && s.iconWrapUnread]}>
-                <Icon name={CATEGORY_ICON[n.category] ?? 'bell'} size={18} color={n.is_critical ? theme.colors.danger : theme.colors.primary} />
-              </View>
-              <View style={s.itemBody}>
-                <Text style={s.title} numberOfLines={1}>{n.title}</Text>
-                <Text style={s.body} numberOfLines={2}>{n.body}</Text>
-                {n.created_at && <Text style={s.meta}>{new Date(n.created_at).toLocaleString(locale)}</Text>}
-                {typeof n.data?.coupon_code === 'string' && (
-                  <View style={s.couponBox}>
-                    <View style={s.couponRow}>
-                      <Text style={s.couponCode}>{String(n.data.coupon_code)}</Text>
-                      <Pressable onPress={() => onActivateCoupon(n.id, String(n.data!.coupon_code))} style={s.couponBtn}>
-                        <Icon name="gift" size={14} color="#FFFFFF" />
-                        <Text style={s.couponBtnText}>{t('payments.couponActivate')}</Text>
-                      </Pressable>
-                    </View>
-                    {couponMsg[n.id] && (
-                      <Text style={[s.couponMsg, { color: couponMsg[n.id].ok ? theme.colors.success : theme.colors.danger }]}>
-                        {couponMsg[n.id].text}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              </View>
-              {!n.read && <View style={s.dot} />}
-            </Pressable>
+          groups.map((g) => (
+            <View key={g.key}>
+              <Text style={s.groupLabel}>{g.label}</Text>
+              {g.items.map(renderNotif)}
+            </View>
           ))
         )}
       </ScrollView>
@@ -172,6 +196,7 @@ const makeStyles = (t: AppTheme) =>
     prefRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
     prefBorder: { borderBottomWidth: 1, borderBottomColor: t.colors.border },
     prefLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text },
+    groupLabel: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.sm, marginBottom: t.spacing.sm },
     item: { flexDirection: 'row-reverse', alignItems: 'flex-start', backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
     unread: { borderColor: t.colors.primary, backgroundColor: t.colors.primarySoft },
     iconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: t.colors.background, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
