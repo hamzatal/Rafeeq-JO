@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+/* Material Symbols is loaded via a <link> in the root layout (with preconnect
+   and font-display: block) so the icon ligature text ("dashboard", "group"…)
+   never flashes before the font loads. */
 
 @tailwind base;
 @tailwind components;

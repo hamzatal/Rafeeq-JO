@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { User, WalletTransaction } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Skeleton } from '../../../src/components/Skeleton';
 
 const TYPES = [
   { value: '', labelAr: 'الكل', labelEn: 'All' },
@@ -68,7 +69,11 @@ export default function UsersPage() {
 
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
         ) : users.length === 0 ? (
           <div className="p-6 text-center text-muted">{locale === 'ar' ? 'لا يوجد مستخدمون' : 'No users'}</div>
         ) : (

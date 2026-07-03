@@ -6,6 +6,7 @@ import type { FinancialReport, Dispute } from '@rafeeq/shared';
 import { api } from '../../src/lib/api';
 import { useAuth } from '../../src/lib/auth';
 import { useT } from '../../src/lib/i18n';
+import { Skeleton, StatCardsSkeleton } from '../../src/components/Skeleton';
 
 const jod = (fils: number) => `${(fils / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 const monthStart = () => {
@@ -134,11 +135,15 @@ export default function CommandCenter() {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        {kpis.map((k) => (
-          <KpiCard key={k.label} k={k} />
-        ))}
-      </div>
+      {loading ? (
+        <StatCardsSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          {kpis.map((k) => (
+            <KpiCard key={k.label} k={k} />
+          ))}
+        </div>
+      )}
 
       {/* Bento: revenue-by-zone chart + quick links */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -155,7 +160,7 @@ export default function CommandCenter() {
           </div>
           <div className="p-5 flex-1 min-h-[280px]">
             {loading ? (
-              <div className="h-full flex items-center justify-center text-muted">{t('common.loading')}</div>
+              <Skeleton className="h-[240px] w-full" />
             ) : (report?.by_zone?.length ?? 0) === 0 ? (
               <div className="h-full flex items-center justify-center text-muted">{t('home.noData')}</div>
             ) : (
@@ -215,7 +220,11 @@ export default function CommandCenter() {
         </div>
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-6 text-center text-muted">{t('common.loading')}</div>
+            <div className="p-4 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-9 w-full" />
+              ))}
+            </div>
           ) : disputes.length === 0 ? (
             <div className="p-6 text-center text-muted">{t('home.noDisputes')}</div>
           ) : (
