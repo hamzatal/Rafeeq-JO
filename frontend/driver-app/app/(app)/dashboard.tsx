@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { DriverStatus, DriverPerformance } from '@rafeeq/shared';
@@ -8,6 +8,7 @@ import { Banner } from '../../src/components/Banner';
 import { Button } from '../../src/components/Button';
 import { Card, ListRow, SectionTitle, Badge } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
+import { Loader } from '../../src/components/Loader';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
@@ -80,7 +81,7 @@ export default function Dashboard() {
   if (!driverLoaded) {
     return (
       <SafeAreaView style={[s.safe, { alignItems: 'center', justifyContent: 'center' }]} edges={['top']}>
-        <ActivityIndicator color={theme.colors.primary} />
+        <Loader size={12} />
       </SafeAreaView>
     );
   }
