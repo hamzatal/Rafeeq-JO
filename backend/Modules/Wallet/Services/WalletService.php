@@ -40,6 +40,73 @@ class WalletService extends BaseService
     }
 
     /**
+     * Admin manual top-up — idempotent by reference so an accidental double
+     * submit (or retry) never credits twice. Returns the existing transaction
+     * if the same reference already topped up this wallet.
+     */
+    public function adminTopup(Wallet $wallet, int $amountFils, ?string $reference = null, ?string $desc = null): WalletTransaction
+    {
+        return DB::transaction(function () use ($wallet, $amountFils, $reference, $desc) {
+            /** @var Wallet $locked */
+            $locked = Wallet::whereKey($wallet->id)->lockForUpdate()->first();
+
+            if ($reference !== null && $reference !== '') {
+                $existing = WalletTransaction::where('wallet_id', $locked->id)
+                    ->where('type', WalletTxnType::Topup)
+                    ->where('reference', $reference)
+                    ->first();
+                if ($existing) {
+                    return $existing;
+                }
+            }
+
+            return $this->apply($locked, abs($amountFils), WalletTxnType::Topup, $desc ?? 'شحن معتمد من الإدارة', $reference);
+        });
+    }
+
+    /**
+     * Reverse a manual top-up / adjustment credit entered by mistake. Creates a
+     * balancing Adjustment debit that points back at the original (reversal_of)
+     * and flags the original (reversed_at) — non-destructive and fully audited.
+     * Fails if the credit was already reversed, is not a reversible credit, or
+     * the funds are no longer available (already spent / held).
+     */
+    public function reverseTransaction(WalletTransaction $original, ?string $reason = null): WalletTransaction
+    {
+        return DB::transaction(function () use ($original, $reason) {
+            /** @var WalletTransaction|null $orig */
+            $orig = WalletTransaction::whereKey($original->id)->lockForUpdate()->first();
+            if (! $orig || ! $orig->isReversible()) {
+                throw new BusinessRuleException('لا يمكن عكس هذه العملية (غير قابلة للعكس أو مَعكوسة مسبقاً).', 'NOT_REVERSIBLE');
+            }
+
+            /** @var Wallet $wallet */
+            $wallet = Wallet::whereKey($orig->wallet_id)->lockForUpdate()->first();
+            if ($wallet->availableFils() < $orig->amount_fils) {
+                throw new BusinessRuleException('لا يمكن عكس الشحن — الرصيد المتاح غير كافٍ (رُبما صُرف جزء منه).', 'INSUFFICIENT_BALANCE');
+            }
+
+            $reversal = $this->apply(
+                $wallet,
+                -abs($orig->amount_fils),
+                WalletTxnType::Adjustment,
+                $reason ?: 'عكس شحن إداري',
+                $orig->reference,
+            );
+            $reversal->forceFill(['reversal_of' => $orig->id])->save();
+            $orig->forceFill(['reversed_at' => now()])->save();
+
+            $this->audit->log('wallet.reverse', auditable: $orig, changes: [
+                'reversed_amount' => $orig->amount_fils,
+                'reversal_txn' => $reversal->id,
+                'reason' => $reason,
+            ]);
+
+            return $reversal;
+        });
+    }
+
+    /**
      * Reserve funds on the wallet without moving money. Fails if the available
      * balance (balance − existing holds) cannot cover the amount.
      */

@@ -22,6 +22,9 @@ class WalletTransactionResource extends JsonResource
             'balance_after' => $this->balance_after,
             'reference' => $this->reference,
             'description' => $this->description,
+            'reversed_at' => $this->reversed_at?->toIso8601String(),
+            'reversal_of' => $this->reversal_of,
+            'is_reversible' => $this->isReversible(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
