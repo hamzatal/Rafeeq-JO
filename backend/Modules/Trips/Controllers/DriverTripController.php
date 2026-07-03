@@ -71,14 +71,21 @@ class DriverTripController extends Controller
         if (! $driver || ! $driver->status->canDrive()) {
             throw new AuthorizationException('حسابك غير معتمد لتشغيل الرحلات.');
         }
-        if ($trip->driver_id !== null || $trip->status !== TripStatus::PendingDriver) {
+
+        // Atomic claim: only ONE captain's UPDATE can match `driver_id IS NULL`
+        // for a still-pending trip. A concurrent second claim matches 0 rows and
+        // is rejected — this prevents two captains taking the same pooled trip.
+        $claimed = Trip::whereKey($trip->id)
+            ->whereNull('driver_id')
+            ->where('status', TripStatus::PendingDriver->value)
+            ->update([
+                'driver_id' => $driver->id,
+                'status' => TripStatus::Scheduled->value,
+            ]);
+
+        if ($claimed === 0) {
             throw new BusinessRuleException('هذه الرحلة لم تعد متاحة.', 'OFFER_TAKEN');
         }
-
-        $trip->forceFill([
-            'driver_id' => $driver->id,
-            'status' => TripStatus::Scheduled,
-        ])->save();
 
         // Mark the grouped ride requests as assigned.
         RideRequest::where('trip_id', $trip->id)
