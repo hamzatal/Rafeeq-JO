@@ -1,33 +1,39 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { CliqInstructions, PaymentRequest, Wallet, WalletTransaction } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
-import { Banner } from '../../src/components/Banner';
 import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
+import { Chip, Skeleton } from '../../src/components/kit';
 import { Icon } from '../../src/components/Icon';
+import { useToast } from '../../src/components/Feedback';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { pickProof } from '../../src/lib/proof';
 import { useTheme, type AppTheme } from '../../src/theme';
 
+const PRESETS = [5, 10, 20, 50];
+
 export default function WalletScreen() {
   const { t, locale } = useI18n();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
+  const toast = useToast();
 
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [txns, setTxns] = useState<WalletTransaction[]>([]);
   const [payments, setPayments] = useState<PaymentRequest[]>([]);
+  const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState('');
-  const [instructions, setInstructions] = useState<CliqInstructions | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [uploading, setUploading] = useState<string | null>(null);
-  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  // The freshly created top-up (request + its CliQ instructions) — drives the
+  // inline "transfer then upload" guide so the user never loses the thread.
+  const [active, setActive] = useState<{ request: PaymentRequest; instructions: CliqInstructions } | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const [w, tx, pays] = await Promise.all([
         api.wallet.show(),
@@ -38,98 +44,149 @@ export default function WalletScreen() {
       setTxns(tx);
       setPayments(pays);
     } catch {
-      /* handled on actions */
+      /* surfaced on actions */
+    } finally {
+      setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    load();
   }, []);
 
-  const topup = async () => {
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const createTopup = async () => {
     const jod = Number(amount);
     if (!Number.isFinite(jod) || jod < 1) {
-      setMsg({ text: t('wallet.invalidAmount'), ok: false });
+      toast.error(t('wallet.invalidAmount'));
       return;
     }
-    setBusy(true);
-    setMsg(null);
+    setCreating(true);
     try {
-      setInstructions(await api.wallet.topupInstructions(Math.round(jod * 1000)));
+      const res = await api.payments.create({ purpose: 'wallet_topup', amount_fils: Math.round(jod * 1000) });
+      setActive(res);
+      setAmount('');
+      toast.success(t('wallet.topupCreated'));
+      await load();
     } catch (e) {
-      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'), ok: false });
+      toast.error(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
     } finally {
-      setBusy(false);
+      setCreating(false);
     }
   };
 
   const uploadProof = async (id: string) => {
     const file = await pickProof();
     if (!file) return;
-    setUploading(id);
-    setMsg(null);
+    setUploadingId(id);
     try {
       const fd = new FormData();
       fd.append('proof', file as Blob);
       await api.payments.submitProof(id, fd);
-      setMsg({ text: t('payments.proofUploaded'), ok: true });
+      toast.success(t('payments.proofUploaded'));
+      setActive(null);
       await load();
     } catch (e) {
-      setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'), ok: false });
+      toast.error(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
     } finally {
-      setUploading(null);
+      setUploadingId(null);
     }
   };
 
   const canUpload = (status: string) => ['pending', 'submitted', 'under_review'].includes(status);
   const payTone = (status: string) => (status === 'approved' ? 'success' : status === 'rejected' ? 'danger' : 'primary');
+  // Pending requests that still need the user to act (upload a receipt).
+  const pending = payments.filter((p) => canUpload(p.status) && p.id !== active?.request.id);
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>{t('wallet.title')}</Text>
-        {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {/* Premium wallet card */}
         <View style={s.walletCard}>
           <View style={s.glow} />
           <View style={s.walletTop}>
             <View style={s.brandChip}>
-              <Icon name="zap" size={13} color={theme.colors.primary} />
+              <Icon name="zap" size={13} color={theme.colors.onAccent} />
               <Text style={s.brandChipText}>رفيق</Text>
             </View>
             <Icon name="credit-card" size={24} color="rgba(255,255,255,0.5)" />
           </View>
           <Text style={s.walletLabel}>{t('wallet.balance')}</Text>
-          <Text style={s.walletValue}>
-            {wallet ? wallet.balance_jod.toFixed(3) : '—'}
-            <Text style={s.walletCur}> {t('subscriptions.currency')}</Text>
-          </Text>
+          {loading ? (
+            <Skeleton width={160} height={44} radius={10} style={{ marginTop: 6, alignSelf: 'flex-end' }} />
+          ) : (
+            <Text style={s.walletValue}>
+              {wallet ? wallet.balance_jod.toFixed(3) : '—'}
+              <Text style={s.walletCur}> {t('subscriptions.currency')}</Text>
+            </Text>
+          )}
           <Text style={s.walletMask}>•••• •••• •••• {(wallet?.id ?? 'RFQ0').slice(-4).toUpperCase()}</Text>
         </View>
 
-        <SectionTitle title={t('wallet.topup')} />
-        <Card>
-          <Input label={t('wallet.amount')} keyboardType="numeric" value={amount} onChangeText={setAmount} placeholder="5" />
-          <Button title={t('wallet.getInstructions')} onPress={topup} loading={busy} />
-        </Card>
-
-        {instructions && (
-          <Card style={{ borderColor: theme.colors.primary }}>
-            <View style={s.cliqHead}>
-              <Icon name="info" size={18} color={theme.colors.primary} />
-              <Text style={s.cliqTitle}>{t('wallet.cliqTitle')}</Text>
-            </View>
-            <Row label={t('wallet.alias')} value={instructions.alias ?? '—'} s={s} />
-            <Row label={t('wallet.beneficiary')} value={instructions.beneficiary ?? '—'} s={s} />
-            <Row label={t('wallet.amount')} value={`${instructions.amount_jod} ${t('subscriptions.currency')}`} s={s} />
-            <Row label={t('wallet.reference')} value={instructions.reference} s={s} />
-            <Text style={s.note}>{instructions.note ?? t('wallet.afterTransfer')}</Text>
-          </Card>
+        {/* Guided top-up */}
+        {active ? (
+          <TopupGuide
+            data={active}
+            uploading={uploadingId === active.request.id}
+            onUpload={() => uploadProof(active.request.id)}
+            onDismiss={() => setActive(null)}
+            s={s}
+            t={t}
+            theme={theme}
+          />
+        ) : (
+          <>
+            <SectionTitle title={t('wallet.topup')} />
+            <Card>
+              <Text style={s.fieldLabel}>{t('wallet.chooseAmount')}</Text>
+              <View style={s.presets}>
+                {PRESETS.map((p) => (
+                  <Chip
+                    key={p}
+                    label={`${p} ${t('subscriptions.currency')}`}
+                    selected={Number(amount) === p}
+                    onPress={() => setAmount(String(p))}
+                  />
+                ))}
+              </View>
+              <View style={{ height: theme.spacing.sm }} />
+              <Input label={t('wallet.amount')} keyboardType="numeric" value={amount} onChangeText={setAmount} placeholder="5" />
+              <Button title={t('wallet.topupCta')} icon="arrow-left" onPress={createTopup} loading={creating} />
+            </Card>
+          </>
         )}
 
+        {/* Pending top-ups still awaiting a receipt */}
+        {pending.length > 0 && (
+          <>
+            <SectionTitle title={t('wallet.paymentRequests')} />
+            {pending.map((p) => (
+              <Card key={p.id}>
+                <View style={s.payHead}>
+                  <Text style={s.payNumber}>{p.purpose_label}</Text>
+                  <Badge label={p.status === 'pending' ? t('wallet.awaitingProof') : t('wallet.underReview')} tone={payTone(p.status)} />
+                </View>
+                <Text style={s.meta}>{p.amount_jod.toFixed(3)} {t('subscriptions.currency')} · {p.number}</Text>
+                {p.reject_reason ? <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text> : null}
+                <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
+                  <Icon name="upload" size={16} color={theme.colors.primary} />
+                  <Text style={s.uploadText}>{uploadingId === p.id ? '...' : t('wallet.uploadProof')}</Text>
+                </Pressable>
+              </Card>
+            ))}
+          </>
+        )}
+
+        {/* Transactions */}
         <SectionTitle title={t('wallet.transactions')} />
-        {txns.length === 0 ? (
+        {loading ? (
+          <View style={{ gap: theme.spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} width="100%" height={64} radius={theme.radius.lg} />
+            ))}
+          </View>
+        ) : txns.length === 0 ? (
           <EmptyState icon="credit-card" title={t('wallet.noTransactions')} />
         ) : (
           txns.map((tx) => {
@@ -150,31 +207,64 @@ export default function WalletScreen() {
             );
           })
         )}
-
-        {/* Payment requests (subscriptions / top-ups awaiting confirmation) */}
-        <SectionTitle title={t('wallet.paymentRequests')} />
-        {payments.length === 0 ? (
-          <EmptyState icon="file-text" title={t('wallet.noPaymentRequests')} />
-        ) : (
-          payments.map((p) => (
-            <Card key={p.id}>
-              <View style={s.payHead}>
-                <Text style={s.payNumber}>{p.purpose_label}</Text>
-                <Badge label={p.status_label} tone={payTone(p.status)} />
-              </View>
-              <Text style={s.meta}>{p.amount_jod.toFixed(3)} {t('subscriptions.currency')} · {p.number}</Text>
-              {p.reject_reason ? <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text> : null}
-              {canUpload(p.status) && (
-                <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
-                  <Icon name="upload" size={16} color={theme.colors.primary} />
-                  <Text style={s.uploadText}>{uploading === p.id ? '...' : t('wallet.uploadProof')}</Text>
-                </Pressable>
-              )}
-            </Card>
-          ))
-        )}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** Inline 3-step guide shown right after a top-up request is created. */
+function TopupGuide({
+  data,
+  uploading,
+  onUpload,
+  onDismiss,
+  s,
+  t,
+  theme,
+}: {
+  data: { request: PaymentRequest; instructions: CliqInstructions };
+  uploading: boolean;
+  onUpload: () => void;
+  onDismiss: () => void;
+  s: ReturnType<typeof makeStyles>;
+  t: (k: string) => string;
+  theme: AppTheme;
+}) {
+  const { instructions: ins } = data;
+  return (
+    <Card style={{ borderColor: theme.colors.accent, borderWidth: 1.5 }}>
+      <View style={s.guideHead}>
+        <Text style={s.guideTitle}>{t('wallet.newTopup')}</Text>
+        <Pressable onPress={onDismiss} hitSlop={8}>
+          <Icon name="x" size={18} color={theme.colors.muted} />
+        </Pressable>
+      </View>
+
+      {/* Step 1 — done */}
+      <StepRow n={1} done label={`${data.request.amount_jod.toFixed(3)} ${t('subscriptions.currency')}`} s={s} theme={theme} />
+      {/* Step 2 — transfer via CliQ */}
+      <StepRow n={2} label={t('wallet.transferStep')} s={s} theme={theme} />
+      <View style={s.cliqBox}>
+        <Row label={t('wallet.alias')} value={ins.alias ?? '—'} s={s} />
+        <Row label={t('wallet.beneficiary')} value={ins.beneficiary ?? '—'} s={s} />
+        <Row label={t('wallet.amount')} value={`${ins.amount_jod} ${t('subscriptions.currency')}`} s={s} />
+        <Row label={t('wallet.reference')} value={ins.reference} s={s} />
+      </View>
+      {/* Step 3 — upload */}
+      <StepRow n={3} label={t('wallet.uploadStep')} s={s} theme={theme} />
+      <Button title={t('wallet.uploadProof')} icon="upload" onPress={onUpload} loading={uploading} />
+    </Card>
+  );
+}
+
+function StepRow({ n, label, done, s, theme }: { n: number; label: string; done?: boolean; s: ReturnType<typeof makeStyles>; theme: AppTheme }) {
+  return (
+    <View style={s.stepRow}>
+      <View style={[s.stepDot, done && { backgroundColor: theme.colors.success, borderColor: theme.colors.success }]}>
+        {done ? <Icon name="check" size={13} color={theme.colors.textInverse} /> : <Text style={s.stepNum}>{n}</Text>}
+      </View>
+      <Text style={s.stepLabel}>{label}</Text>
+    </View>
   );
 }
 
@@ -182,7 +272,7 @@ function Row({ label, value, s }: { label: string; value: string; s: ReturnType<
   return (
     <View style={s.row}>
       <Text style={s.rowLabel}>{label}</Text>
-      <Text style={s.rowValue}>{value}</Text>
+      <Text style={s.rowValue} selectable>{value}</Text>
     </View>
   );
 }
@@ -194,20 +284,30 @@ const makeStyles = (t: AppTheme) =>
     h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
 
     walletCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, overflow: 'hidden', marginBottom: t.spacing.md, ...t.shadow.md },
-    glow: { position: 'absolute', top: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: t.colors.accent, opacity: 0.12 },
+    glow: { position: 'absolute', top: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: t.colors.accent, opacity: 0.14 },
     walletTop: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.lg },
     brandChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, backgroundColor: t.colors.accent, paddingHorizontal: 10, paddingVertical: 4, borderRadius: t.radius.full },
-    brandChipText: { fontFamily: t.fontFamily.extrabold, fontSize: 12, color: t.colors.primary },
+    brandChipText: { fontFamily: t.fontFamily.extrabold, fontSize: 12, color: t.colors.onAccent },
     walletLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: 'rgba(255,255,255,0.6)', textAlign: 'right' },
     walletValue: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: t.colors.accent, textAlign: 'right', marginTop: 2 },
     walletCur: { fontFamily: t.fontFamily.bold, fontSize: 16, color: 'rgba(255,255,255,0.8)' },
     walletMask: { fontFamily: t.fontFamily.medium, fontSize: 15, color: 'rgba(255,255,255,0.45)', textAlign: 'right', marginTop: t.spacing.md, letterSpacing: 2 },
-    cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: t.spacing.sm },
-    cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
+
+    fieldLabel: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm },
+    presets: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.sm },
+
+    guideHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm },
+    guideTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.text },
+    stepRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginTop: t.spacing.sm },
+    stepDot: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
+    stepNum: { fontFamily: t.fontFamily.extrabold, fontSize: 12, color: t.colors.accent },
+    stepLabel: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
+    cliqBox: { backgroundColor: t.colors.hairline, borderRadius: t.radius.md, padding: t.spacing.md, marginVertical: t.spacing.sm, marginRight: 32 },
+
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
     rowLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
     rowValue: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text },
-    note: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, textAlign: 'right', marginTop: t.spacing.xs },
+
     txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.md, marginBottom: t.spacing.sm },
     txnIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     txnBody: { flex: 1 },
