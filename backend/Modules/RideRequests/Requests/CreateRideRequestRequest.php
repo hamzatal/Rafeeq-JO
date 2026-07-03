@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\RideRequests\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\RideType;
 
 class CreateRideRequestRequest extends FormRequest
@@ -22,6 +23,7 @@ class CreateRideRequestRequest extends FormRequest
             'pickup_address' => ['nullable', 'string', 'max:200'],
             'desired_time' => ['required', 'date', 'after_or_equal:now'],
             'type' => ['sometimes', Rule::in(RideType::values())],
+            'direction' => ['sometimes', Rule::in(RideDirection::values())],
             'notes' => ['nullable', 'string', 'max:255'],
             'coupon_code' => ['nullable', 'string', 'max:40'],
         ];

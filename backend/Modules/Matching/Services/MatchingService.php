@@ -44,8 +44,12 @@ class MatchingService extends BaseService
 
         // Express requests get priority and are pooled only with other express
         // riders in the same zone+university (a private single rider is allowed).
+        // Group key includes DIRECTION so home→university and university→home
+        // riders are pooled separately (enables return trips — no empty return).
+        $key = fn (RideRequest $r) => $r->zone_id.'|'.$r->university_id.'|'.$r->direction->value;
+
         $express = $pending->where('is_express', true);
-        foreach ($express->groupBy(fn (RideRequest $r) => $r->zone_id.'|'.$r->university_id) as $group) {
+        foreach ($express->groupBy($key) as $group) {
             foreach ($group->chunk(self::SEAT_CAPACITY) as $chunk) {
                 $this->createPooledTrip($chunk->values(), true);
                 $created++;
@@ -55,7 +59,7 @@ class MatchingService extends BaseService
         // Scheduled requests pool normally; a chunk below min-fill still forms a
         // trip but PricingService applies a (capped) surge to protect earnings.
         $scheduled = $pending->where('is_express', false);
-        foreach ($scheduled->groupBy(fn (RideRequest $r) => $r->zone_id.'|'.$r->university_id) as $group) {
+        foreach ($scheduled->groupBy($key) as $group) {
             foreach ($group->chunk(self::SEAT_CAPACITY) as $chunk) {
                 $this->createPooledTrip($chunk->values(), false);
                 $created++;
@@ -82,6 +86,7 @@ class MatchingService extends BaseService
 
             $trip = Trip::create([
                 'type' => 'pooled',
+                'direction' => $first->direction->value,
                 'is_express' => $isExpress,
                 'zone_id' => $first->zone_id,
                 'university_id' => $first->university_id,

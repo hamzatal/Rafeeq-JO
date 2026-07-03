@@ -8,6 +8,7 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Zones\Services\ZoneService;
+use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\RideType;
 
@@ -46,6 +47,7 @@ class RideRequestService extends BaseService
             'pickup_address' => $data['pickup_address'] ?? null,
             'desired_time' => $data['desired_time'],
             'type' => $type,
+            'direction' => RideDirection::tryFrom($data['direction'] ?? '') ?? RideDirection::ToUniversity,
             'is_express' => $isExpress,
             'express_fee_fils' => $isExpress ? (int) config('rafeeq.express_fee_fils', 1500) : 0,
             'status' => RideRequestStatus::Pending,

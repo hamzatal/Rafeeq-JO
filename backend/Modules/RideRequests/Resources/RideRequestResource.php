@@ -29,6 +29,8 @@ class RideRequestResource extends JsonResource
             'desired_time' => $this->desired_time?->toIso8601String(),
             'type' => $this->type->value,
             'type_label' => $this->type->label(),
+            'direction' => $this->direction->value,
+            'direction_label' => $this->direction->label(),
             'is_express' => $this->is_express,
             'express_fee_fils' => $this->express_fee_fils,
             'status' => $this->status->value,

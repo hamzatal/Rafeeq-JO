@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\RideRequests\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\RideType;
 use Rafeeq\Shared\Traits\HasUuid;
@@ -29,7 +30,7 @@ class RideRequest extends Model
     protected $fillable = [
         'student_id', 'zone_id', 'university_id', 'subscription_id', 'trip_id',
         'pickup_lat', 'pickup_lng', 'pickup_address', 'desired_time',
-        'type', 'is_express', 'express_fee_fils', 'status', 'notes', 'coupon_code',
+        'type', 'direction', 'is_express', 'express_fee_fils', 'status', 'notes', 'coupon_code',
     ];
 
     protected function casts(): array
@@ -39,6 +40,7 @@ class RideRequest extends Model
             'pickup_lng' => 'float',
             'desired_time' => 'datetime',
             'type' => RideType::class,
+            'direction' => RideDirection::class,
             'status' => RideRequestStatus::class,
             'is_express' => 'boolean',
             'express_fee_fils' => 'integer',

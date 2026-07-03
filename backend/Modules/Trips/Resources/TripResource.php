@@ -25,6 +25,8 @@ class TripResource extends JsonResource
             'driver_id' => $this->driver_id,
             'vehicle_id' => $this->vehicle_id,
             'type' => $this->type,
+            'direction' => $this->direction?->value,
+            'direction_label' => $this->direction?->label(),
             'is_express' => (bool) $this->is_express,
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
