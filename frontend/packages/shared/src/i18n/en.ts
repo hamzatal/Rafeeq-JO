@@ -102,7 +102,7 @@ export const en: Translations = {
   home: {
     title: 'Home',
     hello: 'Hello 👋',
-    services: 'All services',
+    allServices: 'All services',
     subscriptions: 'Subscriptions',
     trips: 'Trips',
     rideRequest: 'Request a ride',

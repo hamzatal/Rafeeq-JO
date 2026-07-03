@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import type { User } from '@rafeeq/shared';
+import { useCallback, useEffect, useState } from 'react';
+import type { User, WalletTransaction } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 
@@ -120,6 +120,23 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
   const [reference, setReference] = useState('');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [txns, setTxns] = useState<WalletTransaction[]>([]);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const loadTxns = useCallback(() => {
+    api.admin
+      .listUserWalletTransactions(user.id)
+      .then((r) => {
+        setBalance(r.wallet.balance_fils);
+        setTxns(r.transactions);
+      })
+      .catch(() => undefined);
+  }, [user.id]);
+
+  useEffect(() => {
+    loadTxns();
+  }, [loadTxns]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,7 +154,9 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
         reference: reference || undefined,
       });
       setMsg({ kind: 'ok', text: t('wallet.credited') });
-      setTimeout(onDone, 900);
+      setAmount('');
+      setReference('');
+      loadTxns();
     } catch (err) {
       setMsg({ kind: 'err', text: (err as Error)?.message || t('common.error') });
     } finally {
@@ -145,12 +164,26 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
     }
   };
 
+  const reverse = async (txn: WalletTransaction) => {
+    if (!window.confirm(t('wallet.reverseConfirm'))) return;
+    setBusyId(txn.id);
+    setMsg(null);
+    try {
+      await api.admin.reverseWalletTransaction({ transaction_id: txn.id });
+      setMsg({ kind: 'ok', text: t('wallet.reversed') });
+      loadTxns();
+    } catch (err) {
+      setMsg({ kind: 'err', text: (err as Error)?.message || t('common.error') });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" onMouseDown={onClose}>
-      <form
+      <div
         onMouseDown={(e) => e.stopPropagation()}
-        onSubmit={submit}
-        className="card w-full max-w-md"
+        className="card w-full max-w-lg max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold surface-text">
@@ -160,7 +193,15 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
-        <div className="grid gap-4">
+
+        {balance !== null && (
+          <div className="mb-4 rounded-xl bg-background dark:bg-dsurface p-3 flex items-center justify-between">
+            <span className="text-xs muted-text">{t('wallet.balance')}</span>
+            <span className="font-extrabold surface-text">{(balance / 1000).toFixed(3)} د.أ</span>
+          </div>
+        )}
+
+        <form onSubmit={submit} className="grid gap-4">
           <label className="block">
             <span className="text-xs text-muted">{t('wallet.amountJod')}</span>
             <input
@@ -178,17 +219,58 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
             <span className="text-xs text-muted">{t('wallet.reference')}</span>
             <input className="input mt-1" value={reference} onChange={(e) => setReference(e.target.value)} />
           </label>
+          <div className="flex items-center gap-3">
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? t('common.loading') : t('wallet.confirmCredit')}
+            </button>
+            {msg && <span className={`text-sm ${msg.kind === 'ok' ? 'text-success' : 'text-danger'}`}>{msg.text}</span>}
+          </div>
+        </form>
+
+        <div className="mt-6">
+          <h3 className="text-sm font-bold surface-text mb-2">{t('wallet.recentTopups')}</h3>
+          {txns.length === 0 ? (
+            <p className="text-xs muted-text py-3">{t('wallet.noTransactions')}</p>
+          ) : (
+            <ul className="divide-y divide-line dark:divide-dline">
+              {txns.map((tx) => (
+                <li key={tx.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                  <div className="min-w-0">
+                    <p className="surface-text font-medium truncate">{tx.type_label}</p>
+                    <p className="text-xs muted-text truncate">
+                      {tx.description || tx.reference || '—'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className={`font-bold ${tx.amount_fils >= 0 ? 'text-success' : 'text-danger'}`}>
+                      {tx.amount_fils >= 0 ? '+' : ''}
+                      {(tx.amount_fils / 1000).toFixed(3)}
+                    </span>
+                    {tx.reversed_at ? (
+                      <span className="pill-muted">{t('wallet.reversedBadge')}</span>
+                    ) : tx.is_reversible ? (
+                      <button
+                        onClick={() => reverse(tx)}
+                        disabled={busyId === tx.id}
+                        className="inline-flex items-center gap-1 text-danger hover:underline text-xs font-semibold disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">undo</span>
+                        {busyId === tx.id ? t('common.loading') : t('wallet.reverse')}
+                      </button>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        <div className="flex items-center gap-3 mt-5">
-          <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? t('common.loading') : t('wallet.confirmCredit')}
-          </button>
-          <button type="button" onClick={onClose} className="btn-outline">
+
+        <div className="mt-5 flex justify-end">
+          <button type="button" onClick={onDone} className="btn-outline">
             {t('common.cancel')}
           </button>
-          {msg && <span className={`text-sm ${msg.kind === 'ok' ? 'text-success' : 'text-danger'}`}>{msg.text}</span>}
         </div>
-      </form>
+      </div>
     </div>
   );
 }

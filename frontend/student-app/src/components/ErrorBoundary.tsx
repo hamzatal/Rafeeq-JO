@@ -49,12 +49,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 }
 
+// Self-contained brand constants (must render even if the theme provider is
+// the thing that failed) — Design System v6 navy + gold.
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0B192C', alignItems: 'center', justifyContent: 'center', padding: 28 },
-  badge: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,191,0,0.15)', borderWidth: 2, borderColor: '#FFBF00', alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
-  badgeText: { fontSize: 36, fontWeight: '800', color: '#FFBF00' },
+  root: { flex: 1, backgroundColor: '#0D1220', alignItems: 'center', justifyContent: 'center', padding: 28 },
+  badge: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(231,166,58,0.15)', borderWidth: 2, borderColor: '#E7A63A', alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+  badgeText: { fontSize: 36, fontWeight: '800', color: '#E7A63A' },
   title: { fontSize: 20, fontWeight: '800', color: '#FFFFFF', textAlign: 'center', marginBottom: 8 },
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center', lineHeight: 22, marginBottom: 24, maxWidth: 320 },
-  btn: { backgroundColor: '#FFBF00', paddingHorizontal: 28, height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  btnText: { fontSize: 15, fontWeight: '800', color: '#0B192C' },
+  btn: { backgroundColor: '#E7A63A', paddingHorizontal: 28, height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  btnText: { fontSize: 15, fontWeight: '800', color: '#141C33' },
 });

@@ -96,6 +96,13 @@ const DICT: Dict = {
   'wallet.confirmCredit': { ar: 'اعتماد الشحن', en: 'Confirm top-up' },
   'wallet.credited': { ar: 'تم شحن الرصيد بنجاح.', en: 'Wallet credited successfully.' },
   'wallet.invalidAmount': { ar: 'أدخل مبلغاً صحيحاً.', en: 'Enter a valid amount.' },
+  'wallet.balance': { ar: 'الرصيد الحالي', en: 'Current balance' },
+  'wallet.recentTopups': { ar: 'آخر عمليات الشحن', en: 'Recent top-ups' },
+  'wallet.noTransactions': { ar: 'لا توجد عمليات', en: 'No transactions' },
+  'wallet.reverse': { ar: 'عكس', en: 'Reverse' },
+  'wallet.reverseConfirm': { ar: 'عكس هذا الشحن وإرجاع المبلغ؟', en: 'Reverse this top-up and return the amount?' },
+  'wallet.reversed': { ar: 'تم عكس الشحن.', en: 'Top-up reversed.' },
+  'wallet.reversedBadge': { ar: 'معكوس', en: 'Reversed' },
 
   // Common
   'common.cancel': { ar: 'إلغاء', en: 'Cancel' },

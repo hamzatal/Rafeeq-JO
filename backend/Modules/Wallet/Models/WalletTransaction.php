@@ -22,7 +22,7 @@ class WalletTransaction extends Model
 
     protected $fillable = [
         'wallet_id', 'type', 'amount_fils', 'balance_after',
-        'reference', 'description', 'meta',
+        'reference', 'description', 'meta', 'reversed_at', 'reversal_of',
     ];
 
     protected function casts(): array
@@ -32,7 +32,17 @@ class WalletTransaction extends Model
             'amount_fils' => 'integer',
             'balance_after' => 'integer',
             'meta' => 'array',
+            'reversed_at' => 'datetime',
         ];
+    }
+
+    /** A credit top-up/adjustment that can still be reversed (positive, not yet reversed). */
+    public function isReversible(): bool
+    {
+        return $this->amount_fils > 0
+            && $this->reversed_at === null
+            && $this->reversal_of === null
+            && in_array($this->type, [WalletTxnType::Topup, WalletTxnType::Adjustment], true);
     }
 
     public function wallet(): BelongsTo

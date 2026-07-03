@@ -214,6 +214,8 @@ export const ENDPOINTS = {
     rideRequests: '/admin/ride-requests',
     matchingRun: '/admin/matching/run',
     walletCredit: '/admin/wallets/credit',
+    walletReverse: '/admin/wallets/reverse',
+    walletTransactions: '/admin/wallets/transactions',
     staff: '/admin/staff',
     staffOne: (id: string) => `/admin/staff/${id}`,
     staffRoles: '/admin/staff/roles',

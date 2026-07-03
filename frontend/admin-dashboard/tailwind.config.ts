@@ -1,9 +1,15 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Rafeeq JO — Admin Command Center (Design System v4).
- * Unified indigo brand (#4F46E5) + cyan accent on a clean light canvas, with a
- * TRUE dark (near-black charcoal) scheme — matching the mobile apps' identity.
+ * Admin Console — Design System v6 "Navy + Gold" (premium / academic).
+ * Navy = structural/brand (sidebar, table headers, primary). Gold = premium
+ * accent (active nav, highlights, info pills). Deep navy-charcoal dark scheme
+ * matches the mobile apps.
+ *
+ * NOTE (transitional): the `cyan.*` keys are repointed to the GOLD family so the
+ * many existing `cyan-*` utility usages across pages render gold without a mass
+ * rename. Class names are being renamed to `gold-*` during the page-by-page
+ * dashboard rebuild.
  */
 const config: Config = {
   darkMode: 'class',
@@ -11,40 +17,42 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand — indigo primary, cyan accent
-        primary: { DEFAULT: '#4F46E5', dark: '#4338CA', light: '#6366F1' },
-        // "navy" kept as the neutral charcoal ink / sidebar surface
-        navy: { DEFAULT: '#15171C', light: '#232329', deep: '#0F1115', 900: '#0A0A0C' },
-        cyan: { DEFAULT: '#22D3EE', soft: '#A5F0FB', deep: '#0E7490' },
-        accent: '#22D3EE',
-        gold: '#FBBF24',
+        // Brand — navy primary
+        primary: { DEFAULT: '#243B7A', dark: '#1A2C5C', light: '#3350A0' },
+        // "navy" = deep royal navy used for sidebar / table headers / dark ink
+        navy: { DEFAULT: '#141B2E', light: '#1A2337', deep: '#0D1220', 900: '#0A0F1C' },
+        // Gold accent family
+        gold: { DEFAULT: '#E7A63A', soft: '#FBEFD6', deep: '#B47E1C' },
+        // Transitional alias: cyan-* → gold tones (see note above)
+        cyan: { DEFAULT: '#E7A63A', soft: '#FBEFD6', deep: '#B47E1C' },
+        accent: '#E7A63A',
         // Neutrals
-        background: '#F6F7F9',
+        background: '#F7F8FB',
         surface: '#FFFFFF',
-        line: '#ECEEF2',
-        ink: '#15171C',
-        muted: '#5A616E',
-        // Status
+        line: '#E6E9F0',
+        ink: '#141C33',
+        muted: '#5B6478',
+        // Status (meaning only)
         success: '#16A34A',
-        warning: '#D97706',
+        warning: '#E0930C',
         danger: '#DC2626',
-        info: '#0EA5E9',
-        // Dark scheme — TRUE near-black charcoal (not navy blue)
-        dbg: '#0A0A0C',
-        dsurface: '#141417',
-        dcard: '#1B1B20',
-        dline: '#2A2A31',
-        dtext: '#F4F4F6',
-        dmuted: '#A1A1AC',
+        info: '#2563EB',
+        // Dark scheme — deep navy-charcoal (premium)
+        dbg: '#0D1220',
+        dsurface: '#141B2E',
+        dcard: '#1A2337',
+        dline: '#26304A',
+        dtext: '#EDF0F7',
+        dmuted: '#A6AEC2',
       },
       fontFamily: {
-        sans: ['var(--font-tajawal)', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['var(--font-lexend)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-cairo)', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        card: '0 1px 3px rgba(11, 11, 14, 0.05), 0 1px 2px rgba(11, 11, 14, 0.04)',
-        lift: '0 8px 24px rgba(11, 11, 14, 0.10)',
+        card: '0 1px 3px rgba(20, 28, 51, 0.06), 0 1px 2px rgba(20, 28, 51, 0.04)',
+        lift: '0 8px 24px rgba(20, 28, 51, 0.12)',
       },
     },
   },

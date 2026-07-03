@@ -8,14 +8,14 @@ const sansArabic = Cairo({
   subsets: ['arabic', 'latin'],
   weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
-  variable: '--font-tajawal',
+  variable: '--font-cairo',
 });
 
 const display = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['600', '700', '800'],
   display: 'swap',
-  variable: '--font-lexend',
+  variable: '--font-display',
 });
 
 const mono = JetBrains_Mono({

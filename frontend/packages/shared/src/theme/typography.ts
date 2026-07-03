@@ -1,5 +1,5 @@
 /**
- * Typography scale. Font family: Tajawal (Arabic-first).
+ * Typography scale. Font family: Cairo (Arabic-first, RTL-friendly).
  * Weights available: 400, 500, 600, 700, 800.
  */
 

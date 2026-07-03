@@ -63,11 +63,50 @@ class WalletController extends Controller
 
         $user = User::findOrFail($data['user_id']);
         $wallet = $this->wallet->forUser($user);
-        $txn = $this->wallet->credit($wallet, $data['amount_fils'], WalletTxnType::Topup, 'شحن معتمد من الإدارة', $data['reference'] ?? null);
+        $txn = $this->wallet->adminTopup($wallet, $data['amount_fils'], $data['reference'] ?? null);
 
         return $this->ok([
             'wallet' => new WalletResource($wallet->fresh()),
             'transaction' => new WalletTransactionResource($txn),
         ], 'تم شحن الرصيد.');
+    }
+
+    /** Admin: list a specific user's recent wallet transactions (to review / reverse). */
+    public function adminTransactions(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'user_id' => ['required', 'uuid', 'exists:users,id'],
+        ]);
+
+        $user = User::findOrFail($data['user_id']);
+        $wallet = $this->wallet->forUser($user);
+
+        return $this->ok([
+            'wallet' => new WalletResource($wallet),
+            'transactions' => WalletTransactionResource::collection(
+                $wallet->transactions()->latest()->limit((int) $request->query('limit', 20))->get()
+            ),
+        ]);
+    }
+
+    /**
+     * Admin: reverse a manual top-up / adjustment credit entered by mistake
+     * (e.g. charged 100 instead of 10). Non-destructive — records a balancing
+     * Adjustment debit and flags the original.
+     */
+    public function adminReverse(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'transaction_id' => ['required', 'uuid', 'exists:wallet_transactions,id'],
+            'reason' => ['nullable', 'string', 'max:200'],
+        ]);
+
+        $original = \Rafeeq\Modules\Wallet\Models\WalletTransaction::findOrFail($data['transaction_id']);
+        $reversal = $this->wallet->reverseTransaction($original, $data['reason'] ?? null);
+
+        return $this->ok([
+            'wallet' => new WalletResource($original->wallet->fresh()),
+            'reversal' => new WalletTransactionResource($reversal),
+        ], 'تم عكس الشحن.');
     }
 }

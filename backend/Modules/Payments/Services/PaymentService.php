@@ -254,10 +254,22 @@ class PaymentService extends BaseService
     public function approve(PaymentRequest $request, ?User $actor, ?Payment $payment = null, bool $auto = false): PaymentRequest
     {
         if ($request->status === PaymentStatus::Approved) {
-            return $request; // idempotent
+            return $request; // fast-path idempotent (re-checked under lock below)
         }
 
         return $this->transaction(function () use ($request, $actor, $payment, $auto) {
+            // Lock the row and re-check status UNDER the lock, so two concurrent
+            // approvals (e.g. an admin clicking approve while the AI auto-approves)
+            // can never both fulfil — which would double-credit the wallet or
+            // double-activate a subscription.
+            $locked = PaymentRequest::whereKey($request->id)->lockForUpdate()->first();
+            if ($locked) {
+                $request = $locked;
+            }
+            if ($request->status === PaymentStatus::Approved) {
+                return $request; // already approved by a concurrent path — idempotent
+            }
+
             $request->forceFill([
                 'status' => PaymentStatus::Approved,
                 'approved_at' => now(),
