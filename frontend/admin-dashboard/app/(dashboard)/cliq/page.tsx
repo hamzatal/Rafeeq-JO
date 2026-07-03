@@ -5,6 +5,7 @@ import type { CliqSettings } from '@rafeeq/api-client';
 import type { PaymentRequest } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Skeleton } from '../../../src/components/Skeleton';
 
 export default function CliqPage() {
   const { t } = useT();
@@ -98,7 +99,7 @@ export default function CliqPage() {
       <h2 className="font-bold surface-text mb-3">{t('cliq.recentTopups')}</h2>
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
+          <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : topups.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('cliq.noTopups')}</div>
         ) : (

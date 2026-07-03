@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { FinancialReport } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Skeleton } from '../../../src/components/Skeleton';
 import { downloadBlob, stamp } from '../../../src/lib/download';
 
 const jod = (fils: number) => `${(fils / 1000).toFixed(3)} د.أ`;
@@ -84,7 +85,7 @@ export default function ReportsPage() {
       )}
 
       {loading ? (
-        <div className="card text-center text-muted">{t('common.loading')}</div>
+        <div className="card space-y-3">{Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} className="h-10 w-full" />))}</div>
       ) : report ? (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-5">

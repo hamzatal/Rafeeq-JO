@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { RiskScore } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Skeleton } from '../../../src/components/Skeleton';
 
 const LEVEL_CLASS: Record<string, string> = {
   low: 'bg-white text-muted border-line',
@@ -32,7 +33,7 @@ export default function SafetyPage() {
 
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
+          <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : risks.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('safety.none')}</div>
         ) : (

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { AuditLogEntry } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Skeleton } from '../../../src/components/Skeleton';
 import { downloadBlob, stamp } from '../../../src/lib/download';
 
 const short = (v: string | null, n = 8) => (v ? v.slice(0, n) : '—');
@@ -100,7 +101,7 @@ export default function AuditPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted">{t('common.loading')}</td>
+                <td colSpan={6} className="px-4 py-4"><div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} className="h-8 w-full" />))}</div></td>
               </tr>
             ) : items.length === 0 ? (
               <tr>

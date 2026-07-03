@@ -5,6 +5,7 @@ import type { SubscriptionPlan, SubscriptionType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Skeleton } from '../../../src/components/Skeleton';
 
 const EMPTY = { name: '', type: 'monthly' as SubscriptionType, price_jod: '', rides_count: '', duration_days: '30' };
 const TYPES: SubscriptionType[] = ['weekly', 'monthly', 'term'];
@@ -76,7 +77,7 @@ export default function PlansPage() {
 
       <div className="card p-0 overflow-hidden">
         {loading ? (
-          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
+          <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('plans.none')}</div>
         ) : (

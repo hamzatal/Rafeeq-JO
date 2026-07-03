@@ -5,6 +5,7 @@ import type { Zone } from '@rafeeq/shared';
 import { RafeeqApiError, type ZonePayload } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Skeleton } from '../../../src/components/Skeleton';
 
 type Vertex = [number, number];
 
@@ -134,7 +135,7 @@ export default function ZonesPage() {
 
       <div className="card p-0 overflow-hidden mb-6">
         {loading ? (
-          <div className="p-6 text-center text-muted">{t('common.loading')}</div>
+          <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : zones.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('zones.none')}</div>
         ) : (
