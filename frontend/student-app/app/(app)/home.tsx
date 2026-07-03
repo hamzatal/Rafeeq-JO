@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { SavedAddress, Subscription, Wallet } from '@rafeeq/shared';
@@ -10,7 +10,7 @@ import { getCurrentLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { Icon, type IconName } from '../../src/components/Icon';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
-import { PressableScale } from '../../src/components/kit';
+import { PressableScale, Skeleton } from '../../src/components/kit';
 
 const SERVICES: { key: string; icon: IconName; href: string }[] = [
   { key: 'subscriptions', icon: 'calendar', href: '/(app)/subscriptions' },
@@ -39,13 +39,22 @@ export default function Home() {
   const [addresses, setAddresses] = useState<SavedAddress[]>([]);
   const [sub, setSub] = useState<Subscription | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [loadingStrip, setLoadingStrip] = useState(true);
   const [myLoc, setMyLoc] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Bottom-sheet entrance animation.
+  const rise = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(rise, { toValue: 1, duration: 460, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+  }, [rise]);
 
   useEffect(() => {
     api.notifications.unreadCount().then(setUnread).catch(() => undefined);
-    api.addresses.list().then((a) => setAddresses(a.slice(0, 3))).catch(() => undefined);
-    api.transport.mySubscriptions().then((l) => setSub(l.find((x) => x.usable) ?? null)).catch(() => undefined);
-    api.wallet.show().then(setWallet).catch(() => undefined);
+    api.addresses.list().then((a) => setAddresses(a.slice(0, 2))).catch(() => undefined);
+    Promise.allSettled([
+      api.transport.mySubscriptions().then((l) => setSub(l.find((x) => x.usable) ?? null)),
+      api.wallet.show().then(setWallet),
+    ]).finally(() => setLoadingStrip(false));
     void getCurrentLocation().then((loc) => loc && setMyLoc(loc));
   }, []);
 
@@ -54,6 +63,8 @@ export default function Home() {
     const key = `home.label${a.label.charAt(0).toUpperCase()}${a.label.slice(1)}`;
     return a.title || t(key);
   };
+
+  const translateY = rise.interpolate({ inputRange: [0, 1], outputRange: [40, 0] });
 
   return (
     <View style={s.root}>
@@ -73,42 +84,40 @@ export default function Home() {
         </Pressable>
       </SafeAreaView>
 
-      {/* Bottom sheet */}
-      <View style={[s.sheet, { maxHeight: height * 0.62 }]}>
+      {/* Bottom sheet (animated entrance) */}
+      <Animated.View style={[s.sheet, { maxHeight: height * 0.6, opacity: rise, transform: [{ translateY }] }]}>
         <View style={s.grabber} />
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.sheetContent}>
-          <Text style={s.hello}>{t('home.hello')}{user?.full_name ? `، ${user.full_name.split(' ')[0]}` : ''}</Text>
+          <Text style={s.hello}>{t('home.hello')}{user?.full_name ? `، ${user.full_name.split(' ')[0]}` : ''} 👋</Text>
 
-          {/* Dominant "Where to?" */}
+          {/* Hero "Where to?" CTA */}
           <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.searchBar}>
-            <Icon name="search" size={20} color={theme.colors.primary} />
-            <Text style={s.searchText}>{t('home.whereTo')}</Text>
-            <View style={s.searchNow}>
-              <Text style={s.searchNowText}>{t('common.now')}</Text>
+            <View style={s.searchIcon}>
+              <Icon name="navigation" size={18} color={theme.colors.onAccent} />
             </View>
+            <Text style={s.searchText}>{t('home.whereTo')}</Text>
+            <Icon name="chevron-left" size={20} color={theme.colors.muted} />
           </PressableScale>
 
-          {/* Saved destinations */}
-          <View style={s.places}>
-            {addresses.map((a) => (
-              <Pressable key={a.id} onPress={() => router.push('/(app)/ride-request')} style={({ pressed }) => [s.placeRow, pressed && s.pressed]}>
-                <View style={s.placeIcon}>
-                  <Icon name={LABEL_ICON[a.label] ?? 'map-pin'} size={18} color={theme.colors.text} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.placeTitle} numberOfLines={1}>{labelText(a)}</Text>
-                  <Text style={s.placeSub} numberOfLines={1}>{a.address_text}</Text>
-                </View>
-                <Icon name="chevron-left" size={18} color={theme.colors.muted} />
-              </Pressable>
-            ))}
-            <Pressable onPress={() => router.push('/(app)/addresses')} style={({ pressed }) => [s.placeRow, pressed && s.pressed]}>
+          {/* Saved destinations (compact) */}
+          {addresses.map((a) => (
+            <Pressable key={a.id} onPress={() => router.push('/(app)/ride-request')} style={({ pressed }) => [s.placeRow, pressed && s.pressed]}>
               <View style={s.placeIcon}>
-                <Icon name="plus" size={18} color={theme.colors.primary} />
+                <Icon name={LABEL_ICON[a.label] ?? 'map-pin'} size={18} color={theme.colors.primary} />
               </View>
-              <Text style={[s.placeTitle, { flex: 1, color: theme.colors.primary }]}>{t('home.addPlace')}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={s.placeTitle} numberOfLines={1}>{labelText(a)}</Text>
+                <Text style={s.placeSub} numberOfLines={1}>{a.address_text}</Text>
+              </View>
+              <Icon name="chevron-left" size={18} color={theme.colors.muted} />
             </Pressable>
-          </View>
+          ))}
+          <Pressable onPress={() => router.push('/(app)/addresses')} style={({ pressed }) => [s.placeRow, pressed && s.pressed]}>
+            <View style={[s.placeIcon, { backgroundColor: theme.colors.accentSoft }]}>
+              <Icon name="plus" size={18} color={theme.colors.primary} />
+            </View>
+            <Text style={[s.placeTitle, { flex: 1, color: theme.colors.primary }]}>{t('home.addPlace')}</Text>
+          </Pressable>
 
           {/* Services strip */}
           <Text style={s.section}>{t('home.services')}</Text>
@@ -116,7 +125,7 @@ export default function Home() {
             {SERVICES.map((item) => (
               <PressableScale key={item.key} onPress={() => router.push(item.href as never)} style={s.serviceTile}>
                 <View style={s.serviceIcon}>
-                  <Icon name={item.icon} size={22} color={theme.colors.text} />
+                  <Icon name={item.icon} size={22} color={theme.colors.primary} />
                 </View>
                 <Text style={s.serviceLabel} numberOfLines={1}>{t(`home.${item.key}`)}</Text>
               </PressableScale>
@@ -127,18 +136,18 @@ export default function Home() {
           <View style={s.strip}>
             <Pressable onPress={() => router.push('/(app)/wallet')} style={s.stripItem}>
               <Icon name="credit-card" size={18} color={theme.colors.textSecondary} />
-              <Text style={s.stripValue}>{wallet ? wallet.balance_jod.toFixed(2) : '—'}</Text>
+              {loadingStrip ? <Skeleton width={40} height={16} /> : <Text style={s.stripValue}>{wallet ? wallet.balance_jod.toFixed(2) : '0.00'}</Text>}
               <Text style={s.stripLabel}>{t('wallet.balance')}</Text>
             </Pressable>
             <View style={s.stripDivider} />
             <Pressable onPress={() => router.push('/(app)/subscriptions')} style={s.stripItem}>
               <Icon name="calendar" size={18} color={theme.colors.textSecondary} />
-              <Text style={s.stripValue}>{sub ? (sub.remaining_rides ?? '∞') : '—'}</Text>
+              {loadingStrip ? <Skeleton width={30} height={16} /> : <Text style={s.stripValue}>{sub ? (sub.remaining_rides ?? '∞') : '—'}</Text>}
               <Text style={s.stripLabel}>{t('home.remainingRides')}</Text>
             </Pressable>
           </View>
         </ScrollView>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -158,8 +167,8 @@ const makeStyles = (t: AppTheme) =>
       right: 0,
       bottom: 0,
       backgroundColor: t.colors.surface,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
       paddingHorizontal: t.spacing.lg,
       paddingTop: t.spacing.sm,
       ...t.shadow.lg,
@@ -168,12 +177,10 @@ const makeStyles = (t: AppTheme) =>
     sheetContent: { paddingBottom: t.spacing.xl },
     hello: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
 
-    searchBar: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.background, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, paddingHorizontal: t.spacing.base, height: 56 },
+    searchBar: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.background, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, paddingHorizontal: t.spacing.md, height: 60 },
+    searchIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
     searchText: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
-    searchNow: { backgroundColor: t.colors.hairline, borderRadius: t.radius.sm, paddingHorizontal: 10, paddingVertical: 5 },
-    searchNowText: { fontFamily: t.fontFamily.semibold, fontSize: 12, color: t.colors.textSecondary },
 
-    places: { marginTop: t.spacing.md },
     placeRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, paddingVertical: 10 },
     placeIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.hairline, alignItems: 'center', justifyContent: 'center' },
     placeTitle: { fontFamily: t.fontFamily.semibold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
