@@ -270,6 +270,22 @@ class PaymentService extends BaseService
                 return $request; // already approved by a concurrent path — idempotent
             }
 
+            // Anti-fraud: a single CliQ transfer (bank reference) can only fund ONE
+            // approved request. Refuse to approve a payment whose reference was
+            // already used by another approved payment (double-claim protection,
+            // backed by a partial unique index for the concurrent case).
+            $approving = $payment ?? $request->payments()->latest()->first();
+            $ref = $approving?->bank_reference;
+            if ($ref !== null && trim($ref) !== '') {
+                $dup = Payment::where('bank_reference', $ref)
+                    ->where('status', 'approved')
+                    ->when($approving, fn ($q) => $q->where('id', '!=', $approving->id))
+                    ->exists();
+                if ($dup) {
+                    throw new BusinessRuleException('رقم التحويل مُستخدم في دفعة معتمدة أخرى.', 'DUPLICATE_REFERENCE');
+                }
+            }
+
             $request->forceFill([
                 'status' => PaymentStatus::Approved,
                 'approved_at' => now(),
