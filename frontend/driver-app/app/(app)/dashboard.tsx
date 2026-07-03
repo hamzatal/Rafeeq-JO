@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { DriverStatus, DriverPerformance } from '@rafeeq/shared';
@@ -31,6 +31,7 @@ export default function Dashboard() {
   const s = useMemo(() => makeStyles(theme), [theme]);
   const user = useAuth((a) => a.user);
   const driver = useAuth((a) => a.driver);
+  const driverLoaded = useAuth((a) => a.driverLoaded);
   const refreshDriver = useAuth((a) => a.refreshDriver);
 
   const online = useAvailability((a) => a.online);
@@ -70,6 +71,16 @@ export default function Dashboard() {
   };
 
   const mapPoints: MapPoint[] = loc ? [{ lat: loc.lat, lng: loc.lng, kind: 'captain', label: user?.full_name ?? '' }] : [];
+
+  // Wait for the driver profile before deciding what to show — otherwise an
+  // approved captain briefly sees the "pending / upload documents" state flash.
+  if (!driverLoaded) {
+    return (
+      <SafeAreaView style={[s.safe, { alignItems: 'center', justifyContent: 'center' }]} edges={['top']}>
+        <ActivityIndicator color={theme.colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>

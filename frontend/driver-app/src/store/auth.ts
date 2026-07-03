@@ -16,6 +16,10 @@ type Status = 'idle' | 'authenticated' | 'unauthenticated';
 interface AuthState {
   user: User | null;
   driver: DriverProfile | null;
+  /** True once the driver profile has been fetched at least once (success or
+   * confirmed-absent). Used to avoid flashing the "pending / upload documents"
+   * UI before an approved captain's profile has loaded. */
+  driverLoaded: boolean;
   status: Status;
   bootstrap: () => Promise<void>;
   register: (payload: RegisterPayload) => Promise<string | null>;
@@ -43,12 +47,13 @@ export const useAuth = create<AuthState>((set, get) => {
 
   setUnauthorizedHandler(() => {
     void tokenStorage.clear();
-    set({ user: null, driver: null, status: 'unauthenticated' });
+    set({ user: null, driver: null, driverLoaded: false, status: 'unauthenticated' });
   });
 
   return {
     user: null,
     driver: null,
+    driverLoaded: false,
     status: 'idle',
 
     async bootstrap() {
@@ -90,9 +95,10 @@ export const useAuth = create<AuthState>((set, get) => {
     async refreshDriver() {
       try {
         const driver = await api.driver.getProfile();
-        set({ driver });
+        set({ driver, driverLoaded: true });
       } catch {
-        // driver profile may not exist yet; ignore
+        // driver profile may not exist yet; mark loaded so the UI can resolve.
+        set({ driverLoaded: true });
       }
     },
 
@@ -104,7 +110,7 @@ export const useAuth = create<AuthState>((set, get) => {
         // ignore
       }
       await tokenStorage.clear();
-      set({ user: null, driver: null, status: 'unauthenticated' });
+      set({ user: null, driver: null, driverLoaded: false, status: 'unauthenticated' });
     },
   };
 });
