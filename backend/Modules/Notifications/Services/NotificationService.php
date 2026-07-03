@@ -8,6 +8,7 @@ use Rafeeq\Core\Support\Safely;
 use Rafeeq\Infrastructure\Push\Contracts\PushGateway;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Notifications\Jobs\DeliverNotificationJob;
 use Rafeeq\Modules\Notifications\Models\DeviceToken;
 use Rafeeq\Modules\Notifications\Models\Notification;
 use Rafeeq\Modules\Notifications\Models\NotificationPreference;
@@ -45,29 +46,16 @@ class NotificationService extends BaseService
             $category = $type->category();
             $critical = $type->isCritical();
             $prefs = $this->preferences($user);
-            $channels = ['inapp'];
-
-            // Push delivery.
             $allowsCategory = $critical || $prefs->allows($category);
-            if ($prefs->push_enabled && $allowsCategory) {
-                $pushOptions = [
-                    'channel_id' => $type->channelId(),
-                    'sound' => $type->sound(),
-                    'priority' => $type->pushPriority(),
-                ];
-                if ($this->sendPush($user, $title, $body, array_merge($data, ['type' => $type->value]), $pushOptions)) {
-                    $channels[] = 'push';
-                }
+            $wantsPush = $prefs->push_enabled && $allowsCategory;
+            $wantsSmsFallback = $critical && $prefs->sms_enabled;
+
+            $channels = ['inapp'];
+            if ($wantsPush) {
+                $channels[] = 'push';
             }
 
-            // SMS fallback for critical notifications when push didn't go out.
-            if ($critical && ! in_array('push', $channels, true) && $prefs->sms_enabled) {
-                if ($this->sendSms($user, $title, $body)) {
-                    $channels[] = 'sms';
-                }
-            }
-
-            return Notification::create([
+            $notification = Notification::create([
                 'user_id' => $user->id,
                 'type' => $type->value,
                 'category' => $category,
@@ -77,6 +65,15 @@ class NotificationService extends BaseService
                 'channels' => $channels,
                 'is_critical' => $critical,
             ]);
+
+            // Deliver external channels (push + critical SMS fallback) OFF the
+            // request via a queue, so a slow FCM/SMS call never blocks the API.
+            // Runs inline on the `sync` driver (tests / no worker).
+            if ($wantsPush || $wantsSmsFallback) {
+                DeliverNotificationJob::dispatch($user->id, $type->value, $title, $body, $data, $wantsPush, $wantsSmsFallback);
+            }
+
+            return $notification;
         } catch (\Throwable $e) {
             Log::warning('[Notifications] notify failed', [
                 'user' => $user->id,
@@ -145,6 +142,30 @@ class NotificationService extends BaseService
     }
 
     /** @param array<string, mixed> $data @param array<string, mixed> $options */
+    /**
+     * Deliver the external channels for a notification (push, then a critical
+     * SMS fallback if push didn't go out). Called from DeliverNotificationJob.
+     */
+    public function deliverExternal(string $userId, string $typeValue, string $title, string $body, array $data, bool $wantsPush, bool $wantsSmsFallback): void
+    {
+        $user = User::find($userId);
+        if (! $user) {
+            return;
+        }
+        $type = NotificationType::from($typeValue);
+        $pushed = false;
+        if ($wantsPush) {
+            $pushed = $this->sendPush($user, $title, $body, array_merge($data, ['type' => $type->value]), [
+                'channel_id' => $type->channelId(),
+                'sound' => $type->sound(),
+                'priority' => $type->pushPriority(),
+            ]);
+        }
+        if (! $pushed && $wantsSmsFallback) {
+            $this->sendSms($user, $title, $body);
+        }
+    }
+
     private function sendPush(User $user, string $title, string $body, array $data, array $options = []): bool
     {
         $tokens = DeviceToken::where('user_id', $user->id)->pluck('token');

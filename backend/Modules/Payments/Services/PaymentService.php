@@ -12,6 +12,7 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Modules\Payments\AI\PaymentVerificationService;
+use Rafeeq\Modules\Payments\Jobs\VerifyPaymentProofJob;
 use Rafeeq\Modules\Payments\Models\Payment;
 use Rafeeq\Modules\Payments\Models\PaymentRequest;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
@@ -165,45 +166,65 @@ class PaymentService extends BaseService
         $request->forceFill(['status' => PaymentStatus::Submitted])->save();
         $this->audit->log('payment.proof_submitted', $request->user, auditable: $payment);
 
-        // Build a temporary URL for the vision model (falls back to a data URI).
-        $imageUrl = $this->proofUrl($path);
-        $verdict = $this->verifier->verify($request, $imageUrl);
-
-        $bankReference = $verdict['extracted']['bank_reference'] ?? null;
-
-        // ── Anti-fraud guards: a single CliQ transfer can be claimed once ──
-        $fraudFlags = $this->fraudFlags($payment, $imageHash, $bankReference, $verdict);
-        $decision = $verdict['decision'];
-
-        // Any hard fraud signal blocks auto-approval and forces human review.
-        if ($fraudFlags !== [] && $decision === 'matched') {
-            $decision = 'manual_review';
-        }
-
-        $payment->forceFill([
-            'extracted' => $verdict['extracted'] ?? null,
-            'ai_confidence' => $verdict['confidence'] ?? 0,
-            'verified_by' => $verdict['verified_by'] ?? 'ai',
-            'bank_reference' => $bankReference,
-            'fraud_flags' => $fraudFlags === [] ? null : $fraudFlags,
-            'status' => $decision,
-        ])->save();
-
-        $this->audit->log('payment.verified', auditable: $payment, changes: [
-            'decision' => $decision,
-            'confidence' => $verdict['confidence'] ?? 0,
-            'fraud_flags' => $fraudFlags,
-        ]);
-
-        // Route based on the final decision.
-        if ($decision === 'matched') {
-            $this->approve($request, actor: null, payment: $payment, auto: true);
-        } else {
-            // mismatch or manual_review -> human review queue.
-            $request->forceFill(['status' => PaymentStatus::UnderReview])->save();
-        }
+        // Offload the slow (~60s) GPT-Vision verification to a queue so the
+        // upload request returns immediately. On the `sync` driver (tests /
+        // no worker) it runs inline, preserving behaviour.
+        VerifyPaymentProofJob::dispatch($payment->id);
 
         return $payment->fresh('request');
+    }
+
+    /**
+     * Run GPT-Vision verification + anti-fraud on a submitted proof and route
+     * the payment (auto-approve on a clean match, else human review). Safe to
+     * run from a queued job. Never leaves the payment stuck in "verifying".
+     */
+    public function runVerification(Payment $payment): void
+    {
+        $request = $payment->request()->first();
+        if (! $request) {
+            return;
+        }
+
+        try {
+            $imageUrl = $this->proofUrl((string) $payment->proof_path);
+            $verdict = $this->verifier->verify($request, $imageUrl);
+
+            $bankReference = $verdict['extracted']['bank_reference'] ?? null;
+            $fraudFlags = $this->fraudFlags($payment, $payment->image_hash, $bankReference, $verdict);
+            $decision = $verdict['decision'];
+
+            // Any hard fraud signal blocks auto-approval and forces human review.
+            if ($fraudFlags !== [] && $decision === 'matched') {
+                $decision = 'manual_review';
+            }
+
+            $payment->forceFill([
+                'extracted' => $verdict['extracted'] ?? null,
+                'ai_confidence' => $verdict['confidence'] ?? 0,
+                'verified_by' => $verdict['verified_by'] ?? 'ai',
+                'bank_reference' => $bankReference,
+                'fraud_flags' => $fraudFlags === [] ? null : $fraudFlags,
+                'status' => $decision,
+            ])->save();
+
+            $this->audit->log('payment.verified', auditable: $payment, changes: [
+                'decision' => $decision,
+                'confidence' => $verdict['confidence'] ?? 0,
+                'fraud_flags' => $fraudFlags,
+            ]);
+
+            if ($decision === 'matched') {
+                $this->approve($request, actor: null, payment: $payment, auto: true);
+            } else {
+                $request->forceFill(['status' => PaymentStatus::UnderReview])->save();
+            }
+        } catch (\Throwable $e) {
+            // Never leave a payment orphaned in "verifying": route to human review.
+            $payment->forceFill(['status' => 'manual_review'])->save();
+            $request->forceFill(['status' => PaymentStatus::UnderReview])->save();
+            report($e);
+        }
     }
 
     /**
