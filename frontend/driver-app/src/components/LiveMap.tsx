@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme, type AppTheme } from '../theme';
 import { useI18n } from '../i18n';
@@ -86,14 +86,19 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
   const { WebView } = require('react-native-webview');
   const mapsKey = getMapsKey();
 
+  // If Google fails to load (missing/invalid key — e.g. a non-Google key), fall
+  // back to the free OpenStreetMap map so a map ALWAYS shows.
+  const [googleFailed, setGoogleFailed] = useState(false);
+  const useGoogle = !!mapsKey && !googleFailed;
+
   const initial = useRef({ points, route, center }).current;
   const html = useMemo(
     () =>
-      mapsKey
+      useGoogle
         ? buildGoogleHtml(initial.points, initial.route, initial.center, colors, !!onPick, mapsKey)
         : buildLeafletHtml(initial.points, initial.route, initial.center, colors, !!onPick),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mapsKey],
+    [useGoogle],
   );
 
   // Push live data into the running map whenever inputs change.
@@ -103,10 +108,13 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
   }, [points, route]);
 
   const onMessage = (e: { nativeEvent: { data: string } }) => {
-    if (!onPick) return;
     try {
       const m = JSON.parse(e.nativeEvent.data);
-      if (m?.type === 'pick' && Number.isFinite(m.lat) && Number.isFinite(m.lng)) {
+      if (m?.type === 'gmfail') {
+        setGoogleFailed(true);
+        return;
+      }
+      if (onPick && m?.type === 'pick' && Number.isFinite(m.lat) && Number.isFinite(m.lng)) {
         onPick({ lat: m.lat, lng: m.lng });
       }
     } catch {
@@ -280,7 +288,7 @@ function buildGoogleHtml(
       });
     }
   }
-  window.gm_authFailure=function(){ document.getElementById('map').innerHTML='<div style="padding:16px;font:14px sans-serif;color:#777">تعذّر تحميل خريطة جوجل — تحقّق من المفتاح.</div>'; };
+  window.gm_authFailure=function(){ try{ window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({type:'gmfail'})); }catch(e){} };
 </script>
 <script async src="https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(mapsKey)}&callback=initMap&language=ar&region=JO"></script>
 </body></html>`;
