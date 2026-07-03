@@ -19,7 +19,7 @@ interface MapBackdropProps {
  */
 export function MapBackdrop({
   roadColor = 'rgba(255,255,255,0.10)',
-  routeColor = '#E6B23E',
+  routeColor = '#E7A63A',
   nodeColor = 'rgba(255,255,255,0.35)',
   opacity = 1,
 }: MapBackdropProps) {

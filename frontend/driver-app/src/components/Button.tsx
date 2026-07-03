@@ -3,7 +3,16 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } 
 import { useTheme, type AppTheme } from '../theme';
 import { Icon, type IconName } from './Icon';
 
-type Variant = 'primary' | 'outline' | 'ghost' | 'danger';
+/**
+ * Button variants (Design System v6 — Navy + Gold):
+ *  - primary  → navy brand fill (the main CTA)               [white label]
+ *  - accent   → gold premium fill (special / premium CTA)    [navy-ink label]
+ *  - positive → green fill (accept / confirm / go)           [white label]
+ *  - danger   → red fill (destructive: delete / reject)      [white label]
+ *  - outline  → transparent, navy border                     [navy label]
+ *  - ghost    → subtle neutral fill                          [text label]
+ */
+type Variant = 'primary' | 'accent' | 'positive' | 'danger' | 'outline' | 'ghost';
 type Size = 'md' | 'lg';
 
 interface ButtonProps {
@@ -33,23 +42,27 @@ export function Button({
 
   const fill: Record<Variant, ViewStyle> = {
     primary: s.primary,
+    accent: s.accent,
+    positive: s.positive,
     danger: s.danger,
     outline: s.outline,
     ghost: s.ghost,
   };
-  const labelColor =
-    variant === 'outline'
-      ? theme.colors.primary
-      : variant === 'ghost'
-        ? theme.colors.text
-        : variant === 'danger'
-          ? theme.colors.textInverse
-          : theme.colors.onAccent;
+  const labelColor: Record<Variant, string> = {
+    primary: theme.colors.onPrimary,
+    accent: theme.colors.onAccent,
+    positive: theme.colors.textInverse,
+    danger: theme.colors.textInverse,
+    outline: theme.colors.primary,
+    ghost: theme.colors.text,
+  };
+  const color = labelColor[variant];
 
   return (
     <Pressable
       onPress={onPress}
       disabled={isDisabled}
+      accessibilityRole="button"
       style={({ pressed }) => [
         s.base,
         size === 'md' && s.md,
@@ -60,11 +73,11 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={labelColor} />
+        <ActivityIndicator color={color} />
       ) : (
         <View style={s.row}>
-          {icon ? <Icon name={icon} size={18} color={labelColor} /> : null}
-          <Text style={[s.label, { color: labelColor }]}>{title}</Text>
+          {icon ? <Icon name={icon} size={18} color={color} /> : null}
+          <Text style={[s.label, { color }]}>{title}</Text>
         </View>
       )}
     </Pressable>
@@ -76,11 +89,13 @@ const makeStyles = (t: AppTheme) =>
     base: { height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.lg },
     md: { height: 46, borderRadius: t.radius.md },
     row: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
-    primary: { backgroundColor: t.colors.accent },
+    primary: { backgroundColor: t.colors.primary },
+    accent: { backgroundColor: t.colors.accent },
+    positive: { backgroundColor: t.colors.success },
     danger: { backgroundColor: t.colors.danger },
     outline: { borderWidth: 1.5, borderColor: t.colors.primary, backgroundColor: 'transparent' },
     ghost: { backgroundColor: t.colors.hairline },
     disabled: { opacity: 0.5 },
-    pressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
+    pressed: { opacity: 0.9, transform: [{ scale: 0.99 }] },
     label: { fontFamily: t.fontFamily.bold, fontSize: 16 },
   });

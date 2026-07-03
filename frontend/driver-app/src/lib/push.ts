@@ -47,7 +47,7 @@ async function ensureAndroidChannels(): Promise<void> {
       importance: c.importance,
       sound: 'default',
       vibrationPattern: [0, 300, 200, 300],
-      lightColor: '#00E5FF',
+      lightColor: '#E7A63A',
       enableVibrate: true,
     });
   }

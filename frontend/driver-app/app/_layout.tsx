@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/cairo';
 import { I18nProvider } from '../src/i18n';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { FeedbackProvider } from '../src/components/Feedback';
 import { useAuth } from '../src/store/auth';
 import { usePrefs } from '../src/store/prefs';
 import { loadAppConfig } from '../src/lib/appConfig';
@@ -43,8 +44,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <I18nProvider>
-          <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-          <Slot />
+          <FeedbackProvider>
+            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+            <Slot />
+          </FeedbackProvider>
         </I18nProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

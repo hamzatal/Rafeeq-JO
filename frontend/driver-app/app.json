@@ -5,11 +5,11 @@
     "scheme": "rafeeqdriver",
     "version": "0.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#0E261C"
+      "backgroundColor": "#141B2E"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -19,14 +19,14 @@
     "android": {
       "package": "jo.rafeeq.driver",
       "adaptiveIcon": {
-        "backgroundColor": "#0E261C"
+        "backgroundColor": "#141B2E"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker", ["expo-notifications", { "color": "#001F3F" }]],
+    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker", ["expo-notifications", { "color": "#E7A63A" }]],
     "extra": {
       "apiUrl": "http://localhost:8000"
     }
