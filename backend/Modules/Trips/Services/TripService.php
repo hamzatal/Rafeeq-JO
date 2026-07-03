@@ -8,6 +8,7 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
+use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Safety\Services\FraudService;
 use Rafeeq\Modules\Safety\Services\GpsFraudService;
 use Rafeeq\Modules\Routes\Models\Route;
@@ -19,6 +20,7 @@ use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Models\TripTracking;
 use Rafeeq\Modules\Wallet\Services\WalletService;
+use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Enums\NotificationType;
@@ -134,6 +136,13 @@ class TripService extends BaseService
         $trip->passengers()->where('status', TripPassengerStatus::Onboard->value)
             ->update(['status' => TripPassengerStatus::Dropped->value]);
 
+        // Finalize the linked ride requests so students aren't left stuck in
+        // "assigned" forever (which would block re-requesting to the same
+        // university). A completed trip fulfils them.
+        RideRequest::where('trip_id', $trip->id)
+            ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
+            ->update(['status' => RideRequestStatus::Completed->value]);
+
         if ($unconfirmed > 0) {
             $trip->loadMissing('driver');
             $driverUserId = $trip->driver ? $trip->driver->user_id : null;
@@ -206,6 +215,13 @@ class TripService extends BaseService
         $trip->forceFill(['status' => TripStatus::Cancelled])->save();
         $trip->passengers()->where('status', TripPassengerStatus::Booked->value)
             ->update(['status' => TripPassengerStatus::Cancelled->value]);
+
+        // The trip (not the student) was cancelled, so the students still want
+        // their ride: return their requests to the matching pool (Pending) and
+        // detach the trip, instead of leaving them stuck in "assigned".
+        RideRequest::where('trip_id', $trip->id)
+            ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
+            ->update(['status' => RideRequestStatus::Pending->value, 'trip_id' => null]);
 
         TripStatusChanged::dispatch($trip->id, $trip->status->value);
 
