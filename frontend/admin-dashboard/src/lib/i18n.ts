@@ -495,8 +495,15 @@ const DICT: Dict = {
   'complaints.colActions': { ar: 'إجراءات', en: 'Actions' },
   'complaints.resolutionPrompt': { ar: 'ملاحظة الحل؟', en: 'Resolution note?' },
   'complaints.investigate': { ar: 'تحقيق', en: 'Investigate' },
+  'complaints.view': { ar: 'عرض / تحقيق', en: 'View / Investigate' },
   'complaints.resolve': { ar: 'حل', en: 'Resolve' },
   'complaints.dismissReinstate': { ar: 'رفض + استعادة', en: 'Dismiss + reinstate' },
+  'complaints.details': { ar: 'تفاصيل الشكوى', en: 'Complaint details' },
+  'complaints.description': { ar: 'الوصف', en: 'Description' },
+  'complaints.reporter': { ar: 'المُبلِّغ', en: 'Reporter' },
+  'complaints.against': { ar: 'المُبلَّغ عنه', en: 'Reported party' },
+  'complaints.resolution': { ar: 'ملاحظة الحل', en: 'Resolution' },
+  'complaints.markInvestigating': { ar: 'بدء التحقيق', en: 'Start investigation' },
 
   // Security (MFA)
   'security.title': { ar: 'الأمان — المصادقة الثنائية', en: 'Security — Two-factor authentication' },

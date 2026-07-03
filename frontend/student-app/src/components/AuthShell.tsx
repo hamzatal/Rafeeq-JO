@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme, type AppTheme } from '../theme';
@@ -32,7 +32,7 @@ export function AuthShell({
         <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={s.brandRow}>
             <View style={s.mark}>
-              <Text style={s.markLetter}>ر</Text>
+              <Image source={require('../../assets/r-logo.png')} style={s.markLogo} resizeMode="contain" />
             </View>
             <Text style={s.brand}>رفيق</Text>
           </View>
@@ -56,8 +56,8 @@ const makeStyles = (t: AppTheme) =>
     content: { flexGrow: 1, paddingHorizontal: t.spacing.lg, paddingTop: t.spacing.xl, paddingBottom: t.spacing.lg },
 
     brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginBottom: t.spacing['2xl'] },
-    mark: { width: 52, height: 52, borderRadius: 16, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
-    markLetter: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: t.colors.onAccent, lineHeight: 36 },
+    mark: { width: 52, height: 52, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+    markLogo: { width: 38, height: 38 },
     brand: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: '#FFFFFF' },
 
     title: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: '#FFFFFF', textAlign: 'right', lineHeight: 40 },

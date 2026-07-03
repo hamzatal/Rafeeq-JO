@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useI18n } from '../../src/i18n';
@@ -22,7 +22,7 @@ export default function Welcome() {
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <View style={s.body}>
           <View style={s.mark}>
-            <Text style={s.markLetter}>ر</Text>
+            <Image source={require('../../assets/r-logo.png')} style={s.markLogo} resizeMode="contain" />
           </View>
           <Text style={s.brand}>رفيق</Text>
           <Text style={s.tagline}>{t('auth.welcomeSubtitle')}</Text>
@@ -46,8 +46,8 @@ const makeStyles = (t: AppTheme) =>
     glow2: { position: 'absolute', bottom: -150, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.08 },
     safe: { flex: 1, paddingHorizontal: t.spacing.lg },
     body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: t.spacing.md },
-    mark: { width: 96, height: 96, borderRadius: 28, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm },
-    markLetter: { fontFamily: t.fontFamily.extrabold, fontSize: 56, color: t.colors.onAccent, lineHeight: 64 },
+    mark: { width: 96, height: 96, borderRadius: 28, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm },
+    markLogo: { width: 68, height: 68 },
     brand: { fontFamily: t.fontFamily.extrabold, fontSize: 42, color: '#FFFFFF', letterSpacing: 0.5 },
     tagline: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 26, color: 'rgba(255,255,255,0.7)', textAlign: 'center', maxWidth: 300 },
     actions: { gap: t.spacing.md, paddingBottom: t.spacing.lg },
