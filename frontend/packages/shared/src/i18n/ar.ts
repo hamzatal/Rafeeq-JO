@@ -394,6 +394,9 @@ export const ar = {
     cancelled: 'تم إلغاء الطلب.',
     cancelConfirmTitle: 'إلغاء الطلب؟',
     cancelConfirmMsg: 'سيتم إلغاء طلب الرحلة الحالي. يمكنك إنشاء طلب جديد لاحقاً.',
+    direction: 'الاتجاه',
+    toUniversity: 'إلى الجامعة',
+    fromUniversity: 'من الجامعة',
   },
   rating: {
     title: 'قيّم رحلتك',

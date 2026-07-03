@@ -396,6 +396,9 @@ export const en: Translations = {
     cancelled: 'Request cancelled.',
     cancelConfirmTitle: 'Cancel request?',
     cancelConfirmMsg: 'Your current ride request will be cancelled. You can create a new one later.',
+    direction: 'Direction',
+    toUniversity: 'To university',
+    fromUniversity: 'From university',
   },
   rating: {
     title: 'Rate your trip',

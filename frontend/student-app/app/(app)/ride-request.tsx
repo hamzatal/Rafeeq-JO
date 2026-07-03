@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { FareQuote, RideRequest, RideType, University } from '@rafeeq/shared';
+import type { FareQuote, RideDirection, RideRequest, RideType, University } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
@@ -31,6 +31,7 @@ export default function RideRequestScreen() {
   const [lng, setLng] = useState<number | null>(null);
   const [address, setAddress] = useState('');
   const [type, setType] = useState<RideType>('scheduled');
+  const [direction, setDirection] = useState<RideDirection>('to_university');
   const [quote, setQuote] = useState<FareQuote | null>(null);
   const [mine, setMine] = useState<RideRequest[]>([]);
   const [loadingMine, setLoadingMine] = useState(true);
@@ -118,6 +119,7 @@ export default function RideRequestScreen() {
         pickup_address: address || undefined,
         desired_time: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         type,
+        direction,
         coupon_code: coupon.trim() || undefined,
       });
       toast.success(t('rideRequest.created'));
@@ -195,6 +197,19 @@ export default function RideRequestScreen() {
           </View>
           <Input label={t('rideRequest.address')} value={address} onChangeText={setAddress} placeholder={t('rideRequest.addressHint')} />
         </Card>
+
+        {/* Direction (round-trip support) */}
+        <SectionTitle title={t('rideRequest.direction')} />
+        <View style={s.typeRow}>
+          <Pressable onPress={() => setDirection('to_university')} style={[s.typeChip, direction === 'to_university' && s.chipActive]}>
+            <Icon name="log-in" size={16} color={direction === 'to_university' ? theme.colors.primary : theme.colors.textSecondary} />
+            <Text style={[s.chipText, direction === 'to_university' && s.chipTextActive]}>{t('rideRequest.toUniversity')}</Text>
+          </Pressable>
+          <Pressable onPress={() => setDirection('from_university')} style={[s.typeChip, direction === 'from_university' && s.chipActive]}>
+            <Icon name="log-out" size={16} color={direction === 'from_university' ? theme.colors.primary : theme.colors.textSecondary} />
+            <Text style={[s.chipText, direction === 'from_university' && s.chipTextActive]}>{t('rideRequest.fromUniversity')}</Text>
+          </Pressable>
+        </View>
 
         {/* Ride type */}
         <View style={s.typeRow}>

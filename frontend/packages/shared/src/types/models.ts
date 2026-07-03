@@ -303,6 +303,7 @@ export interface Rating {
 
 // ── Ride requests (door-to-door pooling) ─────────────────────────────
 export type RideType = 'scheduled' | 'express';
+export type RideDirection = 'to_university' | 'from_university';
 export type RideRequestStatus =
   | 'pending' | 'grouped' | 'assigned' | 'completed' | 'cancelled';
 
@@ -316,6 +317,8 @@ export interface RideRequest {
   desired_time: string | null;
   type: RideType;
   type_label?: string;
+  direction?: RideDirection;
+  direction_label?: string;
   is_express: boolean;
   express_fee_fils: number;
   status: RideRequestStatus;

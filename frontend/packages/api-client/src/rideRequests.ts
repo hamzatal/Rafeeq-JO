@@ -5,6 +5,7 @@ import {
   type FareQuote,
   type RideRequest,
   type RideType,
+  type RideDirection,
 } from '@rafeeq/shared';
 import { unwrap } from './client';
 
@@ -15,6 +16,7 @@ export interface CreateRideRequestInput {
   pickup_address?: string;
   desired_time: string;
   type?: RideType;
+  direction?: RideDirection;
   notes?: string;
   coupon_code?: string;
 }
