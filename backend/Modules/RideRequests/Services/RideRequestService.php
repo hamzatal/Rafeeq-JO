@@ -26,7 +26,16 @@ class RideRequestService extends BaseService
         $type = RideType::from($data['type'] ?? RideType::Scheduled->value);
         $isExpress = $type === RideType::Express;
 
-        $zone = $this->zones->nearest($lat, $lng);
+        // Reject locations outside our service area (Irbid zones). Without this
+        // guard the nearest-zone lookup would "snap" a far point (e.g. a spot
+        // at the other end of the country) to an Irbid zone and quote a fare.
+        $zone = $this->zones->covering($lat, $lng);
+        if ($zone === null) {
+            throw new BusinessRuleException(
+                'موقع الانطلاق خارج نطاق الخدمة الحالي (إربد). اختر نقطة قريبة من إحدى الجامعات المخدومة.',
+                'OUT_OF_COVERAGE',
+            );
+        }
 
         // Prevent duplicate active request to the same university.
         $existing = RideRequest::where('student_id', $student->id)

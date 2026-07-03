@@ -10,6 +10,7 @@ use Rafeeq\Modules\RideRequests\Services\RideRequestService;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Services\TripService;
 use Rafeeq\Modules\Universities\Models\University;
+use Rafeeq\Modules\Zones\Models\Zone;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripStatus;
@@ -28,6 +29,11 @@ class RideRequestFinalizationTest extends TestCase
             'type' => UserType::Student, 'status' => UserStatus::Active, 'locale' => 'ar',
         ]);
         $uni = University::create(['name_ar' => 'ج', 'name_en' => 'U', 'code' => 'UJ', 'city' => 'Amman', 'is_active' => true]);
+        // A served zone covering the pickup so coverage validation passes.
+        Zone::create([
+            'name_ar' => 'منطقة', 'name_en' => 'Zone', 'city' => 'إربد',
+            'center_lat' => 32.5, 'center_lng' => 35.85, 'radius_km' => 3.0, 'is_active' => true,
+        ]);
         $captain = User::create([
             'full_name' => 'Cap', 'phone' => '0790000078', 'password' => 'secret-pass',
             'type' => UserType::Driver, 'status' => UserStatus::Active, 'locale' => 'ar',
@@ -61,6 +67,19 @@ class RideRequestFinalizationTest extends TestCase
             'desired_time' => now()->addHours(2)->toDateTimeString(), 'type' => 'scheduled',
         ]);
         $this->assertSame(RideRequestStatus::Pending, $new->status);
+    }
+
+    public function test_rejects_pickup_outside_service_area(): void
+    {
+        [$student, $uni] = $this->scaffold();
+
+        $this->expectExceptionMessage('خارج نطاق الخدمة');
+
+        // Aqaba — ~330km from Irbid; must never be snapped to a served zone.
+        app(RideRequestService::class)->create($student, [
+            'university_id' => $uni->id, 'pickup_lat' => 29.5320, 'pickup_lng' => 35.0060,
+            'desired_time' => now()->addHours(2)->toDateTimeString(), 'type' => 'scheduled',
+        ]);
     }
 
     public function test_cancelling_trip_requeues_ride_request_to_pending(): void
