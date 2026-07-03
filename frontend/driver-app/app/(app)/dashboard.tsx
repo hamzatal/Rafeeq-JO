@@ -36,6 +36,7 @@ export default function Dashboard() {
 
   const online = useAvailability((a) => a.online);
   const setOnline = useAvailability((a) => a.setOnline);
+  const restoreAvailability = useAvailability((a) => a.restore);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +52,10 @@ export default function Dashboard() {
     if (approved) {
       api.payouts.performance().then(setPerf).catch(() => undefined);
       void getCurrentLocation().then((l) => l && setLoc(l));
+      // Resume the persisted online state (so a refresh doesn't drop the captain offline).
+      void restoreAvailability();
     }
-  }, [approved]);
+  }, [approved, restoreAvailability]);
 
   // Turn the captain Offline when leaving / unmounting is handled by the store.
   const jod = (fils: number) => (fils / 1000).toFixed(3);
