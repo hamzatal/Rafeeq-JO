@@ -71,6 +71,24 @@ class WalletController extends Controller
         ], 'تم شحن الرصيد.');
     }
 
+    /** Admin: list a specific user's recent wallet transactions (to review / reverse). */
+    public function adminTransactions(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'user_id' => ['required', 'uuid', 'exists:users,id'],
+        ]);
+
+        $user = User::findOrFail($data['user_id']);
+        $wallet = $this->wallet->forUser($user);
+
+        return $this->ok([
+            'wallet' => new WalletResource($wallet),
+            'transactions' => WalletTransactionResource::collection(
+                $wallet->transactions()->latest()->limit((int) $request->query('limit', 20))->get()
+            ),
+        ]);
+    }
+
     /**
      * Admin: reverse a manual top-up / adjustment credit entered by mistake
      * (e.g. charged 100 instead of 10). Non-destructive — records a balancing

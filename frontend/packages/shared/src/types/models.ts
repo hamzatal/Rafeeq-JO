@@ -206,6 +206,9 @@ export interface WalletTransaction {
   balance_after: number;
   reference: string | null;
   description: string | null;
+  reversed_at?: string | null;
+  reversal_of?: string | null;
+  is_reversible?: boolean;
   created_at: string | null;
 }
 

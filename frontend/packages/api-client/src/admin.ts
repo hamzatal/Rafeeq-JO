@@ -11,6 +11,8 @@ import {
   type Trip,
   type University,
   type User,
+  type Wallet,
+  type WalletTransaction,
 } from '@rafeeq/shared';
 import { unwrap } from './client';
 
@@ -169,6 +171,26 @@ export class AdminApi {
    */
   async creditWallet(payload: { user_id: string; amount_fils: number; reference?: string }): Promise<void> {
     await this.http.post(ENDPOINTS.admin.walletCredit, payload);
+  }
+
+  /**
+   * List a user's recent wallet transactions (to review / reverse a top-up).
+   * Backed by GET /admin/wallets/transactions.
+   */
+  async listUserWalletTransactions(userId: string): Promise<{ wallet: Wallet; transactions: WalletTransaction[] }> {
+    const { data } = await this.http.get<ApiSuccess<{ wallet: Wallet; transactions: WalletTransaction[] }>>(
+      ENDPOINTS.admin.walletTransactions,
+      { params: { user_id: userId } },
+    );
+    return unwrap(data);
+  }
+
+  /**
+   * Reverse a manual top-up / adjustment entered by mistake.
+   * Backed by POST /admin/wallets/reverse (permission: payments.approve).
+   */
+  async reverseWalletTransaction(payload: { transaction_id: string; reason?: string }): Promise<void> {
+    await this.http.post(ENDPOINTS.admin.walletReverse, payload);
   }
 
   // ── Admin team management (permission: users.manage / admin-only) ─
