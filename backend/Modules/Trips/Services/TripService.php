@@ -236,31 +236,24 @@ class TripService extends BaseService
 
         $this->audit->log('trip.cancelled', $actor, auditable: $trip);
 
-        // Release any pre-authorisation holds — no money should stay reserved
-        // for a cancelled trip.
-        foreach ($affectedStudentIds as $studentId) {
-            $student = User::find($studentId);
-            if (! $student) {
-                continue;
-            }
+        // Load affected students ONCE (avoids an N+1 that previously ran two
+        // User::find loops), then release holds + notify in a single pass.
+        $students = User::whereIn('id', $affectedStudentIds)->get();
+        foreach ($students as $student) {
+            // Release any pre-authorisation hold — no money stays reserved for a
+            // cancelled trip.
             $hold = $this->wallets->findActiveHold($this->wallets->forUser($student), $trip->id);
             if ($hold) {
                 $this->wallets->release($hold);
             }
-        }
-
-        // Notify affected passengers (critical → SMS fallback when push is off).
-        foreach ($affectedStudentIds as $studentId) {
-            $student = User::find($studentId);
-            if ($student) {
-                $this->notifications->notify(
-                    $student,
-                    NotificationType::TripCancelled,
-                    'تم إلغاء رحلتك',
-                    'نعتذر، تم إلغاء الرحلة. يمكنك حجز رحلة بديلة الآن.',
-                    ['trip_id' => $trip->id],
-                );
-            }
+            // Notify (critical → SMS fallback when push is off).
+            $this->notifications->notify(
+                $student,
+                NotificationType::TripCancelled,
+                'تم إلغاء رحلتك',
+                'نعتذر، تم إلغاء الرحلة. يمكنك حجز رحلة بديلة الآن.',
+                ['trip_id' => $trip->id],
+            );
         }
 
         return $trip;

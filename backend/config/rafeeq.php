@@ -32,4 +32,9 @@ return [
     // How close (m) the captain must come to a watched pickup to trigger a
     // ghost-trip flag.
     'ghost_watch_radius_meters' => (int) env('RAFEEQ_GHOST_WATCH_RADIUS_METERS', 250),
+
+    // ── Data retention ──────────────────────────────────────────────────────
+    // How many days to keep raw live-location points (trip_tracking) for
+    // finished trips before pruning them (keeps the table bounded).
+    'tracking_retention_days' => (int) env('RAFEEQ_TRACKING_RETENTION_DAYS', 30),
 ];
