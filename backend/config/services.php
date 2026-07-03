@@ -33,7 +33,11 @@ return [
     ],
 
     'sms' => [
+        // Primary OTP/notification channel. Recommended: whatsapp_cloud (cheapest
+        // in Jordan). Optional secondary channel used only if the primary fails,
+        // e.g. SMS_DRIVER=whatsapp_cloud + SMS_FALLBACK=http.
         'driver' => env('SMS_DRIVER', 'log'),
+        'fallback' => env('SMS_FALLBACK'),
         'sender_id' => env('SMS_SENDER_ID', 'Rafeeq'),
         'api_key' => env('SMS_API_KEY'),
         'base_url' => env('SMS_BASE_URL'),

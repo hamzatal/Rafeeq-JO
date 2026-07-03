@@ -11,6 +11,7 @@ use Rafeeq\Infrastructure\Push\Contracts\PushGateway;
 use Rafeeq\Infrastructure\Push\FcmPushGateway;
 use Rafeeq\Infrastructure\Push\LogPushGateway;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
+use Rafeeq\Infrastructure\Sms\FallbackSmsGateway;
 use Rafeeq\Infrastructure\Sms\HttpSmsGateway;
 use Rafeeq\Infrastructure\Sms\LogSmsGateway;
 use Rafeeq\Infrastructure\Sms\WhatsAppCloudSmsGateway;
@@ -20,11 +21,22 @@ class InfrastructureServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(SmsGateway::class, function () {
-            return match (config('services.sms.driver', 'log')) {
+            $make = fn (string $driver): SmsGateway => match ($driver) {
                 'http' => new HttpSmsGateway,
                 'whatsapp_cloud' => new WhatsAppCloudSmsGateway,
                 default => new LogSmsGateway,
             };
+
+            $primary = $make((string) config('services.sms.driver', 'log'));
+
+            // Optional secondary channel: e.g. WhatsApp primary + SMS fallback,
+            // so we only pay for an SMS when WhatsApp delivery fails.
+            $fallback = config('services.sms.fallback');
+            if (! empty($fallback) && $fallback !== config('services.sms.driver')) {
+                return new FallbackSmsGateway($primary, $make((string) $fallback));
+            }
+
+            return $primary;
         });
 
         // GPT client: real provider when a key is set, safe null fallback otherwise.
