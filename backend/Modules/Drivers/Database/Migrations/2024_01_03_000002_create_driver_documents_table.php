@@ -13,9 +13,9 @@ return new class extends Migration
         Schema::create('driver_documents', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('driver_id')->constrained('driver_profiles')->cascadeOnDelete();
-            $table->enum('type', DocumentType::values());
+            $table->string('type', 40);
             $table->string('file_path');
-            $table->enum('status', DocumentStatus::values())->default(DocumentStatus::Pending->value);
+            $table->string('status', 40)->default(DocumentStatus::Pending->value);
             $table->foreignUuid('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('review_note')->nullable();
             $table->date('expires_at')->nullable();

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->uuid('trip_id')->nullable()->index();
             $table->string('type', 40);                       // risk_threshold | collusion | ghost_trip | sos | manual
             $table->string('status', 20)->default('open')->index(); // open | investigating | resolved | dismissed
-            $table->enum('severity', RiskSeverity::values())->default(RiskSeverity::Medium->value);
+            $table->string('severity', 40)->default(RiskSeverity::Medium->value);
             $table->unsignedSmallInteger('risk_score')->nullable();
             $table->text('summary')->nullable();
             $table->foreignUuid('opened_by')->nullable()->constrained('users')->nullOnDelete(); // null = system

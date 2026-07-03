@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('type', 20)->default('scheduled'); // scheduled | pooled
             $table->unsignedInteger('fare_fils')->default(0); // per-seat fare in fils
             $table->timestamp('scheduled_at')->index();
-            $table->enum('status', TripStatus::values())->default(TripStatus::Scheduled->value)->index();
+            $table->string('status', 40)->default(TripStatus::Scheduled->value)->index();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
             $table->unsignedSmallInteger('capacity')->default(4); // private car

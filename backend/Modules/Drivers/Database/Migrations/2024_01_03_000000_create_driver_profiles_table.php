@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('driver_profiles', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', DriverStatus::values())->default(DriverStatus::Pending->value)->index();
+            $table->string('status', 40)->default(DriverStatus::Pending->value)->index();
             $table->unsignedSmallInteger('verification_level')->default(0);
             $table->text('national_id')->nullable(); // encrypted in model
             $table->decimal('rating_avg', 3, 2)->default(0);

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignUuid('student_id')->constrained('users')->cascadeOnDelete();
             $table->foreignUuid('plan_id')->constrained('subscription_plans')->restrictOnDelete();
             $table->foreignUuid('route_id')->nullable()->constrained('routes')->nullOnDelete();
-            $table->enum('status', SubscriptionStatus::values())->default(SubscriptionStatus::Pending->value)->index();
+            $table->string('status', 40)->default(SubscriptionStatus::Pending->value)->index();
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
             $table->unsignedInteger('remaining_rides')->nullable(); // null = unlimited

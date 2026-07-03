@@ -13,7 +13,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('type', 80)->index();        // e.g. driver_cancel_with_passengers
-            $table->enum('severity', RiskSeverity::values())->index();
+            $table->string('severity', 40)->index();
             $table->string('description', 255)->nullable();
             $table->jsonb('meta')->nullable();
             $table->timestamp('resolved_at')->nullable();

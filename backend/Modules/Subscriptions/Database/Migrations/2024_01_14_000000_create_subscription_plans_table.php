@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignUuid('university_id')->nullable()->constrained('universities')->nullOnDelete();
             $table->foreignUuid('route_id')->nullable()->constrained('routes')->nullOnDelete();
             $table->string('name', 150);
-            $table->enum('type', SubscriptionType::values());
+            $table->string('type', 40);
             $table->unsignedInteger('price_fils')->default(0);
             $table->unsignedInteger('rides_count')->nullable(); // null = unlimited
             $table->unsignedSmallInteger('duration_days');

@@ -21,10 +21,10 @@ return new class extends Migration
             $table->decimal('pickup_lng', 10, 7);
             $table->string('pickup_address', 200)->nullable();
             $table->timestamp('desired_time');
-            $table->enum('type', RideType::values())->default(RideType::Scheduled->value);
+            $table->string('type', 40)->default(RideType::Scheduled->value);
             $table->boolean('is_express')->default(false);
             $table->unsignedInteger('express_fee_fils')->default(0);
-            $table->enum('status', RideRequestStatus::values())->default(RideRequestStatus::Pending->value)->index();
+            $table->string('status', 40)->default(RideRequestStatus::Pending->value)->index();
             $table->string('notes', 255)->nullable();
             $table->timestamps();
 

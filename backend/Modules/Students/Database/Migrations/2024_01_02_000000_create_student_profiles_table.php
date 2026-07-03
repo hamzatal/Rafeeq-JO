@@ -18,8 +18,8 @@ return new class extends Migration
             $table->uuid('default_pickup_point_id')->nullable()->index();
             $table->string('student_number', 50)->nullable();
             $table->string('faculty', 120)->nullable();
-            $table->enum('gender', Gender::values())->nullable();
-            $table->enum('reward_tier', RewardTier::values())->default(RewardTier::Bronze->value);
+            $table->string('gender', 40)->nullable();
+            $table->string('reward_tier', 40)->default(RewardTier::Bronze->value);
             $table->boolean('onboarded')->default(false);
             $table->timestamps();
 

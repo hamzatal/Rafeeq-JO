@@ -13,8 +13,8 @@ return new class extends Migration
         Schema::create('otp_codes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('identifier', 150)->index();
-            $table->enum('channel', OtpChannel::values())->default(OtpChannel::Sms->value);
-            $table->enum('purpose', OtpPurpose::values());
+            $table->string('channel', 40)->default(OtpChannel::Sms->value);
+            $table->string('purpose', 40);
             $table->string('code_hash');
             $table->unsignedSmallInteger('attempts')->default(0);
             $table->unsignedSmallInteger('max_attempts')->default(5);

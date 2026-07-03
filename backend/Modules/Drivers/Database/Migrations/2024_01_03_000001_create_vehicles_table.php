@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('color', 40);
             $table->string('plate_number', 30)->unique();
             $table->unsignedSmallInteger('seats')->default(4);
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('status', 30)->default('active');
             $table->timestamps();
         });
     }

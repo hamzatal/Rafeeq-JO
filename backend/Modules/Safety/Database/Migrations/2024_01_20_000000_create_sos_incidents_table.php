@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignUuid('trip_id')->nullable()->constrained('trips')->nullOnDelete();
             $table->decimal('lat', 10, 7)->nullable();
             $table->decimal('lng', 10, 7)->nullable();
-            $table->enum('status', ['open', 'acknowledged', 'resolved'])->default('open')->index();
+            $table->string('status', 30)->default('open')->index();
             $table->string('note', 255)->nullable();
             $table->foreignUuid('handled_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('resolved_at')->nullable();

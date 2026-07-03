@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('email', 150)->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
-            $table->enum('type', UserType::values())->default(UserType::Student->value)->index();
-            $table->enum('status', UserStatus::values())->default(UserStatus::Pending->value)->index();
+            $table->string('type', 40)->default(UserType::Student->value)->index();
+            $table->string('status', 40)->default(UserStatus::Pending->value)->index();
             $table->string('locale', 5)->default('ar');
             $table->string('avatar_path')->nullable();
             $table->timestamp('last_login_at')->nullable();

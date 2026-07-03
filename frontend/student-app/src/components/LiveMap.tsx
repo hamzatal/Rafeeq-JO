@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme, type AppTheme } from '../theme';
 import { useI18n } from '../i18n';
 import { getMapsKey } from '../lib/appConfig';
@@ -133,6 +133,17 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
           style={{ flex: 1, backgroundColor: 'transparent' }}
           scrollEnabled={false}
           onMessage={onMessage}
+          javaScriptEnabled
+          domStorageEnabled
+          startInLoadingState
+          androidLayerType="hardware"
+          mixedContentMode="always"
+          setSupportMultipleWindows={false}
+          renderLoading={() => (
+            <View style={s.mapLoading}>
+              <ActivityIndicator color={theme.colors.primary} />
+            </View>
+          )}
         />
         {onPick && (
           <View style={s.pickHint} pointerEvents="none">
@@ -428,6 +439,13 @@ const makeStyles = (t: AppTheme) =>
       borderWidth: 1,
       borderColor: t.colors.border,
       marginTop: t.spacing.sm,
+      backgroundColor: t.colors.primarySoft,
+    },
+    mapLoading: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: t.colors.primarySoft,
     },
     pickHint: {
       position: 'absolute',

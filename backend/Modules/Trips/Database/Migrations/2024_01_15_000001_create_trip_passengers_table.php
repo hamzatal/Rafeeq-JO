@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('pickup_lat', 10, 7)->nullable();
             $table->decimal('pickup_lng', 10, 7)->nullable();
             $table->unsignedSmallInteger('pickup_order')->nullable(); // optimized sequence
-            $table->enum('status', TripPassengerStatus::values())->default(TripPassengerStatus::Booked->value);
+            $table->string('status', 40)->default(TripPassengerStatus::Booked->value);
             $table->string('boarding_code', 8); // Trip OTP at boarding (security layer 6)
             $table->string('dropoff_code', 8)->nullable(); // OTP at drop-off (anti-fraud)
             $table->unsignedInteger('fare_fils')->default(0);

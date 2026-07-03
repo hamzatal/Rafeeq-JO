@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('wallet_transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('wallet_id')->constrained('wallets')->cascadeOnDelete();
-            $table->enum('type', WalletTxnType::values());
+            $table->string('type', 40);
             $table->bigInteger('amount_fils');   // signed: + credit, - debit
             $table->bigInteger('balance_after'); // wallet balance after this txn
             $table->string('reference', 100)->nullable();
