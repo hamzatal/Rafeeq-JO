@@ -44,9 +44,8 @@ export class PaymentsApi {
 
   /** Upload a CliQ transfer proof image (FormData) for verification. */
   async submitProof(id: string, proof: FormData): Promise<{ request: PaymentRequest }> {
-    const { data } = await this.http.post<ApiSuccess<{ request: PaymentRequest }>>(ENDPOINTS.payments.proof(id), proof, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    // Do not set Content-Type manually; the transport adds the multipart boundary.
+    const { data } = await this.http.post<ApiSuccess<{ request: PaymentRequest }>>(ENDPOINTS.payments.proof(id), proof);
     return unwrap(data);
   }
 

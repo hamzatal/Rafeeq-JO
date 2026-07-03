@@ -36,10 +36,12 @@ export class DriverApi {
     form.append('file', file as Blob);
     if (expiresAt) form.append('expires_at', expiresAt);
 
+    // NOTE: do NOT set Content-Type manually. Letting the transport (browser/RN)
+    // set it ensures the required multipart `boundary` is included — a manual
+    // "multipart/form-data" without boundary makes the server drop the file (422).
     const { data } = await this.http.post<ApiSuccess<DriverDocument>>(
       ENDPOINTS.driver.documents,
       form,
-      { headers: { 'Content-Type': 'multipart/form-data' } },
     );
     return unwrap(data);
   }

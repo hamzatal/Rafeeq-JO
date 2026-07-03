@@ -57,9 +57,22 @@ export default function Documents() {
   }, [progress, bar]);
 
   const doUpload = async (type: DocumentType, asset: ImagePicker.ImagePickerAsset) => {
-    const file = Platform.OS === 'web'
-      ? ((asset as unknown as { file?: Blob }).file as Blob)
-      : ({ uri: asset.uri, name: asset.fileName ?? `${type}.jpg`, type: asset.mimeType ?? 'image/jpeg' } as unknown as Blob);
+    let file: Blob;
+    if (Platform.OS === 'web') {
+      // On web the picker sometimes omits `.file`; rebuild a proper File from the URI
+      // so the backend receives a named multipart file (avoids 422 "file is required").
+      const maybe = (asset as unknown as { file?: File }).file;
+      if (maybe instanceof File) {
+        file = maybe;
+      } else {
+        const blob = await (await fetch(asset.uri)).blob();
+        const mime = blob.type && blob.type.startsWith('image/') ? blob.type : 'image/jpeg';
+        const ext = mime === 'image/png' ? 'png' : 'jpg';
+        file = new File([blob], asset.fileName ?? `${type}.${ext}`, { type: mime });
+      }
+    } else {
+      file = { uri: asset.uri, name: asset.fileName ?? `${type}.jpg`, type: asset.mimeType ?? 'image/jpeg' } as unknown as Blob;
+    }
     setUploading(type);
     setPreviews((p) => ({ ...p, [type]: asset.uri }));
     try {

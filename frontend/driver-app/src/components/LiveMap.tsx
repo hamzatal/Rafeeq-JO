@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { createElement, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTheme, type AppTheme } from '../theme';
 import { useI18n } from '../i18n';
 import { getMapsKey } from '../lib/appConfig';
@@ -53,28 +53,56 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
   const kinds = new Set(points.map((p) => p.kind ?? 'pickup'));
   const showLegend = legend ?? kinds.size > 1;
 
-  // ── Web fallback: a clean live panel (Leaflet/WebView aren't reliable on web).
+  // Built once so the web <iframe> / native WebView isn't torn down on every render.
+  const initial = useRef({ points, route, center }).current;
+
+  // ── Web: render a REAL embedded OpenStreetMap (Leaflet) inside an <iframe>.
+  // Live updates + tap-to-pick are relayed via window.postMessage.
+  const webHtml = useMemo(
+    () => (Platform.OS === 'web' ? buildLeafletHtml(initial.points, initial.route, initial.center, colors, !!onPick) : ''),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [colors, !!onPick],
+  );
+
+  // Push live marker/route updates into the running map (web iframe + native handled below).
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const win = (webRef.current as HTMLIFrameElement | null)?.contentWindow;
+      win?.postMessage(JSON.stringify({ __rafeeqUpdate: true, payload: { points, route: route ?? null } }), '*');
+    }
+  }, [points, route]);
+
+  // Receive tap-to-pick coordinates from the web iframe.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !onPick) return;
+    const handler = (e: MessageEvent) => {
+      try {
+        const m = JSON.parse(e.data);
+        if (m?.type === 'pick' && Number.isFinite(m.lat) && Number.isFinite(m.lng)) onPick({ lat: m.lat, lng: m.lng });
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [onPick]);
+
   if (Platform.OS === 'web') {
     return (
       <View>
-        <View style={[s.webCard, { height }]}>
-          <Icon name="map-pin" size={26} color={theme.colors.primary} />
-          {points.map((p, i) => (
-            <Text key={i} style={s.webCoord}>
-              {p.label ? `${p.label}: ` : ''}
-              {p.lat.toFixed(5)}, {p.lng.toFixed(5)}
-            </Text>
-          ))}
-          <Pressable
-            onPress={() =>
-              Linking.openURL(
-                `https://www.openstreetmap.org/?mlat=${center.lat}&mlon=${center.lng}#map=15/${center.lat}/${center.lng}`,
-              )
-            }
-            style={s.webBtn}
-          >
-            <Text style={s.webBtnText}>{t('map.openInMap')}</Text>
-          </Pressable>
+        <View style={[s.mapWrap, { height }]}>
+          {createElement('iframe', {
+            ref: webRef,
+            srcDoc: webHtml,
+            title: 'map',
+            style: { border: '0', width: '100%', height: '100%', display: 'block' },
+          })}
+          {onPick && (
+            <View style={s.pickHint} pointerEvents="none">
+              <Icon name="crosshair" size={13} color={theme.colors.onPrimary} />
+              <Text style={s.pickHintText}>{t('map.pickHint')}</Text>
+            </View>
+          )}
         </View>
         {showLegend && <Legend s={s} colors={colors} kinds={kinds} />}
       </View>
@@ -91,7 +119,6 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
   const [googleFailed, setGoogleFailed] = useState(false);
   const useGoogle = !!mapsKey && !googleFailed;
 
-  const initial = useRef({ points, route, center }).current;
   const html = useMemo(
     () =>
       useGoogle
@@ -416,6 +443,13 @@ function buildLeafletHtml(
   var cap0=draw(${data});
   captainMarker = cap0 ? markers.find(function(m,i){return (${data}.points[i]||{}).kind==='captain';}) : null;
 
+  // Live updates pushed from the app (WebView.injectJavaScript OR iframe postMessage on web).
+  window.addEventListener('message',function(ev){
+    try{var msg=JSON.parse(ev.data); if(msg&&msg.__rafeeqUpdate){window.__rafeeqUpdate(msg.payload);}}catch(e){}
+  });
+  // Ensure Leaflet lays out correctly once the frame has its final size (fixes blank/white map on web).
+  setTimeout(function(){try{map.invalidateSize();}catch(e){}},250);
+
   ${pickable ? `
   var pickMarker=null;
   map.on('click',function(e){
@@ -426,7 +460,9 @@ function buildLeafletHtml(
     post(e.latlng.lat,e.latlng.lng);
   });
   function post(lat,lng){
-    if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(JSON.stringify({type:'pick',lat:lat,lng:lng}));}
+    var msg=JSON.stringify({type:'pick',lat:lat,lng:lng});
+    if(window.ReactNativeWebView){window.ReactNativeWebView.postMessage(msg);}
+    else if(window.parent){window.parent.postMessage(msg,'*');}
   }` : ''}
 </script></body></html>`;
 }
@@ -471,23 +507,4 @@ const makeStyles = (t: AppTheme) =>
     legendItem: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5 },
     legendDot: { width: 10, height: 10, borderRadius: 5 },
     legendText: { fontFamily: t.fontFamily.medium, fontSize: 11, color: t.colors.textSecondary },
-    webCard: {
-      borderRadius: t.radius.lg,
-      borderWidth: 1,
-      borderColor: t.colors.border,
-      backgroundColor: t.colors.primarySoft,
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      marginTop: t.spacing.sm,
-    },
-    webCoord: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.text },
-    webBtn: {
-      marginTop: 6,
-      backgroundColor: t.colors.primary,
-      borderRadius: t.radius.md,
-      paddingVertical: 8,
-      paddingHorizontal: t.spacing.lg,
-    },
-    webBtnText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.onPrimary },
   });
