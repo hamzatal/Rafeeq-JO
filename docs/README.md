@@ -13,7 +13,7 @@
 | [audit/AUDIT_2026-07.md](./audit/AUDIT_2026-07.md) | **تقرير التدقيق الشامل** (يوليو 2026): حالة التطبيقات الثلاثة + الباك إند + التصميم + الأمان + القانوني، مع مراجع ملفات وأسطر. |
 | [audit/MASTER_REMEDIATION_PLAN.md](./audit/MASTER_REMEDIATION_PLAN.md) | **خطة الإصلاح الشاملة** والجاهزية للإطلاق (8 مراحل مرتّبة بالأولوية + قرارات مطلوبة). |
 
-> ⚠️ **تنبيه هوية بصرية:** المصدر المعتمد الوحيد لتوكنز التصميم هو الكود `packages/shared/src/theme/scheme.ts` + `admin-dashboard/tailwind.config.ts`. الملفات `DESIGN.md` و`DESIGN_SYSTEM.md` تحوي نسخ هوية سابقة (v2/v4) لا تطابق الكود (v5) — قيد التوحيد ضمن **المرحلة 1** من خطة الإصلاح.
+> ✅ **الهوية البصرية المعتمدة: v6 (كحلي `#243B7A` + ذهبي `#E7A63A`)** — الموثّقة في [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)، ومطبّقة في الكود (`packages/shared/src/theme/scheme.ts` + `admin-dashboard/tailwind.config.ts`). الهويات الأقدم (v2/v3/v4/v5) مؤرشفة في `archive/`.
 
 ---
 
@@ -55,8 +55,8 @@
 
 | الملف | الوصف |
 |------|-------|
-| [FEATURES.md](./FEATURES.md) | قائمة المزايا الكاملة عبر الوحدات الـ 31. |
-| [DESIGN.md](./DESIGN.md) | نظام التصميم والهوية البصرية (RTL/عربي أولاً). |
+| [FEATURES.md](./FEATURES.md) | قائمة المزايا الكاملة عبر الوحدات الـ 32. |
+| [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) | **Canonical** — نظام التصميم والهوية البصرية v6 (كحلي+ذهبي، RTL/عربي أولاً). |
 | [business/overview.md](./business/overview.md) | نظرة عمل/منتج عامة. |
 | [ROADMAP.md](./ROADMAP.md) · [business/roadmap.md](./business/roadmap.md) | خارطة الطريق (مراحل المنتج). |
 
@@ -80,7 +80,7 @@
 | [deployment/local-setup.md](./deployment/local-setup.md) | إعداد البيئة المحلية (backend). |
 | [deployment/frontend-setup.md](./deployment/frontend-setup.md) | إعداد التطبيقات (Expo / Next.js). |
 | [LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md) | قائمة ما تبقّى للإطلاق (تكاملات + بنية تحتية + متاجر). |
-| [EXECUTION_PLAN.md](./EXECUTION_PLAN.md) | خطة التنفيذ. |
+| [deployment/android-build.md](./deployment/android-build.md) | بناء APK للأندرويد عبر EAS (للتجربة على الأجهزة). |
 
 ---
 
@@ -106,9 +106,25 @@
 
 ---
 
+## 🗃️ الأرشيف (تاريخي)
+
+| الملف | الوصف |
+|------|-------|
+| [archive/](./archive/) | خطط وهويات سابقة تجاوزها الواقع (DESIGN v2، REVAMP_PLAN، EXECUTION_PLAN). للمرجع فقط. |
+
+---
+
+## 🏷️ العلامة والاسم
+
+| الملف | الوصف |
+|------|-------|
+| [business/BRAND_NAMING.md](./business/BRAND_NAMING.md) | تحليل الاسم (رفيق/UniGo) + قائمة أسماء أصلية مقترحة وفحص التوفّر. |
+
+---
+
 ## 🧪 الجودة (Quality)
 
-- **الاختبارات:** `cd backend && php artisan test` (الحالي: 132 اختبار).
+- **الاختبارات:** `cd backend && php artisan test` (الحالي: 156 اختبار).
 - **التحليل الساكن:** `cd backend && vendor/bin/phpstan analyse` (Larastan، إعداد في `phpstan.neon`).
 - **فحص الأنواع (الفرونت):** لكل تطبيق `npx tsc --noEmit`.
 - **الستايل:** `cd backend && vendor/bin/pint`.
