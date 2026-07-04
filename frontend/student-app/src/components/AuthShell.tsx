@@ -6,10 +6,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme, type AppTheme } from '../theme';
 
 /**
- * Unified, premium auth background for login / register / reset (Onyx).
- * A deep ink canvas (so it reads distinct) with a soft signature-blue glow,
- * the unified brand mark, a clear title and a friendly subtitle — shared
- * visual language across the student & captain apps.
+ * Unified auth background for login / reset (Onyx, light).
+ * A clean near-white canvas with a soft signature-blue glow, the floating brand
+ * mark, a clear title and a friendly subtitle — the same light language used by
+ * the register screen and the rest of the app, so nothing jumps dark↔light.
  */
 export function AuthShell({
   title,
@@ -25,7 +25,7 @@ export function AuthShell({
 
   return (
     <View style={s.root}>
-      <StatusBar style="light" />
+      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
       <View style={s.glow} />
       <View style={s.glow2} />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
@@ -49,19 +49,19 @@ export function AuthShell({
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#0A0D12', overflow: 'hidden' },
-    glow: { position: 'absolute', top: -120, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.16 },
-    glow2: { position: 'absolute', bottom: -140, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.accent, opacity: 0.07 },
+    root: { flex: 1, backgroundColor: t.colors.background, overflow: 'hidden' },
+    glow: { position: 'absolute', top: -130, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.09 },
+    glow2: { position: 'absolute', bottom: -150, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.accent, opacity: 0.05 },
     safe: { flex: 1 },
     content: { flexGrow: 1, paddingHorizontal: t.spacing.lg, paddingTop: t.spacing.xl, paddingBottom: t.spacing.lg },
 
     brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginBottom: t.spacing['2xl'] },
-    mark: { width: 52, height: 52, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+    mark: { width: 54, height: 54, borderRadius: 16, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.md },
     markLogo: { width: 38, height: 38 },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: '#FFFFFF' },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text },
 
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: '#FFFFFF', textAlign: 'right', lineHeight: 40 },
-    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: 'rgba(255,255,255,0.65)', textAlign: 'right', marginTop: 8 },
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: t.colors.text, textAlign: 'right', lineHeight: 40 },
+    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'right', marginTop: 8 },
 
     form: { marginTop: t.spacing['2xl'] },
   });

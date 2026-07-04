@@ -1,4 +1,8 @@
 import { Platform } from 'react-native';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
+
+/** Expo Go (SDK 53+) removed remote push; expo-notifications throws on import there. */
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 /**
  * Safe location + notification permission helpers.
@@ -128,7 +132,7 @@ export function watchLocation(onUpdate: (c: Coords) => void): () => void {
 /** Current notification permission, without prompting. */
 export async function getNotificationState(): Promise<PermState> {
   try {
-    if (Platform.OS === 'web') return 'unavailable';
+    if (Platform.OS === 'web' || isExpoGo) return 'unavailable';
     const Notifications = await import('expo-notifications');
     const current = await Notifications.getPermissionsAsync();
     return current.granted ? 'granted' : 'denied';
@@ -140,7 +144,7 @@ export async function getNotificationState(): Promise<PermState> {
 /** Prompt for notifications. Returns true when granted. */
 export async function requestNotifications(): Promise<boolean> {
   try {
-    if (Platform.OS === 'web') return false;
+    if (Platform.OS === 'web' || isExpoGo) return false;
     const Notifications = await import('expo-notifications');
     const current = await Notifications.getPermissionsAsync();
     if (current.granted) return true;

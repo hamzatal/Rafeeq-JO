@@ -43,9 +43,12 @@ export default function Intro() {
     router.replace('/(auth)/welcome');
   };
 
-  const advance = () => {
+  const advance = async () => {
     if (last) {
-      router.replace('/(onboarding)/permissions');
+      // No dedicated permissions page — location/notifications are requested
+      // inline exactly when they're needed (map screen, etc.).
+      await setIntroSeen();
+      router.replace('/(auth)/welcome');
     } else {
       transition(index + 1);
     }
