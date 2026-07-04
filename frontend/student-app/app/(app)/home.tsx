@@ -6,7 +6,7 @@ import type { SavedAddress, Subscription, Wallet } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { getCurrentLocation } from '../../src/lib/permissions';
+import { getCurrentLocation, watchLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { Icon, type IconName } from '../../src/components/Icon';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
@@ -55,8 +55,16 @@ export default function Home() {
       api.transport.mySubscriptions().then((l) => setSub(l.find((x) => x.usable) ?? null)),
       api.wallet.show().then(setWallet),
     ]).finally(() => setLoadingStrip(false));
+    // Show the user's REAL position immediately, then keep it live.
     void getCurrentLocation().then((loc) => loc && setMyLoc(loc));
+    const stop = watchLocation((loc) => setMyLoc(loc));
+    return stop;
   }, []);
+
+  const recenter = async () => {
+    const loc = await getCurrentLocation();
+    if (loc) setMyLoc({ ...loc });
+  };
 
   const mapPoints: MapPoint[] = myLoc ? [{ lat: myLoc.lat, lng: myLoc.lng, kind: 'origin', label: t('home.nearby') }] : [];
   const labelText = (a: SavedAddress) => {
@@ -83,6 +91,11 @@ export default function Home() {
           {unread > 0 && <View style={s.fabDot} />}
         </Pressable>
       </SafeAreaView>
+
+      {/* Recenter to my real location */}
+      <Pressable onPress={recenter} style={s.locateFab} hitSlop={8}>
+        <Icon name="crosshair" size={20} color={theme.colors.accent} />
+      </Pressable>
 
       {/* Bottom sheet (animated entrance) */}
       <Animated.View style={[s.sheet, { maxHeight: height * 0.6, opacity: rise, transform: [{ translateY }] }]}>
@@ -161,6 +174,8 @@ const makeStyles = (t: AppTheme) =>
     fabInitial: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.primary },
     fabDot: { position: 'absolute', top: 10, right: 11, width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.danger, borderWidth: 1.5, borderColor: t.colors.surface },
 
+    locateFab: { position: 'absolute', bottom: '42%', right: t.spacing.lg, width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.md },
+
     sheet: {
       position: 'absolute',
       left: 0,
@@ -177,7 +192,7 @@ const makeStyles = (t: AppTheme) =>
     sheetContent: { paddingBottom: t.spacing.xl },
     hello: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
 
-    searchBar: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.background, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, paddingHorizontal: t.spacing.md, height: 60 },
+    searchBar: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.xl, paddingHorizontal: t.spacing.md, height: 62, ...t.shadow.sm },
     searchIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
     searchText: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
 
@@ -190,10 +205,10 @@ const makeStyles = (t: AppTheme) =>
     section: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.base, marginBottom: t.spacing.sm },
     servicesRow: { flexDirection: 'row-reverse', gap: t.spacing.sm },
     serviceTile: { width: 78, alignItems: 'center', gap: 6 },
-    serviceIcon: { width: 64, height: 64, borderRadius: t.radius.lg, backgroundColor: t.colors.background, borderWidth: 1, borderColor: t.colors.border, alignItems: 'center', justifyContent: 'center' },
+    serviceIcon: { width: 64, height: 64, borderRadius: t.radius.xl, backgroundColor: t.colors.card, alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
     serviceLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text, textAlign: 'center' },
 
-    strip: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.background, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, marginTop: t.spacing.base, paddingVertical: t.spacing.md },
+    strip: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.xl, marginTop: t.spacing.base, paddingVertical: t.spacing.base, ...t.shadow.sm },
     stripItem: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6 },
     stripValue: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.text },
     stripLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },

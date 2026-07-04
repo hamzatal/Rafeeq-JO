@@ -132,8 +132,8 @@ export function ListRow({ icon, title, subtitle, trailing, onPress }: { icon?: I
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    card: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base, ...t.shadow.sm },
-    pressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
+    card: { backgroundColor: t.colors.card, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.md },
+    pressed: { opacity: 0.92, transform: [{ scale: 0.985 }] },
 
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.lg },
     headerText: { flex: 1 },
@@ -149,17 +149,17 @@ const makeStyles = (t: AppTheme) =>
     emptyHint: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'center', marginTop: 4, maxWidth: 260 },
 
     tile: { width: '23%', alignItems: 'center', marginBottom: t.spacing.base },
-    tileIcon: { width: 58, height: 58, borderRadius: 29, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 6, borderWidth: 1, borderColor: t.colors.accent + '33' },
+    tileIcon: { width: 60, height: 60, borderRadius: t.radius.xl, backgroundColor: t.colors.card, alignItems: 'center', justifyContent: 'center', marginBottom: 7, ...t.shadow.sm },
     tileLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text, textAlign: 'center' },
     tileSoon: { fontFamily: t.fontFamily.regular, fontSize: 9, color: t.colors.muted },
 
-    stat: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, ...t.shadow.md },
+    stat: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, ...t.shadow.md },
     statLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onPrimary, opacity: 0.85, textAlign: 'right' },
     statValue: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.onPrimary, textAlign: 'right', marginTop: 2 },
     statIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
 
-    row: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.md, marginBottom: t.spacing.sm },
-    rowIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
+    row: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.xl, padding: t.spacing.base, marginBottom: t.spacing.sm, ...t.shadow.sm },
+    rowIcon: { width: 40, height: 40, borderRadius: t.radius.md, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     rowText: { flex: 1 },
     rowTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     rowSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
