@@ -6,7 +6,7 @@ import { RafeeqApiError } from '@rafeeq/api-client';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
-import { AuthShell } from '../../src/components/AuthShell';
+import { AuthScaffold } from '../../src/components/AuthScaffold';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
@@ -57,10 +57,10 @@ export default function Login() {
   };
 
   return (
-    <AuthShell title={t('auth.login')} subtitle={t('auth.studentSigninSub')}>
+    <AuthScaffold title={t('auth.login')} subtitle={t('auth.studentSigninSub')}>
       {formError ? <Banner message={formError} variant="error" /> : null}
-      <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
-      <Input label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry />
+      <Input icon="phone" label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+      <Input icon="lock" label={t('auth.password')} value={password} onChangeText={setPassword} secureTextEntry />
 
       <Pressable onPress={() => router.push('/(auth)/forgot-password')} hitSlop={8} style={s.forgot}>
         <Text style={s.forgotText}>{t('auth.forgotPassword')}</Text>
@@ -82,7 +82,7 @@ export default function Login() {
       <Pressable onPress={() => router.push('/(auth)/register')} hitSlop={8} style={s.bottomLink}>
         <Text style={s.bottomLinkText}>{t('auth.noAccount')}</Text>
       </Pressable>
-    </AuthShell>
+    </AuthScaffold>
   );
 }
 
@@ -99,10 +99,11 @@ const makeStyles = (t: AppTheme) =>
       justifyContent: 'center',
       gap: 8,
       height: 54,
-      borderRadius: t.radius.lg,
+      borderRadius: t.radius.xl,
       borderWidth: 1.5,
       borderColor: t.colors.border,
       backgroundColor: t.colors.card,
+      ...t.shadow.sm,
     },
     secondaryText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     pressed: { opacity: 0.7 },

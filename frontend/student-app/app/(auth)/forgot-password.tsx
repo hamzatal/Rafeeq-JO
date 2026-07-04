@@ -6,7 +6,7 @@ import { RafeeqApiError } from '@rafeeq/api-client';
 import { Input } from '../../src/components/Input';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
-import { AuthShell } from '../../src/components/AuthShell';
+import { AuthScaffold } from '../../src/components/AuthScaffold';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
@@ -57,32 +57,33 @@ export default function ForgotPassword() {
   };
 
   return (
-    <AuthShell title={t('auth.resetTitle')} subtitle={t('auth.resetHint')}>
+    <AuthScaffold title={t('auth.resetTitle')} subtitle={t('auth.resetHint')} showBack>
       {msg ? <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} /> : null}
 
       {step === 'request' ? (
         <>
-          <Input onDark label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
-          <Button title={t('auth.sendResetCode')} onPress={sendCode} loading={loading} />
+          <Input icon="phone" label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+          <Button title={t('auth.sendResetCode')} icon="arrow-left" onPress={sendCode} loading={loading} style={s.cta} />
         </>
       ) : (
         <>
-          <Input onDark label={t('auth.code')} value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="----" />
-          <Input onDark label={t('auth.newPassword')} value={password} onChangeText={setPassword} secureTextEntry />
-          <Input onDark label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
-          <Button title={t('auth.resetTitle')} onPress={reset} loading={loading} />
+          <Input icon="key" label={t('auth.code')} value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="----" />
+          <Input icon="lock" label={t('auth.newPassword')} value={password} onChangeText={setPassword} secureTextEntry />
+          <Input icon="lock" label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
+          <Button title={t('auth.resetTitle')} onPress={reset} loading={loading} style={s.cta} />
         </>
       )}
 
       <Pressable onPress={() => router.replace('/(auth)/login')} hitSlop={8} style={s.bottomLink}>
         <Text style={s.bottomLinkText}>{t('auth.haveAccount')}</Text>
       </Pressable>
-    </AuthShell>
+    </AuthScaffold>
   );
 }
 
-const makeStyles = (_t: AppTheme) =>
+const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    bottomLink: { alignItems: 'center', marginTop: 24 },
-    bottomLinkText: { fontFamily: _t.fontFamily.semibold, fontSize: 14, color: 'rgba(255,255,255,0.8)' },
+    cta: { marginTop: t.spacing.sm },
+    bottomLink: { alignItems: 'center', marginTop: t.spacing.xl },
+    bottomLinkText: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.textSecondary },
   });

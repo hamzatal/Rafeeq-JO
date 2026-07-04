@@ -1,27 +1,54 @@
-import React, { useMemo } from 'react';
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { useTheme, type AppTheme } from '../theme';
+import { Icon, type IconName } from './Icon';
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
-  /** Style the field for a dark background (auth screens). */
+  /** Leading icon inside the field (formal look). */
+  icon?: IconName;
+  /** @deprecated kept for API compatibility — the field now adapts to the theme. */
   onDark?: boolean;
 }
 
-export function Input({ label, error, style, onDark = false, ...props }: InputProps) {
+/**
+ * Formal, structured input field (DS v7 "Onyx").
+ * Filled surface + hairline border + soft elevation, an optional leading icon,
+ * and a focus ring in the signature blue. Password fields get a show/hide eye.
+ */
+export function Input({ label, error, icon, style, onDark: _onDark, secureTextEntry, ...props }: InputProps) {
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
+  const [focused, setFocused] = useState(false);
+  const [hidden, setHidden] = useState(!!secureTextEntry);
 
   return (
     <View style={s.wrapper}>
-      {label ? <Text style={[s.label, onDark && s.labelDark]}>{label}</Text> : null}
-      <TextInput
-        placeholderTextColor={onDark ? 'rgba(255,255,255,0.45)' : theme.colors.muted}
-        style={[s.input, onDark && s.inputDark, error ? s.inputError : null, style]}
-        {...props}
-      />
-      {error ? <Text style={[s.error, onDark && s.errorDark]}>{error}</Text> : null}
+      {label ? <Text style={s.label}>{label}</Text> : null}
+      <View style={[s.field, focused && s.fieldFocused, error ? s.fieldError : null]}>
+        {icon ? <Icon name={icon} size={18} color={focused ? theme.colors.accent : theme.colors.muted} /> : null}
+        <TextInput
+          placeholderTextColor={theme.colors.muted}
+          style={[s.input, style]}
+          secureTextEntry={hidden}
+          onFocus={(e) => {
+            setFocused(true);
+            props.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            props.onBlur?.(e);
+          }}
+          {...props}
+        />
+        {secureTextEntry ? (
+          <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10}>
+            <Icon name={hidden ? 'eye' : 'eye-off'} size={18} color={theme.colors.muted} />
+          </Pressable>
+        ) : null}
+      </View>
+      {error ? <Text style={s.error}>{error}</Text> : null}
     </View>
   );
 }
@@ -29,26 +56,21 @@ export function Input({ label, error, style, onDark = false, ...props }: InputPr
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     wrapper: { marginBottom: t.spacing.base, width: '100%' },
-    label: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.text, marginBottom: 7, textAlign: 'right' },
-    labelDark: { color: 'rgba(255,255,255,0.85)' },
-    input: {
-      height: 56,
+    label: { fontFamily: t.fontFamily.semibold, fontSize: 13.5, color: t.colors.textSecondary, marginBottom: 8, textAlign: 'right' },
+    field: {
+      flexDirection: 'row-reverse',
+      alignItems: 'center',
+      gap: 10,
+      minHeight: 58,
+      borderRadius: t.radius.xl,
+      backgroundColor: t.colors.surface,
       borderWidth: 1,
       borderColor: t.colors.border,
-      borderRadius: t.radius.xl,
       paddingHorizontal: t.spacing.base,
-      fontFamily: t.fontFamily.medium,
-      fontSize: 16,
-      color: t.colors.text,
-      backgroundColor: t.colors.surface,
-      textAlign: 'right',
+      ...t.shadow.sm,
     },
-    inputDark: {
-      backgroundColor: 'rgba(255,255,255,0.07)',
-      borderColor: 'rgba(255,255,255,0.16)',
-      color: '#FFFFFF',
-    },
-    inputError: { borderColor: t.colors.danger },
-    error: { color: t.colors.danger, fontSize: 12, marginTop: 4, fontFamily: t.fontFamily.regular, textAlign: 'right' },
-    errorDark: { color: '#FCA5A5' },
+    fieldFocused: { borderColor: t.colors.accent, borderWidth: 1.5 },
+    fieldError: { borderColor: t.colors.danger },
+    input: { flex: 1, fontFamily: t.fontFamily.semibold, fontSize: 16, color: t.colors.text, textAlign: 'right', paddingVertical: 16 },
+    error: { color: t.colors.danger, fontSize: 12, marginTop: 5, fontFamily: t.fontFamily.regular, textAlign: 'right' },
   });
