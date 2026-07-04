@@ -314,7 +314,8 @@ function buildGoogleHtml(
 
   function initMap(){
     map=new google.maps.Map(document.getElementById('map'),{
-      center:CENTER, zoom:14, disableDefaultUI:true, gestureHandling:'greedy', clickableIcons:false });
+      center:CENTER, zoom:14, disableDefaultUI:true, gestureHandling:'greedy', clickableIcons:false,
+      mapTypeControl:true, mapTypeControlOptions:{ position: google.maps.ControlPosition.TOP_LEFT, mapTypeIds:['roadmap','satellite','hybrid'] } });
     var ci=draw(pendingInitial); captainMarker = ci>=0 ? markers[ci] : null;
     if(PICKABLE){
       map.addListener('click',function(e){
@@ -344,8 +345,6 @@ function buildLeafletHtml(
   const c = JSON.stringify(center);
   const col = JSON.stringify(colors);
 
-  // Free OpenStreetMap tiles (no key required, ToS-compliant).
-  const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
   return `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -367,7 +366,12 @@ function buildLeafletHtml(
   var COL = ${col};
   var c = ${c};
   var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([c.lat,c.lng],14);
-  L.tileLayer('${tileUrl}',{maxZoom:19,subdomains:['a','b','c']}).addTo(map);
+  // Map view modes (free, no-key tiles): streets / minimal / satellite (buildings).
+  var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:['a','b','c']});
+  var minimal = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd'});
+  var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
+  streets.addTo(map);
+  L.control.layers({'شوارع':streets,'مبسّط':minimal,'أقمار صناعية':satellite}, null, {position:'topleft',collapsed:true}).addTo(map);
 
   var markers=[], routeLine=null, routeCasing=null, captainMarker=null;
 
