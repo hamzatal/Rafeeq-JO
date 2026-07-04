@@ -329,10 +329,9 @@ export function ListSkeleton({ rows = 4 }: { rows?: number }) {
             alignItems: 'center',
             gap: t.spacing.md,
             backgroundColor: t.colors.card,
-            borderRadius: t.radius.lg,
-            borderWidth: 1,
-            borderColor: t.colors.border,
+            borderRadius: t.radius.xl,
             padding: t.spacing.base,
+            ...t.shadow.sm,
           }}
         >
           <Skeleton width={44} height={44} radius={22} />
