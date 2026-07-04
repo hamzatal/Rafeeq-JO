@@ -20,6 +20,10 @@ const config = getDefaultConfig(projectRoot);
 
 config.cacheVersion = 'rafeeq-driver-app';
 
+// Windows: Metro's fallback watcher can crash (ENOENT) trying to watch a
+// non-existent path inside this transitive dep — exclude it from the crawl.
+config.resolver.blockList = [/[\\/]@tybys[\\/]wasm-util[\\/].*/];
+
 config.watchFolders = [workspaceRoot];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),

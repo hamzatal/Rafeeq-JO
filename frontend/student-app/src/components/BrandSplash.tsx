@@ -11,12 +11,17 @@ import { Animated, Easing, Image, ImageBackground, StyleSheet, Text, View } from
 const INK = '#0A0D12';
 const BLUE = '#2F6BFF';
 const BLUE_SOFT = 'rgba(47,107,255,0.30)';
+const GOLD = '#E8B04B';
 
 export function BrandSplash() {
   const rise = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.86)).current;
   const aura = useRef(new Animated.Value(0)).current;
-  const bar = useRef(new Animated.Value(0)).current;
+  const dots = [
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+  ];
 
   useEffect(() => {
     Animated.parallel([
@@ -29,17 +34,23 @@ export function BrandSplash() {
         Animated.timing(aura, { toValue: 0, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       ]),
     ).start();
-    Animated.loop(
-      Animated.timing(bar, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.ease), useNativeDriver: false }),
-    ).start();
+    // Staggered pulsing gold dots.
+    dots.forEach((d, i) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(i * 180),
+          Animated.timing(d, { toValue: 1, duration: 460, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(d, { toValue: 0, duration: 460, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.delay((2 - i) * 180),
+        ]),
+      ).start();
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const translateY = rise.interpolate({ inputRange: [0, 1], outputRange: [24, 0] });
   const auraOpacity = aura.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.78] });
   const auraScale = aura.interpolate({ inputRange: [0, 1], outputRange: [1, 1.25] });
-  const barWidth = bar.interpolate({ inputRange: [0, 1], outputRange: ['8%', '92%'] });
-  const barX = bar.interpolate({ inputRange: [0, 1], outputRange: [-40, 220] });
 
   return (
     <ImageBackground source={require('../../assets/splash-map.jpg')} style={styles.container} resizeMode="cover">
@@ -60,8 +71,19 @@ export function BrandSplash() {
         <Text style={styles.tag}>النقل والخدمات الجامعية الذكية</Text>
       </Animated.View>
 
-      <View style={styles.track}>
-        <Animated.View style={[styles.fill, { width: barWidth, transform: [{ translateX: barX }] }]} />
+      <View style={styles.dots}>
+        {dots.map((d, i) => (
+          <Animated.View
+            key={i}
+            style={[
+              styles.dot,
+              {
+                opacity: d.interpolate({ inputRange: [0, 1], outputRange: [0.28, 1] }),
+                transform: [{ scale: d.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1.3] }) }],
+              },
+            ]}
+          />
+        ))}
       </View>
     </ImageBackground>
   );
@@ -93,6 +115,6 @@ const styles = StyleSheet.create({
   sub: { fontFamily: 'Cairo_700Bold', fontSize: 15, color: BLUE, letterSpacing: 4, marginTop: 2 },
   tag: { fontFamily: 'Cairo_500Medium', fontSize: 13.5, color: 'rgba(255,255,255,0.65)', marginTop: 12, textAlign: 'center' },
 
-  track: { position: 'absolute', bottom: 70, width: 200, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden' },
-  fill: { height: 4, borderRadius: 2, backgroundColor: BLUE },
+  dots: { position: 'absolute', bottom: 72, flexDirection: 'row', gap: 10 },
+  dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: GOLD },
 });
