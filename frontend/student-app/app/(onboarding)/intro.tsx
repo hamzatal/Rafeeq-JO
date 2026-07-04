@@ -29,29 +29,31 @@ export default function Intro() {
 
   const [index, setIndex] = useState(0);
   const fade = useRef(new Animated.Value(1)).current;
+  const slideX = useRef(new Animated.Value(0)).current;
   const last = index === SLIDES.length - 1;
 
   const transition = (next: number) => {
-    Animated.timing(fade, { toValue: 0, duration: 180, useNativeDriver: true }).start(() => {
+    Animated.parallel([
+      Animated.timing(fade, { toValue: 0, duration: 160, useNativeDriver: true }),
+      Animated.timing(slideX, { toValue: -24, duration: 160, useNativeDriver: true }),
+    ]).start(() => {
       setIndex(next);
-      Animated.timing(fade, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+      slideX.setValue(24);
+      Animated.parallel([
+        Animated.timing(fade, { toValue: 1, duration: 300, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(slideX, { toValue: 0, duration: 300, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      ]).start();
     });
   };
 
-  const skip = async () => {
+  const done = async () => {
     await setIntroSeen();
     router.replace('/(auth)/welcome');
   };
 
-  const advance = async () => {
-    if (last) {
-      // No dedicated permissions page — location/notifications are requested
-      // inline exactly when they're needed (map screen, etc.).
-      await setIntroSeen();
-      router.replace('/(auth)/welcome');
-    } else {
-      transition(index + 1);
-    }
+  const advance = () => {
+    if (last) void done();
+    else transition(index + 1);
   };
 
   const slide = SLIDES[index];
@@ -62,19 +64,27 @@ export default function Intro() {
       <View style={s.glow} />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <View style={s.topBar}>
-          <Pressable onPress={skip} hitSlop={12}>
+          <Text style={s.brand}>رفيق</Text>
+          <Pressable onPress={done} hitSlop={12}>
             <Text style={s.skip}>{t('onboarding.skip')}</Text>
           </Pressable>
         </View>
 
-        <Animated.View style={[s.body, { opacity: fade }]}>
-          <View style={s.iconWrap}>
-            <Icon name={slide.icon} size={56} color={theme.colors.primary} />
+        {/* Hero panel */}
+        <Animated.View style={[s.hero, { opacity: fade, transform: [{ translateX: slideX }] }]}>
+          <View style={s.heroGlow} />
+          <View style={s.iconCircle}>
+            <Icon name={slide.icon} size={64} color={theme.colors.accent} />
           </View>
-          <Text style={s.title}>{t(slide.titleKey)}</Text>
-          <Text style={s.text}>{t(slide.bodyKey)}</Text>
         </Animated.View>
 
+        {/* Copy */}
+        <Animated.View style={[s.copy, { opacity: fade, transform: [{ translateX: slideX }] }]}>
+          <Text style={s.title}>{t(slide.titleKey)}</Text>
+          <Text style={s.body}>{t(slide.bodyKey)}</Text>
+        </Animated.View>
+
+        {/* Footer */}
         <View style={s.footer}>
           <View style={s.dots}>
             {SLIDES.map((_, i) => (
@@ -83,6 +93,7 @@ export default function Intro() {
           </View>
           <Pressable onPress={advance} style={({ pressed }) => [s.cta, pressed && s.pressed]}>
             <Text style={s.ctaText}>{last ? t('onboarding.getStarted') : t('common.next')}</Text>
+            <Icon name={last ? 'arrow-left' : 'chevron-left'} size={20} color={theme.colors.onPrimary} />
           </Pressable>
         </View>
       </SafeAreaView>
@@ -93,21 +104,34 @@ export default function Intro() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: t.colors.background, overflow: 'hidden' },
-    glow: { position: 'absolute', top: -120, right: -80, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.12 },
+    glow: { position: 'absolute', top: -140, right: -110, width: 360, height: 360, borderRadius: 180, backgroundColor: t.colors.accent, opacity: 0.09 },
     safe: { flex: 1, paddingHorizontal: t.spacing.lg },
-    topBar: { flexDirection: 'row-reverse', paddingTop: t.spacing.sm },
+
+    topBar: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingTop: t.spacing.sm },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text },
     skip: { fontFamily: t.fontFamily.semibold, fontSize: 15, color: t.colors.textSecondary },
 
-    body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: t.spacing.lg },
-    iconWrap: { width: 128, height: 128, borderRadius: 64, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.accent + '33' },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'center', paddingHorizontal: t.spacing.lg },
-    text: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 26, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 330 },
+    hero: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: t.spacing.base },
+    heroGlow: { position: 'absolute', width: 260, height: 260, borderRadius: 130, backgroundColor: t.colors.accentSoft },
+    iconCircle: {
+      width: 168,
+      height: 168,
+      borderRadius: 52,
+      backgroundColor: t.colors.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...t.shadow.lg,
+    },
+
+    copy: { alignItems: 'center', gap: t.spacing.md, paddingHorizontal: t.spacing.sm, marginBottom: t.spacing.xl },
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 28, color: t.colors.text, textAlign: 'center', lineHeight: 40 },
+    body: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 27, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 340 },
 
     footer: { paddingBottom: t.spacing.lg, gap: t.spacing.lg },
     dots: { flexDirection: 'row', alignSelf: 'center', gap: 7 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.border },
-    dotActive: { backgroundColor: t.colors.primary, width: 22 },
-    cta: { backgroundColor: t.colors.primary, height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center' },
+    dotActive: { backgroundColor: t.colors.accent, width: 26 },
+    cta: { flexDirection: 'row-reverse', gap: 8, backgroundColor: t.colors.primary, height: 56, borderRadius: t.radius.xl, alignItems: 'center', justifyContent: 'center', ...t.shadow.md },
     ctaText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onPrimary },
-    pressed: { opacity: 0.88 },
+    pressed: { opacity: 0.9, transform: [{ scale: 0.99 }] },
   });

@@ -1,89 +1,101 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
-import { palette, fontFamily } from '@rafeeq/shared';
+import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
 
 /**
- * Branded launch — Student. Calm, premium identity over the Amman map:
- * a glowing emblem with a slow orbit ring, the wordmark, and a soft
- * three-dot loader (replaces the old driving-car animation).
+ * Branded launch — Onyx. A calm, premium first impression:
+ * deep-ink canvas, a soft signature-blue aura behind a floating white emblem,
+ * the wordmark + tagline, and a single slim progress bar. No busy spinners.
+ * Self-contained (renders even if the theme provider is what failed to load).
  */
+
+// Onyx constants (kept local — must render without the theme provider).
+const INK = '#0A0D12';
+const INK_2 = '#12161D';
+const BLUE = '#2F6BFF';
+const BLUE_SOFT = 'rgba(47,107,255,0.28)';
+
 export function BrandSplash() {
-  const scale = useRef(new Animated.Value(0.8)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const spin = useRef(new Animated.Value(0)).current;
-  const pulse = useRef(new Animated.Value(0)).current;
-  const dots = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
+  const rise = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.86)).current;
+  const aura = useRef(new Animated.Value(0)).current;
+  const bar = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(scale, { toValue: 1, friction: 6, tension: 70, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.timing(rise, { toValue: 1, duration: 620, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.spring(scale, { toValue: 1, friction: 7, tension: 60, useNativeDriver: true }),
     ]).start();
-    Animated.loop(Animated.timing(spin, { toValue: 1, duration: 5000, easing: Easing.linear, useNativeDriver: true })).start();
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 1100, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 1100, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(aura, { toValue: 1, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(aura, { toValue: 0, duration: 1600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       ]),
     ).start();
-    dots.forEach((d, i) => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.delay(i * 180),
-          Animated.timing(d, { toValue: 1, duration: 420, useNativeDriver: true }),
-          Animated.timing(d, { toValue: 0, duration: 420, useNativeDriver: true }),
-          Animated.delay((2 - i) * 180),
-        ]),
-      ).start();
-    });
+    Animated.loop(
+      Animated.timing(bar, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.ease), useNativeDriver: false }),
+    ).start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
-  const glow = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.6] });
-  const glowScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.18] });
+  const translateY = rise.interpolate({ inputRange: [0, 1], outputRange: [24, 0] });
+  const auraOpacity = aura.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.75] });
+  const auraScale = aura.interpolate({ inputRange: [0, 1], outputRange: [1, 1.25] });
+  const barWidth = bar.interpolate({ inputRange: [0, 1], outputRange: ['8%', '92%'] });
+  const barX = bar.interpolate({ inputRange: [0, 1], outputRange: [-40, 220] });
 
   return (
-    <ImageBackground source={require('../../assets/splash-map.jpg')} style={styles.container} resizeMode="cover">
-      <View style={styles.scrim} pointerEvents="none" />
+    <View style={styles.container}>
+      {/* Layered ink backdrop */}
+      <View style={styles.bgTop} />
+      <View style={styles.bgBottom} />
 
-      <Animated.View style={{ opacity, transform: [{ scale }], alignItems: 'center' }}>
+      <Animated.View style={{ opacity: rise, transform: [{ translateY }], alignItems: 'center' }}>
         <View style={styles.emblemWrap}>
-          <Animated.View style={[styles.glow, { opacity: glow, transform: [{ scale: glowScale }] }]} />
-          <Animated.View style={[styles.ring, { transform: [{ rotate }] }]} />
-          <View style={styles.emblem}>
+          <Animated.View style={[styles.aura, { opacity: auraOpacity, transform: [{ scale: auraScale }] }]} />
+          <Animated.View style={[styles.emblem, { transform: [{ scale }] }]}>
             <Image source={require('../../assets/r-logo.png')} style={styles.logoImg} resizeMode="contain" />
-          </View>
+          </Animated.View>
         </View>
 
-        <Text style={styles.word}>Rafeeq</Text>
+        <Text style={styles.word}>رفيق</Text>
+        <Text style={styles.sub}>Rafeeq</Text>
         <Text style={styles.tag}>النقل والخدمات الجامعية الذكية</Text>
-
-        <View style={styles.dots}>
-          {dots.map((d, i) => (
-            <Animated.View
-              key={i}
-              style={[styles.dot, { opacity: d.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }), transform: [{ scale: d.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.25] }) }] }]}
-            />
-          ))}
-        </View>
       </Animated.View>
-    </ImageBackground>
+
+      {/* Slim indeterminate progress */}
+      <View style={styles.track}>
+        <Animated.View style={[styles.fill, { width: barWidth, transform: [{ translateX: barX }] }]} />
+      </View>
+    </View>
   );
 }
 
-const GOLD = palette.gold;
-
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.primary },
-  scrim: { ...StyleSheet.absoluteFill, backgroundColor: palette.primary, opacity: 0.5 },
-  emblemWrap: { width: 132, height: 132, alignItems: 'center', justifyContent: 'center', marginBottom: 26 },
-  glow: { position: 'absolute', width: 132, height: 132, borderRadius: 66, backgroundColor: GOLD },
-  ring: { position: 'absolute', width: 122, height: 122, borderRadius: 61, borderWidth: 2.5, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
-  emblem: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 12, shadowOffset: { width: 0, height: 6 } },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: INK },
+  bgTop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK_2, opacity: 0.55 },
+  bgBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', backgroundColor: INK },
+
+  emblemWrap: { width: 148, height: 148, alignItems: 'center', justifyContent: 'center', marginBottom: 30 },
+  aura: { position: 'absolute', width: 148, height: 148, borderRadius: 74, backgroundColor: BLUE_SOFT },
+  emblem: {
+    width: 100,
+    height: 100,
+    borderRadius: 30,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: BLUE,
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 16,
+  },
   logoImg: { width: 66, height: 66 },
-  word: { fontFamily: fontFamily.extrabold, fontSize: 38, color: '#FFFFFF', textAlign: 'center', letterSpacing: 1 },
-  tag: { fontFamily: fontFamily.medium, fontSize: 13.5, color: 'rgba(255,255,255,0.82)', marginTop: 6, textAlign: 'center' },
-  dots: { flexDirection: 'row', gap: 8, marginTop: 28 },
-  dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: GOLD },
+
+  word: { fontFamily: 'Cairo_800ExtraBold', fontSize: 40, color: '#FFFFFF', letterSpacing: 0.5 },
+  sub: { fontFamily: 'Cairo_700Bold', fontSize: 15, color: BLUE, letterSpacing: 4, marginTop: 2 },
+  tag: { fontFamily: 'Cairo_500Medium', fontSize: 13.5, color: 'rgba(255,255,255,0.6)', marginTop: 12, textAlign: 'center' },
+
+  track: { position: 'absolute', bottom: 70, width: 200, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' },
+  fill: { height: 4, borderRadius: 2, backgroundColor: BLUE },
 });
