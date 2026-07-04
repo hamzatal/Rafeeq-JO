@@ -197,7 +197,7 @@ const makeStyles = (t: AppTheme) =>
     prefBorder: { borderBottomWidth: 1, borderBottomColor: t.colors.border },
     prefLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text },
     groupLabel: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.sm, marginBottom: t.spacing.sm },
-    item: { flexDirection: 'row-reverse', alignItems: 'flex-start', backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
+    item: { flexDirection: 'row-reverse', alignItems: 'flex-start', backgroundColor: t.colors.card, borderRadius: t.radius.xl, padding: t.spacing.base, marginBottom: t.spacing.sm, ...t.shadow.sm },
     unread: { borderColor: t.colors.primary, backgroundColor: t.colors.primarySoft },
     iconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: t.colors.background, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     iconWrapUnread: { backgroundColor: t.colors.surface },

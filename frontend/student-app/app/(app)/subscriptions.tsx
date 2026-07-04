@@ -138,7 +138,7 @@ const makeStyles = (t: AppTheme) =>
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
 
     // Active premium subscription card
-    premium: { backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.md },
+    premium: { backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.lg },
     premiumTop: { flexDirection: 'row-reverse', alignItems: 'flex-start', marginBottom: t.spacing.md },
     activePill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, alignSelf: 'flex-end', backgroundColor: t.colors.accent, paddingHorizontal: 10, paddingVertical: 3, borderRadius: t.radius.full, marginBottom: 8 },
     warnPill: { backgroundColor: t.colors.warning },
@@ -152,7 +152,7 @@ const makeStyles = (t: AppTheme) =>
     pDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.12)', marginHorizontal: t.spacing.md },
 
     // Available plan card
-    planCard: { flexDirection: 'row-reverse', backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, overflow: 'hidden', marginBottom: t.spacing.base, ...t.shadow.sm },
+    planCard: { flexDirection: 'row-reverse', backgroundColor: t.colors.card, borderRadius: t.radius['2xl'], overflow: 'hidden', marginBottom: t.spacing.base, ...t.shadow.md },
     planAccent: { width: 5, backgroundColor: t.colors.accent },
     planBody: { flex: 1, padding: t.spacing.base },
     planHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm },

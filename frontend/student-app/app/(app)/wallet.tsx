@@ -283,7 +283,7 @@ const makeStyles = (t: AppTheme) =>
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
 
-    walletCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, overflow: 'hidden', marginBottom: t.spacing.md, ...t.shadow.md },
+    walletCard: { backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, overflow: 'hidden', marginBottom: t.spacing.md, ...t.shadow.lg },
     glow: { position: 'absolute', top: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: t.colors.accent, opacity: 0.14 },
     walletTop: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.lg },
     brandChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, backgroundColor: t.colors.accent, paddingHorizontal: 10, paddingVertical: 4, borderRadius: t.radius.full },
@@ -308,7 +308,7 @@ const makeStyles = (t: AppTheme) =>
     rowLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
     rowValue: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text },
 
-    txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.md, marginBottom: t.spacing.sm },
+    txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.xl, padding: t.spacing.base, marginBottom: t.spacing.sm, ...t.shadow.sm },
     txnIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     txnBody: { flex: 1 },
     txnType: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
