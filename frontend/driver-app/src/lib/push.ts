@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { api } from './api';
 
 /**
@@ -18,6 +19,9 @@ let handlerSet = false;
 /** Lazily load expo-notifications; returns null on web / Expo Go / any failure. */
 async function loadNotifications(): Promise<any | null> {
   if (Platform.OS === 'web') return null;
+  // Expo Go (SDK 53+) removed remote push and throws on import — don't even
+  // load the module there, so no dev-overlay error ever shows.
+  if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) return null;
   try {
     return await import('expo-notifications');
   } catch {
