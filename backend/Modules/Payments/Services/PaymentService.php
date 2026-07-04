@@ -3,9 +3,7 @@
 namespace Rafeeq\Modules\Payments\Services;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
@@ -453,23 +451,34 @@ class PaymentService extends BaseService
         }
     }
 
-    /** Generates a per-year incrementing reference: RFQ-YYYY-#####. */
+    /**
+     * Generate an UNPREDICTABLE, high-entropy payment reference: RFQ-XXXX-XXXX.
+     *
+     * Security: a sequential number (…-00002, …-00003) is trivially guessable, so
+     * an attacker could predict/forge references. We instead draw each character
+     * from a CSPRNG (`random_int`) over an unambiguous alphabet (no 0/O/1/I/L so
+     * payers can type it correctly) → 32^8 ≈ 1.1 trillion combinations. We retry
+     * on the (astronomically rare) collision so the value stays unique.
+     */
     private function generateNumber(): string
     {
-        $year = now()->format('Y');
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 32 chars, no look-alikes
+        $max = strlen($alphabet) - 1;
 
-        return DB::transaction(function () use ($year) {
-            $prefix = "RFQ-{$year}-";
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $token = '';
+            for ($i = 0; $i < 8; $i++) {
+                $token .= $alphabet[random_int(0, $max)];
+            }
+            $number = 'RFQ-'.substr($token, 0, 4).'-'.substr($token, 4, 4);
 
-            $last = PaymentRequest::where('number', 'like', $prefix.'%')
-                ->lockForUpdate()
-                ->orderByDesc('number')
-                ->value('number');
+            if (! PaymentRequest::where('number', $number)->exists()) {
+                return $number;
+            }
+        }
 
-            $seq = $last ? ((int) Str::afterLast($last, '-')) + 1 : 1;
-
-            return $prefix.str_pad((string) $seq, 5, '0', STR_PAD_LEFT);
-        });
+        // Fallback (never realistically reached): extra entropy from random_bytes.
+        return 'RFQ-'.strtoupper(bin2hex(random_bytes(6)));
     }
 
     /** Returns a URL the vision model can read; temporary URL or data URI. */

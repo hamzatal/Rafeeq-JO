@@ -1,18 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
 
 /**
- * Branded launch — Onyx. A calm, premium first impression:
- * deep-ink canvas, a soft signature-blue aura behind a floating white emblem,
- * the wordmark + tagline, and a single slim progress bar. No busy spinners.
+ * Branded launch — Onyx over the Amman map. A premium first impression:
+ * the city map darkened under a deep-ink scrim, a floating white emblem with a
+ * pulsing signature-blue aura, the wordmark + tagline, and a slim progress bar.
  * Self-contained (renders even if the theme provider is what failed to load).
  */
 
-// Onyx constants (kept local — must render without the theme provider).
 const INK = '#0A0D12';
-const INK_2 = '#12161D';
 const BLUE = '#2F6BFF';
-const BLUE_SOFT = 'rgba(47,107,255,0.28)';
+const BLUE_SOFT = 'rgba(47,107,255,0.30)';
 
 export function BrandSplash() {
   const rise = useRef(new Animated.Value(0)).current;
@@ -38,16 +36,16 @@ export function BrandSplash() {
   }, []);
 
   const translateY = rise.interpolate({ inputRange: [0, 1], outputRange: [24, 0] });
-  const auraOpacity = aura.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.75] });
+  const auraOpacity = aura.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.78] });
   const auraScale = aura.interpolate({ inputRange: [0, 1], outputRange: [1, 1.25] });
   const barWidth = bar.interpolate({ inputRange: [0, 1], outputRange: ['8%', '92%'] });
   const barX = bar.interpolate({ inputRange: [0, 1], outputRange: [-40, 220] });
 
   return (
-    <View style={styles.container}>
-      {/* Layered ink backdrop */}
-      <View style={styles.bgTop} />
-      <View style={styles.bgBottom} />
+    <ImageBackground source={require('../../assets/splash-map.jpg')} style={styles.container} resizeMode="cover">
+      {/* Deep-ink scrim (darker than before → more premium) + bottom fade */}
+      <View style={styles.scrim} pointerEvents="none" />
+      <View style={styles.scrimBottom} pointerEvents="none" />
 
       <Animated.View style={{ opacity: rise, transform: [{ translateY }], alignItems: 'center' }}>
         <View style={styles.emblemWrap}>
@@ -62,18 +60,17 @@ export function BrandSplash() {
         <Text style={styles.tag}>النقل والخدمات الجامعية الذكية</Text>
       </Animated.View>
 
-      {/* Slim indeterminate progress */}
       <View style={styles.track}>
         <Animated.View style={[styles.fill, { width: barWidth, transform: [{ translateX: barX }] }]} />
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: INK },
-  bgTop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK_2, opacity: 0.55 },
-  bgBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', backgroundColor: INK },
+  scrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: INK, opacity: 0.82 },
+  scrimBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%', backgroundColor: INK, opacity: 0.4 },
 
   emblemWrap: { width: 148, height: 148, alignItems: 'center', justifyContent: 'center', marginBottom: 30 },
   aura: { position: 'absolute', width: 148, height: 148, borderRadius: 74, backgroundColor: BLUE_SOFT },
@@ -94,8 +91,8 @@ const styles = StyleSheet.create({
 
   word: { fontFamily: 'Cairo_800ExtraBold', fontSize: 40, color: '#FFFFFF', letterSpacing: 0.5 },
   sub: { fontFamily: 'Cairo_700Bold', fontSize: 15, color: BLUE, letterSpacing: 4, marginTop: 2 },
-  tag: { fontFamily: 'Cairo_500Medium', fontSize: 13.5, color: 'rgba(255,255,255,0.6)', marginTop: 12, textAlign: 'center' },
+  tag: { fontFamily: 'Cairo_500Medium', fontSize: 13.5, color: 'rgba(255,255,255,0.65)', marginTop: 12, textAlign: 'center' },
 
-  track: { position: 'absolute', bottom: 70, width: 200, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' },
+  track: { position: 'absolute', bottom: 70, width: 200, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden' },
   fill: { height: 4, borderRadius: 2, backgroundColor: BLUE },
 });
