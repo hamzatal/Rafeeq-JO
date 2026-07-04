@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#141B2E"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "jo.rafeeq.student"
@@ -41,7 +43,10 @@
         {
           "color": "#E7A63A"
         }
-      ]
+      ],
+      "expo-sharing",
+      "expo-splash-screen",
+      "expo-status-bar"
     ],
     "extra": {
       "apiUrl": "http://localhost:8000",

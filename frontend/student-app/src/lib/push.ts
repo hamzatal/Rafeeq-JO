@@ -22,6 +22,9 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    // SDK 52+ split the foreground alert into banner + list.
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -50,7 +53,7 @@ async function ensureAndroidChannels(): Promise<void> {
       importance: c.importance,
       sound: 'default',
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#E7A63A',
+      lightColor: '#2F6BFF',
       enableVibrate: true,
     });
   }

@@ -1,5 +1,6 @@
 import { Redirect, Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import type { ColorValue } from 'react-native';
 import { useAuth } from '../../src/store/auth';
 import { useI18n } from '../../src/i18n';
 import { TabBar } from '../../src/components/TabBar';
@@ -15,7 +16,7 @@ export default function AppLayout() {
   }
 
   const tab = (name: keyof typeof Feather.glyphMap) =>
-    ({ color, size }: { color: string; size: number }) => <Feather name={name} size={size} color={color} />;
+    ({ color, size }: { color: ColorValue; size: number }) => <Feather name={name} size={size} color={color} />;
 
   // Work tabs (offers / trips / earnings) are useless until the account is
   // approved. Hide them for pending captains so they only see "complete your

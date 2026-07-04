@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#141B2E"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "jo.rafeeq.driver"
@@ -26,7 +28,22 @@
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker", ["expo-notifications", { "color": "#E7A63A" }]],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      "expo-image-picker",
+      "expo-document-picker",
+      [
+        "expo-notifications",
+        {
+          "color": "#E7A63A"
+        }
+      ],
+      "expo-sharing",
+      "expo-splash-screen",
+      "expo-status-bar"
+    ],
     "extra": {
       "apiUrl": "http://localhost:8000"
     }

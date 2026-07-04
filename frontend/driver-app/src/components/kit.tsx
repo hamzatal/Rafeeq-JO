@@ -234,7 +234,7 @@ const makeStyles = (t: AppTheme) =>
     kvValue: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.text, textAlign: 'left' },
     kvValueStrong: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
 
-    sheetBackdrop: { ...StyleSheet.absoluteFillObject },
+    sheetBackdrop: { ...StyleSheet.absoluteFill },
     sheet: {
       position: 'absolute',
       left: 0,

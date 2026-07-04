@@ -478,7 +478,7 @@ const makeStyles = (t: AppTheme) =>
       backgroundColor: t.colors.primarySoft,
     },
     mapLoading: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: t.colors.primarySoft,

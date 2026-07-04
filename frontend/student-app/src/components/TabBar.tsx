@@ -1,7 +1,25 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTheme, type AppTheme } from '../theme';
+
+/**
+ * Structural tab-bar props — decoupled from the navigation library, whose
+ * internals changed across Expo Router versions. Matches the runtime shape
+ * Expo Router's <Tabs tabBar={...}> passes.
+ */
+type TabIcon = (p: { focused: boolean; color: string; size: number }) => ReactNode;
+interface TabBarProps {
+  state: { index: number; routes: { key: string; name: string }[] };
+  descriptors: Record<
+    string,
+    { options: { title?: string; tabBarIcon?: TabIcon; tabBarBadge?: number | string } }
+  >;
+  navigation: {
+    emit: (event: { type: 'tabPress'; target: string; canPreventDefault: true }) => { defaultPrevented: boolean };
+    navigate: (name: string) => void;
+  };
+}
 
 /**
  * Onyx bottom bar (DS v7).
@@ -10,7 +28,7 @@ import { useTheme, type AppTheme } from '../theme';
  * badges (red circle + count) surface actionable items — set via the route's
  * `tabBarBadge` option.
  */
-export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+export function TabBar({ state, descriptors, navigation }: TabBarProps) {
   const t = useTheme();
   const insets = useSafeAreaInsets();
   const s = makeStyles(t);

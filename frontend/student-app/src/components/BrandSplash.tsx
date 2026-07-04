@@ -76,7 +76,7 @@ const GOLD = palette.gold;
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.primary },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.primary, opacity: 0.5 },
+  scrim: { ...StyleSheet.absoluteFill, backgroundColor: palette.primary, opacity: 0.5 },
   emblemWrap: { width: 132, height: 132, alignItems: 'center', justifyContent: 'center', marginBottom: 26 },
   glow: { position: 'absolute', width: 132, height: 132, borderRadius: 66, backgroundColor: GOLD },
   ring: { position: 'absolute', width: 122, height: 122, borderRadius: 61, borderWidth: 2.5, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
