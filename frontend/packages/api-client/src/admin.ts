@@ -279,6 +279,45 @@ export class AdminApi {
     const res = await this.http.get(ENDPOINTS.admin.reportsFinancialExport, { params, responseType: 'blob' });
     return res.data as Blob;
   }
+
+  // ── Command center: pending-action counts (sidebar red badges) ───
+  async pendingCounts(): Promise<PendingCounts> {
+    const { data } = await this.http.get<ApiSuccess<PendingCounts>>(ENDPOINTS.admin.overviewPendingCounts);
+    return unwrap(data);
+  }
+
+  // ── Command center: newest-first "what's new" activity feed ──────
+  async activity(limit = 12): Promise<ActivityItem[]> {
+    const { data } = await this.http.get<ApiSuccess<ActivityItem[]>>(ENDPOINTS.admin.overviewActivity, {
+      params: { limit },
+    });
+    return unwrap(data);
+  }
+}
+
+/** Counts of items awaiting an admin action (keys map to sidebar routes). */
+export interface PendingCounts {
+  drivers_pending: number;
+  payments_pending: number;
+  withdrawals_pending: number;
+  complaints_open: number;
+  disputes_open: number;
+  support_open: number;
+  sos_active: number;
+}
+
+export type ActivityType =
+  | 'driver_pending'
+  | 'payment_pending'
+  | 'withdrawal_pending'
+  | 'complaint_open'
+  | 'sos_active';
+
+export interface ActivityItem {
+  type: ActivityType;
+  id: string;
+  at: string | null;
+  href: string;
 }
 
 export interface CliqSettings {

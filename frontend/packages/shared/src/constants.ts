@@ -224,6 +224,8 @@ export const ENDPOINTS = {
     notifyAudience: '/admin/notifications/audience',
     reportsFinancial: '/admin/reports/financial',
     reportsFinancialExport: '/admin/reports/financial/export',
+    overviewPendingCounts: '/admin/overview/pending-counts',
+    overviewActivity: '/admin/overview/activity',
     auditLogs: '/admin/audit-logs',
     auditLogActions: '/admin/audit-logs/actions',
     auditLogsExport: '/admin/audit-logs/export',

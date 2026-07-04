@@ -32,10 +32,10 @@ const makeStyles = (t: AppTheme) =>
     label: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.text, marginBottom: 7, textAlign: 'right' },
     labelDark: { color: 'rgba(255,255,255,0.85)' },
     input: {
-      height: 54,
+      height: 56,
       borderWidth: 1,
       borderColor: t.colors.border,
-      borderRadius: t.radius.lg,
+      borderRadius: t.radius.xl,
       paddingHorizontal: t.spacing.base,
       fontFamily: t.fontFamily.medium,
       fontSize: 16,

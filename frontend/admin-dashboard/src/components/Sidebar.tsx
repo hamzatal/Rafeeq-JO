@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../lib/auth';
 import { useT } from '../lib/i18n';
+import { usePending, ROUTE_BADGE } from '../lib/pending';
 import { LogoMark } from './Logo';
 
 interface NavLink {
@@ -103,6 +104,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t } = useT();
+  const { counts } = usePending();
 
   const isAdmin = (user?.roles ?? []).includes('admin');
   // Hide admin-only links from non-admin staff.
@@ -132,6 +134,8 @@ export function Sidebar() {
             {g.links.map((l) => {
               if (adminOnly.has(l.href) && !isAdmin) return null;
               const active = isActive(l.href);
+              const badgeKey = ROUTE_BADGE[l.href];
+              const count = badgeKey ? counts[badgeKey] : 0;
               return (
                 <Link
                   key={l.href}
@@ -143,6 +147,14 @@ export function Sidebar() {
                     {l.icon}
                   </span>
                   <span className="truncate">{t(l.labelKey)}</span>
+                  {count > 0 ? (
+                    <span
+                      className="ms-auto shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-danger text-white text-[11px] font-extrabold flex items-center justify-center leading-none shadow-sm"
+                      aria-label={`${count}`}
+                    >
+                      {count > 99 ? '99+' : count}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}
