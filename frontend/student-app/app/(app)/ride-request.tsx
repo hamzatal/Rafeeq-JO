@@ -5,8 +5,8 @@ import type { FareQuote, RideDirection, RideRequest, RideType, University } from
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Button } from '../../src/components/Button';
 import { Input } from '../../src/components/Input';
-import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
-import { Skeleton } from '../../src/components/kit';
+import { EmptyState, SectionTitle, Badge } from '../../src/components/ui';
+import { Skeleton, SegmentedControl } from '../../src/components/kit';
 import { Icon } from '../../src/components/Icon';
 import { LiveMap } from '../../src/components/LiveMap';
 import { useToast, useConfirm } from '../../src/components/Feedback';
@@ -70,6 +70,12 @@ export default function RideRequestScreen() {
     void useMyLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-estimate the fare whenever the ride type changes (modern, no extra tap).
+  useEffect(() => {
+    void estimate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
 
   const useMyLocation = async () => {
     setLocating(true);
@@ -154,109 +160,118 @@ export default function RideRequestScreen() {
     ...(hasDest ? [{ lat: uni!.lat!, lng: uni!.lng!, kind: 'destination' as const, label: locale === 'ar' ? uni!.name_ar : uni!.name_en }] : []),
   ];
   const route = hasPickup && hasDest ? [{ lat: lat!, lng: lng! }, { lat: uni!.lat!, lng: uni!.lng! }] : undefined;
+  const uniName = (u: University) => (locale === 'ar' ? u.name_ar : u.name_en);
+  const fareJod = quote ? (quote.fare_fils / 1000).toFixed(3) : null;
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Text style={s.h1}>{t('rideRequest.title')}</Text>
 
-        <SectionTitle title={t('rideRequest.university')} />
-        <View style={s.chips}>
-          {universities.map((u) => (
-            <Pressable key={u.id} onPress={() => setUniversityId(u.id)} style={[s.chip, universityId === u.id && s.chipActive]}>
-              <Text style={[s.chipText, universityId === u.id && s.chipTextActive]}>{locale === 'ar' ? u.name_ar : u.name_en}</Text>
-            </Pressable>
-          ))}
+        {/* Map — prominent, map-first */}
+        <View style={s.mapCard}>
+          <LiveMap
+            points={pts.length ? pts : [{ lat: uni?.lat ?? 32.5556, lng: uni?.lng ?? 35.85, kind: 'destination' }]}
+            route={route}
+            height={230}
+            onPick={(p) => {
+              setLat(Number(p.lat.toFixed(6)));
+              setLng(Number(p.lng.toFixed(6)));
+            }}
+          />
         </View>
 
-        <SectionTitle title={t('rideRequest.pickup')} />
-        <Card>
-          {/* Location status + set button */}
-          <View style={s.pickupHead}>
-            <View style={s.pickupStatus}>
-              <Icon name={hasPickup ? 'check-circle' : 'map-pin'} size={16} color={hasPickup ? theme.colors.success : theme.colors.muted} />
-              <Text style={[s.pickupText, hasPickup && { color: theme.colors.success }]}>
+        {/* Trip card — destination (university) + pickup, Uber-style stacked rows */}
+        <View style={s.tripCard}>
+          <View style={s.tripRow}>
+            <View style={[s.dot, { backgroundColor: theme.colors.success }]} />
+            <View style={{ flex: 1 }}>
+              <Text style={s.tripLabel}>{t('rideRequest.university')}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.uniRow}>
+                {universities.map((u) => {
+                  const on = universityId === u.id;
+                  return (
+                    <Pressable key={u.id} onPress={() => setUniversityId(u.id)} style={[s.uniPill, on && s.uniPillOn]}>
+                      <Text style={[s.uniPillText, on && s.uniPillTextOn]} numberOfLines={1}>{uniName(u)}</Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+
+          <View style={s.tripConnector} />
+
+          <View style={s.tripRow}>
+            <View style={[s.dot, { backgroundColor: theme.colors.warning }]} />
+            <View style={{ flex: 1 }}>
+              <View style={s.pickupHead}>
+                <Text style={s.tripLabel}>{t('rideRequest.pickup')}</Text>
+                <Pressable onPress={useMyLocation} style={s.locBtn} disabled={locating} hitSlop={6}>
+                  <Icon name="crosshair" size={14} color={theme.colors.accent} />
+                  <Text style={s.locText}>{locating ? '...' : t('rideRequest.useMyLocation')}</Text>
+                </Pressable>
+              </View>
+              <Text style={[s.pickupText, hasPickup && { color: theme.colors.success }]} numberOfLines={1}>
                 {hasPickup ? t('rideRequest.locationSet') : t('rideRequest.tapMapHint')}
               </Text>
             </View>
-            <Pressable onPress={useMyLocation} style={s.locBtn} disabled={locating}>
-              <Icon name="crosshair" size={15} color={theme.colors.primary} />
-              <Text style={s.locText}>{locating ? '...' : t('rideRequest.useMyLocation')}</Text>
-            </Pressable>
           </View>
-          <View style={s.mapBox}>
-            <LiveMap
-              points={pts.length ? pts : [{ lat: uni?.lat ?? 32.5556, lng: uni?.lng ?? 35.85, kind: 'destination' }]}
-              route={route}
-              height={200}
-              onPick={(p) => {
-                setLat(Number(p.lat.toFixed(6)));
-                setLng(Number(p.lng.toFixed(6)));
-              }}
-            />
-          </View>
-          <Input label={t('rideRequest.address')} value={address} onChangeText={setAddress} placeholder={t('rideRequest.addressHint')} />
-        </Card>
 
-        {/* Direction (round-trip support) */}
-        <SectionTitle title={t('rideRequest.direction')} />
-        <View style={s.typeRow}>
-          <Pressable onPress={() => setDirection('to_university')} style={[s.typeChip, direction === 'to_university' && s.chipActive]}>
-            <Icon name="log-in" size={16} color={direction === 'to_university' ? theme.colors.primary : theme.colors.textSecondary} />
-            <Text style={[s.chipText, direction === 'to_university' && s.chipTextActive]}>{t('rideRequest.toUniversity')}</Text>
-          </Pressable>
-          <Pressable onPress={() => setDirection('from_university')} style={[s.typeChip, direction === 'from_university' && s.chipActive]}>
-            <Icon name="log-out" size={16} color={direction === 'from_university' ? theme.colors.primary : theme.colors.textSecondary} />
-            <Text style={[s.chipText, direction === 'from_university' && s.chipTextActive]}>{t('rideRequest.fromUniversity')}</Text>
-          </Pressable>
+          <Input value={address} onChangeText={setAddress} placeholder={t('rideRequest.addressHint')} />
         </View>
 
-        {/* Ride type */}
-        <View style={s.typeRow}>
-          <Pressable onPress={() => setType('scheduled')} style={[s.typeChip, type === 'scheduled' && s.chipActive]}>
-            <Icon name="calendar" size={16} color={type === 'scheduled' ? theme.colors.primary : theme.colors.textSecondary} />
-            <Text style={[s.chipText, type === 'scheduled' && s.chipTextActive]}>{t('rideRequest.typeScheduled')}</Text>
-          </Pressable>
-          <Pressable onPress={() => setType('express')} style={[s.typeChip, type === 'express' && s.chipActive]}>
-            <Icon name="zap" size={16} color={type === 'express' ? theme.colors.primary : theme.colors.textSecondary} />
-            <Text style={[s.chipText, type === 'express' && s.chipTextActive]}>{t('rideRequest.typeExpress')}</Text>
-          </Pressable>
-        </View>
+        {/* Direction + ride type — segmented (clean, mutually exclusive) */}
+        <Text style={s.section}>{t('rideRequest.direction')}</Text>
+        <SegmentedControl<RideDirection>
+          value={direction}
+          onChange={setDirection}
+          options={[
+            { value: 'to_university', label: t('rideRequest.toUniversity') },
+            { value: 'from_university', label: t('rideRequest.fromUniversity') },
+          ]}
+        />
 
-        <Pressable onPress={estimate} style={s.estimateBtn}>
-          <Icon name="dollar-sign" size={15} color={theme.colors.primary} />
-          <Text style={s.locText}>{t('rideRequest.estimate')}</Text>
-        </Pressable>
-        {quote && (
-          <Card style={{ borderColor: theme.colors.accent, borderWidth: 1.5 }}>
-            <View style={s.row}>
-              <Text style={s.quoteText}>{t('rideRequest.estimatedFare')}</Text>
-              <Text style={s.quoteVal}>{(quote.fare_fils / 1000).toFixed(3)} {t('subscriptions.currency')}</Text>
-            </View>
-            <Text style={s.meta}>{t('rideRequest.surge')}: ×{quote.surge_multiplier}</Text>
-          </Card>
-        )}
+        <Text style={s.section}>{t('rideRequest.type')}</Text>
+        <SegmentedControl<RideType>
+          value={type}
+          onChange={setType}
+          options={[
+            { value: 'scheduled', label: t('rideRequest.typeScheduled') },
+            { value: 'express', label: t('rideRequest.typeExpress') },
+          ]}
+        />
+
+        {/* Fare — auto-estimated, shown inline on an ink hero */}
+        <View style={s.fareCard}>
+          <View>
+            <Text style={s.fareLabel}>{t('rideRequest.estimatedFare')}</Text>
+            {quote ? (
+              <Text style={s.fareMeta}>{t('rideRequest.surge')}: ×{quote.surge_multiplier}</Text>
+            ) : (
+              <Text style={s.fareMeta}>—</Text>
+            )}
+          </View>
+          <Text style={s.fareVal}>{fareJod ? `${fareJod} ${t('subscriptions.currency')}` : '—'}</Text>
+        </View>
 
         {/* Coupon */}
-        <Card style={{ marginTop: theme.spacing.base }}>
-          <SectionTitle title={t('payments.couponLabel')} />
-          <View style={s.couponRow}>
-            <View style={s.couponInput}>
-              <Input label="" value={coupon} onChangeText={setCoupon} placeholder={t('payments.couponPlaceholder')} autoCapitalize="characters" />
-            </View>
-            <Pressable onPress={applyCoupon} style={s.couponApply}>
-              <Text style={s.locText}>{t('payments.couponApply')}</Text>
-            </Pressable>
+        <View style={s.couponCard}>
+          <View style={s.couponInput}>
+            <Input value={coupon} onChangeText={setCoupon} placeholder={t('payments.couponPlaceholder')} autoCapitalize="characters" />
           </View>
-        </Card>
+          <Pressable onPress={applyCoupon} style={s.couponApply} hitSlop={6}>
+            <Text style={s.couponApplyText}>{t('payments.couponApply')}</Text>
+          </Pressable>
+        </View>
 
         <Button title={t('rideRequest.submit')} icon="navigation" onPress={submit} loading={busy} style={s.submit} />
 
-        {/* My requests + cancel */}
+        {/* My requests */}
         <SectionTitle title={t('rideRequest.myRequests')} />
         {loadingMine ? (
           <View style={{ gap: theme.spacing.sm }}>
-            {[0, 1].map((i) => <Skeleton key={i} width="100%" height={72} radius={theme.radius.lg} />)}
+            {[0, 1].map((i) => <Skeleton key={i} width="100%" height={72} radius={theme.radius.xl} />)}
           </View>
         ) : mine.length === 0 ? (
           <EmptyState icon="navigation" title={t('rideRequest.none')} />
@@ -264,7 +279,7 @@ export default function RideRequestScreen() {
           mine.map((r) => {
             const active = ACTIVE.includes(r.status);
             return (
-              <Card key={r.id}>
+              <View key={r.id} style={s.reqCard}>
                 <View style={s.row}>
                   <Text style={s.cardTitle}>{r.zone ? (locale === 'ar' ? r.zone.name_ar : r.zone.name_en) : '—'}</Text>
                   <Badge label={r.status_label} tone={active ? 'primary' : r.status === 'completed' ? 'success' : 'muted'} />
@@ -276,7 +291,7 @@ export default function RideRequestScreen() {
                     <Text style={s.cancelText}>{cancelling === r.id ? '...' : t('rideRequest.cancel')}</Text>
                   </Pressable>
                 )}
-              </Card>
+              </View>
             );
           })
         )}
@@ -290,31 +305,43 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     h1: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
-    chips: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.sm },
-    chip: { paddingHorizontal: t.spacing.base, paddingVertical: 8, borderRadius: t.radius.md, borderWidth: 1, borderColor: t.colors.border, backgroundColor: t.colors.surface },
-    chipActive: { borderColor: t.colors.primary, backgroundColor: t.colors.primarySoft },
-    chipText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.text },
-    chipTextActive: { color: t.colors.primary, fontFamily: t.fontFamily.bold },
 
-    pickupHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm },
-    pickupStatus: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, flex: 1 },
-    pickupText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
-    locBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 7, paddingHorizontal: 12 },
-    locText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.primary },
-    mapBox: { borderRadius: t.radius.md, overflow: 'hidden', marginBottom: t.spacing.sm },
+    mapCard: { borderRadius: t.radius['2xl'], overflow: 'hidden', marginBottom: t.spacing.base, ...t.shadow.md },
 
-    typeRow: { flexDirection: 'row-reverse', gap: t.spacing.sm, marginTop: t.spacing.base },
-    typeChip: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: t.radius.md, borderWidth: 1, borderColor: t.colors.border, backgroundColor: t.colors.surface },
-    estimateBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 12, marginTop: t.spacing.base, marginBottom: t.spacing.sm },
-    quoteText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
-    quoteVal: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.primary },
-    submit: { marginTop: t.spacing.base },
-    couponRow: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: t.spacing.sm },
+    tripCard: { backgroundColor: t.colors.card, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.sm },
+    tripRow: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md },
+    dot: { width: 12, height: 12, borderRadius: 6, marginTop: 6 },
+    tripConnector: { width: 2, height: 18, backgroundColor: t.colors.border, marginRight: 5, marginVertical: 4 },
+    tripLabel: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
+    uniRow: { flexDirection: 'row-reverse', gap: t.spacing.sm, paddingTop: t.spacing.sm },
+    uniPill: { paddingHorizontal: t.spacing.base, paddingVertical: 9, borderRadius: t.radius.full, backgroundColor: t.colors.background },
+    uniPillOn: { backgroundColor: t.colors.primary },
+    uniPillText: { fontFamily: t.fontFamily.semibold, fontSize: 13, color: t.colors.text, maxWidth: 180 },
+    uniPillTextOn: { color: t.colors.onPrimary },
+
+    pickupHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+    pickupText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2, marginBottom: t.spacing.sm },
+    locBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5 },
+    locText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.accent },
+
+    section: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.base, marginBottom: t.spacing.sm },
+
+    fareCard: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginTop: t.spacing.base, ...t.shadow.md },
+    fareLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onPrimary, opacity: 0.85, textAlign: 'right' },
+    fareMeta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.onPrimary, opacity: 0.7, textAlign: 'right', marginTop: 2 },
+    fareVal: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.onPrimary },
+
+    couponCard: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: t.spacing.sm, backgroundColor: t.colors.card, borderRadius: t.radius.xl, padding: t.spacing.md, marginTop: t.spacing.base, ...t.shadow.sm },
     couponInput: { flex: 1 },
-    couponApply: { borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 12, paddingHorizontal: 18, alignItems: 'center', marginBottom: 2 },
+    couponApply: { backgroundColor: t.colors.accentSoft, borderRadius: t.radius.md, paddingVertical: 14, paddingHorizontal: 18, alignItems: 'center', marginBottom: t.spacing.base },
+    couponApplyText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.accent },
+
+    submit: { marginTop: t.spacing.lg, marginBottom: t.spacing.sm },
+
+    reqCard: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, padding: t.spacing.base, marginBottom: t.spacing.sm, ...t.shadow.sm },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
     cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
-    cancelBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: t.spacing.sm, borderWidth: 1, borderColor: t.colors.danger, borderRadius: t.radius.md, paddingVertical: 9 },
+    cancelBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: t.spacing.sm, backgroundColor: t.colors.dangerSoft, borderRadius: t.radius.md, paddingVertical: 10 },
     cancelText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.danger },
   });
