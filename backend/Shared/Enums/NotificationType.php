@@ -25,6 +25,9 @@ enum NotificationType: string
     case RatingRequest = 'rating_request';
     case SosTriggered = 'sos_triggered';
     case AccountFrozen = 'account_frozen';
+    // Captain onboarding review outcomes.
+    case DriverApproved = 'driver_approved';
+    case DriverRejected = 'driver_rejected';
     case General = 'general';
 
     /** Category used to match a per-user preference toggle. */

@@ -7,13 +7,18 @@ use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Shared\Enums\DocumentStatus;
 use Rafeeq\Shared\Enums\DocumentType;
 use Rafeeq\Shared\Enums\DriverStatus;
+use Rafeeq\Shared\Enums\NotificationType;
 
 class DriverReviewService extends BaseService
 {
-    public function __construct(private readonly AuditLogger $audit) {}
+    public function __construct(
+        private readonly AuditLogger $audit,
+        private readonly NotificationService $notifications,
+    ) {}
 
     /** Approve a driver — requires all mandatory documents to be approved. */
     public function approve(DriverProfile $driver, User $reviewer, ?string $note = null): DriverProfile
@@ -39,6 +44,17 @@ class DriverReviewService extends BaseService
 
         $this->audit->log('driver.approved', $reviewer, auditable: $driver);
 
+        // Tell the captain their account is live so they know to start working.
+        if ($driver->user) {
+            $this->notifications->notify(
+                $driver->user,
+                NotificationType::DriverApproved,
+                'تم اعتماد حسابك 🎉',
+                'صار حسابك مفعّلاً. تقدر تبدأ استقبال الرحلات الآن — فعّل حالة "متصل" لتصلك العروض.',
+                ['kind' => 'driver_review', 'status' => 'approved'],
+            );
+        }
+
         return $driver->fresh();
     }
 
@@ -51,6 +67,17 @@ class DriverReviewService extends BaseService
         ])->save();
 
         $this->audit->log('driver.rejected', $reviewer, auditable: $driver);
+
+        // Let the captain know, with the reason, so they can fix and resubmit.
+        if ($driver->user) {
+            $this->notifications->notify(
+                $driver->user,
+                NotificationType::DriverRejected,
+                'لم يتم اعتماد حسابك',
+                $note !== '' ? "السبب: {$note}. عدّل وثائقك وأعد الإرسال." : 'يرجى مراجعة وثائقك وإعادة إرسالها.',
+                ['kind' => 'driver_review', 'status' => 'rejected'],
+            );
+        }
 
         return $driver->fresh();
     }
