@@ -42,10 +42,10 @@ export function LiveMap({ points, route, onPick, legend, height = 220 }: LiveMap
   const colors = useMemo(
     () => ({
       captain: theme.colors.primary,
-      pickup: '#2563EB',
-      destination: theme.colors.accent,
-      origin: theme.colors.success,
-      route: theme.colors.primary,
+      pickup: theme.colors.accent,
+      destination: theme.colors.success,
+      origin: theme.colors.warning,
+      route: theme.colors.accent,
     }),
     [theme],
   );

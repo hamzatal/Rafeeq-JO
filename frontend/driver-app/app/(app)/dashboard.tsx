@@ -14,7 +14,7 @@ import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { useAvailability } from '../../src/store/availability';
 import { api } from '../../src/lib/api';
-import { getCurrentLocation } from '../../src/lib/permissions';
+import { getCurrentLocation, watchLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
 
 const statusMeta: Record<DriverStatus, { key: string; tone: 'warning' | 'primary' | 'success' | 'danger' }> = {
@@ -50,12 +50,14 @@ export default function Dashboard() {
   const approved = status === 'approved';
 
   useEffect(() => {
-    if (approved) {
-      api.payouts.performance().then(setPerf).catch(() => undefined);
-      void getCurrentLocation().then((l) => l && setLoc(l));
-      // Resume the persisted online state (so a refresh doesn't drop the captain offline).
-      void restoreAvailability();
-    }
+    if (!approved) return;
+    api.payouts.performance().then(setPerf).catch(() => undefined);
+    void getCurrentLocation().then((l) => l && setLoc(l));
+    // Keep the captain's own marker live on the map.
+    const stop = watchLocation((l) => setLoc(l));
+    // Resume the persisted online state (so a refresh doesn't drop the captain offline).
+    void restoreAvailability();
+    return stop;
   }, [approved, restoreAvailability]);
 
   // Turn the captain Offline when leaving / unmounting is handled by the store.
@@ -95,7 +97,9 @@ export default function Dashboard() {
             <Text style={s.greeting}>{t('driver.dashboard')}</Text>
             <Text style={s.name} numberOfLines={1}>{user?.full_name ?? ''}</Text>
           </View>
-          <Badge label={t(meta.key)} tone={meta.tone} />
+          {/* Once approved & working, the captain doesn't need to keep seeing an
+              "approved" badge — surface it only while the account isn't active yet. */}
+          {!approved ? <Badge label={t(meta.key)} tone={meta.tone} /> : null}
         </View>
 
         {status === 'rejected' && driver?.review_note ? <Banner message={driver.review_note} variant="error" /> : null}
@@ -160,13 +164,19 @@ export default function Dashboard() {
           </>
         )}
 
-        <SectionTitle title={t('driver.documents')} />
-        <Card style={{ padding: 6 }}>
-          <ListRow icon="file-text" title={t('driver.documents')} subtitle={`${driver?.documents?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/documents')} />
-          <ListRow icon="truck" title={t('driver.vehicle')} subtitle={`${driver?.vehicles?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/vehicle')} />
-        </Card>
+        {/* Documents / vehicle only matter BEFORE approval. An approved captain
+            manages these from Settings, so we keep the working dashboard clean. */}
+        {!approved && (
+          <>
+            <SectionTitle title={t('driver.documents')} />
+            <Card style={{ padding: 6 }}>
+              <ListRow icon="file-text" title={t('driver.documents')} subtitle={`${driver?.documents?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/documents')} />
+              <ListRow icon="truck" title={t('driver.vehicle')} subtitle={`${driver?.vehicles?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/vehicle')} />
+            </Card>
 
-        {canSubmit ? <Button title={t('driver.submitReview')} onPress={onSubmit} loading={submitting} style={s.submit} /> : null}
+            {canSubmit ? <Button title={t('driver.submitReview')} onPress={onSubmit} loading={submitting} style={s.submit} /> : null}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

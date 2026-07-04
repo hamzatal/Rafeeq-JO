@@ -51,7 +51,7 @@ export function AuthShell({
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#141B2E', overflow: 'hidden' },
+    root: { flex: 1, backgroundColor: '#0A0D12', overflow: 'hidden' },
     glow: { position: 'absolute', top: -120, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.16 },
     glow2: { position: 'absolute', bottom: -140, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.accent, opacity: 0.07 },
     safe: { flex: 1 },

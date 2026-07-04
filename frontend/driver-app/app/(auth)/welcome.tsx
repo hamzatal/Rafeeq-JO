@@ -44,7 +44,7 @@ export default function Welcome() {
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#141B2E', overflow: 'hidden' },
+    root: { flex: 1, backgroundColor: '#0A0D12', overflow: 'hidden' },
     glow: { position: 'absolute', top: -110, right: -80, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.18 },
     glow2: { position: 'absolute', bottom: -150, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.08 },
     safe: { flex: 1, paddingHorizontal: t.spacing.lg },
