@@ -1,53 +1,61 @@
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import { api } from './api';
 
 /**
  * Push notifications (Firebase Cloud Messaging via the native device token).
  *
- * Design principles (matches Rafeeq's resilience policy):
- *  - Never crashes the app: every step is guarded; on web / simulator / when
- *    Firebase isn't configured yet it simply no-ops.
- *  - Uses the NATIVE device push token (FCM on Android, APNs on iOS) so it
- *    matches the backend FcmPushGateway, which sends straight to FCM v1.
- *  - Android channels mirror the backend NotificationType.channelId() values
- *    so each category gets the right sound + importance (incl. loud ride
- *    offers for captains and critical safety alerts).
+ * IMPORTANT (Expo Go): the remote-push API of `expo-notifications` was REMOVED
+ * from Expo Go with SDK 53. Importing the module at top level THROWS inside
+ * Expo Go and would crash the whole app. So we load it LAZILY and treat any
+ * failure as "push unavailable" — the app runs fully; push simply only works in
+ * a development/production build. Never crashes the app.
  */
 
-// Foreground behaviour: show the alert AND play the sound while the app is open.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    // SDK 52+ split the foreground alert into banner + list.
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
 let registeredToken: string | null = null;
+let handlerSet = false;
 
-interface ChannelSpec {
-  id: string;
-  name: string;
-  importance: Notifications.AndroidImportance;
+/** Lazily load expo-notifications; returns null on web / Expo Go / any failure. */
+async function loadNotifications(): Promise<any | null> {
+  if (Platform.OS === 'web') return null;
+  try {
+    return await import('expo-notifications');
+  } catch {
+    return null;
+  }
+}
+
+/** Foreground behaviour: show banner + list + sound while the app is open. */
+async function ensureHandler(Notifications: any): Promise<void> {
+  if (handlerSet) return;
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+    handlerSet = true;
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Channels must match backend NotificationType->channelId(). */
-const CHANNELS: ChannelSpec[] = [
-  { id: 'rafeeq_default', name: 'إشعارات عامة', importance: Notifications.AndroidImportance.DEFAULT },
-  { id: 'rafeeq_trips', name: 'الرحلات', importance: Notifications.AndroidImportance.HIGH },
-  { id: 'rafeeq_rides', name: 'طلبات الرحلات', importance: Notifications.AndroidImportance.MAX },
-  { id: 'rafeeq_payments', name: 'المدفوعات والمحفظة', importance: Notifications.AndroidImportance.HIGH },
-  { id: 'rafeeq_critical', name: 'تنبيهات حرجة وأمان', importance: Notifications.AndroidImportance.MAX },
-];
-
-async function ensureAndroidChannels(): Promise<void> {
+async function ensureAndroidChannels(Notifications: any): Promise<void> {
   if (Platform.OS !== 'android') return;
-  for (const c of CHANNELS) {
+  const I = Notifications.AndroidImportance;
+  const channels = [
+    { id: 'rafeeq_default', name: 'إشعارات عامة', importance: I.DEFAULT },
+    { id: 'rafeeq_trips', name: 'الرحلات', importance: I.HIGH },
+    { id: 'rafeeq_rides', name: 'طلبات الرحلات', importance: I.MAX },
+    { id: 'rafeeq_payments', name: 'المدفوعات والمحفظة', importance: I.HIGH },
+    { id: 'rafeeq_critical', name: 'تنبيهات حرجة وأمان', importance: I.MAX },
+  ];
+  for (const c of channels) {
     await Notifications.setNotificationChannelAsync(c.id, {
       name: c.name,
       importance: c.importance,
@@ -61,14 +69,16 @@ async function ensureAndroidChannels(): Promise<void> {
 
 /**
  * Register this device for push and send the token to the backend.
- * Safe to call repeatedly; it only re-registers when the token changes.
+ * Safe to call repeatedly; no-ops on web / Expo Go / simulators.
  */
 export async function registerForPush(): Promise<void> {
   try {
-    // No native push on web or simulators/emulators.
     if (Platform.OS === 'web' || !Device.isDevice) return;
+    const Notifications = await loadNotifications();
+    if (!Notifications) return; // Expo Go / unavailable
 
-    await ensureAndroidChannels();
+    await ensureHandler(Notifications);
+    await ensureAndroidChannels(Notifications);
 
     const current = await Notifications.getPermissionsAsync();
     let granted =
@@ -81,7 +91,6 @@ export async function registerForPush(): Promise<void> {
     }
     if (!granted) return;
 
-    // Native token (FCM on Android, APNs on iOS) — matches the backend gateway.
     const { data: token } = await Notifications.getDevicePushTokenAsync();
     if (!token || typeof token !== 'string' || token === registeredToken) return;
 
@@ -108,16 +117,29 @@ export async function unregisterPush(): Promise<void> {
 
 /**
  * Listen for the user tapping a notification (for deep-linking).
- * Returns an unsubscribe function. No-ops gracefully on failure.
+ * Returns an unsubscribe function. Lazily attaches; no-ops in Expo Go.
  */
 export function onNotificationTap(handler: (data: Record<string, unknown>) => void): () => void {
-  try {
-    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = (response.notification.request.content.data ?? {}) as Record<string, unknown>;
-      handler(data);
-    });
-    return () => sub.remove();
-  } catch {
-    return () => undefined;
-  }
+  let sub: { remove: () => void } | null = null;
+  let cancelled = false;
+  (async () => {
+    const Notifications = await loadNotifications();
+    if (!Notifications || cancelled) return;
+    try {
+      sub = Notifications.addNotificationResponseReceivedListener((response: any) => {
+        const data = (response?.notification?.request?.content?.data ?? {}) as Record<string, unknown>;
+        handler(data);
+      });
+    } catch {
+      /* ignore */
+    }
+  })();
+  return () => {
+    cancelled = true;
+    try {
+      sub?.remove();
+    } catch {
+      /* ignore */
+    }
+  };
 }
