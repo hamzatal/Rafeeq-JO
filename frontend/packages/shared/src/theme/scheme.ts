@@ -2,17 +2,17 @@ export type ColorScheme = 'light' | 'dark';
 export type ThemeRole = 'student' | 'driver' | 'admin';
 
 export interface ThemeColors {
-  /** Brand navy — structural color: primary buttons, headers, active states. */
+  /** Structural ink — primary buttons, headers, active anchors, key surfaces. */
   primary: string;
   primaryDark: string;
   primarySoft: string;
-  /** Gold — premium accent: highlights, badges, key premium CTAs. */
+  /** Signature blue — interactive highlight: selected states, links, online, key CTAs. */
   accent: string;
-  /** Tinted accent background (chips, soft highlights). */
+  /** Tinted accent background (chips, soft highlights, focus rings). */
   accentSoft: string;
-  /** Text/icon color on a navy primary surface (white). */
+  /** Text/icon color on the primary (ink) surface. */
   onPrimary: string;
-  /** Text/icon color on the gold accent — always near-navy ink for contrast. */
+  /** Text/icon color on the blue accent surface (always white). */
   onAccent: string;
   background: string;
   surface: string;
@@ -47,32 +47,37 @@ export interface ThemeColors {
 // Semantic status colors — reserved for MEANING only (not brand identity):
 // success = positive/accept/go, danger = destructive/reject, warning, info.
 const status = {
-  success: '#16A34A',
-  warning: '#E0930C',
-  danger: '#DC2626',
-  info: '#2563EB',
+  success: '#12B76A',
+  warning: '#F79009',
+  danger: '#F04438',
+  info: '#2F6BFF',
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// Brand — Design System v6 "Navy + Gold" (premium / academic).
-// Identity: a deep royal NAVY as the structural/primary color (buttons, headers,
-// active states, key icons) paired with a warm GOLD accent reserved for premium
-// highlights, active/online states, badges and special CTAs (gold surface always
-// carries near-navy ink for contrast). Neutral canvas keeps it clean and modern.
-// Semantic green/red are used ONLY for meaning (accept / destructive).
+// Rafeeq Design System v7 — "Onyx".
+// A premium, formal, globally-legible identity built on three pillars:
+//   1. INK  — a near-black structural color for primary buttons, headers,
+//      active anchors and hero surfaces. This is the calm, serious anchor.
+//   2. SIGNATURE BLUE — one confident interactive accent for selected states,
+//      links, the online indicator and key call-to-actions. Blue always
+//      carries white text.
+//   3. A soft, near-white canvas (light) / deep ink canvas (dark) with real
+//      LAYERED ELEVATION instead of hard borders — this is what makes it feel
+//      modern and expensive rather than flat.
+// Semantic green/amber/red are used ONLY for meaning (accept / warn / reject).
+// This is our own system: no gold, no navy-heavy chrome, no toy colors.
 // ─────────────────────────────────────────────────────────────────────────
-const NAVY_LIGHT = '#243B7A'; // brand primary on light surfaces
-const NAVY_DARK = '#5B7BD6'; // brighter royal blue for dark surfaces (contrast)
-const GOLD_LIGHT = '#E7A63A'; // gold accent on light surfaces
-const GOLD_DARK = '#F0B44E'; // slightly brighter gold for dark surfaces
-const INK = '#141C33'; // near-navy black — text on gold, deepest ink
+const INK_LIGHT = '#0F1216'; // structural ink on light surfaces (buttons/headers)
+const INK_DARK = '#F4F6F8'; // on dark surfaces the "ink" role flips to near-white
+const BLUE_LIGHT = '#2F6BFF'; // signature interactive blue on light
+const BLUE_DARK = '#5B8CFF'; // slightly brighter blue for dark surfaces (contrast)
 
 const roleAccent: Record<ThemeRole, { light: string; dark: string }> = {
-  // Unified family: same navy + gold across all three apps. Differentiation is
-  // done at the layout / density level, not by changing the brand hue.
-  student: { light: GOLD_LIGHT, dark: GOLD_DARK },
-  driver: { light: GOLD_LIGHT, dark: GOLD_DARK },
-  admin: { light: GOLD_LIGHT, dark: GOLD_DARK },
+  // Unified family: same ink + signature blue across all three apps.
+  // Differentiation is done at the layout / density level, not by hue.
+  student: { light: BLUE_LIGHT, dark: BLUE_DARK },
+  driver: { light: BLUE_LIGHT, dark: BLUE_DARK },
+  admin: { light: BLUE_LIGHT, dark: BLUE_DARK },
 };
 
 /** hex (#RRGGBB) → rgba string at the given alpha. */
@@ -84,34 +89,36 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+// Light — a soft, near-white canvas (not glaring pure white) with pure-white
+// cards floating on subtle layered shadows. Ink text, generous neutrals.
 const neutralsLight = {
-  background: '#F7F8FB',
+  background: '#F4F6F8',
   surface: '#FFFFFF',
   card: '#FFFFFF',
   elevated: '#FFFFFF',
-  text: '#141C33',
-  textSecondary: '#5B6478',
-  muted: '#8A93A6',
-  border: '#E6E9F0',
-  hairline: '#F0F2F7',
-  overlay: 'rgba(20,28,51,0.45)',
-  scrim: 'rgba(20,28,51,0.6)',
+  text: '#0F1216',
+  textSecondary: '#59616E',
+  muted: '#98A2B3',
+  border: '#E7EAEF',
+  hairline: '#F1F3F6',
+  overlay: 'rgba(15,18,22,0.42)',
+  scrim: 'rgba(15,18,22,0.62)',
 };
 
-// Dark mode — a deep navy-charcoal canvas (premium, not pure black), with
-// layered elevation. Keeps the royal identity even in the dark.
+// Dark — a true deep-ink canvas (premium, not muddy) with clearly layered
+// elevation: background → surface → card → elevated each step lighter.
 const neutralsDark = {
-  background: '#0D1220',
-  surface: '#141B2E',
-  card: '#1A2337',
-  elevated: '#222C45',
-  text: '#EDF0F7',
-  textSecondary: '#A6AEC2',
-  muted: '#6E7794',
-  border: '#26304A',
-  hairline: '#1E2740',
+  background: '#0A0D12',
+  surface: '#12161D',
+  card: '#171C24',
+  elevated: '#1F2630',
+  text: '#F4F6F8',
+  textSecondary: '#A2ABB9',
+  muted: '#6B7686',
+  border: '#242B36',
+  hairline: '#1A2028',
   overlay: 'rgba(0,0,0,0.5)',
-  scrim: 'rgba(5,8,18,0.72)',
+  scrim: 'rgba(0,0,0,0.74)',
 };
 
 /** Build a full semantic palette for a role + scheme. */
@@ -119,18 +126,20 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
   const isDark = scheme === 'dark';
   const neutrals = isDark ? neutralsDark : neutralsLight;
   const accent = isDark ? roleAccent[role].dark : roleAccent[role].light;
-  const primary = isDark ? NAVY_DARK : NAVY_LIGHT;
-  const onPrimary = '#FFFFFF';
-  const softAlpha = isDark ? 0.2 : 0.12;
+  const primary = isDark ? INK_DARK : INK_LIGHT;
+  // On light, the ink primary carries white text; on dark, the primary flips to
+  // near-white so it must carry ink text.
+  const onPrimary = isDark ? '#0A0D12' : '#FFFFFF';
+  const softAlpha = isDark ? 0.22 : 0.12;
 
   return {
     primary,
-    primaryDark: isDark ? '#8AA2E6' : '#1A2C5C',
-    primarySoft: hexToRgba(primary, isDark ? 0.26 : 0.12),
+    primaryDark: isDark ? '#FFFFFF' : '#000000',
+    primarySoft: hexToRgba(primary, isDark ? 0.16 : 0.08),
     accent,
-    accentSoft: hexToRgba(accent, isDark ? 0.24 : 0.18),
+    accentSoft: hexToRgba(accent, isDark ? 0.24 : 0.12),
     onPrimary,
-    onAccent: INK,
+    onAccent: '#FFFFFF',
     textInverse: '#FFFFFF',
     ...neutrals,
     ...status,

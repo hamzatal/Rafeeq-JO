@@ -1,4 +1,4 @@
-/** 4px-based spacing scale + border radii + shadows. */
+/** 4px-based spacing scale + border radii + shadows (DS v7 "Onyx"). */
 
 export const spacing = {
   none: 0,
@@ -13,37 +13,39 @@ export const spacing = {
   '4xl': 56,
 } as const;
 
+// Softer, larger radii — modern, "pill & rounded-card" language.
 export const radius = {
   none: 0,
-  sm: 8,
-  md: 10,
-  lg: 14,
-  xl: 16,
-  '2xl': 20,
+  sm: 10,
+  md: 14,
+  lg: 18,
+  xl: 22,
+  '2xl': 28,
   full: 9999,
 } as const;
 
-// Restrained, premium elevation — subtle, never heavy/"toy-like".
+// Real, layered elevation — soft and expensive, never hard/"toy-like".
+// Uses cool-ink shadow color so shadows read as depth, not dirt.
 export const shadow = {
   sm: {
-    shadowColor: '#0B0B0E',
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
+    shadowColor: '#0B1220',
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   md: {
-    shadowColor: '#0B0B0E',
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowColor: '#0B1220',
+    shadowOpacity: 0.1,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
   lg: {
-    shadowColor: '#0B0B0E',
-    shadowOpacity: 0.1,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 10,
+    shadowColor: '#0B1220',
+    shadowOpacity: 0.16,
+    shadowRadius: 32,
+    shadowOffset: { width: 0, height: 16 },
+    elevation: 14,
   },
 } as const;
