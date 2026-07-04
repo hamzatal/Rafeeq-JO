@@ -1,15 +1,15 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Admin Console — Design System v6 "Navy + Gold" (premium / academic).
- * Navy = structural/brand (sidebar, table headers, primary). Gold = premium
- * accent (active nav, highlights, info pills). Deep navy-charcoal dark scheme
- * matches the mobile apps.
+ * Admin Console — Design System v7 "Onyx".
+ * INK = structural/brand (sidebar, table headers, primary buttons, dark ink).
+ * SIGNATURE BLUE = interactive accent (active nav, highlights, links, info pills).
+ * Soft near-white canvas (light) / deep-ink canvas (dark) with layered shadows.
  *
- * NOTE (transitional): the `cyan.*` keys are repointed to the GOLD family so the
- * many existing `cyan-*` utility usages across pages render gold without a mass
- * rename. Class names are being renamed to `gold-*` during the page-by-page
- * dashboard rebuild.
+ * NOTE (transitional): the `cyan.*` keys are aliased to the BLUE accent family so
+ * the many existing `cyan-*` utility usages across pages render blue without a
+ * mass rename. New code should use `accent` / `gold` (also blue) — the alias will
+ * be removed once every page has been migrated.
  */
 const config: Config = {
   darkMode: 'class',
@@ -17,33 +17,33 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand — navy primary
-        primary: { DEFAULT: '#243B7A', dark: '#1A2C5C', light: '#3350A0' },
-        // "navy" = deep royal navy used for sidebar / table headers / dark ink
-        navy: { DEFAULT: '#141B2E', light: '#1A2337', deep: '#0D1220', 900: '#0A0F1C' },
-        // Gold accent family
-        gold: { DEFAULT: '#E7A63A', soft: '#FBEFD6', deep: '#B47E1C' },
-        // Transitional alias: cyan-* → gold tones (see note above)
-        cyan: { DEFAULT: '#E7A63A', soft: '#FBEFD6', deep: '#B47E1C' },
-        accent: '#E7A63A',
+        // Brand — ink primary (structural: buttons, table headers, dark ink)
+        primary: { DEFAULT: '#0F1216', dark: '#000000', light: '#2A2F37' },
+        // "navy" = the deep ink surface family used for the sidebar / dark chrome
+        navy: { DEFAULT: '#12161D', light: '#171C24', deep: '#0A0D12', 900: '#070A0E' },
+        // Signature-blue accent family (was gold)
+        gold: { DEFAULT: '#2F6BFF', soft: '#E8EFFF', deep: '#1B4DCC' },
+        // Transitional alias: cyan-* → blue tones (see note above)
+        cyan: { DEFAULT: '#2F6BFF', soft: '#E8EFFF', deep: '#1B4DCC' },
+        accent: '#2F6BFF',
         // Neutrals
-        background: '#F7F8FB',
+        background: '#F4F6F8',
         surface: '#FFFFFF',
-        line: '#E6E9F0',
-        ink: '#141C33',
-        muted: '#5B6478',
+        line: '#E7EAEF',
+        ink: '#0F1216',
+        muted: '#59616E',
         // Status (meaning only)
-        success: '#16A34A',
-        warning: '#E0930C',
-        danger: '#DC2626',
-        info: '#2563EB',
-        // Dark scheme — deep navy-charcoal (premium)
-        dbg: '#0D1220',
-        dsurface: '#141B2E',
-        dcard: '#1A2337',
-        dline: '#26304A',
-        dtext: '#EDF0F7',
-        dmuted: '#A6AEC2',
+        success: '#12B76A',
+        warning: '#F79009',
+        danger: '#F04438',
+        info: '#2F6BFF',
+        // Dark scheme — deep ink (premium), layered elevation
+        dbg: '#0A0D12',
+        dsurface: '#12161D',
+        dcard: '#171C24',
+        dline: '#242B36',
+        dtext: '#F4F6F8',
+        dmuted: '#A2ABB9',
       },
       fontFamily: {
         sans: ['var(--font-cairo)', 'Inter', 'system-ui', 'sans-serif'],
@@ -51,8 +51,8 @@ const config: Config = {
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        card: '0 1px 3px rgba(20, 28, 51, 0.06), 0 1px 2px rgba(20, 28, 51, 0.04)',
-        lift: '0 8px 24px rgba(20, 28, 51, 0.12)',
+        card: '0 2px 6px rgba(11, 18, 32, 0.06), 0 1px 2px rgba(11, 18, 32, 0.04)',
+        lift: '0 8px 24px rgba(11, 18, 32, 0.12)',
       },
     },
   },
