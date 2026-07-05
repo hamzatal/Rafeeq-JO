@@ -344,8 +344,8 @@ function buildLeafletHtml(
   const c = JSON.stringify(center);
   const col = JSON.stringify(colors);
 
-  // Free OpenStreetMap tiles (no key required, ToS-compliant).
-  const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  // CartoDB Voyager tiles — clean, modern basemap (no key required).
+  const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
   return `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -367,7 +367,7 @@ function buildLeafletHtml(
   var COL = ${col};
   var c = ${c};
   var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([c.lat,c.lng],14);
-  L.tileLayer('${tileUrl}',{maxZoom:19,subdomains:['a','b','c']}).addTo(map);
+  L.tileLayer('${tileUrl}',{maxZoom:20,subdomains:'abcd'}).addTo(map);
 
   var markers=[], routeLine=null, routeCasing=null, captainMarker=null;
 

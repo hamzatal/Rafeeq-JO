@@ -48,6 +48,23 @@ export default function Home() {
     Animated.timing(rise, { toValue: 1, duration: 460, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, [rise]);
 
+  // Collapsible sheet: tap the grabber to shrink the panel to a peek and reveal
+  // the FULL map, or expand it back to browse services. (JS-driven height anim,
+  // kept on a separate node from the native opacity/translate entrance.)
+  const EXPANDED = Math.round(height * 0.62);
+  const PEEK = 188;
+  const sheetH = useRef(new Animated.Value(EXPANDED)).current;
+  const [expanded, setExpanded] = useState(true);
+  const toggleSheet = () => {
+    Animated.timing(sheetH, {
+      toValue: expanded ? PEEK : EXPANDED,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+    setExpanded((v) => !v);
+  };
+
   useEffect(() => {
     api.notifications.unreadCount().then(setUnread).catch(() => undefined);
     api.addresses.list().then((a) => setAddresses(a.slice(0, 2))).catch(() => undefined);
@@ -97,11 +114,15 @@ export default function Home() {
         <Icon name="crosshair" size={20} color={theme.colors.accent} />
       </Pressable>
 
-      {/* Bottom sheet (animated entrance) */}
-      <Animated.View style={[s.sheet, { maxHeight: height * 0.6, opacity: rise, transform: [{ translateY }] }]}>
-        <View style={s.grabber} />
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.sheetContent}>
-          <Text style={s.hello}>{t('home.hello')}{user?.full_name ? `، ${user.full_name.split(' ')[0]}` : ''} 👋</Text>
+      {/* Bottom sheet (animated entrance + collapsible) */}
+      <Animated.View style={[s.sheetOuter, { opacity: rise, transform: [{ translateY }] }]} pointerEvents="box-none">
+        <Animated.View style={[s.sheet, { height: sheetH }]}>
+          <Pressable onPress={toggleSheet} style={s.grabberRow} hitSlop={12}>
+            <View style={s.grabber} />
+            <Icon name={expanded ? 'chevron-down' : 'chevron-up'} size={16} color={theme.colors.muted} />
+          </Pressable>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.sheetContent} scrollEnabled={expanded}>
+            <Text style={s.hello}>{t('home.hello')}{user?.full_name ? `، ${user.full_name.split(' ')[0]}` : ''} 👋</Text>
 
           {/* Hero "Where to?" CTA */}
           <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.searchBar}>
@@ -159,7 +180,8 @@ export default function Home() {
               <Text style={s.stripLabel}>{t('home.remainingRides')}</Text>
             </Pressable>
           </View>
-        </ScrollView>
+          </ScrollView>
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -176,19 +198,17 @@ const makeStyles = (t: AppTheme) =>
 
     locateFab: { position: 'absolute', bottom: '42%', right: t.spacing.lg, width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.md },
 
+    sheetOuter: { position: 'absolute', left: 0, right: 0, bottom: 0 },
     sheet: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
       backgroundColor: t.colors.surface,
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,
       paddingHorizontal: t.spacing.lg,
-      paddingTop: t.spacing.sm,
+      overflow: 'hidden',
       ...t.shadow.lg,
     },
-    grabber: { alignSelf: 'center', width: 38, height: 4, borderRadius: 2, backgroundColor: t.colors.border, marginBottom: t.spacing.base },
+    grabberRow: { alignItems: 'center', gap: 4, paddingTop: t.spacing.sm, paddingBottom: t.spacing.sm },
+    grabber: { width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.border },
     sheetContent: { paddingBottom: t.spacing.xl },
     hello: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
 

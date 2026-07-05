@@ -366,12 +366,13 @@ function buildLeafletHtml(
   var COL = ${col};
   var c = ${c};
   var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([c.lat,c.lng],14);
-  // Map view modes (free, no-key tiles): streets / minimal / satellite (buildings).
-  var streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:['a','b','c']});
-  var minimal = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{maxZoom:20,subdomains:'abcd'});
+  // Map view modes (free, no-key tiles). Default = CartoDB Voyager: a clean,
+  // modern basemap (the look world-class apps use), retina-aware ({r}).
+  var voyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd'});
+  var minimal = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd'});
   var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});
-  streets.addTo(map);
-  L.control.layers({'شوارع':streets,'مبسّط':minimal,'أقمار صناعية':satellite}, null, {position:'topleft',collapsed:true}).addTo(map);
+  voyager.addTo(map);
+  L.control.layers({'الخريطة':voyager,'مبسّط':minimal,'أقمار صناعية':satellite}, null, {position:'topleft',collapsed:true}).addTo(map);
 
   var markers=[], routeLine=null, routeCasing=null, captainMarker=null;
 
