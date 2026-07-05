@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>رفيق — معاينة اتجاهات التصميم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', system-ui, sans-serif; }
+  body { background: #eceff3; color: #0f1216; padding: 28px 16px 60px; }
+  .page-head { max-width: 1200px; margin: 0 auto 26px; text-align: center; }
+  .page-head h1 { font-size: 26px; font-weight: 800; }
+  .page-head p { color: #5b636e; font-size: 15px; margin-top: 8px; line-height: 1.7; }
+  .hint { display:inline-block; margin-top:14px; background:#fff; border:1px solid #e3e7ec; border-radius:12px; padding:10px 16px; font-size:13.5px; color:#374151; }
+  .hint b { color:#2f6bff; }
+
+  .stage { display: flex; flex-wrap: wrap; gap: 34px; justify-content: center; align-items: flex-start; max-width: 1200px; margin: 0 auto; }
+  .col { width: 340px; }
+  .col > .cap { text-align: center; margin-bottom: 14px; }
+  .col > .cap .name { font-weight: 800; font-size: 17px; }
+  .col > .cap .desc { font-size: 12.5px; color: #6b7280; margin-top: 3px; line-height: 1.6; }
+
+  /* Phone frame */
+  .phone { width: 340px; height: 720px; border-radius: 42px; padding: 12px; background: #0b0d10; box-shadow: 0 30px 60px rgba(11,18,32,.28); position: relative; }
+  .screen { width: 100%; height: 100%; border-radius: 32px; overflow: hidden; position: relative; }
+  .notch { position:absolute; top:12px; left:50%; transform:translateX(-50%); width:120px; height:26px; background:#0b0d10; border-radius:0 0 16px 16px; z-index:50; }
+  .statusbar { position:absolute; top:0; left:0; right:0; height:44px; display:flex; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:12px; font-weight:700; z-index:40; }
+
+  .ic { width: 22px; height: 22px; display:inline-block; vertical-align:middle; }
+  .row { display:flex; align-items:center; }
+
+  /* ============ DIRECTION A — Emerald, map-first (Careem-like) ============ */
+  .a .screen { background:#eaf1ee; }
+  .a .statusbar { color:#0f1216; }
+  .a .map { position:absolute; inset:0; background:
+      linear-gradient(0deg, rgba(14,159,110,.05), rgba(14,159,110,.05)),
+      repeating-linear-gradient(0deg,#e5ece8 0 38px,#dbe5df 38px 40px),
+      repeating-linear-gradient(90deg,#e5ece8 0 46px,#dbe5df 46px 48px); }
+  .a .road { position:absolute; background:#fff; box-shadow:0 0 0 1px #d3ddd6; }
+  .a .r1 { top:34%; left:-5%; right:-5%; height:16px; transform:rotate(-8deg); }
+  .a .r2 { top:-5%; bottom:-5%; right:38%; width:14px; transform:rotate(6deg); }
+  .a .route { position:absolute; top:44%; right:30%; width:120px; height:120px; border:5px solid #0e9f6e; border-radius:60px; border-left-color:transparent; border-bottom-color:transparent; transform:rotate(20deg); opacity:.9; }
+  .a .pin { position:absolute; width:30px; height:30px; border-radius:50% 50% 50% 2px; background:#0e9f6e; transform:rotate(45deg); box-shadow:0 6px 14px rgba(14,159,110,.4); }
+  .a .pin::after{content:'';position:absolute;inset:9px;background:#fff;border-radius:50%;}
+  .a .pin1{ top:40%; right:29%; }
+  .a .pin2{ top:58%; right:52%; background:#0f1216; box-shadow:0 6px 14px rgba(0,0,0,.3);}
+  .a .topfloat { position:absolute; top:52px; left:16px; right:16px; z-index:30; display:flex; justify-content:space-between; }
+  .a .fab { width:46px;height:46px;border-radius:23px;background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.14); display:flex;align-items:center;justify-content:center; color:#0e9f6e; font-weight:800; }
+  .a .sheet { position:absolute; left:0; right:0; bottom:0; background:#fff; border-radius:28px 28px 0 0; padding:14px 18px 26px; box-shadow:0 -10px 30px rgba(0,0,0,.12); z-index:35; }
+  .a .grab { width:40px;height:5px;border-radius:3px;background:#e2e6ea;margin:2px auto 16px; }
+  .a .hello { font-weight:800; font-size:21px; margin-bottom:14px; }
+  .a .search { display:flex; align-items:center; gap:12px; background:#f2f5f3; border-radius:18px; padding:15px 16px; }
+  .a .search .dot{ width:38px;height:38px;border-radius:19px;background:#0e9f6e;display:flex;align-items:center;justify-content:center;color:#fff;}
+  .a .search .txt{ flex:1; font-weight:700; font-size:16px; }
+  .a .search .chev{ color:#9aa3ad; }
+  .a .places{ margin-top:6px; }
+  .a .place{ display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid #f1f3f5; }
+  .a .place .pic{ width:38px;height:38px;border-radius:19px;background:#eaf1ee;display:flex;align-items:center;justify-content:center;color:#0e9f6e;}
+  .a .place .t{ font-weight:600; font-size:14.5px; }
+  .a .place .s{ font-size:11.5px; color:#8a929c; }
+  .a .svcs{ display:flex; gap:10px; margin-top:16px; }
+  .a .svc{ flex:1; text-align:center; }
+  .a .svc .b{ width:100%; aspect-ratio:1; border-radius:18px; background:#f2f5f3; display:flex;align-items:center;justify-content:center; color:#0e9f6e; margin-bottom:6px;}
+  .a .svc .l{ font-size:11px; color:#4b5563; font-weight:600; }
+  .a .tabbar{ position:absolute; bottom:0; left:0; right:0; height:64px; background:#fff; border-top:1px solid #eef1f3; display:flex; z-index:36; }
+
+  /* ============ DIRECTION B — Onyx Blue, content dashboard (fintech) ============ */
+  .b .screen { background:#f5f7fb; }
+  .b .statusbar { color:#0f1216; }
+  .b .body { position:absolute; inset:0; padding:54px 18px 70px; overflow:hidden; }
+  .b .head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .b .head .who{ display:flex; align-items:center; gap:11px; }
+  .b .head .av{ width:46px;height:46px;border-radius:23px;background:#e6eeff;color:#2f6bff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;}
+  .b .head .g1{ font-size:12.5px;color:#6b7280;}
+  .b .head .g2{ font-size:17px;font-weight:800;}
+  .b .head .bell{ width:44px;height:44px;border-radius:14px;background:#fff;box-shadow:0 4px 12px rgba(11,18,32,.06);display:flex;align-items:center;justify-content:center;position:relative;}
+  .b .head .bell .n{ position:absolute;top:8px;left:9px;width:9px;height:9px;border-radius:5px;background:#f04438;border:2px solid #fff;}
+  .b .cta{ background:#2f6bff; border-radius:24px; padding:20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 14px 30px rgba(47,107,255,.34); }
+  .b .cta::before{content:'';position:absolute;top:-40px;left:-20px;width:130px;height:130px;border-radius:65px;background:rgba(255,255,255,.14);}
+  .b .cta .k{ font-size:13px; opacity:.9; }
+  .b .cta .h{ font-size:22px; font-weight:800; margin-top:4px; }
+  .b .cta .pill{ display:inline-flex; align-items:center; gap:6px; background:#fff; color:#2f6bff; font-weight:700; font-size:13px; border-radius:999px; padding:8px 15px; margin-top:14px; }
+  .b .stats{ display:flex; gap:12px; margin-top:14px; }
+  .b .stat{ flex:1; background:#fff; border-radius:20px; padding:15px; box-shadow:0 4px 12px rgba(11,18,32,.05); }
+  .b .stat .i{ width:36px;height:36px;border-radius:18px;background:#e6eeff;color:#2f6bff;display:flex;align-items:center;justify-content:center;margin-bottom:9px;}
+  .b .stat .v{ font-size:21px;font-weight:800;}
+  .b .stat .v small{ font-size:12px;color:#6b7280;font-weight:700;}
+  .b .stat .l{ font-size:11.5px;color:#6b7280;margin-top:2px;}
+  .b .sec{ font-weight:800; font-size:15px; margin:20px 0 12px; }
+  .b .grid{ display:flex; flex-wrap:wrap; gap:12px; }
+  .b .tile{ width:calc(25% - 9px); text-align:center; }
+  .b .tile .b2{ width:100%; aspect-ratio:1; border-radius:18px; background:#fff; box-shadow:0 4px 12px rgba(11,18,32,.05); display:flex;align-items:center;justify-content:center;color:#2f6bff; margin-bottom:6px;}
+  .b .tile .l{ font-size:10.5px; color:#4b5563; font-weight:600; }
+  .b .tabbar{ position:absolute; bottom:12px; left:16px; right:16px; height:60px; background:#fff; border-radius:22px; box-shadow:0 10px 26px rgba(11,18,32,.14); display:flex; align-items:center; justify-content:space-around; }
+  .b .tabbar .ti{ color:#aab2bd; } .b .tabbar .ti.on{ color:#2f6bff; background:#e6eeff; padding:8px 16px; border-radius:999px; }
+
+  /* ============ DIRECTION C — Midnight premium (dark, glass) ============ */
+  .c .screen { background:#0a0e14; color:#eaeef4; }
+  .c .statusbar { color:#eaeef4; }
+  .c .body { position:absolute; inset:0; padding:54px 18px 70px; overflow:hidden; }
+  .c .glow{ position:absolute; top:-60px; right:-40px; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle,#3b6cff55,transparent 70%); }
+  .c .head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; position:relative; }
+  .c .head .who{ display:flex; align-items:center; gap:11px; }
+  .c .head .av{ width:46px;height:46px;border-radius:23px;background:#17202e;color:#5b8cff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;border:1px solid #22304a;}
+  .c .head .g1{ font-size:12.5px;color:#8b97a8;}
+  .c .head .g2{ font-size:17px;font-weight:800;}
+  .c .head .bell{ width:44px;height:44px;border-radius:14px;background:#141b26;border:1px solid #202a3a;display:flex;align-items:center;justify-content:center;position:relative;}
+  .c .head .bell .n{ position:absolute;top:8px;left:9px;width:9px;height:9px;border-radius:5px;background:#ff5c72;border:2px solid #141b26;}
+  .c .cta{ border-radius:24px; padding:20px; position:relative; overflow:hidden; background:linear-gradient(135deg,#2f6bff,#6d5cff); box-shadow:0 16px 36px rgba(47,107,255,.4); }
+  .c .cta .k{ font-size:13px; opacity:.92; color:#fff;}
+  .c .cta .h{ font-size:22px; font-weight:800; margin-top:4px; color:#fff;}
+  .c .cta .pill{ display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.16); color:#fff; font-weight:700; font-size:13px; border-radius:999px; padding:8px 15px; margin-top:14px; backdrop-filter:blur(4px); }
+  .c .stats{ display:flex; gap:12px; margin-top:14px; }
+  .c .stat{ flex:1; background:#121926; border:1px solid #1e2836; border-radius:20px; padding:15px; }
+  .c .stat .i{ width:36px;height:36px;border-radius:18px;background:#17263f;color:#5b8cff;display:flex;align-items:center;justify-content:center;margin-bottom:9px;}
+  .c .stat .v{ font-size:21px;font-weight:800;color:#f2f5fa;}
+  .c .stat .v small{ font-size:12px;color:#8b97a8;font-weight:700;}
+  .c .stat .l{ font-size:11.5px;color:#8b97a8;margin-top:2px;}
+  .c .sec{ font-weight:800; font-size:15px; margin:20px 0 12px; }
+  .c .mapcard{ margin-top:14px; height:120px; border-radius:20px; overflow:hidden; position:relative; border:1px solid #1e2836; background:
+     repeating-linear-gradient(0deg,#0f1622 0 26px,#111a28 26px 28px),
+     repeating-linear-gradient(90deg,#0f1622 0 30px,#111a28 30px 32px); }
+  .c .mapcard .route{ position:absolute; top:30%; right:24%; width:90px;height:90px;border:4px solid #5b8cff; border-radius:50px; border-left-color:transparent;border-bottom-color:transparent; transform:rotate(20deg);}
+  .c .mapcard .pin{ position:absolute; top:26%; right:22%; width:16px;height:16px;border-radius:50%;background:#5b8cff;box-shadow:0 0 0 5px rgba(91,140,255,.25);}
+  .c .grid{ display:flex; flex-wrap:wrap; gap:12px; margin-top:6px;}
+  .c .tile{ width:calc(25% - 9px); text-align:center;}
+  .c .tile .b2{ width:100%; aspect-ratio:1; border-radius:18px; background:#121926;border:1px solid #1e2836; display:flex;align-items:center;justify-content:center;color:#5b8cff; margin-bottom:6px;}
+  .c .tile .l{ font-size:10.5px;color:#8b97a8;font-weight:600;}
+  .c .tabbar{ position:absolute; bottom:12px; left:16px; right:16px; height:60px; background:#121926; border:1px solid #1e2836; border-radius:22px; display:flex; align-items:center; justify-content:space-around;}
+  .c .tabbar .ti{ color:#5b6675;} .c .tabbar .ti.on{ color:#fff; background:#2f6bff; padding:8px 16px; border-radius:999px;}
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>رفيق — اختر اتجاه التصميم للصفحة الرئيسية</h1>
+    <p>ثلاثة اتجاهات مختلفة كلياً بالهوية والترتيب. شوف الفرق الحقيقي واختَر اللي بيناسب مشروعك — بعدها أنفّذه بالتطبيق الفعلي بكل صفحاته.</p>
+    <div class="hint">قلّي رقم الاتجاه: <b>A</b> أو <b>B</b> أو <b>C</b> — أو امزج (مثلاً «ألوان B مع ترتيب A»).</div>
+  </div>
+
+  <div class="stage">
+
+    <!-- ============ A ============ -->
+    <div class="col">
+      <div class="cap"><div class="name">A · زمرّدي — الخريطة أولاً</div><div class="desc">دافئ وموثوق (أسلوب كريم). الخريطة تملأ الشاشة + لوحة سفلية.</div></div>
+      <div class="phone a"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮ 5G</span></div>
+        <div class="map"><div class="road r1"></div><div class="road r2"></div><div class="route"></div><div class="pin pin1"></div><div class="pin pin2"></div></div>
+        <div class="topfloat"><div class="fab">ح</div><div class="fab">🔔</div></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <div class="hello">أهلاً حمزة 👋</div>
+          <div class="search"><div class="dot">➤</div><div class="txt">لوين رايح اليوم؟</div><div class="chev">‹</div></div>
+          <div class="places">
+            <div class="place"><div class="pic">🏠</div><div><div class="t">المنزل</div><div class="s">إربد - شارع الجامعة</div></div></div>
+            <div class="place"><div class="pic">🎓</div><div><div class="t">الجامعة</div><div class="s">جامعة اليرموك</div></div></div>
+          </div>
+          <div class="svcs">
+            <div class="svc"><div class="b">📅</div><div class="l">اشتراكات</div></div>
+            <div class="svc"><div class="b">📦</div><div class="l">أغراض</div></div>
+            <div class="svc"><div class="b">🎁</div><div class="l">نقاط</div></div>
+            <div class="svc"><div class="b">💳</div><div class="l">المحفظة</div></div>
+          </div>
+        </div>
+        <div class="tabbar"></div>
+      </div></div>
+    </div>
+
+    <!-- ============ B ============ -->
+    <div class="col">
+      <div class="cap"><div class="name">B · أزرق أنيق — لوحة محتوى</div><div class="desc">عصري ومرتّب (أسلوب فنتك). ترحيب + رصيد + زر بارز + شبكة خدمات.</div></div>
+      <div class="phone b"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮ 5G</span></div>
+        <div class="body">
+          <div class="head">
+            <div class="who"><div class="av">ح</div><div><div class="g1">أهلاً 👋</div><div class="g2">حمزة</div></div></div>
+            <div class="bell">🔔<div class="n"></div></div>
+          </div>
+          <div class="cta"><div class="k">إلى أين نتجه اليوم؟</div><div class="h">اطلب رحلتك الآن</div><div class="pill">اطلب رحلة ‹</div></div>
+          <div class="stats">
+            <div class="stat"><div class="i">💳</div><div class="v">12.50<small> د.أ</small></div><div class="l">الرصيد</div></div>
+            <div class="stat"><div class="i">📅</div><div class="v">8</div><div class="l">الرحلات المتبقية</div></div>
+          </div>
+          <div class="sec">الخدمات</div>
+          <div class="grid">
+            <div class="tile"><div class="b2">📅</div><div class="l">اشتراكات</div></div>
+            <div class="tile"><div class="b2">🚌</div><div class="l">رحلات</div></div>
+            <div class="tile"><div class="b2">📦</div><div class="l">أغراض</div></div>
+            <div class="tile"><div class="b2">💳</div><div class="l">المحفظة</div></div>
+            <div class="tile"><div class="b2">🎁</div><div class="l">نقاط</div></div>
+            <div class="tile"><div class="b2">🔍</div><div class="l">مفقودات</div></div>
+            <div class="tile"><div class="b2">🔁</div><div class="l">تبادل</div></div>
+            <div class="tile"><div class="b2">💬</div><div class="l">الدعم</div></div>
+          </div>
+        </div>
+        <div class="tabbar"><span class="ti on">🏠</span><span class="ti">🚌</span><span class="ti">💳</span><span class="ti">🔔</span><span class="ti">👤</span></div>
+      </div></div>
+    </div>
+
+    <!-- ============ C ============ -->
+    <div class="col">
+      <div class="cap"><div class="name">C · ليلي فخم — داكن</div><div class="desc">داكن راقٍ مع لمسة توهّج وزجاج. «أفخم» بس منفّذ بذوق.</div></div>
+      <div class="phone c"><div class="notch"></div><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>▮▮▮ 5G</span></div>
+        <div class="body">
+          <div class="glow"></div>
+          <div class="head">
+            <div class="who"><div class="av">ح</div><div><div class="g1">أهلاً 👋</div><div class="g2">حمزة</div></div></div>
+            <div class="bell">🔔<div class="n"></div></div>
+          </div>
+          <div class="cta"><div class="k">إلى أين نتجه اليوم؟</div><div class="h">اطلب رحلتك الآن</div><div class="pill">اطلب رحلة ‹</div></div>
+          <div class="stats">
+            <div class="stat"><div class="i">💳</div><div class="v">12.50<small> د.أ</small></div><div class="l">الرصيد</div></div>
+            <div class="stat"><div class="i">📅</div><div class="v">8</div><div class="l">الرحلات المتبقية</div></div>
+          </div>
+          <div class="mapcard"><div class="route"></div><div class="pin"></div></div>
+          <div class="sec">الخدمات</div>
+          <div class="grid">
+            <div class="tile"><div class="b2">📅</div><div class="l">اشتراكات</div></div>
+            <div class="tile"><div class="b2">📦</div><div class="l">أغراض</div></div>
+            <div class="tile"><div class="b2">🎁</div><div class="l">نقاط</div></div>
+            <div class="tile"><div class="b2">💬</div><div class="l">الدعم</div></div>
+          </div>
+        </div>
+        <div class="tabbar"><span class="ti on">🏠</span><span class="ti">🚌</span><span class="ti">💳</span><span class="ti">🔔</span><span class="ti">👤</span></div>
+      </div></div>
+    </div>
+
+  </div>
+</body>
+</html>
