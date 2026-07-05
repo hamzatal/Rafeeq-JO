@@ -140,7 +140,7 @@ export default function Dashboard() {
             {/* Today earnings + stats */}
             <View style={s.statsRow}>
               <View style={s.statBoxWide}>
-                <Text style={s.statLbl}>{t('driver.todayEarnings')}</Text>
+                <Text style={s.statWideLbl}>{t('driver.todayEarnings')}</Text>
                 <Text style={s.statValBig}>{perf ? jod(perf.available_earnings_fils) : '—'} <Text style={s.cur}>{t('subscriptions.currency')}</Text></Text>
               </View>
             </View>
@@ -187,8 +187,8 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     header: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: t.spacing.lg },
-    avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.onPrimary },
+    avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: t.colors.ink, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
+    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.onInk },
     headerText: { flex: 1 },
     greeting: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
     name: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'right' },
@@ -201,9 +201,10 @@ const makeStyles = (t: AppTheme) =>
     toggleHint: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
     statsRow: { flexDirection: 'row-reverse', gap: t.spacing.base, marginBottom: t.spacing.base },
-    statBoxWide: { flex: 1, backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, ...t.shadow.md },
-    statValBig: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: t.colors.onPrimary, textAlign: 'right', marginTop: 4 },
-    cur: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onPrimary },
+    statBoxWide: { flex: 1, backgroundColor: t.colors.ink, borderRadius: t.radius.xl, padding: t.spacing.lg, ...t.shadow.md },
+    statWideLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.onInk, opacity: 0.7, textAlign: 'right' },
+    statValBig: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: t.colors.onInk, textAlign: 'right', marginTop: 4 },
+    cur: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onInk },
     statBox: { flex: 1, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, alignItems: 'center', ...t.shadow.sm },
     statVal: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, marginTop: 4 },
     statLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, marginTop: 2, textAlign: 'right' },
