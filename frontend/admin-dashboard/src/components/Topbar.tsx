@@ -36,7 +36,7 @@ const TARGETS: Target[] = [
   { href: '/profile', ar: 'ملفي الشخصي', en: 'My Profile', icon: 'account_circle' },
 ];
 
-export function Topbar() {
+export function Topbar({ onMenu }: { onMenu?: () => void }) {
   const { locale, scheme, setLocale, setScheme } = usePrefs();
   const { t } = useT();
   const router = useRouter();
@@ -123,9 +123,19 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-surface/90 backdrop-blur border-b border-line flex items-center justify-between px-6 dark:bg-dcard/90 dark:border-dline">
-      {/* Global search */}
-      <div className="relative w-96 max-w-[48vw] hidden sm:block" ref={searchRef}>
+    <header className="sticky top-0 z-40 h-16 bg-surface/90 backdrop-blur border-b border-line flex items-center justify-between px-4 sm:px-6 dark:bg-dcard/90 dark:border-dline">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        {/* Mobile menu toggle */}
+        <button
+          onClick={onMenu}
+          aria-label="menu"
+          className="lg:hidden w-10 h-10 shrink-0 rounded-lg flex items-center justify-center text-muted hover:bg-background dark:hover:bg-dsurface transition-colors"
+        >
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+
+        {/* Global search */}
+        <div className="relative w-96 max-w-[48vw] hidden sm:block" ref={searchRef}>
         <form onSubmit={submitSearch}>
           <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-line bg-background focus-within:border-cyan focus-within:ring-1 focus-within:ring-cyan dark:bg-dsurface dark:border-dline">
             <span className="material-symbols-outlined text-muted text-[20px] leading-none shrink-0">search</span>
@@ -174,6 +184,7 @@ export function Topbar() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       <div className="flex items-center gap-2">

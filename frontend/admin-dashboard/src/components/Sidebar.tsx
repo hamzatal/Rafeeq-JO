@@ -100,7 +100,7 @@ const HINTS: Record<string, string> = {
   '/profile': 'تعديل بياناتك وكلمة المرور',
 };
 
-export function Sidebar() {
+export function Sidebar({ open = false, onClose }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { t } = useT();
@@ -114,7 +114,19 @@ export function Sidebar() {
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-navy text-white flex flex-col z-50 shadow-lift">
+    <>
+      {/* Mobile backdrop */}
+      <div
+        onClick={onClose}
+        className={`lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      />
+      <aside
+        className={`fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-navy text-white flex flex-col z-50 shadow-lift transition-transform duration-300 lg:translate-x-0 ${
+          open ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'
+        }`}
+      >
       {/* Brand */}
       <div className="px-5 py-5 flex items-center gap-3 border-b border-white/10">
         <LogoMark size={42} />
@@ -141,6 +153,7 @@ export function Sidebar() {
                   key={l.href}
                   href={l.href}
                   title={HINTS[l.href] ?? ''}
+                  onClick={onClose}
                   className={`nav-item ${active ? 'nav-item-active' : ''}`}
                 >
                   <span className={`material-symbols-outlined text-[20px] ${active ? 'icon-fill' : ''}`}>
@@ -166,6 +179,7 @@ export function Sidebar() {
       <div className="p-3 border-t border-white/10">
         <Link
           href="/profile"
+          onClick={onClose}
           className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors"
         >
           <div className="w-9 h-9 rounded-full bg-cyan text-navy flex items-center justify-center font-bold shrink-0">
@@ -184,6 +198,7 @@ export function Sidebar() {
           {t('shell.logout')}
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
