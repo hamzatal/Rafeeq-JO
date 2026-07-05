@@ -11,6 +11,7 @@ import {
   Cairo_700Bold,
   Cairo_800ExtraBold,
 } from '@expo-google-fonts/cairo';
+import Feather from '@expo/vector-icons/Feather';
 import { I18nProvider } from '../src/i18n';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { FeedbackProvider } from '../src/components/Feedback';
@@ -27,6 +28,8 @@ export default function RootLayout() {
     Cairo_600SemiBold,
     Cairo_700Bold,
     Cairo_800ExtraBold,
+    // Preload the Feather icon font so icons never flash as empty boxes on cold start.
+    ...Feather.font,
   });
 
   const bootstrap = useAuth((s) => s.bootstrap);
