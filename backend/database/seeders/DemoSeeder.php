@@ -369,9 +369,11 @@ class DemoSeeder extends Seeder
     /** Pending CliQ payment requests (wallet top-ups + subscription) → admin payments badge. @param User[] $students */
     private function seedPaymentRequests(array $students): void
     {
+        // 'submitted' = proof uploaded, awaiting admin verification → lights up the
+        // admin payments badge. 'pending' = still awaiting proof (not yet actionable).
         $defs = [
-            ['purpose' => 'wallet_topup', 'amount' => 10000, 'status' => 'pending'],
-            ['purpose' => 'wallet_topup', 'amount' => 5000, 'status' => 'pending'],
+            ['purpose' => 'wallet_topup', 'amount' => 10000, 'status' => 'submitted'],
+            ['purpose' => 'wallet_topup', 'amount' => 5000, 'status' => 'submitted'],
             ['purpose' => 'subscription', 'amount' => 25000, 'status' => 'pending'],
             ['purpose' => 'wallet_topup', 'amount' => 20000, 'status' => 'approved'],
         ];
