@@ -62,13 +62,17 @@ npm run driver    # تطبيق الكابتن
 
 ## التوثيق
 
+> الفهرس الكامل للتوثيق: [docs/README.md](docs/README.md)
+
 | الموضوع | الملف |
 |---------|-------|
-| نظرة عمل المشروع | [docs/business/overview.md](docs/business/overview.md) |
-| المعمارية | [docs/architecture/system-architecture.md](docs/architecture/system-architecture.md) |
-| قاعدة البيانات | [docs/database/schema.md](docs/database/schema.md) |
-| الأمان | [docs/security/security-model.md](docs/security/security-model.md) |
-| خارطة الطريق | [docs/business/roadmap.md](docs/business/roadmap.md) |
+| ابدأ هنا / الحالة | [docs/STATUS.md](docs/STATUS.md) |
+| المعمارية | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| قاعدة البيانات | [docs/DATABASE.md](docs/DATABASE.md) |
+| المزايا ونظرة العمل | [docs/FEATURES.md](docs/FEATURES.md) |
+| الأمان | [docs/SECURITY.md](docs/SECURITY.md) |
+| خارطة الطريق | [docs/ROADMAP.md](docs/ROADMAP.md) |
+| التشغيل والنشر | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 
 ## خطة التنفيذ (Phases)
 
@@ -81,7 +85,7 @@ npm run driver    # تطبيق الكابتن
 - [~] **Phase 6** — لوحة الإدارة + التحليلات · **الإشعارات (FCM+SMS) ✅** · **التقييم الثنائي ✅** (backend)
 - [~] **Phase 7** — الإطلاق · **SOS + جهات اتصال الطوارئ ✅** · Notifications ✅ · **OTP صعود + OTP إنزال (تأكيد الطرفين) ✅** · **محرك تسعير + Express ✅** · **حجز الرصيد ✅** · **كشف احتيال GPS ✅** · (Deployment/CI/اختبارات شاملة ⏳)
 
-> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md` (**المصدر الرسمي للحالة**). كتالوج المزايا: `docs/FEATURES.md`. **المتبقّي للإطلاق: `docs/LAUNCH_CHECKLIST.md`.** آخر commit: **RFQ-203**.
+> الحالة الحيّة والتفصيلية (التقدّم + قائمة الإطلاق + التسليم + التدقيق) موحّدة الآن في `docs/STATUS.md`. كتالوج المزايا: `docs/FEATURES.md`.
 >
 > ملاحظة: حُذف نهائياً (RFQ-199) تطبيق ولي الأمر `guardian-app` ووحدة `Guardians` — استُبدل بجهات اتصال الطوارئ داخل تطبيق الطالب.
 
