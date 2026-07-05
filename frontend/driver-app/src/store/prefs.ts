@@ -4,9 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { ColorScheme, Locale } from '@rafeeq/shared';
 import { setApiLocale } from '../lib/api';
 
-// Bumped to _v2 with the Onyx premium-dark identity (mirrors the student app):
-// any previously persisted light scheme is discarded so the new default shows.
-const KEY = 'rafeeq_driver_prefs_v2';
+// Reverted to the light identity (the dark redesign was rolled back). Key
+// bumped to _v3 so any 'dark' value persisted during the trial is discarded.
+const KEY = 'rafeeq_driver_prefs_v3';
 
 interface PrefsState {
   locale: Locale;
@@ -29,7 +29,7 @@ function applyRTL(locale: Locale) {
 
 export const usePrefs = create<PrefsState>((set, get) => ({
   locale: 'ar',
-  scheme: 'dark', // default = Arabic + premium dark (Onyx) for all apps (user can switch to light)
+  scheme: 'light', // default = Arabic + light for all apps (user can switch to dark)
   introSeen: false,
   hydrated: false,
 
@@ -38,7 +38,7 @@ export const usePrefs = create<PrefsState>((set, get) => ({
       const raw = await AsyncStorage.getItem(KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        set({ locale: p.locale ?? 'ar', scheme: p.scheme ?? 'dark', introSeen: p.introSeen ?? false });
+        set({ locale: p.locale ?? 'ar', scheme: p.scheme ?? 'light', introSeen: p.introSeen ?? false });
       }
     } catch {
       /* ignore */
