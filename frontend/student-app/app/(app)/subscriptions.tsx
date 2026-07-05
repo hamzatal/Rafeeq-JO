@@ -138,17 +138,17 @@ const makeStyles = (t: AppTheme) =>
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
 
     // Active premium subscription card
-    premium: { backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.lg },
+    premium: { backgroundColor: t.colors.ink, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.lg },
     premiumTop: { flexDirection: 'row-reverse', alignItems: 'flex-start', marginBottom: t.spacing.md },
     activePill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, alignSelf: 'flex-end', backgroundColor: t.colors.accent, paddingHorizontal: 10, paddingVertical: 3, borderRadius: t.radius.full, marginBottom: 8 },
     warnPill: { backgroundColor: t.colors.warning },
     activePillText: { fontFamily: t.fontFamily.bold, fontSize: 11, color: t.colors.primary },
-    premiumTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.onPrimary, textAlign: 'right' },
+    premiumTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.onInk, textAlign: 'right' },
     premiumIcon: { width: 46, height: 46, borderRadius: 23, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     premiumStats: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: t.radius.lg, padding: t.spacing.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
     pStatLabel: { fontFamily: t.fontFamily.regular, fontSize: 11, color: 'rgba(255,255,255,0.65)', textAlign: 'right' },
     pStatValue: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.accent, textAlign: 'right', marginTop: 2 },
-    pStatValueSm: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onPrimary, textAlign: 'right', marginTop: 2 },
+    pStatValueSm: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onInk, textAlign: 'right', marginTop: 2 },
     pDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.12)', marginHorizontal: t.spacing.md },
 
     // Available plan card

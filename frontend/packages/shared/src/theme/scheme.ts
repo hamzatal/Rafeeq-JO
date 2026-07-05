@@ -24,6 +24,14 @@ export interface ThemeColors {
   muted: string;
   /** Text/icon color that sits on a colored (primary/accent) surface. */
   textInverse: string;
+  /**
+   * A premium "showcase" surface (wallet / subscription / rewards hero cards)
+   * that stays a deep-ink card carrying white content in BOTH light and dark
+   * themes — like a physical card. Unlike `primary`, it never flips to
+   * near-white, so hero text on it is always legible.
+   */
+  ink: string;
+  onInk: string;
   border: string;
   /** A very subtle divider, lighter than `border`. */
   hairline: string;
@@ -141,6 +149,11 @@ export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
     onPrimary,
     onAccent: '#FFFFFF',
     textInverse: '#FFFFFF',
+    // Deep-ink showcase surface. On the light canvas it is a rich near-black
+    // card; on the dark canvas it is a slightly-elevated ink that still sits
+    // clearly above the background. White content is legible on both.
+    ink: isDark ? '#1B222E' : '#12161D',
+    onInk: '#FFFFFF',
     ...neutrals,
     ...status,
     successSoft: hexToRgba(status.success, softAlpha),

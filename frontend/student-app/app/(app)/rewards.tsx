@@ -93,11 +93,11 @@ export default function Rewards() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     h1: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
-    card: { backgroundColor: t.colors.primary, borderRadius: t.radius.lg, padding: t.spacing.xl, alignItems: 'center', marginBottom: t.spacing.lg },
-    pts: { fontFamily: t.fontFamily.extrabold, fontSize: 48, color: t.colors.onPrimary },
-    ptsLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.onPrimary, opacity: 0.9 },
+    card: { backgroundColor: t.colors.ink, borderRadius: t.radius.lg, padding: t.spacing.xl, alignItems: 'center', marginBottom: t.spacing.lg },
+    pts: { fontFamily: t.fontFamily.extrabold, fontSize: 48, color: t.colors.onInk },
+    ptsLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.onInk, opacity: 0.9 },
     tierPill: { marginTop: t.spacing.base, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: t.spacing.lg, paddingVertical: 6, borderRadius: 999 },
-    tierText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onPrimary },
+    tierText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onInk },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', paddingVertical: t.spacing.sm, borderBottomWidth: 1, borderBottomColor: t.colors.border },
     metaLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
     metaValue: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },

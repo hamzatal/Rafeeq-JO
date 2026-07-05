@@ -283,7 +283,7 @@ const makeStyles = (t: AppTheme) =>
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
 
-    walletCard: { backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, overflow: 'hidden', marginBottom: t.spacing.md, ...t.shadow.lg },
+    walletCard: { backgroundColor: t.colors.ink, borderRadius: t.radius['2xl'], padding: t.spacing.lg, overflow: 'hidden', marginBottom: t.spacing.md, ...t.shadow.lg },
     glow: { position: 'absolute', top: -50, left: -30, width: 160, height: 160, borderRadius: 80, backgroundColor: t.colors.accent, opacity: 0.14 },
     walletTop: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.lg },
     brandChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, backgroundColor: t.colors.accent, paddingHorizontal: 10, paddingVertical: 4, borderRadius: t.radius.full },

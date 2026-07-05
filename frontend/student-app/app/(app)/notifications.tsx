@@ -209,7 +209,7 @@ const makeStyles = (t: AppTheme) =>
     couponRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
     couponCode: { fontFamily: t.fontFamily.extrabold, fontSize: 15, color: t.colors.primary, letterSpacing: 1 },
     couponBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingHorizontal: 12, paddingVertical: 7 },
-    couponBtnText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: '#FFFFFF' },
+    couponBtnText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.onPrimary },
     couponMsg: { fontFamily: t.fontFamily.medium, fontSize: 12, textAlign: 'right', marginTop: 6 },
     dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.primary, marginRight: 6, marginTop: 6 },
   });

@@ -326,10 +326,10 @@ const makeStyles = (t: AppTheme) =>
 
     section: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.base, marginBottom: t.spacing.sm },
 
-    fareCard: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginTop: t.spacing.base, ...t.shadow.md },
-    fareLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onPrimary, opacity: 0.85, textAlign: 'right' },
-    fareMeta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.onPrimary, opacity: 0.7, textAlign: 'right', marginTop: 2 },
-    fareVal: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.onPrimary },
+    fareCard: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.ink, borderRadius: t.radius['2xl'], padding: t.spacing.lg, marginTop: t.spacing.base, ...t.shadow.md },
+    fareLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onInk, opacity: 0.85, textAlign: 'right' },
+    fareMeta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.onInk, opacity: 0.7, textAlign: 'right', marginTop: 2 },
+    fareVal: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.onInk },
 
     couponCard: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: t.spacing.sm, backgroundColor: t.colors.card, borderRadius: t.radius.xl, padding: t.spacing.md, marginTop: t.spacing.base, ...t.shadow.sm },
     couponInput: { flex: 1 },

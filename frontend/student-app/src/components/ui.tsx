@@ -153,9 +153,9 @@ const makeStyles = (t: AppTheme) =>
     tileLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text, textAlign: 'center' },
     tileSoon: { fontFamily: t.fontFamily.regular, fontSize: 9, color: t.colors.muted },
 
-    stat: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, ...t.shadow.md },
-    statLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onPrimary, opacity: 0.85, textAlign: 'right' },
-    statValue: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.onPrimary, textAlign: 'right', marginTop: 2 },
+    stat: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.ink, borderRadius: t.radius['2xl'], padding: t.spacing.lg, ...t.shadow.md },
+    statLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onInk, opacity: 0.85, textAlign: 'right' },
+    statValue: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.onInk, textAlign: 'right', marginTop: 2 },
     statIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
 
     row: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.xl, padding: t.spacing.base, marginBottom: t.spacing.sm, ...t.shadow.sm },
