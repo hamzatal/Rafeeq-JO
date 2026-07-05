@@ -19,6 +19,12 @@ use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Wallet\Models\Wallet;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Modules\Addresses\Models\SavedAddress;
+use Rafeeq\Modules\RideRequests\Models\RideRequest;
+use Rafeeq\Modules\Payments\Models\PaymentRequest;
+use Rafeeq\Modules\Payouts\Models\PayoutRequest;
+use Rafeeq\Modules\Disputes\Models\Dispute;
+use Rafeeq\Modules\Support\Models\SupportTicket;
 use Rafeeq\Shared\Enums\ComplaintStatus;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\Gender;
@@ -52,8 +58,14 @@ class DemoSeeder extends Seeder
         $this->seedComplaints($students, $drivers);
         $this->seedNotifications($students, $drivers);
         $this->seedTrips($drivers, $zones, $unis);
+        $this->seedAddresses($students);
+        $this->seedRideRequests($students, $unis, $zones);
+        $this->seedPaymentRequests($students);
+        $this->seedPayouts($drivers);
+        $this->seedDisputes($students, $drivers);
+        $this->seedSupport($students);
 
-        $this->command?->info('DemoSeeder: '.count($students).' students, '.count($drivers).' captains, plus subscriptions/coupons/complaints/notifications/trips.');
+        $this->command?->info('DemoSeeder: '.count($students).' students, '.count($drivers).' captains, plus subscriptions, coupons, complaints, notifications, trips, saved addresses, ride requests, pending payments/payouts, disputes and support tickets (admin attention badges will light up).');
     }
 
 
@@ -306,6 +318,145 @@ class DemoSeeder extends Seeder
                     'base_fare_fils' => 1500,
                     'started_at' => in_array($st, [TripStatus::Started, TripStatus::Completed], true) ? now()->subMinutes(30) : null,
                     'ended_at' => $st === TripStatus::Completed ? now()->subMinutes(5) : null,
+                ],
+            );
+        }
+    }
+
+    /** Saved home/university destinations so the student home shows quick places. @param User[] $students */
+    private function seedAddresses(array $students): void
+    {
+        $defs = [
+            ['label' => 'home', 'title' => 'المنزل', 'address' => 'إربد - شارع الجامعة، بناية 12', 'lat' => 32.5486, 'lng' => 35.8560, 'default' => true],
+            ['label' => 'university', 'title' => 'الجامعة', 'address' => 'جامعة اليرموك - البوابة الشمالية', 'lat' => 32.5361, 'lng' => 35.8536, 'default' => false],
+        ];
+        foreach (array_slice($students, 0, 8) as $s) {
+            foreach ($defs as $d) {
+                SavedAddress::firstOrCreate(
+                    ['user_id' => $s->id, 'label' => $d['label']],
+                    ['title' => $d['title'], 'address_text' => $d['address'], 'lat' => $d['lat'], 'lng' => $d['lng'], 'is_default' => $d['default']],
+                );
+            }
+        }
+    }
+
+    /** A spread of ride requests (pending/grouped/completed) for the student "my requests" list + admin queue. @param User[] $students */
+    private function seedRideRequests(array $students, $unis, $zones): void
+    {
+        $statuses = ['pending', 'grouped', 'assigned', 'completed', 'cancelled'];
+        foreach ($statuses as $i => $status) {
+            $student = $students[$i % count($students)] ?? null;
+            $uni = $unis->get($i % max($unis->count(), 1));
+            if (! $student || ! $uni) {
+                continue;
+            }
+            RideRequest::updateOrCreate(
+                ['student_id' => $student->id, 'university_id' => $uni->id, 'desired_time' => now()->addHours($i + 1)->startOfHour()],
+                [
+                    'zone_id' => $zones->get($i % max($zones->count(), 1))?->id,
+                    'pickup_lat' => 32.5480 + $i * 0.002,
+                    'pickup_lng' => 35.8555 + $i * 0.002,
+                    'pickup_address' => 'إربد - نقطة انطلاق '.($i + 1),
+                    'type' => $i % 2 === 0 ? 'scheduled' : 'express',
+                    'is_express' => $i % 2 !== 0,
+                    'express_fee_fils' => $i % 2 !== 0 ? 500 : 0,
+                    'status' => $status,
+                ],
+            );
+        }
+    }
+
+    /** Pending CliQ payment requests (wallet top-ups + subscription) → admin payments badge. @param User[] $students */
+    private function seedPaymentRequests(array $students): void
+    {
+        $defs = [
+            ['purpose' => 'wallet_topup', 'amount' => 10000, 'status' => 'pending'],
+            ['purpose' => 'wallet_topup', 'amount' => 5000, 'status' => 'pending'],
+            ['purpose' => 'subscription', 'amount' => 25000, 'status' => 'pending'],
+            ['purpose' => 'wallet_topup', 'amount' => 20000, 'status' => 'approved'],
+        ];
+        foreach ($defs as $i => $d) {
+            $student = $students[$i % count($students)] ?? null;
+            if (! $student) {
+                continue;
+            }
+            PaymentRequest::firstOrCreate(
+                ['number' => 'PR-DEMO-'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)],
+                [
+                    'user_id' => $student->id,
+                    'purpose' => $d['purpose'],
+                    'amount_fils' => $d['amount'],
+                    'currency' => 'JOD',
+                    'method' => 'cliq',
+                    'status' => $d['status'],
+                    'expires_at' => now()->addDays(2),
+                    'approved_at' => $d['status'] === 'approved' ? now()->subHour() : null,
+                ],
+            );
+        }
+    }
+
+    /** Pending captain payout requests → admin withdrawals badge. @param DriverProfile[] $drivers */
+    private function seedPayouts(array $drivers): void
+    {
+        $approved = array_values(array_filter($drivers, fn ($d) => $d->status === DriverStatus::Approved));
+        foreach (array_slice($approved, 0, 3) as $i => $driver) {
+            PayoutRequest::firstOrCreate(
+                ['captain_user_id' => $driver->user_id, 'amount_fils' => 15000 + $i * 5000],
+                [
+                    'method' => 'cliq',
+                    'destination' => '+96279'.str_pad((string) (300000 + $i), 7, '0', STR_PAD_LEFT),
+                    'status' => $i === 0 ? 'pending' : ($i === 1 ? 'pending' : 'paid'),
+                    'note' => 'سحب أرباح',
+                    'processed_at' => $i === 2 ? now()->subDay() : null,
+                ],
+            );
+        }
+    }
+
+    /** Open safety/manual disputes → admin disputes badge. @param User[] $students @param DriverProfile[] $drivers */
+    private function seedDisputes(array $students, array $drivers): void
+    {
+        $defs = [
+            ['type' => 'sos', 'status' => 'open', 'sev' => RiskSeverity::Critical, 'summary' => 'نداء طوارئ من طالب أثناء رحلة نشطة.'],
+            ['type' => 'risk_threshold', 'status' => 'investigating', 'sev' => RiskSeverity::High, 'summary' => 'نمط مخاطرة مرتفع على حساب كابتن.'],
+            ['type' => 'manual', 'status' => 'open', 'sev' => RiskSeverity::Medium, 'summary' => 'مراجعة يدوية بعد شكوى متكررة.'],
+        ];
+        foreach ($defs as $i => $d) {
+            $subject = ($i % 2 === 0 ? ($drivers[$i % count($drivers)]->user_id ?? null) : ($students[$i % count($students)]->id ?? null));
+            if (! $subject) {
+                continue;
+            }
+            Dispute::firstOrCreate(
+                ['subject_user_id' => $subject, 'type' => $d['type'], 'summary' => $d['summary']],
+                ['status' => $d['status'], 'severity' => $d['sev'], 'risk_score' => 40 + $i * 20],
+            );
+        }
+    }
+
+    /** Open support tickets across levels → admin support badge. @param User[] $students */
+    private function seedSupport(array $students): void
+    {
+        $defs = [
+            ['cat' => 'payment', 'subject' => 'لم يتم شحن محفظتي بعد التحويل', 'priority' => 'high', 'level' => 2],
+            ['cat' => 'trip', 'subject' => 'الكابتن لم يصل لنقطة الالتقاط', 'priority' => 'normal', 'level' => 1],
+            ['cat' => 'technical', 'subject' => 'لا أستطيع تحديث رقم هاتفي', 'priority' => 'low', 'level' => 1],
+        ];
+        foreach ($defs as $i => $d) {
+            $student = $students[$i % count($students)] ?? null;
+            if (! $student) {
+                continue;
+            }
+            SupportTicket::firstOrCreate(
+                ['number' => 'TKT-DEMO-'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)],
+                [
+                    'user_id' => $student->id,
+                    'category' => $d['cat'],
+                    'subject' => $d['subject'],
+                    'status' => 'open',
+                    'priority' => $d['priority'],
+                    'level' => $d['level'],
+                    'last_reply_at' => now()->subHours($i + 1),
                 ],
             );
         }
