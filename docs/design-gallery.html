@@ -3,244 +3,239 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>رفيق — معرض التصاميم (10 اتجاهات)</title>
+<title>رفيق — معرض التصاميم (20 اتجاه × 4 شاشات)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Reem+Kufi:wght@500;600;700&family=Sora:wght@600;700;800&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --page-bg:#0b0e13; --panel:#151a22; --panel2:#1c232d; --line:#28303b; --ftext:#e8edf3; --fmuted:#95a1b2; }
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family:'Cairo',system-ui,sans-serif; background:var(--page-bg); color:var(--ftext); padding:0 0 80px; }
-  header.top { position:sticky; top:0; z-index:50; background:rgba(11,14,19,0.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:18px 22px; }
-  header.top h1 { font-size:22px; font-weight:900; letter-spacing:.3px; }
-  header.top p { color:var(--fmuted); font-size:13.5px; margin-top:4px; line-height:1.7; }
-  .switcher { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
-  .switcher button { font-family:inherit; cursor:pointer; border:1px solid var(--line); background:var(--panel); color:var(--ftext); padding:8px 16px; border-radius:999px; font-weight:700; font-size:13px; transition:.15s; }
-  .switcher button.active { background:#2F6BFF; border-color:#2F6BFF; color:#fff; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:22px; padding:24px 22px; max-width:1500px; margin:0 auto; }
-  .variant { background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:18px; }
-  .variant .vhead { display:flex; align-items:flex-start; gap:10px; justify-content:space-between; margin-bottom:4px; }
-  .variant .vnum { font-size:12px; font-weight:800; color:#fff; background:#2F6BFF; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
-  .variant h3 { font-size:17px; font-weight:800; }
-  .variant .en { font-size:11.5px; color:var(--fmuted); font-weight:600; letter-spacing:.4px; }
-  .variant .why { font-size:12.5px; color:var(--fmuted); line-height:1.75; margin:8px 0 12px; min-height:56px; }
-  .swatches { display:flex; gap:6px; margin-bottom:14px; }
-  .sw { flex:1; height:30px; border-radius:8px; border:1px solid rgba(255,255,255,.08); position:relative; }
-  .sw span { position:absolute; bottom:-16px; right:0; font-size:9px; color:var(--fmuted); }
-  .stage { display:flex; justify-content:center; padding-top:14px; }
+  :root { --page:#0b0e13; --panel:#141a22; --panel2:#1b222c; --line:#28303b; --ftext:#e8edf3; --fmuted:#94a1b2; --hi:#2F6BFF; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Cairo',system-ui,sans-serif; background:var(--page); color:var(--ftext); }
+  a { color:inherit; }
 
-  /* ---- phone ---- */
-  .phone { width:290px; height:600px; background:#000; border-radius:40px; padding:9px; box-shadow:0 18px 40px rgba(0,0,0,.55); flex:0 0 auto; }
-  .screen { width:100%; height:100%; border-radius:32px; overflow:hidden; position:relative; display:flex; flex-direction:column; background:var(--bg); color:var(--text); }
-  .statusbar { display:flex; justify-content:space-between; align-items:center; padding:10px 18px 4px; font-size:12px; font-weight:700; color:var(--text); }
-  .statusbar.onink { color:#fff; }
+  header.top { position:sticky; top:0; z-index:100; background:rgba(11,14,19,.94); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:16px 22px; }
+  header.top h1 { font-size:21px; font-weight:900; }
+  header.top p { color:var(--fmuted); font-size:13px; margin-top:5px; line-height:1.7; max-width:1000px; }
+  .jump { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+  .jump a { font-size:12px; font-weight:800; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:9px; background:var(--panel2); border:1px solid var(--line); text-decoration:none; transition:.15s; }
+  .jump a:hover { background:var(--hi); border-color:var(--hi); }
 
-  /* welcome / splash */
-  .s-welcome { background:var(--ink); color:#fff; align-items:center; justify-content:center; text-align:center; padding:30px; position:relative; overflow:hidden; }
-  .glow { position:absolute; width:280px; height:280px; border-radius:50%; background:var(--accent); filter:blur(60px); opacity:.28; top:-70px; left:-60px; }
-  .glow2 { position:absolute; width:240px; height:240px; border-radius:50%; background:var(--accent); filter:blur(70px); opacity:.14; bottom:-60px; right:-50px; }
-  .logo-circle { width:92px; height:92px; border-radius:28px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:44px; font-weight:900; color:var(--ink); z-index:2; box-shadow:0 10px 30px rgba(0,0,0,.4); }
-  .ring { position:absolute; width:120px; height:120px; border-radius:50%; border:2.5px solid var(--accent); border-top-color:transparent; border-right-color:transparent; z-index:1; }
-  .s-welcome .brand { font-size:40px; font-weight:900; margin-top:22px; z-index:2; }
-  .s-welcome .tag { font-size:14px; color:rgba(255,255,255,.72); margin-top:8px; line-height:1.7; z-index:2; max-width:230px; }
-  .w-actions { position:absolute; bottom:34px; left:24px; right:24px; z-index:2; }
-  .btn { width:100%; height:52px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15.5px; border:none; }
-  .btn-primary { background:var(--accent); color:var(--onAccent); }
-  .btn-ghost { background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.25); color:#fff; margin-top:12px; }
+  .wrap { max-width:1180px; margin:0 auto; padding:10px 22px 100px; }
+  .design { border:1px solid var(--line); background:var(--panel); border-radius:22px; padding:20px; margin-top:26px; scroll-margin-top:120px; }
+  .dtitle { display:flex; align-items:center; gap:12px; }
+  .dnum { flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--hi); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:15px; }
+  .dtitle h2 { font-size:20px; font-weight:900; }
+  .dtitle .en { font-size:12px; color:var(--fmuted); font-weight:700; letter-spacing:.4px; margin-top:2px; }
+  .why { color:var(--fmuted); font-size:13px; line-height:1.8; margin:12px 0 6px; }
 
-  /* home */
-  .s-home { padding:6px 16px 0; overflow:hidden; }
-  .h-head { display:flex; align-items:center; justify-content:space-between; padding:8px 2px 14px; }
-  .h-head .hi { font-size:13px; color:var(--muted); }
-  .h-head .name { font-size:18px; font-weight:800; margin-top:2px; }
-  .avatar { width:42px; height:42px; border-radius:50%; background:var(--accent); color:var(--onAccent); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; }
-  .hero { background:var(--ink); color:#fff; border-radius:22px; padding:18px; position:relative; overflow:hidden; }
-  .hero .glowmini { position:absolute; width:150px; height:150px; border-radius:50%; background:var(--accent); opacity:.22; filter:blur(35px); top:-40px; left:-30px; }
-  .hero .lbl { font-size:12.5px; opacity:.8; }
-  .hero .bal { font-size:30px; font-weight:900; margin-top:4px; }
-  .hero .bal small { font-size:14px; font-weight:700; opacity:.75; }
-  .hero .topup { margin-top:14px; background:var(--accent); color:var(--onAccent); border:none; height:40px; border-radius:12px; width:100%; font-weight:800; font-size:13.5px; }
-  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:18px; }
+  /* brand bar — bilingual distinctive wordmark */
+  .brandbar { display:flex; gap:26px; align-items:center; flex-wrap:wrap; background:var(--panel2); border:1px solid var(--line); border-radius:16px; padding:14px 18px; margin:14px 0 18px; }
+  .brandbar .cap { font-size:11px; color:var(--fmuted); font-weight:700; }
+  .wm { display:inline-flex; align-items:center; gap:10px; }
+  .wm .mark { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; box-shadow:0 4px 12px rgba(0,0,0,.3); position:relative; }
+  .wm .mark::after { content:''; position:absolute; top:-3px; left:-3px; width:9px; height:9px; border-radius:50%; border:2px solid var(--page); }
+  .wm .txt-ar { font-family:'Reem Kufi',serif; font-weight:700; font-size:30px; line-height:1; letter-spacing:-.5px; }
+  .wm .txt-en { font-family:'Sora',sans-serif; font-weight:800; font-size:26px; line-height:1; letter-spacing:-.5px; }
+  .wm .dot { color:var(--wm-accent); }
+
+  .phones { display:flex; gap:16px; overflow-x:auto; padding:6px 2px 14px; }
+  .pcol { flex:0 0 auto; }
+  .plabel { text-align:center; font-size:12px; font-weight:800; color:var(--fmuted); margin-bottom:8px; }
+  .phone { width:246px; height:534px; background:#0a0a0a; border-radius:34px; padding:8px; box-shadow:0 16px 34px rgba(0,0,0,.5); }
+  .screen { width:100%; height:100%; border-radius:27px; overflow:hidden; position:relative; display:flex; flex-direction:column; background:var(--bg); color:var(--text); font-size:13px; }
+  .sb { display:flex; justify-content:space-between; padding:9px 16px 3px; font-size:11px; font-weight:800; }
+  .sb.ink { color:#fff; }
+
+  /* wordmark inside app header */
+  .apphdr { display:flex; align-items:center; justify-content:space-between; padding:6px 14px 10px; }
+  .apphdr .wmini { display:flex; align-items:center; gap:7px; }
+  .apphdr .wmini .m { width:30px; height:30px; border-radius:9px; background:var(--accent); color:var(--onAccent); font-weight:900; display:flex; align-items:center; justify-content:center; font-size:16px; font-family:'Reem Kufi',serif; }
+  .apphdr .wmini .w { font-family:'Reem Kufi',serif; font-weight:700; font-size:20px; color:var(--text); }
+  .apphdr .av { width:36px; height:36px; border-radius:50%; background:var(--accent); color:var(--onAccent); display:flex; align-items:center; justify-content:center; font-weight:800; }
+  .htitle { font-size:19px; font-weight:900; padding:4px 16px 12px; }
+
+  .body { flex:1; overflow-y:auto; padding:0 14px; }
+  .body::-webkit-scrollbar{ display:none; }
+
+  .hero { background:var(--ink); color:#fff; border-radius:18px; padding:15px; position:relative; overflow:hidden; }
+  .hero .g { position:absolute; width:130px; height:130px; border-radius:50%; background:var(--accent); opacity:.25; filter:blur(30px); top:-34px; left:-24px; }
+  .hero .l { font-size:12px; opacity:.82; }
+  .hero .b { font-size:26px; font-weight:900; margin-top:3px; }
+  .hero .b small { font-size:12px; opacity:.75; font-weight:700; }
+  .hero .row { display:flex; gap:8px; margin-top:12px; position:relative; }
+  .hero .qa { flex:1; background:rgba(255,255,255,.14); border:none; color:#fff; height:34px; border-radius:10px; font-weight:800; font-size:12px; font-family:inherit; }
+  .hero .qa.solid { background:var(--accent); color:var(--onAccent); }
+
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:14px; }
   .tile { text-align:center; }
-  .tile .ic { width:56px; height:56px; margin:0 auto; border-radius:18px; background:var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 3px 10px rgba(0,0,0,.05); }
-  .tile .tl { font-size:11px; margin-top:6px; color:var(--text); font-weight:600; }
-  .sect { font-size:14px; font-weight:800; margin:18px 2px 10px; }
-  .cta { width:100%; height:54px; border-radius:16px; background:var(--accent); color:var(--onAccent); border:none; font-weight:800; font-size:15.5px; display:flex; align-items:center; justify-content:center; gap:8px; }
-  .nav { position:absolute; bottom:0; left:0; right:0; height:64px; background:var(--surface); border-top:1px solid var(--border); display:flex; }
-  .nav .n { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:10px; color:var(--muted); font-weight:600; }
+  .tile .ic { width:48px; height:48px; margin:0 auto; border-radius:15px; background:var(--surface); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .tile .t { font-size:10px; margin-top:5px; font-weight:700; }
+
+  .sec { font-size:13px; font-weight:900; margin:15px 2px 9px; display:flex; justify-content:space-between; }
+  .sec .more { color:var(--accent); font-size:11px; font-weight:800; }
+
+  .cta { width:100%; height:48px; border-radius:14px; background:var(--accent); color:var(--onAccent); border:none; font-weight:900; font-size:14px; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:7px; }
+
+  .triprow { display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:8px; }
+  .triprow .rt { flex:1; }
+  .triprow .rt .a { font-weight:800; font-size:12.5px; }
+  .triprow .rt .b { font-size:10.5px; color:var(--muted); margin-top:2px; }
+  .triprow .pr { font-weight:900; font-size:13px; }
+  .pill { font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; }
+  .pill.ok { background:#12B76A22; color:#0E9F6E; }
+  .pill.go { background:var(--accentSoft); color:var(--accent); }
+
+  .nav { height:60px; background:var(--surface); border-top:1px solid var(--border); display:flex; }
+  .nav .n { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:9.5px; color:var(--muted); font-weight:700; }
+  .nav .n .p { width:42px; height:26px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:17px; }
   .nav .n.on { color:var(--accent); }
-  .nav .n.on .pill { background:var(--accentSoft); }
-  .nav .pill { width:46px; height:30px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:19px; }
+  .nav .n.on .p { background:var(--accentSoft); }
 
   /* ride */
-  .s-ride { position:relative; }
-  .map { position:absolute; inset:0; background:
-      linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px) 0 0/38px 38px,
-      linear-gradient(0deg, rgba(0,0,0,.04) 1px, transparent 1px) 0 0/38px 38px,
-      var(--mapbg); }
-  .route { position:absolute; height:5px; border-radius:3px; background:var(--accent); width:170px; top:210px; right:50px; transform:rotate(24deg); box-shadow:0 0 0 5px rgba(0,0,0,.03); }
-  .pin { position:absolute; width:20px; height:20px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:3px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,.3); }
-  .pin.a { background:var(--ink); top:200px; right:44px; }
-  .pin.b { background:var(--accent); top:150px; right:200px; }
-  .ridecard { position:absolute; bottom:0; left:0; right:0; background:var(--surface); border-radius:24px 24px 0 0; padding:20px 18px 24px; box-shadow:0 -8px 30px rgba(0,0,0,.14); }
-  .grip { width:42px; height:5px; border-radius:3px; background:var(--border); margin:0 auto 16px; }
-  .ridecard .st { display:inline-flex; align-items:center; gap:6px; background:var(--accentSoft); color:var(--accent); font-weight:800; font-size:12px; padding:6px 12px; border-radius:999px; }
-  .driver { display:flex; align-items:center; gap:12px; margin-top:16px; }
-  .driver .dav { width:52px; height:52px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; }
-  .driver .dn { font-weight:800; font-size:15px; }
-  .driver .dc { font-size:12px; color:var(--muted); margin-top:2px; }
-  .driver .rate { margin-inline-start:auto; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px 10px; font-weight:800; font-size:13px; }
-  .ridemeta { display:flex; gap:10px; margin-top:16px; }
-  .ridemeta .m { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:10px 12px; }
-  .ridemeta .m .k { font-size:10.5px; color:var(--muted); }
-  .ridemeta .m .v { font-size:15px; font-weight:800; margin-top:2px; }
-  .ridecard .cta { margin-top:16px; }
-  .note { text-align:center; color:var(--fmuted); font-size:13px; padding:8px 22px 0; }
-  .dualchips { display:flex; gap:6px; margin-top:8px; }
-  .dualchips b { flex:1; text-align:center; font-size:10px; padding:5px; border-radius:8px; color:#fff; font-weight:800; }
+  .map { flex:1; position:relative; background:
+     linear-gradient(90deg, rgba(0,0,0,.045) 1px, transparent 1px) 0 0/34px 34px,
+     linear-gradient(0deg, rgba(0,0,0,.045) 1px, transparent 1px) 0 0/34px 34px, var(--mapbg); }
+  .route { position:absolute; height:5px; width:150px; border-radius:3px; background:var(--accent); top:150px; right:40px; transform:rotate(26deg); }
+  .pin { position:absolute; width:18px; height:18px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:3px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.3); }
+  .pin.a { background:var(--ink); top:150px; right:36px; } .pin.b { background:var(--accent); top:100px; right:170px; }
+  .sheet { background:var(--surface); border-radius:22px 22px 0 0; padding:16px 15px 16px; box-shadow:0 -6px 24px rgba(0,0,0,.12); }
+  .grip { width:40px; height:5px; border-radius:3px; background:var(--border); margin:0 auto 13px; }
+  .drv { display:flex; align-items:center; gap:11px; margin-top:13px; }
+  .drv .da { width:46px; height:46px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; }
+  .drv .dn { font-weight:900; font-size:14px; } .drv .dc { font-size:11px; color:var(--muted); margin-top:2px; }
+  .drv .rate { margin-inline-start:auto; border:1px solid var(--border); border-radius:11px; padding:5px 9px; font-weight:900; font-size:12px; }
+  .meta { display:flex; gap:9px; margin-top:13px; }
+  .meta .m { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:9px 11px; }
+  .meta .k { font-size:10px; color:var(--muted); } .meta .v { font-size:14px; font-weight:900; margin-top:2px; }
+
+  .txn { display:flex; align-items:center; gap:10px; padding:10px 2px; border-bottom:1px solid var(--border); }
+  .txn .ti { width:38px; height:38px; border-radius:12px; background:var(--accentSoft); display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .txn .tt { flex:1; } .txn .tt .a { font-weight:800; font-size:12.5px; } .txn .tt .b { font-size:10px; color:var(--muted); margin-top:1px; }
+  .txn .am { font-weight:900; font-size:13px; } .am.pos { color:#0E9F6E; } .am.neg { color:var(--text); }
+  .tabs { display:flex; gap:8px; padding:0 16px 12px; }
+  .tabs .tb { font-size:12px; font-weight:800; padding:7px 14px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--muted); }
+  .tabs .tb.on { background:var(--accent); color:var(--onAccent); border-color:var(--accent); }
+  .dualchips { display:flex; gap:5px; margin-top:10px; }
+  .dualchips b { flex:1; text-align:center; font-size:10px; padding:6px; border-radius:8px; color:#fff; font-weight:800; }
 </style>
 </head>
 <body>
 <header class="top">
-  <h1>رفيق — معرض التصاميم</h1>
-  <p>10 اتجاهات تصميم كاملة، معروضة كشاشات هاتف حقيقية بألوانها الفعلية (RTL). بدّل بين الشاشات لتقارن نفس الشاشة عبر كل الاتجاهات، واختر رقم الاتجاه اللي يعجبك.</p>
-  <div class="switcher" id="sw">
-    <button data-s="welcome" class="active">شاشة الترحيب / السبلاش</button>
-    <button data-s="home">الشاشة الرئيسية</button>
-    <button data-s="ride">تتبّع الرحلة</button>
-  </div>
+  <h1>رفيق — معرض التصاميم الكامل</h1>
+  <p>٢٠ اتجاه تصميم، كل واحد معروض بـ ٤ شاشات داخلية حقيقية: <b>الرئيسية · تتبّع الرحلة · المحفظة · رحلاتي</b> — عشان تحكم على ترتيب الصفحات وشكلها الداخلي. بأعلى كل تصميم شعار «رفيق» بخط مميّز وثنائي اللغة (يتبدّل حسب لغة التطبيق). اختَر رقم الاتجاه اللي بدّك نعتمده.</p>
+  <div class="jump" id="jump"></div>
 </header>
-<div class="note" id="note"></div>
-<div class="grid" id="grid"></div>
+<div class="wrap" id="wrap"></div>
 
 <script>
-const VARIANTS = [
-  { n:1,  ar:'أونيكس', en:'Onyx — Ink + Signature Blue', ink:'#0F1216', splash:'#0A0D12', accent:'#2F6BFF', onAccent:'#FFFFFF', bg:'#F4F6F8', mapbg:'#EAF0F7',
-    why:'أسود حبري رصين + أزرق واحد واثق. مظهر عالمي (أوبر/بولت). هو الأقرب لكود التطبيق حالياً والأقل جهداً للتنفيذ. توصيتي الأولى.' },
-  { n:2,  ar:'ثقة منتصف الليل', en:'Midnight Trust — Navy + Sky', ink:'#0D1B2A', splash:'#0D1B2A', accent:'#38BDF8', onAccent:'#06263A', bg:'#F5F7FA', mapbg:'#E8EEF5',
-    why:'كحلي عميق + سماوي. إحساس «أمان ومؤسسية» يناسب منصّة تحمل طالبات وأموال. يوحي بالموثوقية.' },
-  { n:3,  ar:'الهوية الأردنية', en:'Jordan Heritage — Green + Sand', ink:'#08331F', splash:'#08331F', accent:'#0B7A4B', onAccent:'#FFFFFF', bg:'#FAF7EF', mapbg:'#EFEDE0',
-    why:'أخضر أردني + رملي ذهبي خفيف. هوية محليّة تربط المنصّة بالأردن والجامعات — تميّز تسويقي قوي.' },
-  { n:4,  ar:'إندِيغو الجامعة', en:'Campus Indigo — Indigo + Amber', ink:'#1E1B4B', splash:'#1E1B4B', accent:'#4F46E5', onAccent:'#FFFFFF', bg:'#F5F5FB', mapbg:'#ECECF7',
-    why:'إندِيغو أكاديمي + كهرماني. شبابي/جامعي حيوي بتباين واضح، مناسب لجمهور طلابي.' },
-  { n:5,  ar:'أسلوب inDrive', en:'inDrive-style — Neutral + Lime', ink:'#111827', splash:'#111827', accent:'#C1F11D', onAccent:'#16210A', bg:'#F2F3F5', mapbg:'#E9EBEE',
-    why:'قماشة رمادية محايدة + أخضر ليموني لزر واحد مهيمن. بساطة قصوى وجرأة. (كان مُجرّباً وأُلغي — يعود إن أردت الجرأة).' },
-  { n:6,  ar:'زمرّدي متحرّك', en:'Emerald Motion — Emerald + Charcoal', ink:'#0F1B17', splash:'#0F1B17', accent:'#059669', onAccent:'#FFFFFF', bg:'#F3F6F5', mapbg:'#E6EEEA',
-    why:'زمرّدي + فحمي. يوحي بالحركة/السرعة/الموافقة بصرياً، مريح ومقروء بامتياز.' },
-  { n:7,  ar:'شروق كهرماني', en:'Sunrise Amber — Amber + Ink', ink:'#1C1917', splash:'#1C1917', accent:'#F97316', onAccent:'#FFFFFF', bg:'#FBF7F4', mapbg:'#F1EAE3',
-    why:'كهرماني دافئ + إنك. ودود ودافئ ومناسب لتطبيق طلابي؛ الكهرماني يبرز أزرار الإجراء بقوة.' },
-  { n:8,  ar:'بنفسجي فاخر', en:'Violet Premium — Violet + Neutral', ink:'#2E1065', splash:'#2E1065', accent:'#7C3AED', onAccent:'#FFFFFF', bg:'#F6F4FD', mapbg:'#EDE9F9',
-    why:'بنفسجي ملكي + محايد. مظهر «premium/tech» عصري ومميّز عن منافسي النقل التقليديين.' },
-  { n:9,  ar:'تركوازي هادئ', en:'Teal Calm — Teal + Ink', ink:'#0B1F1E', splash:'#0B1F1E', accent:'#0D9488', onAccent:'#FFFFFF', bg:'#F2F7F6', mapbg:'#E4EFED',
-    why:'تركوازي هادئ + حبري. لون واثق محايد الجندر، مريح للاستخدام اليومي المتكرّر.' },
-  { n:10, ar:'أكسنت مزدوج', en:'Dual-Accent — Ink base per-role accent', ink:'#0F1216', splash:'#0A0D12', accent:'#2F6BFF', onAccent:'#FFFFFF', bg:'#F4F6F8', mapbg:'#EAF0F7', dual:true,
-    why:'أساس إنك موحّد + لون accent مختلف لكل دور: الطالب أزرق، الكابتن أخضر، الأدمن بنفسجي. أقوى تمييز بين الأدوار مع عائلة واحدة.' },
+const V = [
+  {n:1, ar:'أونيكس', en:'Onyx — Ink + Signature Blue', ink:'#0F1216', accent:'#2F6BFF', onAccent:'#fff', bg:'#F4F6F8', map:'#EAF0F7', why:'أسود حبري رصين + أزرق واحد واثق. مظهر عالمي (أوبر/بولت)، والأقرب لكود التطبيق حالياً والأقل جهداً. توصيتي الأولى.'},
+  {n:2, ar:'ثقة منتصف الليل', en:'Midnight Trust — Navy + Sky', ink:'#0D1B2A', accent:'#38BDF8', onAccent:'#06263A', bg:'#F5F7FA', map:'#E8EEF5', why:'كحلي عميق + سماوي. إحساس أمان ومؤسسية يناسب حمل طالبات وأموال.'},
+  {n:3, ar:'الهوية الأردنية', en:'Jordan Heritage — Green + Sand', ink:'#08331F', accent:'#0B7A4B', onAccent:'#fff', bg:'#FAF7EF', map:'#EEEBDD', why:'أخضر أردني + رملي دافئ. هوية محليّة تربط المنصّة بالأردن — تميّز تسويقي قوي.'},
+  {n:4, ar:'إندِيغو الجامعة', en:'Campus Indigo — Indigo + Amber', ink:'#1E1B4B', accent:'#4F46E5', onAccent:'#fff', bg:'#F5F5FB', map:'#ECECF7', why:'إندِيغو أكاديمي شبابي بتباين واضح، مناسب لجمهور طلابي.'},
+  {n:5, ar:'أسلوب inDrive', en:'inDrive-style — Neutral + Lime', ink:'#111827', accent:'#C1F11D', onAccent:'#16210A', bg:'#F2F3F5', map:'#E9EBEE', why:'رمادي محايد + ليموني لزر واحد مهيمن. بساطة قصوى وجرأة.'},
+  {n:6, ar:'زمرّدي متحرّك', en:'Emerald Motion — Emerald + Charcoal', ink:'#0F1B17', accent:'#059669', onAccent:'#fff', bg:'#F3F6F5', map:'#E6EEEA', why:'زمرّدي + فحمي يوحي بالحركة والموافقة، مريح ومقروء.'},
+  {n:7, ar:'شروق كهرماني', en:'Sunrise Amber — Amber + Ink', ink:'#1C1917', accent:'#F97316', onAccent:'#fff', bg:'#FBF7F4', map:'#F1EAE3', why:'كهرماني دافئ وودود؛ يبرز أزرار الإجراء بقوة.'},
+  {n:8, ar:'بنفسجي فاخر', en:'Violet Premium — Violet + Neutral', ink:'#2E1065', accent:'#7C3AED', onAccent:'#fff', bg:'#F6F4FD', map:'#EDE9F9', why:'بنفسجي ملكي عصري، مظهر premium مميّز عن المنافسين.'},
+  {n:9, ar:'تركوازي هادئ', en:'Teal Calm — Teal + Ink', ink:'#0B1F1E', accent:'#0D9488', onAccent:'#fff', bg:'#F2F7F6', map:'#E4EFED', why:'تركوازي هادئ محايد الجندر، مريح للاستخدام اليومي.'},
+  {n:10, ar:'أكسنت مزدوج', en:'Dual-Accent — Ink + per-role accent', ink:'#0F1216', accent:'#2F6BFF', onAccent:'#fff', bg:'#F4F6F8', map:'#EAF0F7', dual:true, why:'أساس إنك موحّد + لون لكل دور: طالب أزرق، كابتن أخضر، أدمن بنفسجي.'},
+  {n:11, ar:'قرمزي جريء', en:'Crimson Drive — Red + Ink', ink:'#1A0E12', accent:'#E11D48', onAccent:'#fff', bg:'#FBF5F6', map:'#F1E6E9', why:'أحمر قرمزي جريء وطاقة عالية، لافت ويثبت بالذاكرة.'},
+  {n:12, ar:'أعماق المحيط', en:'Ocean Deep — Deep Blue', ink:'#0A1F44', accent:'#1D4ED8', onAccent:'#fff', bg:'#F1F5FD', map:'#E3EBFA', why:'أزرق ملكي عميق، ثقة ورصانة كلاسيكية.'},
+  {n:13, ar:'سليت احترافي', en:'Slate Pro — Slate + Blue', ink:'#1E293B', accent:'#3B82F6', onAccent:'#fff', bg:'#F4F6F9', map:'#E9EEF4', why:'رمادي-أزرق مؤسسي هادئ، احترافي جداً ومريح للعين.'},
+  {n:14, ar:'نعناعي منعش', en:'Mint Fresh — Mint + Deep Green', ink:'#06281E', accent:'#10B981', onAccent:'#04231A', bg:'#F1F8F5', map:'#E2F0EA', why:'نعناعي منعش وحيوي، شبابي وخفيف.'},
+  {n:15, ar:'غروب مرجاني', en:'Sunset Coral — Coral + Plum', ink:'#2A1220', accent:'#FB7185', onAccent:'#3A0A17', bg:'#FDF4F6', map:'#F6E7EB', why:'مرجاني دافئ عصري، ودّي ومختلف عن كل المنافسين.'},
+  {n:16, ar:'ساعة ذهبية', en:'Golden Hour — Gold + Espresso', ink:'#2B211A', accent:'#D4A017', onAccent:'#2B211A', bg:'#FBF7EE', map:'#F0E9D8', why:'ذهبي فاخر + بنّي إسبريسو، إحساس رُقي وقيمة عالية.'},
+  {n:17, ar:'سماوي كهربائي', en:'Electric Cyan — Cyan + Navy', ink:'#0A2233', accent:'#06B6D4', onAccent:'#04222E', bg:'#F0F8FA', map:'#E1F0F4', why:'سماوي كهربائي حديث وتقني، نظيف وواضح.'},
+  {n:18, ar:'غابة ليمونية', en:'Forest Lime — Forest + Lime', ink:'#14311F', accent:'#84CC16', onAccent:'#14311F', bg:'#F5F8EF', map:'#EAF0DE', why:'أخضر غابة عميق + ليموني، طبيعي وحيوي بنفس الوقت.'},
+  {n:19, ar:'وردي ليلي', en:'Rose Noir — Rose on Near-black', ink:'#14090C', accent:'#F43F5E', onAccent:'#fff', bg:'#FBF4F5', map:'#F0E4E7', why:'وردي على أسود، مظهر فاخر/عصري لافت جداً.'},
+  {n:20, ar:'سماء ناعمة', en:'Sky Minimal — Airy White + Blue', ink:'#0F1B2D', accent:'#3B82F6', onAccent:'#fff', bg:'#FFFFFF', map:'#EEF3FB', why:'أبيض واسع نظيف جداً + أزرق ناعم، بساطة بأسلوب Apple.'},
 ];
+const soft = h => h+'22';
 
-function softColor(hex){ return hex + '22'; } // ~13% alpha
-
-function screenWelcome(v){ return `
-  <div class="statusbar onink"><span>9:41</span><span>📶 🔋</span></div>
-  <div class="s-welcome" style="flex:1">
-    <div class="glow"></div><div class="glow2"></div>
-    <div class="ring"></div>
-    <div class="logo-circle">ر</div>
-    <div class="brand">رفيق</div>
-    <div class="tag">النقل والخدمات الجامعية الذكية في الأردن</div>
-    <div class="w-actions">
-      <button class="btn btn-primary">إنشاء حساب</button>
-      <button class="btn btn-ghost">تسجيل الدخول</button>
-    </div>
+function wmMark(v){ return `<span class="mark" style="background:${v.accent};color:${v.onAccent}">ر</span>`; }
+function brandBar(v){
+  return `<div class="brandbar" style="--wm-accent:${v.accent}">
+    <div><div class="cap">عربي</div><span class="wm">${wmMark(v)}<span class="txt-ar" style="color:${v.accent}">رفيق<span class="dot">.</span></span></span></div>
+    <div><div class="cap">English</div><span class="wm"><span class="mark" style="background:${v.accent};color:${v.onAccent};font-family:Sora">R</span><span class="txt-en" style="color:${v.accent}">Rafeeq<span class="dot">.</span></span></span></div>
+    <div style="color:var(--fmuted);font-size:11px;line-height:1.6;max-width:230px">الشعار بخط <b>Reem Kufi</b> للعربي و<b>Sora</b> للإنجليزي، مع نقطة لون العلامة — ويتبدّل تلقائياً حسب لغة التطبيق.</div>
   </div>`;
 }
-function screenHome(v){
-  const dual = v.dual ? `<div class="dualchips"><b style="background:#2F6BFF">طالب</b><b style="background:#16A34A">كابتن</b><b style="background:#7C3AED">أدمن</b></div>` : '';
-  return `
-  <div class="statusbar"><span>9:41</span><span>📶 🔋</span></div>
-  <div class="s-home" style="flex:1; overflow:hidden; padding-bottom:70px">
-    <div class="h-head">
-      <div><div class="hi">مساء الخير 👋</div><div class="name">حمزة</div>${dual}</div>
-      <div class="avatar">ح</div>
-    </div>
-    <div class="hero">
-      <div class="glowmini"></div>
-      <div class="lbl">رصيد المحفظة</div>
-      <div class="bal">12.500 <small>د.أ</small></div>
-      <button class="topup">＋ شحن الرصيد</button>
-    </div>
+
+function nav(active){ const items=[['🏠','الرئيسية'],['🚗','رحلاتي'],['💳','المحفظة'],['👤','حسابي']];
+  return `<div class="nav">${items.map((it,i)=>`<div class="n ${i===active?'on':''}"><div class="p">${it[0]}</div>${it[1]}</div>`).join('')}</div>`; }
+
+function scHome(v){ const dual=v.dual?`<div class="dualchips"><b style="background:#2F6BFF">طالب</b><b style="background:#16A34A">كابتن</b><b style="background:#7C3AED">أدمن</b></div>`:'';
+  return `<div class="sb"><span>9:41</span><span>📶🔋</span></div>
+  <div class="apphdr"><div class="wmini"><div class="m">ر</div><div class="w">رفيق</div></div><div class="av">ح</div></div>
+  <div class="body">
+    ${dual}
+    <div class="hero"><div class="g"></div><div class="l">رصيد المحفظة</div><div class="b">12.500 <small>د.أ</small></div>
+      <div class="row"><button class="qa solid">＋ شحن</button><button class="qa">سحب</button></div></div>
     <div class="tiles">
-      <div class="tile"><div class="ic">🚗</div><div class="tl">رحلة</div></div>
-      <div class="tile"><div class="ic">💳</div><div class="tl">اشتراك</div></div>
-      <div class="tile"><div class="ic">📦</div><div class="tl">طرود</div></div>
-      <div class="tile"><div class="ic">🎁</div><div class="tl">مكافآت</div></div>
+      <div class="tile"><div class="ic">🚗</div><div class="t">رحلة</div></div>
+      <div class="tile"><div class="ic">🎫</div><div class="t">اشتراك</div></div>
+      <div class="tile"><div class="ic">📦</div><div class="t">طرود</div></div>
+      <div class="tile"><div class="ic">🎁</div><div class="t">مكافآت</div></div>
     </div>
-    <div class="sect">اطلب رحلتك</div>
+    <div class="sec"><span>رحلتك القادمة</span><span class="more">الكل</span></div>
+    <div class="triprow"><div class="rt"><div class="a">الجامعة الأردنية ← دابوق</div><div class="b">اليوم · 8:30 ص</div></div><span class="pill go">مؤكّدة</span></div>
     <button class="cta">🚕 اطلب رحلة الآن</button>
-  </div>
-  <div class="nav">
-    <div class="n on"><div class="pill">🏠</div>الرئيسية</div>
-    <div class="n"><div class="pill">🚗</div>رحلاتي</div>
-    <div class="n"><div class="pill">💳</div>المحفظة</div>
-    <div class="n"><div class="pill">👤</div>حسابي</div>
+    <div style="height:12px"></div>
+  </div>${nav(0)}`;
+}
+function scRide(v){ return `<div class="sb ink" style="position:absolute;top:0;left:0;right:0;z-index:5"><span>9:41</span><span>📶🔋</span></div>
+  <div class="map"><div class="route"></div><div class="pin b"></div><div class="pin a"></div></div>
+  <div class="sheet"><div class="grip"></div>
+    <span class="pill go">● الكابتن في الطريق إليك</span>
+    <div class="drv"><div class="da">ع</div><div><div class="dn">عمر خالد</div><div class="dc">كيا سيراتو · رمادي · ٤٢٧٩</div></div><div class="rate">⭐ 4.9</div></div>
+    <div class="meta"><div class="m"><div class="k">الوصول خلال</div><div class="v">٣ دقائق</div></div><div class="m"><div class="k">التكلفة</div><div class="v">١.٧٥ د.أ</div></div></div>
+    <button class="cta" style="margin-top:14px">📞 تواصل مع الكابتن</button>
   </div>`;
 }
-function screenRide(v){ return `
-  <div class="statusbar"><span>9:41</span><span>📶 🔋</span></div>
-  <div class="s-ride" style="flex:1">
-    <div class="map"></div>
-    <div class="route"></div>
-    <div class="pin b"></div>
-    <div class="pin a"></div>
-    <div class="ridecard">
-      <div class="grip"></div>
-      <div class="st">● الكابتن في الطريق إليك</div>
-      <div class="driver">
-        <div class="dav">ع</div>
-        <div><div class="dn">عمر خالد</div><div class="dc">كيا سيراتو · رمادي · ٤٢٧٩</div></div>
-        <div class="rate">⭐ 4.9</div>
-      </div>
-      <div class="ridemeta">
-        <div class="m"><div class="k">الوصول خلال</div><div class="v">٣ دقائق</div></div>
-        <div class="m"><div class="k">التكلفة</div><div class="v">١.٧٥ د.أ</div></div>
-      </div>
-      <button class="cta">📞 تواصل مع الكابتن</button>
-    </div>
-  </div>`;
+function scWallet(v){ return `<div class="sb"><span>9:41</span><span>📶🔋</span></div>
+  <div class="htitle">المحفظة</div>
+  <div class="body">
+    <div class="hero"><div class="g"></div><div class="l">الرصيد الحالي</div><div class="b">12.500 <small>د.أ</small></div>
+      <div class="row"><button class="qa solid">＋ شحن الرصيد</button><button class="qa">طلب سحب</button></div></div>
+    <div class="sec"><span>آخر العمليات</span><span class="more">الكل</span></div>
+    <div class="txn"><div class="ti">🚗</div><div class="tt"><div class="a">رحلة — دابوق</div><div class="b">اليوم · 8:52 ص</div></div><div class="am neg">−1.750</div></div>
+    <div class="txn"><div class="ti">＋</div><div class="tt"><div class="a">شحن عبر CliQ</div><div class="b">أمس · 6:10 م</div></div><div class="am pos">+10.000</div></div>
+    <div class="txn"><div class="ti">🎁</div><div class="tt"><div class="a">مكافأة دعوة صديق</div><div class="b">السبت</div></div><div class="am pos">+1.000</div></div>
+    <div class="txn"><div class="ti">🎫</div><div class="tt"><div class="a">اشتراك شهري</div><div class="b">1 تموز</div></div><div class="am neg">−15.000</div></div>
+    <div style="height:12px"></div>
+  </div>${nav(2)}`;
+}
+function scTrips(v){ return `<div class="sb"><span>9:41</span><span>📶🔋</span></div>
+  <div class="htitle">رحلاتي</div>
+  <div class="tabs"><span class="tb on">نشطة</span><span class="tb">سابقة</span></div>
+  <div class="body">
+    <div class="triprow"><div class="rt"><div class="a">الجامعة الأردنية ← دابوق</div><div class="b">اليوم · 8:30 ص · عمر خالد</div></div><span class="pill go">جارية</span></div>
+    <div class="triprow"><div class="rt"><div class="a">صويلح ← جامعة الأميرة سمية</div><div class="b">أمس · 9:15 ص</div><div class="pr">2.000 د.أ</div></div><span class="pill ok">مكتملة</span></div>
+    <div class="triprow"><div class="rt"><div class="a">الجبيهة ← الجامعة الأردنية</div><div class="b">السبت · 8:00 ص</div><div class="pr">1.500 د.أ</div></div><span class="pill ok">مكتملة</span></div>
+    <div class="triprow"><div class="rt"><div class="a">تلاع العلي ← JUST</div><div class="b">الخميس · 7:40 ص</div><div class="pr">1.750 د.أ</div></div><span class="pill ok">مكتملة</span></div>
+    <div style="height:12px"></div>
+  </div>${nav(1)}`;
 }
 
-function render(screen){
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  document.getElementById('note').textContent =
-    screen==='welcome' ? 'الشاشة المعروضة: الترحيب/السبلاش (الخلفية الداكنة = هوية كل اتجاه).' :
-    screen==='home' ? 'الشاشة المعروضة: الرئيسية (بطاقة المحفظة + الخدمات + زر الطلب + الشريط السفلي).' :
-    'الشاشة المعروضة: تتبّع الرحلة (الخريطة + بطاقة حالة الرحلة + بيانات الكابتن).';
-  VARIANTS.forEach(v=>{
-    const vars = `--ink:${v.ink}; --accent:${v.accent}; --onAccent:${v.onAccent}; --bg:${v.bg}; --surface:#FFFFFF; --text:#0F1216; --muted:#6B7280; --border:#E6E9EF; --accentSoft:${softColor(v.accent)}; --mapbg:${v.mapbg};`;
-    const inner = screen==='welcome'?screenWelcome(v):screen==='home'?screenHome(v):screenRide(v);
-    const el = document.createElement('div');
-    el.className='variant';
-    el.innerHTML = `
-      <div class="vhead"><div><h3>${v.ar}</h3><div class="en">${v.en}</div></div><div class="vnum">${v.n}</div></div>
-      <div class="why">${v.why}</div>
-      <div class="swatches">
-        <div class="sw" style="background:${v.ink}"><span>إنك</span></div>
-        <div class="sw" style="background:${v.accent}"><span>أكسنت</span></div>
-        <div class="sw" style="background:${v.bg}"><span>خلفية</span></div>
-        <div class="sw" style="background:#12B76A"><span>نجاح</span></div>
-        <div class="sw" style="background:#F04438"><span>خطر</span></div>
-      </div>
-      <div class="stage"><div class="phone"><div class="screen" style="${vars}">${inner}</div></div></div>`;
-    grid.appendChild(el);
-  });
-}
+function phone(label,inner,vars){ return `<div class="pcol"><div class="plabel">${label}</div><div class="phone"><div class="screen" style="${vars}">${inner}</div></div></div>`; }
 
-document.getElementById('sw').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b) return;
-  document.querySelectorAll('#sw button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  render(b.dataset.s);
+const wrap=document.getElementById('wrap'), jump=document.getElementById('jump');
+V.forEach(v=>{
+  const vars=`--ink:${v.ink};--accent:${v.accent};--onAccent:${v.onAccent};--bg:${v.bg};--surface:#fff;--text:#0F1216;--muted:#6B7280;--border:#E6E9EF;--accentSoft:${soft(v.accent)};--mapbg:${v.map};`;
+  const el=document.createElement('section'); el.className='design'; el.id='d'+v.n;
+  el.innerHTML=`
+    <div class="dtitle"><div class="dnum">${v.n}</div><div><h2>${v.ar}</h2><div class="en">${v.en}</div></div></div>
+    <div class="why">${v.why}</div>
+    ${brandBar(v)}
+    <div class="phones">
+      ${phone('الرئيسية', scHome(v), vars)}
+      ${phone('تتبّع الرحلة', scRide(v), vars)}
+      ${phone('المحفظة', scWallet(v), vars)}
+      ${phone('رحلاتي', scTrips(v), vars)}
+    </div>`;
+  wrap.appendChild(el);
+  const a=document.createElement('a'); a.href='#d'+v.n; a.textContent=v.n; a.title=v.ar; jump.appendChild(a);
 });
-render('welcome');
 </script>
 </body>
 </html>
