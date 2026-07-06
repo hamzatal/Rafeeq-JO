@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Notifications\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Traits\HasUuid;
 
@@ -17,7 +18,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property array|null $data
  * @property array|null $channels
  * @property bool $is_critical
- * @property \Illuminate\Support\Carbon|null $read_at
+ * @property Carbon|null $read_at
  */
 class Notification extends Model
 {

@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\Chat\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
@@ -56,7 +57,7 @@ class ChatService extends BaseService
         );
     }
 
-    /** @return \Illuminate\Database\Eloquent\Collection<int, ChatConversation> */
+    /** @return Collection<int, ChatConversation> */
     public function conversationsFor(User $user)
     {
         return ChatConversation::with(['student:id,full_name', 'driver:id,full_name'])
@@ -75,7 +76,7 @@ class ChatService extends BaseService
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, ChatMessage>
+     * @return Collection<int, ChatMessage>
      */
     public function messages(User $user, ChatConversation $conversation, ?string $afterId = null)
     {

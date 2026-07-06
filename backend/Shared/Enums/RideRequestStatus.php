@@ -2,9 +2,11 @@
 
 namespace Rafeeq\Shared\Enums;
 
+use Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
 enum RideRequestStatus: string
 {
-    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+    use LocalizedLabel;
 
     case Pending = 'pending';     // waiting to be grouped
     case Grouped = 'grouped';     // pooled, awaiting captain assignment

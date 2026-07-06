@@ -18,7 +18,8 @@ class AssistantToolsTest extends TestCase
 
     private function bindToolCallingGpt(): void
     {
-        $fake = new class implements GptClient {
+        $fake = new class implements GptClient
+        {
             public function chat(array $messages, array $options = []): GptResult
             {
                 // Triage (JSON mode) — return a neutral classification.

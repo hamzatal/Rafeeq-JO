@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 use Rafeeq\Core\Permissions\HasRoles;
+use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Students\Models\StudentProfile;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
 use Rafeeq\Shared\Traits\HasUuid;
@@ -17,7 +20,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $id
  * @property string $full_name
  * @property string $phone
- * @property \Illuminate\Support\Carbon|null $phone_verified_at
+ * @property Carbon|null $phone_verified_at
  * @property string|null $email
  * @property string|null $password
  * @property UserType $type
@@ -25,7 +28,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $locale
  * @property array|null $metadata
  * @property string|null $mfa_secret
- * @property \Illuminate\Support\Carbon|null $mfa_enabled_at
+ * @property Carbon|null $mfa_enabled_at
  * @property array|null $mfa_recovery_codes
  */
 class User extends Authenticatable implements MustVerifyEmail
@@ -92,11 +95,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function studentProfile(): HasOne
     {
-        return $this->hasOne(\Rafeeq\Modules\Students\Models\StudentProfile::class);
+        return $this->hasOne(StudentProfile::class);
     }
 
     public function driverProfile(): HasOne
     {
-        return $this->hasOne(\Rafeeq\Modules\Drivers\Models\DriverProfile::class);
+        return $this->hasOne(DriverProfile::class);
     }
 }

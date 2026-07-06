@@ -4,6 +4,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Rafeeq\Core\Exceptions\ApiExceptionRenderer;
+use Rafeeq\Core\Http\Middleware\AuditRequest;
+use Rafeeq\Core\Http\Middleware\EnsureUserHasPermission;
+use Rafeeq\Core\Http\Middleware\EnsureUserHasRole;
 use Rafeeq\Core\Http\Middleware\ForceJsonResponse;
 use Rafeeq\Core\Http\Middleware\SecurityHeaders;
 use Rafeeq\Core\Http\Middleware\SetLocale;
@@ -31,9 +34,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Named middleware aliases (RBAC, etc.)
         $middleware->alias([
-            'role' => \Rafeeq\Core\Http\Middleware\EnsureUserHasRole::class,
-            'permission' => \Rafeeq\Core\Http\Middleware\EnsureUserHasPermission::class,
-            'audit' => \Rafeeq\Core\Http\Middleware\AuditRequest::class,
+            'role' => EnsureUserHasRole::class,
+            'permission' => EnsureUserHasPermission::class,
+            'audit' => AuditRequest::class,
         ]);
 
         // NOTE: We use stateless token auth (Sanctum personal access tokens / Bearer)

@@ -2,9 +2,11 @@
 
 namespace Rafeeq\Shared\Enums;
 
+use Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
 enum RiskSeverity: string
 {
-    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+    use LocalizedLabel;
 
     case Low = 'low';
     case Medium = 'medium';

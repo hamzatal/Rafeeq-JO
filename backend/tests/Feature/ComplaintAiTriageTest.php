@@ -6,7 +6,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Infrastructure\Gpt\Contracts\GptClient;
 use Rafeeq\Infrastructure\Gpt\Data\GptResult;
 use Rafeeq\Modules\Auth\Models\User;
-use Rafeeq\Modules\Complaints\Models\Complaint;
 use Rafeeq\Modules\Complaints\Services\ComplaintService;
 use Rafeeq\Shared\Enums\ComplaintStatus;
 use Rafeeq\Shared\Enums\RiskSeverity;
@@ -20,7 +19,8 @@ class ComplaintAiTriageTest extends TestCase
 
     private function bindGpt(?array $payload): void
     {
-        $fake = new class($payload) implements GptClient {
+        $fake = new class($payload) implements GptClient
+        {
             public function __construct(private ?array $payload) {}
 
             public function chat(array $messages, array $options = []): GptResult

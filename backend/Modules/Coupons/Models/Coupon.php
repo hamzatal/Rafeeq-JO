@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Rafeeq\Shared\Enums\CouponScope;
 use Rafeeq\Shared\Enums\CouponType;
 use Rafeeq\Shared\Traits\HasUuid;
@@ -24,8 +25,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property int|null $usage_limit
  * @property int|null $per_user_limit
  * @property int $used_count
- * @property \Illuminate\Support\Carbon|null $starts_at
- * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $expires_at
  * @property bool $is_active
  */
 class Coupon extends Model

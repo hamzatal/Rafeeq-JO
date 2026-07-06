@@ -4,7 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Rafeeq\Shared\Enums\DocumentStatus;
-use Rafeeq\Shared\Enums\DocumentType;
 
 return new class extends Migration
 {

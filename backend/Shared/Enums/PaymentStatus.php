@@ -2,9 +2,11 @@
 
 namespace Rafeeq\Shared\Enums;
 
+use Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
 enum PaymentStatus: string
 {
-    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+    use LocalizedLabel;
 
     case Pending = 'pending';         // request created, awaiting proof
     case Submitted = 'submitted';     // proof uploaded, awaiting verification

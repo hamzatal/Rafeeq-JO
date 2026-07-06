@@ -7,7 +7,6 @@ use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Payments\Models\PaymentRequest;
 use Rafeeq\Modules\Payments\Services\PaymentService;
 use Rafeeq\Modules\Wallet\Models\Wallet;
-use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\PaymentPurpose;
 use Rafeeq\Shared\Enums\PaymentStatus;
 use Rafeeq\Shared\Enums\UserStatus;

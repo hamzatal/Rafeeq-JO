@@ -135,7 +135,7 @@ class MatchingService extends BaseService
      * Draw a 4-digit code unique within the codes already assigned in this trip
      * (passed by reference so boarding and drop-off codes never collide).
      *
-     * @param array<int, string> $used
+     * @param  array<int, string>  $used
      */
     private function uniqueCode(array &$used): string
     {

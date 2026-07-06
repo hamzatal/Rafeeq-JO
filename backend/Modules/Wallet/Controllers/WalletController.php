@@ -6,10 +6,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Settings\Services\SettingService;
+use Rafeeq\Modules\Wallet\Models\WalletTransaction;
 use Rafeeq\Modules\Wallet\Resources\WalletResource;
 use Rafeeq\Modules\Wallet\Resources\WalletTransactionResource;
 use Rafeeq\Modules\Wallet\Services\WalletService;
-use Rafeeq\Shared\Enums\WalletTxnType;
 
 class WalletController extends Controller
 {
@@ -38,7 +39,7 @@ class WalletController extends Controller
 
         $reference = 'WALLET-'.strtoupper(substr($request->user()->id, 0, 6)).'-'.now()->format('ymdHis');
 
-        $cliq = app(\Rafeeq\Modules\Settings\Services\SettingService::class)->cliq();
+        $cliq = app(SettingService::class)->cliq();
 
         return $this->ok([
             'method' => 'cliq',
@@ -101,7 +102,7 @@ class WalletController extends Controller
             'reason' => ['nullable', 'string', 'max:200'],
         ]);
 
-        $original = \Rafeeq\Modules\Wallet\Models\WalletTransaction::findOrFail($data['transaction_id']);
+        $original = WalletTransaction::findOrFail($data['transaction_id']);
         $reversal = $this->wallet->reverseTransaction($original, $data['reason'] ?? null);
 
         return $this->ok([

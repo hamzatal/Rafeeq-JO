@@ -2,9 +2,11 @@
 
 namespace Rafeeq\Shared\Enums;
 
+use Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
 enum WalletTxnType: string
 {
-    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+    use LocalizedLabel;
 
     case Topup = 'topup';            // + via CliQ
     case RidePayment = 'ride_payment'; // - paying for a ride

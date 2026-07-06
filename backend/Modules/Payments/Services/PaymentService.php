@@ -9,19 +9,25 @@ use Illuminate\Support\Str;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Core\Support\Safely;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Coupons\Models\Coupon;
+use Rafeeq\Modules\Coupons\Services\CouponService;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Modules\Payments\AI\PaymentVerificationService;
 use Rafeeq\Modules\Payments\Jobs\VerifyPaymentProofJob;
 use Rafeeq\Modules\Payments\Models\Payment;
 use Rafeeq\Modules\Payments\Models\PaymentRequest;
+use Rafeeq\Modules\Settings\Services\SettingService;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Services\SubscriptionService;
 use Rafeeq\Modules\Wallet\Services\WalletService;
+use Rafeeq\Shared\Enums\CouponScope;
+use Rafeeq\Shared\Enums\NotificationType;
 use Rafeeq\Shared\Enums\PaymentPurpose;
 use Rafeeq\Shared\Enums\PaymentStatus;
-use Rafeeq\Shared\Enums\NotificationType;
 use Rafeeq\Shared\Enums\WalletTxnType;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Orchestrates the manual-transfer (CliQ) payment flow with GPT-Vision
@@ -45,7 +51,7 @@ class PaymentService extends BaseService
         private readonly WalletService $wallets,
         private readonly SubscriptionService $subscriptions,
         private readonly NotificationService $notifications,
-        private readonly \Rafeeq\Modules\Coupons\Services\CouponService $coupons,
+        private readonly CouponService $coupons,
     ) {}
 
     /**
@@ -107,19 +113,19 @@ class PaymentService extends BaseService
     }
 
     /** Map a payment purpose to the matching coupon scope. */
-    private function couponScope(PaymentPurpose $purpose): \Rafeeq\Shared\Enums\CouponScope
+    private function couponScope(PaymentPurpose $purpose): CouponScope
     {
         return match ($purpose) {
-            PaymentPurpose::Subscription => \Rafeeq\Shared\Enums\CouponScope::Subscription,
-            PaymentPurpose::WalletTopup => \Rafeeq\Shared\Enums\CouponScope::WalletTopup,
-            default => \Rafeeq\Shared\Enums\CouponScope::Any,
+            PaymentPurpose::Subscription => CouponScope::Subscription,
+            PaymentPurpose::WalletTopup => CouponScope::WalletTopup,
+            default => CouponScope::Any,
         };
     }
 
     /** CliQ transfer instructions shown to the payer. */
     public function instructions(PaymentRequest $request): array
     {
-        $cliq = app(\Rafeeq\Modules\Settings\Services\SettingService::class)->cliq();
+        $cliq = app(SettingService::class)->cliq();
 
         return [
             'number' => $request->number,
@@ -330,8 +336,8 @@ class PaymentService extends BaseService
             // Consume the coupon (if any) now that the payment is approved.
             // Wrapped so a redemption-recording hiccup never blocks fulfilment.
             if ($request->coupon_id) {
-                \Rafeeq\Core\Support\Safely::run(function () use ($request) {
-                    $coupon = \Rafeeq\Modules\Coupons\Models\Coupon::find($request->coupon_id);
+                Safely::run(function () use ($request) {
+                    $coupon = Coupon::find($request->coupon_id);
                     if ($coupon && $request->user) {
                         $this->coupons->redeem(
                             $coupon,
@@ -486,7 +492,7 @@ class PaymentService extends BaseService
         }
     }
 
-    public function proofDownload(Payment $payment): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function proofDownload(Payment $payment): StreamedResponse
     {
         return Storage::disk(self::DISK)->download((string) $payment->proof_path);
     }

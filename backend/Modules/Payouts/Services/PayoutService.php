@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\Payouts\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
@@ -140,13 +141,13 @@ class PayoutService extends BaseService
         });
     }
 
-    /** @return \Illuminate\Database\Eloquent\Collection<int, PayoutRequest> */
+    /** @return Collection<int, PayoutRequest> */
     public function forCaptain(User $captain)
     {
         return PayoutRequest::where('captain_user_id', $captain->id)->latest()->get();
     }
 
-    /** @return \Illuminate\Database\Eloquent\Collection<int, PayoutRequest> */
+    /** @return Collection<int, PayoutRequest> */
     public function queue()
     {
         return PayoutRequest::with('captain:id,full_name,phone')

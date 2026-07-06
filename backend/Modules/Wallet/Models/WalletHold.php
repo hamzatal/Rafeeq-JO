@@ -22,7 +22,9 @@ class WalletHold extends Model
     use HasUuid;
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_CAPTURED = 'captured';
+
     public const STATUS_RELEASED = 'released';
 
     protected $fillable = [

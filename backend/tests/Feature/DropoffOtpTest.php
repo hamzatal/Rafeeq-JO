@@ -18,7 +18,6 @@ use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\SubscriptionStatus;
 use Rafeeq\Shared\Enums\SubscriptionType;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
-use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
 use Tests\TestCase;

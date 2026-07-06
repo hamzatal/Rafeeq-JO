@@ -10,7 +10,8 @@ class FallbackSmsGatewayTest extends TestCase
 {
     private function gateway(bool $throws, string $ref, array &$calls): SmsGateway
     {
-        return new class($throws, $ref, $calls) implements SmsGateway {
+        return new class($throws, $ref, $calls) implements SmsGateway
+        {
             public function __construct(private bool $throws, private string $ref, private array &$calls) {}
 
             public function send(string $to, string $message): string

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Disputes\Models\Dispute;
 use Rafeeq\Modules\Safety\Models\CancellationLog;
+use Rafeeq\Modules\Safety\Models\RiskFlag;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
@@ -42,7 +43,7 @@ class FraudSweepCommandTest extends TestCase
         }
 
         // Seed one open flag so the driver shows up in topRisks() ranking.
-        \Rafeeq\Modules\Safety\Models\RiskFlag::create([
+        RiskFlag::create([
             'user_id' => $driver->id, 'type' => 'seed', 'severity' => 'low',
         ]);
 

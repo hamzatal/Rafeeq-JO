@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\RideRequests\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Zones\Models\Zone;
 use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\RideRequestStatus;
@@ -21,7 +22,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property RideType $type
  * @property bool $is_express
  * @property RideRequestStatus $status
- * @property \Illuminate\Support\Carbon $desired_time
+ * @property Carbon $desired_time
  */
 class RideRequest extends Model
 {

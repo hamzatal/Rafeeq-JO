@@ -2,6 +2,8 @@
 
 namespace Rafeeq\Shared\Enums;
 
+use Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
 /**
  * Direction of a ride/trip. Enables round trips (home → university in the
  * morning, university → home in the afternoon) so a captain doesn't drive back
@@ -9,7 +11,7 @@ namespace Rafeeq\Shared\Enums;
  */
 enum RideDirection: string
 {
-    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+    use LocalizedLabel;
 
     case ToUniversity = 'to_university';   // home → university
     case FromUniversity = 'from_university'; // university → home

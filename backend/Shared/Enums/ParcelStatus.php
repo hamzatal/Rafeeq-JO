@@ -2,9 +2,11 @@
 
 namespace Rafeeq\Shared\Enums;
 
+use Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
 enum ParcelStatus: string
 {
-    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+    use LocalizedLabel;
 
     case Created = 'created';
     case AwaitingPickup = 'awaiting_pickup';

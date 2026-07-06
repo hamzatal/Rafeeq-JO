@@ -13,7 +13,7 @@ class Csv
     /**
      * @param  array<int, string>  $headers
      * @param  iterable<int, array<int, mixed>>|callable  $rows  Rows to write, or a
-     *         callable that receives a writer `fn(array $row): void` for streaming.
+     *                                                           callable that receives a writer `fn(array $row): void` for streaming.
      */
     public static function download(string $filename, array $headers, iterable|callable $rows): StreamedResponse
     {

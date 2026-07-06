@@ -5,24 +5,26 @@ namespace Rafeeq\Modules\Auth\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Rafeeq\Core\Http\Controllers\Controller;
+use Rafeeq\Modules\Auth\Requests\ConfirmMfaRequest;
 use Rafeeq\Modules\Auth\Requests\ForgotPasswordRequest;
 use Rafeeq\Modules\Auth\Requests\LoginRequest;
 use Rafeeq\Modules\Auth\Requests\RegisterRequest;
 use Rafeeq\Modules\Auth\Requests\RequestOtpRequest;
 use Rafeeq\Modules\Auth\Requests\ResendOtpRequest;
 use Rafeeq\Modules\Auth\Requests\ResetPasswordRequest;
-use Rafeeq\Modules\Auth\Requests\VerifyOtpRequest;
 use Rafeeq\Modules\Auth\Requests\VerifyMfaRequest;
-use Rafeeq\Modules\Auth\Requests\ConfirmMfaRequest;
+use Rafeeq\Modules\Auth\Requests\VerifyOtpRequest;
 use Rafeeq\Modules\Auth\Resources\UserResource;
 use Rafeeq\Modules\Auth\Services\AuthService;
+use Rafeeq\Modules\Auth\Services\MfaService;
+use Rafeeq\Modules\Auth\Services\OtpService;
 use Rafeeq\Modules\Drivers\Services\DriverService;
 use Rafeeq\Shared\Enums\OtpChannel;
 use Rafeeq\Shared\Enums\UserType;
 
 class AuthController extends Controller
 {
-    public function __construct(private readonly AuthService $auth, private readonly \Rafeeq\Modules\Auth\Services\MfaService $mfa) {}
+    public function __construct(private readonly AuthService $auth, private readonly MfaService $mfa) {}
 
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -70,7 +72,7 @@ class AuthController extends Controller
 
     public function resendOtp(ResendOtpRequest $request): JsonResponse
     {
-        $code = app(\Rafeeq\Modules\Auth\Services\OtpService::class)->issue(
+        $code = app(OtpService::class)->issue(
             identifier: $request->input('phone'),
             purpose: $request->purpose(),
             channel: OtpChannel::Sms,

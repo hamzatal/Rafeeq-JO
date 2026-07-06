@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Modules\Auth\Models\User;
-use Rafeeq\Modules\Wallet\Models\Wallet;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;

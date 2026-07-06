@@ -22,7 +22,7 @@ class StaffService
     public function __construct(private readonly AuditLogger $audit) {}
 
     /**
-     * @param array{full_name:string, phone:string, email?:string|null, password:string, role:string} $data
+     * @param  array{full_name:string, phone:string, email?:string|null, password:string, role:string}  $data
      */
     public function create(array $data, ?User $actor): User
     {
@@ -51,7 +51,7 @@ class StaffService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function update(User $user, array $data, ?User $actor): User
     {

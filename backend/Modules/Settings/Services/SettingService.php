@@ -55,7 +55,7 @@ class SettingService
     /**
      * Upsert CliQ settings. Only the provided keys are changed.
      *
-     * @param array{alias?:string|null, beneficiary_name?:string|null, bank_name?:string|null} $data
+     * @param  array{alias?:string|null, beneficiary_name?:string|null, bank_name?:string|null}  $data
      */
     public function updateCliq(array $data, ?User $actor): array
     {

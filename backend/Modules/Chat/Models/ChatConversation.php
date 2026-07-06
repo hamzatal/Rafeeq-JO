@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\Chat\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Traits\HasUuid;
 
@@ -13,7 +14,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string|null $trip_id
  * @property string $student_user_id
  * @property string $driver_user_id
- * @property \Illuminate\Support\Carbon|null $last_message_at
+ * @property Carbon|null $last_message_at
  */
 class ChatConversation extends Model
 {

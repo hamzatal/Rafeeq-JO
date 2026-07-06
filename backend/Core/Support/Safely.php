@@ -27,7 +27,7 @@ final class Safely
      * Execute a side-effect, swallowing and logging any throwable.
      *
      * @param  callable():mixed  $effect
-     * @return bool  true if it ran without throwing, false otherwise
+     * @return bool true if it ran without throwing, false otherwise
      */
     public static function run(callable $effect, string $context = 'side_effect', array $meta = []): bool
     {
@@ -46,6 +46,7 @@ final class Safely
      * Execute a producer and return its value, or a default if it throws.
      *
      * @template T
+     *
      * @param  callable():T  $producer
      * @param  T  $default
      * @return T

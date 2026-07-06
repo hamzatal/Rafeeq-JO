@@ -2,9 +2,9 @@
 
 namespace Rafeeq\Modules\Notifications\Services;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Services\BaseService;
-use Rafeeq\Core\Support\Safely;
 use Rafeeq\Infrastructure\Push\Contracts\PushGateway;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
 use Rafeeq\Modules\Auth\Models\User;
@@ -94,7 +94,7 @@ class NotificationService extends BaseService
      * Admin broadcast: send the same notification to many users. Returns the
      * number actually recorded. Each send is best-effort (never throws).
      *
-     * @param  \Illuminate\Support\Collection<int, User>  $users
+     * @param  Collection<int, User>  $users
      * @param  array<string, mixed>  $data
      */
     public function broadcast($users, string $title, string $body, array $data = []): int

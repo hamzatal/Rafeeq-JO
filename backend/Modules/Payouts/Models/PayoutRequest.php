@@ -20,7 +20,9 @@ class PayoutRequest extends Model
     use HasUuid;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PAID = 'paid';
+
     public const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [

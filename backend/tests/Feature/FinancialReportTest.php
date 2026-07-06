@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Rafeeq\Core\Permissions\Models\Permission;
 use Rafeeq\Core\Permissions\Models\Role;
@@ -44,7 +45,7 @@ class FinancialReportTest extends TestCase
 
         $student = User::create(['full_name' => 'Stu', 'phone' => '0790000051', 'type' => UserType::Student, 'status' => UserStatus::Active, 'locale' => 'ar']);
 
-        $zoneId = (string) \Illuminate\Support\Str::uuid();
+        $zoneId = (string) Str::uuid();
         $trip = Trip::create([
             'route_id' => $route->id,
             'driver_id' => $driver->id,
@@ -102,7 +103,7 @@ class FinancialReportTest extends TestCase
         $admin = $this->makeAdmin();
 
         Sanctum::actingAs($admin);
-        $this->getJson('/api/v1/admin/reports/financial?zone_id='.\Illuminate\Support\Str::uuid())
+        $this->getJson('/api/v1/admin/reports/financial?zone_id='.Str::uuid())
             ->assertOk()
             ->assertJsonPath('data.rides_count', 0)
             ->assertJsonPath('data.commission_fils', 0);

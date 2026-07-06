@@ -8,10 +8,11 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
+use Rafeeq\Modules\Rewards\Services\RewardService;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
+use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Safety\Services\FraudService;
 use Rafeeq\Modules\Safety\Services\GpsFraudService;
-use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Services\SubscriptionService;
 use Rafeeq\Modules\Trips\Events\TripLocationUpdated;
@@ -20,10 +21,10 @@ use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Models\TripTracking;
 use Rafeeq\Modules\Wallet\Services\WalletService;
+use Rafeeq\Shared\Enums\NotificationType;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
-use Rafeeq\Shared\Enums\NotificationType;
 
 class TripService extends BaseService
 {
@@ -210,7 +211,7 @@ class TripService extends BaseService
             $captainUser = $trip->driver ? User::find($trip->driver->user_id) : null;
             $completed = $trip->passengers()->where('status', TripPassengerStatus::Dropped->value)->count();
             if ($captainUser && $completed > 0) {
-                app(\Rafeeq\Modules\Rewards\Services\RewardService::class)
+                app(RewardService::class)
                     ->earn($captainUser, $completed * 10, 'trip_completed', $trip->id);
             }
         } catch (\Throwable $e) {

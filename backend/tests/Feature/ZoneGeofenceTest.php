@@ -3,8 +3,13 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+use Rafeeq\Core\Permissions\Models\Role;
+use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Zones\Models\Zone;
 use Rafeeq\Modules\Zones\Services\ZoneService;
+use Rafeeq\Shared\Enums\UserStatus;
+use Rafeeq\Shared\Enums\UserType;
 use Tests\TestCase;
 
 class ZoneGeofenceTest extends TestCase
@@ -52,14 +57,14 @@ class ZoneGeofenceTest extends TestCase
 
     public function test_admin_can_create_zone_with_boundary(): void
     {
-        $admin = \Rafeeq\Modules\Auth\Models\User::create([
+        $admin = User::create([
             'full_name' => 'Admin', 'phone' => '+962790000003',
-            'type' => \Rafeeq\Shared\Enums\UserType::Admin,
-            'status' => \Rafeeq\Shared\Enums\UserStatus::Active, 'locale' => 'ar',
+            'type' => UserType::Admin,
+            'status' => UserStatus::Active, 'locale' => 'ar',
         ]);
-        \Rafeeq\Core\Permissions\Models\Role::firstOrCreate(['name' => 'admin'], ['label_ar' => 'إدارة', 'label_en' => 'Admin']);
+        Role::firstOrCreate(['name' => 'admin'], ['label_ar' => 'إدارة', 'label_en' => 'Admin']);
         $admin->assignRole('admin');
-        \Laravel\Sanctum\Sanctum::actingAs($admin);
+        Sanctum::actingAs($admin);
 
         $res = $this->postJson('/api/v1/admin/zones', [
             'name_ar' => 'حي', 'name_en' => 'Hood', 'city' => 'إربد',

@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Payments\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Rafeeq\Shared\Traits\HasUuid;
 
 /**
@@ -22,7 +23,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property array|null $fraud_flags
  * @property string $status
  * @property string|null $notes
- * @property \Illuminate\Support\Carbon|null $submitted_at
+ * @property Carbon|null $submitted_at
  */
 class Payment extends Model
 {

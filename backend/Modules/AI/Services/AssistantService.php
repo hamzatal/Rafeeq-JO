@@ -2,11 +2,16 @@
 
 namespace Rafeeq\Modules\AI\Services;
 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Core\Support\Safely;
 use Rafeeq\Infrastructure\Gpt\Contracts\GptClient;
-use Rafeeq\Modules\AI\Tools\AssistantToolRegistry;
+use Rafeeq\Infrastructure\Gpt\Data\GptResult;
 use Rafeeq\Modules\AI\Models\AiConversation;
 use Rafeeq\Modules\AI\Models\AiMessage;
+use Rafeeq\Modules\AI\Tools\AssistantToolRegistry;
 use Rafeeq\Modules\Auth\Models\User;
 
 /**
@@ -106,7 +111,7 @@ class AssistantService extends BaseService
         // avoid paying for duplicate calls (key includes the full prompt).
         $ttl = (int) config('services.openai.reply_cache_ttl', 0);
         $cacheKey = 'ai_reply:'.hash('sha256', json_encode($messages));
-        if ($ttl > 0 && ($cached = \Illuminate\Support\Facades\Cache::get($cacheKey)) !== null) {
+        if ($ttl > 0 && ($cached = Cache::get($cacheKey)) !== null) {
             return ['content' => $cached, 'ai' => true, 'tokens' => 0];
         }
 
@@ -148,7 +153,7 @@ class AssistantService extends BaseService
                 $content = trim($result->content);
                 // Don't cache answers produced by side-effecting tools.
                 if ($ttl > 0 && ! $usedTool) {
-                    \Illuminate\Support\Facades\Cache::put($cacheKey, $content, $ttl);
+                    Cache::put($cacheKey, $content, $ttl);
                 }
                 $this->usage->forget($user->id);
 
@@ -167,7 +172,7 @@ class AssistantService extends BaseService
      *
      * @return array<string, mixed>
      */
-    private function assistantToolCallMessage(\Rafeeq\Infrastructure\Gpt\Data\GptResult $result): array
+    private function assistantToolCallMessage(GptResult $result): array
     {
         $calls = [];
         foreach ($result->toolCalls as $call) {
@@ -198,22 +203,22 @@ class AssistantService extends BaseService
      */
     private function accountSnapshot(User $user): string
     {
-        return \Rafeeq\Core\Support\Safely::value(function () use ($user) {
+        return Safely::value(function () use ($user) {
             $lines = [];
 
-            $balance = \Illuminate\Support\Facades\DB::table('wallets')
+            $balance = DB::table('wallets')
                 ->where('user_id', $user->id)->value('balance_fils');
             if ($balance !== null) {
                 $lines[] = 'رصيد المحفظة: '.number_format($balance / 1000, 2).' د.أ';
             }
 
-            $points = \Illuminate\Support\Facades\DB::table('reward_accounts')
+            $points = DB::table('reward_accounts')
                 ->where('user_id', $user->id)->value('points');
             if ($points !== null) {
                 $lines[] = "نقاط المكافآت: {$points}";
             }
 
-            $sub = \Illuminate\Support\Facades\DB::table('subscriptions')
+            $sub = DB::table('subscriptions')
                 ->join('subscription_plans', 'subscription_plans.id', '=', 'subscriptions.plan_id')
                 ->where('subscriptions.student_id', $user->id)
                 ->where('subscriptions.status', 'active')
@@ -226,7 +231,7 @@ class AssistantService extends BaseService
                 $lines[] = 'لا يوجد اشتراك فعّال حالياً.';
             }
 
-            $nextTrip = \Illuminate\Support\Facades\DB::table('trip_passengers')
+            $nextTrip = DB::table('trip_passengers')
                 ->join('trips', 'trips.id', '=', 'trip_passengers.trip_id')
                 ->where('trip_passengers.student_id', $user->id)
                 ->whereIn('trips.status', ['scheduled', 'pending', 'started'])
@@ -234,7 +239,7 @@ class AssistantService extends BaseService
                 ->orderBy('trips.scheduled_at')
                 ->value('trips.scheduled_at');
             if ($nextTrip) {
-                $lines[] = 'الرحلة القادمة: '.\Illuminate\Support\Carbon::parse($nextTrip)->format('Y-m-d H:i');
+                $lines[] = 'الرحلة القادمة: '.Carbon::parse($nextTrip)->format('Y-m-d H:i');
             }
 
             if (empty($lines)) {

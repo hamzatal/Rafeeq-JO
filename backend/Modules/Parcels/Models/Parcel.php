@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Shared\Enums\ParcelSize;
 use Rafeeq\Shared\Enums\ParcelStatus;
 use Rafeeq\Shared\Traits\HasUuid;
@@ -54,7 +55,7 @@ class Parcel extends Model
 
     public function courier(): BelongsTo
     {
-        return $this->belongsTo(\Rafeeq\Modules\Drivers\Models\DriverProfile::class, 'courier_id');
+        return $this->belongsTo(DriverProfile::class, 'courier_id');
     }
 
     public function events(): HasMany

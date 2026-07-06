@@ -30,7 +30,7 @@ class WhatsAppCloudOtpTest extends TestCase
             'graph.facebook.com/*' => Http::response(['messages' => [['id' => 'wamid.ABC']]], 200),
         ]);
 
-        $ref = (new WhatsAppCloudSmsGateway())->send(
+        $ref = (new WhatsAppCloudSmsGateway)->send(
             '+962790001234',
             'رفيق: رمز التحقق الخاص بك هو 482103. صالح لمدة 5 دقائق.',
         );
@@ -55,7 +55,7 @@ class WhatsAppCloudOtpTest extends TestCase
         $this->configure(['mode' => 'text']);
         Http::fake(['graph.facebook.com/*' => Http::response(['messages' => [['id' => 'x']]], 200)]);
 
-        (new WhatsAppCloudSmsGateway())->send('0790001234', 'مرحبا من رفيق');
+        (new WhatsAppCloudSmsGateway)->send('0790001234', 'مرحبا من رفيق');
 
         Http::assertSent(function ($request) {
             $body = $request->data();
@@ -71,7 +71,7 @@ class WhatsAppCloudOtpTest extends TestCase
         $this->configure(['phone_number_id' => '', 'access_token' => '']);
 
         $this->expectException(BusinessRuleException::class);
-        (new WhatsAppCloudSmsGateway())->send('+962790001234', 'code 1234');
+        (new WhatsAppCloudSmsGateway)->send('+962790001234', 'code 1234');
     }
 
     public function test_throws_when_api_returns_error(): void
@@ -80,6 +80,6 @@ class WhatsAppCloudOtpTest extends TestCase
         Http::fake(['graph.facebook.com/*' => Http::response(['error' => ['message' => 'bad token']], 401)]);
 
         $this->expectException(BusinessRuleException::class);
-        (new WhatsAppCloudSmsGateway())->send('+962790001234', 'code 1234');
+        (new WhatsAppCloudSmsGateway)->send('+962790001234', 'code 1234');
     }
 }

@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\Auth\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
@@ -58,7 +59,7 @@ class OtpService extends BaseService
         try {
             $this->dispatch($identifier, $channel, $code, $purpose);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('otp.dispatch_failed', [
+            Log::warning('otp.dispatch_failed', [
                 'purpose' => $purpose->value,
                 'error' => $e->getMessage(),
             ]);

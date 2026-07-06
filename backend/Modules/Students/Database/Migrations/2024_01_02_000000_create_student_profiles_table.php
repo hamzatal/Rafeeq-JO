@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Rafeeq\Shared\Enums\Gender;
 use Rafeeq\Shared\Enums\RewardTier;
 
 return new class extends Migration

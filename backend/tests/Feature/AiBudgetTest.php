@@ -18,7 +18,8 @@ class AiBudgetTest extends TestCase
 
     private function enableFakeGpt(): void
     {
-        $fake = new class implements GptClient {
+        $fake = new class implements GptClient
+        {
             public function chat(array $messages, array $options = []): GptResult
             {
                 return new GptResult('رد ذكي', 50, 50, 'gpt-test');

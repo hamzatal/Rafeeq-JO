@@ -24,7 +24,7 @@ class FraudSweep extends Command
         $frozen = count(array_filter($results, fn ($r) => $r['frozen']));
         $opened = count(array_filter($results, fn ($r) => $r['dispute'] !== null));
 
-        $this->info("Fraud sweep: evaluated ".count($results)." account(s), opened {$opened} case(s), froze {$frozen}.");
+        $this->info('Fraud sweep: evaluated '.count($results)." account(s), opened {$opened} case(s), froze {$frozen}.");
 
         return self::SUCCESS;
     }

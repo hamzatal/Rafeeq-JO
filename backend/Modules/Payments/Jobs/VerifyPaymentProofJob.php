@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Rafeeq\Modules\Payments\Models\Payment;
 use Rafeeq\Modules\Payments\Services\PaymentService;
+use Rafeeq\Shared\Enums\PaymentStatus;
 
 /**
  * Runs the slow GPT-Vision verification for an uploaded CliQ proof off the HTTP
@@ -42,7 +43,7 @@ class VerifyPaymentProofJob implements ShouldQueue
         $payment = Payment::find($this->paymentId);
         if ($payment && $payment->status === 'verifying') {
             $payment->forceFill(['status' => 'manual_review'])->save();
-            $payment->request()->first()?->forceFill(['status' => \Rafeeq\Shared\Enums\PaymentStatus::UnderReview])->save();
+            $payment->request()->first()?->forceFill(['status' => PaymentStatus::UnderReview])->save();
         }
     }
 }

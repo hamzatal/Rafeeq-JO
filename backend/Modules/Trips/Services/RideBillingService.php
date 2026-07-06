@@ -8,10 +8,10 @@ use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Coupons\Models\Coupon;
 use Rafeeq\Modules\Coupons\Services\CouponService;
 use Rafeeq\Modules\Matching\Services\PricingService;
+use Rafeeq\Modules\Rewards\Services\RewardService;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Wallet\Services\WalletService;
-use Rafeeq\Modules\Rewards\Services\RewardService;
 use Rafeeq\Shared\Enums\CouponScope;
 use Rafeeq\Shared\Enums\WalletTxnType;
 

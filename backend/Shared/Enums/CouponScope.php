@@ -2,12 +2,14 @@
 
 namespace Rafeeq\Shared\Enums;
 
+use Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+
 /**
  * What a coupon can be applied to. `Any` matches every context.
  */
 enum CouponScope: string
 {
-    use \Rafeeq\Shared\Enums\Concerns\LocalizedLabel;
+    use LocalizedLabel;
 
     case Any = 'any';
     case Subscription = 'subscription';

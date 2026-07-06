@@ -9,6 +9,7 @@ use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Subscriptions\Models\SubscriptionPlan;
 use Rafeeq\Modules\Subscriptions\Requests\PlanRequest;
 use Rafeeq\Modules\Subscriptions\Resources\SubscriptionPlanResource;
+use Rafeeq\Shared\Enums\SubscriptionType;
 
 class PlanController extends Controller
 {
@@ -34,7 +35,7 @@ class PlanController extends Controller
     public function store(PlanRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $data['duration_days'] ??= \Rafeeq\Shared\Enums\SubscriptionType::from($data['type'])->defaultDurationDays();
+        $data['duration_days'] ??= SubscriptionType::from($data['type'])->defaultDurationDays();
 
         $plan = SubscriptionPlan::create($data);
         $this->audit->log('plan.created', $request->user(), auditable: $plan);

@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Auth\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Rafeeq\Shared\Enums\OtpChannel;
 use Rafeeq\Shared\Enums\OtpPurpose;
 use Rafeeq\Shared\Traits\HasUuid;
@@ -16,8 +17,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $code_hash
  * @property int $attempts
  * @property int $max_attempts
- * @property \Illuminate\Support\Carbon $expires_at
- * @property \Illuminate\Support\Carbon|null $consumed_at
+ * @property Carbon $expires_at
+ * @property Carbon|null $consumed_at
  */
 class OtpCode extends Model
 {

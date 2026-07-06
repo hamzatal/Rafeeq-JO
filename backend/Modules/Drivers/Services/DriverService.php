@@ -7,7 +7,6 @@ use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
-use Rafeeq\Shared\Enums\DocumentStatus;
 use Rafeeq\Shared\Enums\DocumentType;
 use Rafeeq\Shared\Enums\DriverStatus;
 

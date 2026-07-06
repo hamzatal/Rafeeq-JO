@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\LostFound\Services;
 
+use Illuminate\Support\Collection;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
@@ -37,7 +38,7 @@ class LostFoundService extends BaseService
     }
 
     /** Candidate matches from the opposite pool (lost ↔ found). */
-    public function candidates(LostFoundItem $item, int $limit = 10): \Illuminate\Support\Collection
+    public function candidates(LostFoundItem $item, int $limit = 10): Collection
     {
         $opposite = $item->type === 'lost' ? 'found' : 'lost';
         $terms = preg_split('/\s+/', trim((string) $item->title)) ?: [];
@@ -49,7 +50,7 @@ class LostFoundService extends BaseService
                 foreach (array_slice($terms, 0, 5) as $term) {
                     if (mb_strlen($term) >= 2) {
                         $q->orWhere('title', 'like', "%{$term}%")
-                          ->orWhere('description', 'like', "%{$term}%");
+                            ->orWhere('description', 'like', "%{$term}%");
                     }
                 }
             })

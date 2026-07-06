@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\RolesPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\CouponScope;
@@ -19,7 +20,7 @@ class EndToEndFlowTest extends TestCase
 
     private function seedRolesAndAdmin(): User
     {
-        $this->seed(\Database\Seeders\RolesPermissionsSeeder::class);
+        $this->seed(RolesPermissionsSeeder::class);
 
         $admin = User::create([
             'full_name' => 'مدير', 'phone' => '+962790000001', 'type' => 'admin',

@@ -5,11 +5,13 @@ namespace Rafeeq\Modules\Trips\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Drivers\Models\Vehicle;
 use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Traits\HasUuid;
 
@@ -27,9 +29,9 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property int|null $express_fee_fils
  * @property float|null $surge_multiplier
  * @property TripStatus $status
- * @property \Illuminate\Support\Carbon $scheduled_at
- * @property \Illuminate\Support\Carbon|null $started_at
- * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property Carbon $scheduled_at
+ * @property Carbon|null $started_at
+ * @property Carbon|null $ended_at
  * @property int $capacity
  */
 class Trip extends Model
@@ -46,7 +48,7 @@ class Trip extends Model
     {
         return [
             'status' => TripStatus::class,
-            'direction' => \Rafeeq\Shared\Enums\RideDirection::class,
+            'direction' => RideDirection::class,
             'scheduled_at' => 'datetime',
             'started_at' => 'datetime',
             'ended_at' => 'datetime',

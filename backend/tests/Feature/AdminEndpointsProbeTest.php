@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\RolesPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\UserStatus;
@@ -19,7 +20,7 @@ class AdminEndpointsProbeTest extends TestCase
 
     public function test_all_admin_list_endpoints_respond_without_server_error(): void
     {
-        $this->seed(\Database\Seeders\RolesPermissionsSeeder::class);
+        $this->seed(RolesPermissionsSeeder::class);
         $admin = User::create([
             'full_name' => 'Admin', 'phone' => '0790009999', 'password' => 'secret-pass',
             'type' => UserType::Admin, 'status' => UserStatus::Active, 'locale' => 'ar',

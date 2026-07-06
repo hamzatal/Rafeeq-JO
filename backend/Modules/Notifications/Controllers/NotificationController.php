@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Notifications\Models\Notification;
-use Rafeeq\Modules\Notifications\Models\NotificationPreference;
 use Rafeeq\Modules\Notifications\Resources\NotificationResource;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
 

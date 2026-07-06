@@ -12,6 +12,7 @@ use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Shared\Enums\DocumentStatus;
 use Rafeeq\Shared\Enums\DocumentType;
 use Rafeeq\Shared\Enums\DriverStatus;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DriverDocumentService extends BaseService
 {
@@ -77,7 +78,7 @@ class DriverDocumentService extends BaseService
     }
 
     /** Stream a private document for authorized admins (disk-agnostic). */
-    public function download(DriverDocument $document): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function download(DriverDocument $document): StreamedResponse
     {
         return Storage::disk(self::DISK)->download($document->file_path);
     }

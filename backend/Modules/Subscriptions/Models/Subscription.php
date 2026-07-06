@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Rafeeq\Shared\Enums\SubscriptionStatus;
 use Rafeeq\Shared\Traits\HasUuid;
 
@@ -15,8 +16,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $plan_id
  * @property string|null $route_id
  * @property SubscriptionStatus $status
- * @property \Illuminate\Support\Carbon|null $starts_at
- * @property \Illuminate\Support\Carbon|null $ends_at
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
  * @property int|null $remaining_rides
  */
 class Subscription extends Model

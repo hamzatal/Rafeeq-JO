@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Complaints\Models\Complaint;
 use Rafeeq\Modules\Coupons\Models\Coupon;
@@ -55,7 +54,6 @@ class DemoSeeder extends Seeder
 
         $this->command?->info('DemoSeeder: '.count($students).' students, '.count($drivers).' captains, plus subscriptions/coupons/complaints/notifications/trips.');
     }
-
 
     /** @return SubscriptionPlan[] */
     private function seedPlans($unis): array
@@ -148,7 +146,6 @@ class DemoSeeder extends Seeder
         return $students;
     }
 
-
     /** @return DriverProfile[] */
     private function seedDrivers($zones): array
     {
@@ -236,7 +233,6 @@ class DemoSeeder extends Seeder
             );
         }
     }
-
 
     /** @param User[] $students @param DriverProfile[] $drivers */
     private function seedComplaints(array $students, array $drivers): void

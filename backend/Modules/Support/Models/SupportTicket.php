@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\Support\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\TicketCategory;
 use Rafeeq\Shared\Enums\TicketPriority;
@@ -21,7 +22,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property TicketPriority $priority
  * @property int $level
  * @property string|null $assigned_to
- * @property \Illuminate\Support\Carbon|null $last_reply_at
+ * @property Carbon|null $last_reply_at
  */
 class SupportTicket extends Model
 {

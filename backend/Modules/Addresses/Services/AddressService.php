@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\Addresses\Services;
 
+use Illuminate\Database\Eloquent\Collection;
 use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Addresses\Models\SavedAddress;
@@ -9,7 +10,7 @@ use Rafeeq\Modules\Auth\Models\User;
 
 class AddressService extends BaseService
 {
-    /** @return \Illuminate\Database\Eloquent\Collection<int, SavedAddress> */
+    /** @return Collection<int, SavedAddress> */
     public function forUser(User $user)
     {
         return SavedAddress::where('user_id', $user->id)

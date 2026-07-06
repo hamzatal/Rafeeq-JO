@@ -9,7 +9,9 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Rewards\Models\RewardAccount;
 use Rafeeq\Modules\Rewards\Models\RewardTransaction;
+use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\RewardTier;
+use Rafeeq\Shared\Enums\WalletTxnType;
 
 /**
  * Rafeeq Rewards: points earned from activity (rides, referrals) that raise
@@ -32,7 +34,7 @@ class RewardService extends BaseService
 
     public function __construct(
         private readonly AuditLogger $audit,
-        private readonly \Rafeeq\Modules\Wallet\Services\WalletService $wallets,
+        private readonly WalletService $wallets,
     ) {}
 
     public function account(User $user): RewardAccount
@@ -146,7 +148,7 @@ class RewardService extends BaseService
             $this->wallets->credit(
                 $this->wallets->forUser($user),
                 $creditFils,
-                \Rafeeq\Shared\Enums\WalletTxnType::RewardRedemption,
+                WalletTxnType::RewardRedemption,
                 'استبدال نقاط رفيق',
                 $txn->id,
             );

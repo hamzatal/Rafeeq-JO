@@ -21,6 +21,7 @@ class RoundTripMatchingTest extends TestCase
     use RefreshDatabase;
 
     private University $uni;
+
     private Zone $zone;
 
     protected function setUp(): void

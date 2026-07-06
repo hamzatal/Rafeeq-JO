@@ -3,6 +3,7 @@
 namespace Rafeeq\Modules\Safety\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Rafeeq\Shared\Traits\HasUuid;
 
 /**
@@ -15,7 +16,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $driver_id
  * @property array $pickups
  * @property bool $resolved
- * @property \Illuminate\Support\Carbon $expires_at
+ * @property Carbon $expires_at
  */
 class GhostTripWatch extends Model
 {

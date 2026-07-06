@@ -28,7 +28,8 @@ class PaymentFraudGuardTest extends TestCase
 
     private function bindGpt(array $payload): void
     {
-        $fake = new class($payload) implements GptClient {
+        $fake = new class($payload) implements GptClient
+        {
             public function __construct(private array $payload) {}
 
             public function chat(array $messages, array $options = []): GptResult

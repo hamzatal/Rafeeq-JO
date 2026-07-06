@@ -1,5 +1,7 @@
 <?php
 
+use Rafeeq\Modules\Auth\Models\User;
+
 return [
     'defaults' => [
         'guard' => env('AUTH_GUARD', 'web'),
@@ -20,7 +22,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', Rafeeq\Modules\Auth\Models\User::class),
+            'model' => env('AUTH_MODEL', User::class),
         ],
     ],
 

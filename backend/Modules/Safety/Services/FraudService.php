@@ -15,6 +15,7 @@ use Rafeeq\Shared\Enums\RiskSeverity;
 class FraudService extends BaseService
 {
     private const CANCEL_RATE_WINDOW_DAYS = 7;
+
     private const CANCEL_RATE_THRESHOLD = 5;
 
     public function __construct(private readonly AuditLogger $audit) {}

@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Rafeeq\Core\Permissions\Models\Role;
-use Rafeeq\Modules\Addresses\Models\SavedAddress;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;

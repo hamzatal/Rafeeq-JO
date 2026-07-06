@@ -2,10 +2,10 @@
 
 namespace Rafeeq\Modules\Safety\Services;
 
+use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
-use Illuminate\Support\Facades\Log;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Modules\Safety\Models\EmergencyContact;

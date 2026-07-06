@@ -7,6 +7,7 @@ use Laravel\Sanctum\Sanctum;
 use Rafeeq\Core\Permissions\Models\Role;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Chat\Models\ChatConversation;
+use Rafeeq\Modules\Chat\Services\ChatService;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
@@ -137,7 +138,7 @@ class ChatTest extends TestCase
         $this->postJson("/api/v1/chat/conversations/{$cid}/read")->assertOk()->assertJsonPath('data.marked', 1);
 
         $conv = ChatConversation::find($cid);
-        $this->assertSame(0, app(\Rafeeq\Modules\Chat\Services\ChatService::class)->unreadCount($driverUser, $conv));
+        $this->assertSame(0, app(ChatService::class)->unreadCount($driverUser, $conv));
     }
 
     public function test_non_participant_cannot_read_messages(): void

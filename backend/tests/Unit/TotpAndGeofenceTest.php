@@ -10,7 +10,7 @@ class TotpAndGeofenceTest extends TestCase
 {
     public function test_totp_code_verifies_against_its_own_secret(): void
     {
-        $totp = new TotpService();
+        $totp = new TotpService;
         $secret = $totp->generateSecret();
 
         $counter = (int) floor(time() / 30);
@@ -23,7 +23,7 @@ class TotpAndGeofenceTest extends TestCase
 
     public function test_totp_rejects_malformed_codes(): void
     {
-        $totp = new TotpService();
+        $totp = new TotpService;
         $secret = $totp->generateSecret();
 
         $this->assertFalse($totp->verify($secret, 'abcdef'));
@@ -32,7 +32,7 @@ class TotpAndGeofenceTest extends TestCase
 
     public function test_provisioning_uri_contains_secret_and_issuer(): void
     {
-        $totp = new TotpService();
+        $totp = new TotpService;
         $uri = $totp->provisioningUri('JBSWY3DPEHPK3PXP', 'admin@rafeeq.jo', 'Rafeeq');
 
         $this->assertStringStartsWith('otpauth://totp/', $uri);
@@ -43,7 +43,7 @@ class TotpAndGeofenceTest extends TestCase
     public function test_point_in_polygon_geofence(): void
     {
         // A square around Irbid (~lat 32.55, lng 35.85).
-        $zone = new Zone();
+        $zone = new Zone;
         $zone->center_lat = 32.55;
         $zone->center_lng = 35.85;
         $zone->radius_km = 3;
@@ -63,7 +63,7 @@ class TotpAndGeofenceTest extends TestCase
 
     public function test_zone_without_boundary_does_not_contain_points(): void
     {
-        $zone = new Zone();
+        $zone = new Zone;
         $zone->boundary = null;
 
         $this->assertFalse($zone->hasBoundary());

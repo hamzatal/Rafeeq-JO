@@ -3,7 +3,6 @@
 namespace Rafeeq\Modules\Settings\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Settings\Requests\UpdateCliqRequest;
 use Rafeeq\Modules\Settings\Services\SettingService;

@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\Payments\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\PaymentPurpose;
 use Rafeeq\Shared\Enums\PaymentStatus;
@@ -22,8 +23,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $method
  * @property PaymentStatus $status
  * @property string|null $reject_reason
- * @property \Illuminate\Support\Carbon|null $expires_at
- * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $approved_at
  * @property string|null $approved_by
  */
 class PaymentRequest extends Model

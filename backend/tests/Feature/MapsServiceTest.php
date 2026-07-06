@@ -10,7 +10,7 @@ class MapsServiceTest extends TestCase
 {
     public function test_haversine_distance_is_reasonable(): void
     {
-        $svc = new MapsService();
+        $svc = new MapsService;
         // Irbid → Amman is ~70 km straight line.
         $m = $svc->haversineMeters(32.5556, 35.85, 31.9539, 35.9106);
 
@@ -21,7 +21,7 @@ class MapsServiceTest extends TestCase
     public function test_distance_falls_back_to_haversine_without_key(): void
     {
         config()->set('services.maps.google_key', '');
-        $svc = new MapsService();
+        $svc = new MapsService;
 
         $m = $svc->distanceMeters(32.5556, 35.85, 32.5000, 35.85);
         $this->assertGreaterThan(0, $m);
@@ -36,14 +36,14 @@ class MapsServiceTest extends TestCase
             ], 200),
         ]);
 
-        $m = (new MapsService())->distanceMeters(32.5, 35.8, 32.6, 35.9);
+        $m = (new MapsService)->distanceMeters(32.5, 35.8, 32.6, 35.9);
         $this->assertSame(12345, $m);
     }
 
     public function test_geocode_returns_null_without_key(): void
     {
         config()->set('services.maps.google_key', '');
-        $this->assertNull((new MapsService())->geocode('Yarmouk University'));
+        $this->assertNull((new MapsService)->geocode('Yarmouk University'));
     }
 
     public function test_geocode_parses_google_response(): void
@@ -56,7 +56,7 @@ class MapsServiceTest extends TestCase
             ], 200),
         ]);
 
-        $loc = (new MapsService())->geocode('Yarmouk University, Irbid');
+        $loc = (new MapsService)->geocode('Yarmouk University, Irbid');
         $this->assertEqualsWithDelta(32.51, $loc['lat'], 0.001);
         $this->assertEqualsWithDelta(35.85, $loc['lng'], 0.001);
     }

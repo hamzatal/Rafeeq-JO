@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\RolesPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
@@ -16,7 +17,7 @@ class WalletSubscriptionPaymentTest extends TestCase
 
     private function student(string $phone): User
     {
-        $this->seed(\Database\Seeders\RolesPermissionsSeeder::class);
+        $this->seed(RolesPermissionsSeeder::class);
         $user = User::create([
             'full_name' => 'طالب', 'phone' => $phone, 'type' => 'student',
             'status' => 'active', 'locale' => 'ar',
