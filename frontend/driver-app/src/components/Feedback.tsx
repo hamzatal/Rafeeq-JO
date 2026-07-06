@@ -6,7 +6,7 @@ import { Icon, type IconName } from './Icon';
 import { Button } from './Button';
 
 /**
- * Unified feedback system (Design System v6).
+ * Unified feedback system (Design System v7 "Onyx").
  *
  * Replaces the scattered per-screen inline <Banner> + local error state with a
  * single global surface:

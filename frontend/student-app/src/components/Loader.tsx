@@ -4,8 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
 
 /**
- * Modern branded loader — three gold dots pulsing in sequence. Replaces plain
- * "loading…" text / bare spinners with an on-brand, animated indicator.
+ * Modern branded loader — three signature-blue dots pulsing in sequence.
+ * Replaces plain "loading…" text / bare spinners with an on-brand, animated
+ * indicator (color follows the theme accent).
  */
 export function Loader({ size = 10, color, style }: { size?: number; color?: string; style?: ViewStyle }) {
   const theme = useTheme();

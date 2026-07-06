@@ -20,9 +20,9 @@ export function LogoFull({ compact = false }: { compact?: boolean }) {
       <LogoMark size={compact ? 40 : 48} />
       <div className="leading-tight">
         <div className={`font-extrabold tracking-tight text-cyan-soft ${compact ? 'text-lg' : 'text-2xl'}`}>
-          Rafeeq<span className="text-white/90"> JO</span>
+          رفيق
         </div>
-        <div className="text-[11px] text-white/55">Smart Student Mobility</div>
+        <div className="text-[11px] text-white/55">النقل الجامعي الذكي</div>
       </div>
     </div>
   );

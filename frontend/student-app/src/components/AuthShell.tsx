@@ -6,10 +6,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme, type AppTheme } from '../theme';
 
 /**
- * Unified, premium auth background for login / register / reset.
- * A slightly-dark canvas (so it reads distinct) with a soft lime glow, the
- * unified brand mark, a clear title and a friendly subtitle — shared visual
- * language across the student & captain apps.
+ * Unified, premium auth background for login / register / reset (Onyx DS v7).
+ * A deep ink canvas with a soft signature-blue glow, the unified brand mark, a
+ * clear title and a friendly subtitle — one shared visual language across the
+ * student & captain apps, matching the welcome + splash surfaces.
  */
 export function AuthShell({
   title,
@@ -49,7 +49,7 @@ export function AuthShell({
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#141B2E', overflow: 'hidden' },
+    root: { flex: 1, backgroundColor: '#0A0D12', overflow: 'hidden' },
     glow: { position: 'absolute', top: -120, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.16 },
     glow2: { position: 'absolute', bottom: -140, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.accent, opacity: 0.07 },
     safe: { flex: 1 },

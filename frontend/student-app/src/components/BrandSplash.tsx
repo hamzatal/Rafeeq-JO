@@ -56,7 +56,7 @@ export function BrandSplash() {
           </View>
         </View>
 
-        <Text style={styles.word}>Rafeeq</Text>
+        <Text style={styles.word}>رفيق</Text>
         <Text style={styles.tag}>النقل والخدمات الجامعية الذكية</Text>
 
         <View style={styles.dots}>
@@ -72,18 +72,18 @@ export function BrandSplash() {
   );
 }
 
-const GOLD = palette.gold;
+const ACCENT = palette.accentBright;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.primary },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.primary, opacity: 0.5 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.ink },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.ink, opacity: 0.5 },
   emblemWrap: { width: 132, height: 132, alignItems: 'center', justifyContent: 'center', marginBottom: 26 },
-  glow: { position: 'absolute', width: 132, height: 132, borderRadius: 66, backgroundColor: GOLD },
-  ring: { position: 'absolute', width: 122, height: 122, borderRadius: 61, borderWidth: 2.5, borderColor: GOLD, borderTopColor: 'transparent', borderRightColor: 'transparent' },
+  glow: { position: 'absolute', width: 132, height: 132, borderRadius: 66, backgroundColor: ACCENT },
+  ring: { position: 'absolute', width: 122, height: 122, borderRadius: 61, borderWidth: 2.5, borderColor: ACCENT, borderTopColor: 'transparent', borderRightColor: 'transparent' },
   emblem: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 12, shadowOffset: { width: 0, height: 6 } },
   logoImg: { width: 66, height: 66 },
   word: { fontFamily: fontFamily.extrabold, fontSize: 38, color: '#FFFFFF', textAlign: 'center', letterSpacing: 1 },
   tag: { fontFamily: fontFamily.medium, fontSize: 13.5, color: 'rgba(255,255,255,0.82)', marginTop: 6, textAlign: 'center' },
   dots: { flexDirection: 'row', gap: 8, marginTop: 28 },
-  dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: GOLD },
+  dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: ACCENT },
 });

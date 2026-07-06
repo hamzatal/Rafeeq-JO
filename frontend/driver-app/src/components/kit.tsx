@@ -1,8 +1,8 @@
 /**
- * Rafeeq Design System v3 — shared UI primitives (captain app).
+ * Rafeeq Design System v7 "Onyx" — shared UI primitives (captain app).
  *
  * Premium, theme-aware, RTL-first building blocks. Everything reads from
- * `useTheme()` so light/dark + the captain navy+cyan brand stay consistent.
+ * `useTheme()` so light/dark + the unified onyx + signature-blue brand stay consistent.
  * No hard-coded Arabic strings (callers pass already-translated labels).
  */
 import React, { useEffect, useMemo, useRef } from 'react';

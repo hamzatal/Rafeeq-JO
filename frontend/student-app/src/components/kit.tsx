@@ -1,5 +1,5 @@
 /**
- * Rafeeq Design System v3 — shared UI primitives (student app).
+ * Rafeeq Design System v7 "Onyx" — shared UI primitives (student app).
  *
  * Premium, theme-aware, RTL-first building blocks used across the rebuilt
  * screens. Everything reads from `useTheme()` so light/dark + brand colors

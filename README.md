@@ -17,7 +17,7 @@
 | `frontend/student-app` | تطبيق الطالب | Expo (React Native + TS) | iOS · Android · Web |
 | `frontend/driver-app` | تطبيق الكابتن | Expo (React Native + TS) | iOS · Android · Web |
 | `frontend/admin-dashboard` | لوحة الإدارة | Next.js + TS + Tailwind | Web |
-| `backend` | الـ API والمنطق | Laravel 11 (PHP 8.4) | — |
+| `backend` | الـ API والمنطق | Laravel 12 (PHP 8.4) | — |
 | `frontend/packages/shared` | نظام التصميم والأنواع المشتركة | TypeScript | — |
 
 ## البنية التقنية
