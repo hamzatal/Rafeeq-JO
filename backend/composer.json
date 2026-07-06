@@ -1,7 +1,7 @@
 {
     "name": "rafeeq/backend",
     "type": "project",
-    "description": "Rafeeq Platform — Modular Monolith API (Laravel 11)",
+    "description": "Rafeeq Platform — Modular Monolith API (Laravel 12)",
     "keywords": ["rafeeq", "laravel", "api", "mobility"],
     "license": "proprietary",
     "require": {

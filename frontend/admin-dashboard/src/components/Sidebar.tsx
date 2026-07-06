@@ -117,7 +117,7 @@ export function Sidebar() {
       <div className="px-5 py-5 flex items-center gap-3 border-b border-white/10">
         <LogoMark size={42} />
         <div>
-          <div className="text-lg font-extrabold font-display text-cyan-soft leading-tight">Rafeeq JO</div>
+          <div className="text-lg font-extrabold font-display text-cyan-soft leading-tight">رفيق</div>
           <div className="text-[11px] text-white/60">{t('brand.tagline')}</div>
         </div>
       </div>

@@ -7,25 +7,25 @@
 @tailwind utilities;
 
 html, body { padding: 0; margin: 0; }
-body { background: #F7F8FB; color: #141C33; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-html.dark body { background: #0D1220; color: #EDF0F7; }
+body { background: #F4F6F8; color: #0F1216; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+html.dark body { background: #0A0D12; color: #F4F6F8; }
 * { box-sizing: border-box; }
 
-/* Modern, slim scrollbars (navy) */
-* { scrollbar-width: thin; scrollbar-color: rgba(36,59,122,0.45) transparent; }
+/* Modern, slim scrollbars (ink) */
+* { scrollbar-width: thin; scrollbar-color: rgba(15,18,22,0.45) transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: rgba(36,59,122,0.35);
+  background: rgba(15,18,22,0.32);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-*::-webkit-scrollbar-thumb:hover { background: rgba(36,59,122,0.6); background-clip: padding-box; }
-/* Sidebar (on navy) scrollbar — subtle light thumb */
+*::-webkit-scrollbar-thumb:hover { background: rgba(15,18,22,0.55); background-clip: padding-box; }
+/* Sidebar (on ink) scrollbar — subtle light thumb */
 aside ::-webkit-scrollbar-thumb,
 aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); background-clip: padding-box; }
-aside ::-webkit-scrollbar-thumb:hover { background: rgba(231,166,58,0.7); background-clip: padding-box; }
+aside ::-webkit-scrollbar-thumb:hover { background: rgba(47,107,255,0.7); background-clip: padding-box; }
 aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
 
 /* Material Symbols base */
@@ -42,7 +42,7 @@ aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 h-11 font-semibold text-sm transition disabled:opacity-50;
   }
   .btn-primary { @apply btn bg-primary text-white hover:bg-primary-light shadow-card; }
-  .btn-accent  { @apply btn bg-cyan text-navy hover:bg-cyan-soft font-bold; }
+  .btn-accent  { @apply btn bg-cyan text-white hover:bg-cyan-deep font-bold; }
   .btn-outline { @apply btn border border-line bg-white text-navy hover:bg-background dark:border-dline dark:bg-dcard dark:text-dtext dark:hover:bg-dsurface; }
   .btn-danger  { @apply btn bg-danger text-white hover:opacity-90; }
   .btn-success { @apply btn bg-success text-white hover:opacity-90; }
@@ -71,7 +71,7 @@ aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
   .pill-info    { @apply pill bg-cyan/15 text-cyan-deep border-cyan/30; }
   .pill-muted   { @apply pill bg-background text-muted border-line; }
 
-  /* Tables — navy header, zebra rows (enterprise data density) */
+  /* Tables — ink header, zebra rows (enterprise data density) */
   .data-table { @apply w-full text-sm text-right; }
   .data-table thead { @apply bg-navy text-white; }
   .data-table th { @apply py-3 px-4 font-semibold text-xs uppercase tracking-wider; }
@@ -86,6 +86,6 @@ aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
            text-white/70 hover:text-white hover:bg-white/10 transition-colors;
   }
   .nav-item-active {
-    @apply text-navy bg-cyan hover:bg-cyan hover:text-navy font-bold border-s-4 border-cyan-soft;
+    @apply text-white bg-cyan hover:bg-cyan hover:text-white font-bold border-s-4 border-cyan-soft;
   }
 }

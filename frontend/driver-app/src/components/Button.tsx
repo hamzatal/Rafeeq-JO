@@ -4,9 +4,9 @@ import { useTheme, type AppTheme } from '../theme';
 import { Icon, type IconName } from './Icon';
 
 /**
- * Button variants (Design System v6 — Navy + Gold):
- *  - primary  → navy brand fill (the main CTA)               [white label]
- *  - accent   → gold premium fill (special / premium CTA)    [navy-ink label]
+ * Button variants (Design System v7 — Onyx):
+ *  - primary  → ink fill (the main CTA)                      [white label]
+ *  - accent   → signature-blue fill (key action CTA)         [white label]
  *  - positive → green fill (accept / confirm / go)           [white label]
  *  - danger   → red fill (destructive: delete / reject)      [white label]
  *  - outline  → transparent, navy border                     [navy label]
