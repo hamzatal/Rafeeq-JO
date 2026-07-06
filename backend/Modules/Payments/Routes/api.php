@@ -6,10 +6,11 @@ use Rafeeq\Modules\Payments\Controllers\PaymentController;
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Payer (student) — manage own payment requests
     Route::get('payments', [PaymentController::class, 'mine']);
-    Route::post('payments', [PaymentController::class, 'create']);
+    // Money-creating / proof-upload endpoints are rate-limited (throttle:sensitive).
+    Route::post('payments', [PaymentController::class, 'create'])->middleware('throttle:sensitive');
     Route::get('payments/{paymentRequest}', [PaymentController::class, 'show']);
     Route::get('payments/{paymentRequest}/instructions', [PaymentController::class, 'instructions']);
-    Route::post('payments/{paymentRequest}/proof', [PaymentController::class, 'submitProof']);
+    Route::post('payments/{paymentRequest}/proof', [PaymentController::class, 'submitProof'])->middleware('throttle:sensitive');
 
     // Admin / finance — review queue + approvals
     Route::prefix('admin')->group(function () {

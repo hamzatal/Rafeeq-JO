@@ -3,6 +3,7 @@
 namespace Rafeeq\Core\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Rafeeq\Core\Audit\AuditLogger;
@@ -19,10 +20,23 @@ class CoreServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
         $this->registerRateLimiters();
+        $this->registerBroadcasting();
 
         if ($this->app->runningInConsole()) {
             $this->commands([SchemaDocCommand::class]);
         }
+    }
+
+    /**
+     * Register the broadcasting auth endpoint on the stateless Sanctum guard
+     * (so mobile Bearer tokens authorize private-channel subscriptions) and
+     * load the channel authorization callbacks.
+     */
+    private function registerBroadcasting(): void
+    {
+        Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
+        require __DIR__.'/../../routes/channels.php';
     }
 
     /**

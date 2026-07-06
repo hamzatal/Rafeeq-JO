@@ -8,6 +8,14 @@ return [
 
     // In non-production environments, return the code in the API response
     // and allow a universal test code for QA without sending real SMS.
-    'debug_return_code' => env('OTP_DEBUG_RETURN_CODE', env('APP_ENV') !== 'production'),
-    'universal_code' => env('OTP_UNIVERSAL_CODE'),
+    //
+    // HARD PRODUCTION GUARD: these QA aids are FORCE-DISABLED whenever
+    // APP_ENV=production, regardless of any env override — so a single
+    // misconfiguration can never leak live OTPs or enable a bypass code.
+    'debug_return_code' => env('APP_ENV') === 'production'
+        ? false
+        : (bool) env('OTP_DEBUG_RETURN_CODE', true),
+    'universal_code' => env('APP_ENV') === 'production'
+        ? null
+        : env('OTP_UNIVERSAL_CODE'),
 ];

@@ -64,6 +64,12 @@ class RideBillingService extends BaseService
                 $discount = 0;
             }
         }
+
+        // Zero-sum guard: the platform absorbs a ride discount only up to its own
+        // commission (there is no funded treasury wallet). Without this cap, a
+        // discount greater than the commission would credit the captain MORE than
+        // the student is debited — minting unbacked balance in the wallet ledger.
+        $discount = min($discount, $commission);
         $payable = max(0, $fare - $discount);
 
         $this->transaction(function () use ($passenger, $trip, $fare, $payable, $discount, $couponToRedeem, $commission, $captainShare) {

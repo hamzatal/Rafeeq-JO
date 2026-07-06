@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Safety\Models\SosIncident;
 use Rafeeq\Modules\Safety\Services\SosService;
+use Rafeeq\Modules\Trips\Models\Trip;
 
 class SosController extends Controller
 {
@@ -23,11 +24,20 @@ class SosController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
+        // Only associate the incident with a trip the caller actually belongs to
+        // (their own trip as captain or rider). We never BLOCK the SOS on a bad
+        // trip_id — safety first — we just drop an unowned association so a user
+        // can't attach their alert to a stranger's trip.
+        $tripId = $data['trip_id'] ?? null;
+        if ($tripId !== null && ! $this->ownsTrip($request->user()->id, $tripId)) {
+            $tripId = null;
+        }
+
         $incident = $this->sos->trigger(
             $request->user(),
             isset($data['lat']) ? (float) $data['lat'] : null,
             isset($data['lng']) ? (float) $data['lng'] : null,
-            $data['trip_id'] ?? null,
+            $tripId,
             $data['note'] ?? null,
         );
 
@@ -35,6 +45,20 @@ class SosController extends Controller
             'id' => $incident->id,
             'status' => $incident->status,
         ], 'تم إرسال نداء الطوارئ. فريق رفيق سيتواصل فوراً.');
+    }
+
+    /** Whether the user is the captain or a rider of the given trip. */
+    private function ownsTrip(string $userId, string $tripId): bool
+    {
+        $trip = Trip::with('driver')->find($tripId);
+        if (! $trip) {
+            return false;
+        }
+        if ($trip->driver && $trip->driver->user_id === $userId) {
+            return true;
+        }
+
+        return $trip->passengers()->where('student_id', $userId)->exists();
     }
 
     public function mine(Request $request): JsonResponse
