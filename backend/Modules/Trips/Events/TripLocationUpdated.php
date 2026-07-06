@@ -2,8 +2,8 @@
 
 namespace Rafeeq\Modules\Trips\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
@@ -20,10 +20,16 @@ class TripLocationUpdated implements ShouldBroadcast
         public string $recordedAt,
     ) {}
 
-    /** @return Channel[] */
+    /**
+     * PRIVATE channel — live GPS of a student's ride must never be public.
+     * Only the trip's captain, its booked riders, and safety staff may listen
+     * (see routes/channels.php).
+     *
+     * @return PrivateChannel[]
+     */
     public function broadcastOn(): array
     {
-        return [new Channel('trip.'.$this->tripId)];
+        return [new PrivateChannel('trip.'.$this->tripId)];
     }
 
     public function broadcastAs(): string

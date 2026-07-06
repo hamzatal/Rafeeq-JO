@@ -2,8 +2,8 @@
 
 namespace Rafeeq\Modules\Trips\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
@@ -17,10 +17,15 @@ class TripStatusChanged implements ShouldBroadcast
         public string $status,
     ) {}
 
-    /** @return Channel[] */
+    /**
+     * PRIVATE channel — authorized to the trip's captain + riders + safety
+     * staff only (see routes/channels.php).
+     *
+     * @return PrivateChannel[]
+     */
     public function broadcastOn(): array
     {
-        return [new Channel('trip.'.$this->tripId)];
+        return [new PrivateChannel('trip.'.$this->tripId)];
     }
 
     public function broadcastAs(): string

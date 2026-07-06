@@ -44,7 +44,17 @@ class AuthController extends Controller
             request: $request,
         );
 
+        // MFA-enabled accounts using the passwordless login path must still pass
+        // the second factor before a token is issued.
+        if ($result['mfa_required']) {
+            return $this->ok([
+                'mfa_required' => true,
+                'mfa_token' => $result['mfa_token'],
+            ], 'أدخل رمز المصادقة الثنائية لإكمال الدخول.');
+        }
+
         return $this->ok([
+            'mfa_required' => false,
             'user' => new UserResource($result['user']),
             'token' => $result['token'],
             'token_type' => 'Bearer',

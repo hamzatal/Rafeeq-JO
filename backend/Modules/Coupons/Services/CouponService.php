@@ -127,6 +127,20 @@ class CouponService extends BaseService
                 throw new BusinessRuleException('انتهت الكمية المتاحة لرمز الخصم.', 'COUPON_LIMIT_REACHED');
             }
 
+            // Re-check per-user / first-order limits UNDER the lock. Two concurrent
+            // redemptions by the same user both serialize on this locked coupon
+            // row, so the count below can no longer be raced past the limit.
+            $userRedemptions = CouponRedemption::where('coupon_id', $locked->id)
+                ->where('user_id', $user->id)->count();
+
+            if ($locked->per_user_limit !== null && $userRedemptions >= $locked->per_user_limit) {
+                throw new BusinessRuleException('لقد استخدمت هذا الرمز للحد المسموح.', 'COUPON_PER_USER_LIMIT');
+            }
+
+            if ($locked->first_order_only && $userRedemptions > 0) {
+                throw new BusinessRuleException('رمز الخصم لأول عملية فقط.', 'COUPON_FIRST_ORDER_ONLY');
+            }
+
             $locked->increment('used_count');
 
             return CouponRedemption::create([

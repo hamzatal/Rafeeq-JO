@@ -6,9 +6,11 @@ use Rafeeq\Modules\Safety\Controllers\EmergencyContactController;
 use Rafeeq\Modules\Safety\Controllers\SafetyAdminController;
 use Rafeeq\Modules\Safety\Controllers\SosController;
 
-// SOS — any authenticated user
+// SOS — any authenticated user. Trigger is rate-limited (throttle:sensitive)
+// to stop abuse/flooding of the safety team while still allowing genuine
+// repeat presses.
 Route::prefix('v1/sos')->middleware('auth:sanctum')->group(function () {
-    Route::post('/', [SosController::class, 'trigger']);
+    Route::post('/', [SosController::class, 'trigger'])->middleware('throttle:sensitive');
     Route::get('mine', [SosController::class, 'mine']);
 });
 

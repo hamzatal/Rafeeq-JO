@@ -55,7 +55,12 @@ class AuthService extends BaseService
     /**
      * Verify a register/login OTP, activate the account, and issue an access token.
      *
-     * @return array{user: User, token: string}
+     * When the account has two-factor authentication enabled and this is a
+     * passwordless LOGIN, NO token is issued — a short-lived MFA challenge is
+     * returned instead, so the SMS-OTP path can never bypass the second factor
+     * (register can't reach this branch: a brand-new account has no MFA).
+     *
+     * @return array{user: User, token: ?string, mfa_required: bool, mfa_token: ?string}
      */
     public function verifyOtp(string $phone, string $code, OtpPurpose $purpose, ?string $deviceName = null, ?Request $request = null): array
     {
@@ -66,6 +71,19 @@ class AuthService extends BaseService
         }
 
         $this->otp->verify($phone, $purpose, $code);
+
+        // Passwordless login must still satisfy MFA when the account enabled it.
+        if ($purpose === OtpPurpose::Login && $user->hasMfaEnabled()) {
+            $this->guardCanLogin($user);
+            $this->audit->log('auth.login_mfa_challenge', $user, $request, $user);
+
+            return [
+                'user' => $user,
+                'token' => null,
+                'mfa_required' => true,
+                'mfa_token' => $this->mfa->issueChallenge($user),
+            ];
+        }
 
         return $this->transaction(function () use ($user, $deviceName, $request) {
             $user->markPhoneVerified();
@@ -82,7 +100,12 @@ class AuthService extends BaseService
 
             $this->audit->log('auth.otp_verified', $user, $request, $user);
 
-            return ['user' => $user->fresh('roles'), 'token' => $token];
+            return [
+                'user' => $user->fresh('roles'),
+                'token' => $token,
+                'mfa_required' => false,
+                'mfa_token' => null,
+            ];
         });
     }
 

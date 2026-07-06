@@ -129,19 +129,42 @@ class TripService extends BaseService
             ->whereNull('dropoff_confirmed_at')
             ->count();
 
-        $trip->forceFill(['status' => TripStatus::Completed, 'ended_at' => now()])->save();
+        // Atomic state transition: closing the trip, resolving passengers,
+        // releasing stranded holds and finalizing ride requests must all commit
+        // together (or not at all) so a mid-way failure can't leave a completed
+        // trip with locked funds or half-updated riders.
+        $this->transaction(function () use ($trip) {
+            $trip->forceFill(['status' => TripStatus::Completed, 'ended_at' => now()])->save();
 
-        // Onboard passengers are considered dropped at the end (without OTP
-        // confirmation — dropoff_confirmed_at stays null as evidence).
-        $trip->passengers()->where('status', TripPassengerStatus::Onboard->value)
-            ->update(['status' => TripPassengerStatus::Dropped->value]);
+            // Onboard passengers are considered dropped at the end (without OTP
+            // confirmation — dropoff_confirmed_at stays null as evidence).
+            $trip->passengers()->where('status', TripPassengerStatus::Onboard->value)
+                ->update(['status' => TripPassengerStatus::Dropped->value]);
 
-        // Finalize the linked ride requests so students aren't left stuck in
-        // "assigned" forever (which would block re-requesting to the same
-        // university). A completed trip fulfils them.
-        RideRequest::where('trip_id', $trip->id)
-            ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
-            ->update(['status' => RideRequestStatus::Completed->value]);
+            // Riders who booked but never boarded (booked → trip started → never
+            // captured) must NOT keep a fare hold locking their balance forever.
+            // Release any active hold and mark them no-show.
+            $notBoarded = $trip->passengers()
+                ->where('status', TripPassengerStatus::Booked->value)
+                ->with('student')
+                ->get();
+            foreach ($notBoarded as $passenger) {
+                if ($student = $passenger->student) {
+                    $hold = $this->wallets->findActiveHold($this->wallets->forUser($student), $trip->id);
+                    if ($hold) {
+                        $this->wallets->release($hold);
+                    }
+                }
+                $passenger->forceFill(['status' => TripPassengerStatus::NoShow->value])->save();
+            }
+
+            // Finalize the linked ride requests so students aren't left stuck in
+            // "assigned" forever (which would block re-requesting to the same
+            // university). A completed trip fulfils them.
+            RideRequest::where('trip_id', $trip->id)
+                ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
+                ->update(['status' => RideRequestStatus::Completed->value]);
+        });
 
         if ($unconfirmed > 0) {
             $trip->loadMissing('driver');
@@ -212,16 +235,20 @@ class TripService extends BaseService
             ->whereIn('status', [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value])
             ->pluck('student_id');
 
-        $trip->forceFill(['status' => TripStatus::Cancelled])->save();
-        $trip->passengers()->where('status', TripPassengerStatus::Booked->value)
-            ->update(['status' => TripPassengerStatus::Cancelled->value]);
+        // Atomic: cancelling the trip, releasing the riders' seats and returning
+        // their requests to the matching pool must commit together.
+        $this->transaction(function () use ($trip) {
+            $trip->forceFill(['status' => TripStatus::Cancelled])->save();
+            $trip->passengers()->where('status', TripPassengerStatus::Booked->value)
+                ->update(['status' => TripPassengerStatus::Cancelled->value]);
 
-        // The trip (not the student) was cancelled, so the students still want
-        // their ride: return their requests to the matching pool (Pending) and
-        // detach the trip, instead of leaving them stuck in "assigned".
-        RideRequest::where('trip_id', $trip->id)
-            ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
-            ->update(['status' => RideRequestStatus::Pending->value, 'trip_id' => null]);
+            // The trip (not the student) was cancelled, so the students still want
+            // their ride: return their requests to the matching pool (Pending) and
+            // detach the trip, instead of leaving them stuck in "assigned".
+            RideRequest::where('trip_id', $trip->id)
+                ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
+                ->update(['status' => RideRequestStatus::Pending->value, 'trip_id' => null]);
+        });
 
         TripStatusChanged::dispatch($trip->id, $trip->status->value);
 

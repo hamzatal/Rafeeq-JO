@@ -2,8 +2,8 @@
 
 namespace Rafeeq\Modules\Chat\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
@@ -20,10 +20,15 @@ class ChatMessageSent implements ShouldBroadcast
         public string $createdAt,
     ) {}
 
-    /** @return Channel[] */
+    /**
+     * PRIVATE channel — only the two participants of the conversation may
+     * listen (see routes/channels.php).
+     *
+     * @return PrivateChannel[]
+     */
     public function broadcastOn(): array
     {
-        return [new Channel('chat.'.$this->conversationId)];
+        return [new PrivateChannel('chat.'.$this->conversationId)];
     }
 
     public function broadcastAs(): string
