@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import type { RewardSummary } from '@rafeeq/shared';
@@ -72,13 +71,10 @@ export default function Home() {
         <LiveMap points={mapPoints} legend={false} height={height} />
       </View>
 
-      {/* Ambient bottom fade so the action area reads clearly over the map */}
-      <LinearGradient
-        colors={['rgba(249,249,255,0)', 'rgba(249,249,255,0.85)', theme.colors.background]}
-        locations={[0, 0.5, 1]}
-        style={s.mapOverlay}
-        pointerEvents="none"
-      />
+      {/* Ambient bottom scrim so the action area reads clearly over the map.
+          Layered plain views (no gradient dependency) for a soft fade. */}
+      <View style={[s.scrim, s.scrimA]} pointerEvents="none" />
+      <View style={[s.scrim, s.scrimB]} pointerEvents="none" />
 
       {/* Decorative nearby-captain marker (ambient) */}
       <View style={s.carMarker} pointerEvents="none">
@@ -121,8 +117,9 @@ export default function Home() {
       <Animated.View style={[s.bottomArea, { opacity: rise, transform: [{ translateY }] }]}>
         {/* Points & status card (navy gradient) */}
         <PressableScale onPress={() => router.push('/(app)/rewards')} style={s.pointsWrap}>
-          <LinearGradient colors={[theme.colors.primary, '#1A365D']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.pointsCard}>
+          <View style={s.pointsCard}>
             <View style={s.pointsDecor} />
+            <View style={s.pointsDecor2} />
             <View style={s.pointsLeft}>
               <View style={s.pointsIcon}>
                 <Icon name="award" size={20} color={theme.colors.accent} />
@@ -136,7 +133,7 @@ export default function Home() {
               <Text style={s.pointsLabel}>{t('home.level')}</Text>
               <Text style={s.pointsTier}>{rewards?.tier_label ?? '—'}</Text>
             </View>
-          </LinearGradient>
+          </View>
         </PressableScale>
 
         {/* Where to? glass panel */}
@@ -171,7 +168,9 @@ function QuickAction({ theme, icon, label, onPress }: { theme: AppTheme; icon: '
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: t.colors.background },
-    mapOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '58%' },
+    scrim: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+    scrimA: { height: '42%', backgroundColor: 'rgba(249,249,255,0.35)' },
+    scrimB: { height: '22%', backgroundColor: 'rgba(249,249,255,0.55)' },
 
     topBar: { position: 'absolute', top: 0, left: 0, right: 0, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: t.spacing.lg, paddingTop: t.spacing.sm },
     greetPill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)', paddingRight: 8, paddingLeft: 16, paddingVertical: 8, borderRadius: t.radius.full, ...t.shadow.sm },
@@ -193,8 +192,9 @@ const makeStyles = (t: AppTheme) =>
     bottomArea: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: t.spacing.lg, paddingBottom: t.spacing.base, gap: t.spacing.base },
 
     pointsWrap: { borderRadius: t.radius.lg, ...t.shadow.md },
-    pointsCard: { borderRadius: t.radius.lg, padding: t.spacing.base, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden' },
+    pointsCard: { borderRadius: t.radius.lg, padding: t.spacing.base, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', backgroundColor: t.colors.primary },
     pointsDecor: { position: 'absolute', right: -32, top: -32, width: 96, height: 96, borderRadius: 48, backgroundColor: 'rgba(255,255,255,0.10)' },
+    pointsDecor2: { position: 'absolute', right: 40, bottom: -40, width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(110,247,238,0.08)' },
     pointsLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
     pointsIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
     pointsLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: '#D6E3FF', textAlign: 'right' },
