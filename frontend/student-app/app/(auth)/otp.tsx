@@ -55,7 +55,7 @@ export default function Otp() {
         {params.debug ? <Text style={s.debug}>{t('auth.testCode')}: {params.debug}</Text> : null}
       </View>
       {formError ? <Banner message={formError} variant="error" /> : null}
-      <Input onDark value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="------" style={s.codeInput} />
+      <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="------" style={s.codeInput} />
       <Button title={t('auth.verify')} onPress={onVerify} loading={loading} />
     </AuthShell>
   );
@@ -64,7 +64,7 @@ export default function Otp() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     header: { marginBottom: t.spacing.lg, gap: t.spacing.xs, alignItems: 'center' },
-    phone: { fontFamily: t.fontFamily.bold, fontSize: 16, color: '#FFFFFF', textAlign: 'center' },
+    phone: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary, textAlign: 'center' },
     debug: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.warning, textAlign: 'center' },
     codeInput: { textAlign: 'center', letterSpacing: 8, fontSize: 22 },
   });

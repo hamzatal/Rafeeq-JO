@@ -62,14 +62,14 @@ export default function ForgotPassword() {
 
       {step === 'request' ? (
         <>
-          <Input onDark label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+          <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
           <Button title={t('auth.sendResetCode')} onPress={sendCode} loading={loading} />
         </>
       ) : (
         <>
-          <Input onDark label={t('auth.code')} value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="----" />
-          <Input onDark label={t('auth.newPassword')} value={password} onChangeText={setPassword} secureTextEntry />
-          <Input onDark label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
+          <Input label={t('auth.code')} value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="----" />
+          <Input label={t('auth.newPassword')} value={password} onChangeText={setPassword} secureTextEntry />
+          <Input label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
           <Button title={t('auth.resetTitle')} onPress={reset} loading={loading} />
         </>
       )}
@@ -84,5 +84,5 @@ export default function ForgotPassword() {
 const makeStyles = (_t: AppTheme) =>
   StyleSheet.create({
     bottomLink: { alignItems: 'center', marginTop: 24 },
-    bottomLinkText: { fontFamily: _t.fontFamily.semibold, fontSize: 14, color: 'rgba(255,255,255,0.8)' },
+    bottomLinkText: { fontFamily: _t.fontFamily.semibold, fontSize: 14, color: _t.colors.textSecondary },
   });
