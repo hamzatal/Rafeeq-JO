@@ -6,9 +6,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme, type AppTheme } from '../theme';
 
 /**
- * Unified, premium auth background for login / register / reset (captain, Onyx
- * DS v7). Deep ink canvas + soft signature-blue glow + unified brand mark +
- * clear title and subtitle — the same visual language as the student app.
+ * Unified auth surface for the captain app — Stitch design system.
+ * A clean light canvas with a white rounded card, the teal brand mark, a
+ * "كابتن" tag, a centered navy title and a friendly subtitle. Same visual
+ * language as the student app. LIGHT-MODE ONLY.
  */
 export function AuthShell({
   title,
@@ -24,25 +25,26 @@ export function AuthShell({
 
   return (
     <View style={s.root}>
-      <StatusBar style="light" />
-      <View style={s.glow} />
-      <View style={s.glow2} />
+      <StatusBar style="dark" />
+      <View style={s.tintA} pointerEvents="none" />
+      <View style={s.tintB} pointerEvents="none" />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <View style={s.brandRow}>
-            <View style={s.mark}>
-              <Image source={require('../../assets/r-logo.png')} style={s.markLogo} resizeMode="contain" />
+          <View style={s.card}>
+            <View style={s.brandRow}>
+              <View style={s.mark}>
+                <Image source={require('../../assets/r-logo.png')} style={s.markLogo} resizeMode="contain" />
+              </View>
+              <View style={s.captainTag}>
+                <Text style={s.captainTagText}>كابتن</Text>
+              </View>
             </View>
-            <Text style={s.brand}>رفيق</Text>
-            <View style={s.captainTag}>
-              <Text style={s.captainTagText}>كابتن</Text>
-            </View>
+
+            <Text style={s.title}>{title}</Text>
+            {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
+
+            <View style={s.form}>{children}</View>
           </View>
-
-          <Text style={s.title}>{title}</Text>
-          {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
-
-          <View style={s.form}>{children}</View>
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -51,21 +53,30 @@ export function AuthShell({
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#0A0D12', overflow: 'hidden' },
-    glow: { position: 'absolute', top: -120, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.16 },
-    glow2: { position: 'absolute', bottom: -140, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.accent, opacity: 0.07 },
+    root: { flex: 1, backgroundColor: t.colors.background, overflow: 'hidden' },
+    tintA: { position: 'absolute', top: -120, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.06 },
+    tintB: { position: 'absolute', bottom: -140, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.primary, opacity: 0.05 },
     safe: { flex: 1 },
-    content: { flexGrow: 1, paddingHorizontal: t.spacing.lg, paddingTop: t.spacing.xl, paddingBottom: t.spacing.lg },
+    content: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.xl },
 
-    brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginBottom: t.spacing['2xl'] },
-    mark: { width: 52, height: 52, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
-    markLogo: { width: 38, height: 38 },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: '#FFFFFF' },
-    captainTag: { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: t.radius.full, paddingHorizontal: 10, paddingVertical: 4 },
+    card: {
+      backgroundColor: t.colors.surface,
+      borderRadius: t.radius.xl,
+      borderWidth: 1,
+      borderColor: t.colors.hairline,
+      paddingHorizontal: t.spacing.lg,
+      paddingVertical: t.spacing['2xl'],
+      ...t.shadow.md,
+    },
+
+    brandRow: { alignItems: 'center', gap: t.spacing.sm, marginBottom: t.spacing.base },
+    mark: { width: 64, height: 64, borderRadius: t.radius.lg, backgroundColor: '#F0F3FF', alignItems: 'center', justifyContent: 'center' },
+    markLogo: { width: 44, height: 44 },
+    captainTag: { backgroundColor: t.colors.accentSoft, borderRadius: t.radius.full, paddingHorizontal: 12, paddingVertical: 4 },
     captainTagText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.accent },
 
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: '#FFFFFF', textAlign: 'right', lineHeight: 40 },
-    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: 'rgba(255,255,255,0.65)', textAlign: 'right', marginTop: 8 },
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 28, color: t.colors.primary, textAlign: 'center', lineHeight: 38 },
+    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'center', marginTop: 8 },
 
-    form: { marginTop: t.spacing['2xl'] },
+    form: { marginTop: t.spacing.xl },
   });
