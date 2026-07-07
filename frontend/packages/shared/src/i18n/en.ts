@@ -531,6 +531,11 @@ export const en: Translations = {
     send: 'Send',
     empty: 'Ask Rafeeq Assistant about subscriptions, rides, wallet, parcels and more.',
     aiOff: 'AI assistant is off — replies are guidance only.',
+    online: 'Online',
+    thinking: 'Thinking',
+    suggest1: 'How do I request a ride?',
+    suggest2: 'What are the subscription plans?',
+    suggest3: 'How do I top up my wallet?',
   },
   emergency: {
     title: 'Emergency',
