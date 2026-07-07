@@ -5,12 +5,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   useFonts,
-  Cairo_400Regular,
-  Cairo_500Medium,
-  Cairo_600SemiBold,
-  Cairo_700Bold,
-  Cairo_800ExtraBold,
-} from '@expo-google-fonts/cairo';
+  IBMPlexSansArabic_400Regular,
+  IBMPlexSansArabic_500Medium,
+  IBMPlexSansArabic_600SemiBold,
+  IBMPlexSansArabic_700Bold,
+} from '@expo-google-fonts/ibm-plex-sans-arabic';
 import { I18nProvider } from '../src/i18n';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { FeedbackProvider } from '../src/components/Feedback';
@@ -22,17 +21,15 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Cairo_400Regular,
-    Cairo_500Medium,
-    Cairo_600SemiBold,
-    Cairo_700Bold,
-    Cairo_800ExtraBold,
+    IBMPlexSansArabic_400Regular,
+    IBMPlexSansArabic_500Medium,
+    IBMPlexSansArabic_600SemiBold,
+    IBMPlexSansArabic_700Bold,
   });
 
   const bootstrap = useAuth((s) => s.bootstrap);
   const hydrate = usePrefs((s) => s.hydrate);
   const hydrated = usePrefs((s) => s.hydrated);
-  const scheme = usePrefs((s) => s.scheme);
 
   useEffect(() => { void hydrate(); void loadAppConfig(); }, [hydrate]);
   useEffect(() => { if (hydrated) void bootstrap(); }, [hydrated, bootstrap]);
@@ -45,7 +42,7 @@ export default function RootLayout() {
       <ErrorBoundary>
         <I18nProvider>
           <FeedbackProvider>
-            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+            <StatusBar style="dark" />
             <Slot />
           </FeedbackProvider>
         </I18nProvider>

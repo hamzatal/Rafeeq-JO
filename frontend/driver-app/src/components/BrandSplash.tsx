@@ -75,8 +75,8 @@ export function BrandSplash() {
 const ACCENT = palette.accentBright;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.ink },
-  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.ink, opacity: 0.55 },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.navy },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: palette.navy, opacity: 0.55 },
   emblemWrap: { width: 132, height: 132, alignItems: 'center', justifyContent: 'center', marginBottom: 26 },
   glow: { position: 'absolute', width: 132, height: 132, borderRadius: 66, backgroundColor: ACCENT },
   ring: { position: 'absolute', width: 122, height: 122, borderRadius: 61, borderWidth: 2.5, borderColor: ACCENT, borderTopColor: 'transparent', borderRightColor: 'transparent' },

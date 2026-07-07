@@ -1,21 +1,15 @@
 import type { Metadata } from 'next';
-import { Cairo, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { IBM_Plex_Sans_Arabic, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '../src/lib/auth';
 import { PrefsProvider } from '../src/lib/prefs';
 
-const sansArabic = Cairo({
+// Stitch design system — single font family: IBM Plex Sans Arabic.
+const sansArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-cairo',
-});
-
-const display = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['600', '700', '800'],
-  display: 'swap',
-  variable: '--font-display',
+  variable: '--font-ibm-plex',
 });
 
 const mono = JetBrains_Mono({
@@ -32,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${sansArabic.variable} ${display.variable} ${mono.variable}`}>
+    <html lang="ar" dir="rtl" className={`${sansArabic.variable} ${mono.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

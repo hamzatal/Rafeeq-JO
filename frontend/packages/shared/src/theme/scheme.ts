@@ -2,17 +2,17 @@ export type ColorScheme = 'light' | 'dark';
 export type ThemeRole = 'student' | 'driver' | 'admin';
 
 export interface ThemeColors {
-  /** Structural ink — primary buttons, headers, active anchors, key surfaces. */
+  /** Deep Royal Blue — primary buttons, headers, active anchors, key surfaces. */
   primary: string;
   primaryDark: string;
   primarySoft: string;
-  /** Signature blue — interactive highlight: selected states, links, online, key CTAs. */
+  /** Smart Teal — AI features, live tracking, success/completion states, links. */
   accent: string;
   /** Tinted accent background (chips, soft highlights, focus rings). */
   accentSoft: string;
-  /** Text/icon color on the primary (ink) surface. */
+  /** Text/icon color on the primary (navy) surface. */
   onPrimary: string;
-  /** Text/icon color on the blue accent surface (always white). */
+  /** Text/icon color on the teal accent surface (always white). */
   onAccent: string;
   background: string;
   surface: string;
@@ -27,10 +27,10 @@ export interface ThemeColors {
   border: string;
   /** A very subtle divider, lighter than `border`. */
   hairline: string;
-  /** Positive / accept / go (green) — semantic only, never brand. */
+  /** Positive / accept / go / completion — Smart Teal per Stitch design. */
   success: string;
   warning: string;
-  /** Destructive / reject / delete (red) — semantic only, never brand. */
+  /** Destructive / reject / delete (coral-red) — semantic only. */
   danger: string;
   info: string;
   /** Soft tinted backgrounds for status pills / banners. */
@@ -44,41 +44,28 @@ export interface ThemeColors {
   scrim: string;
 }
 
-// Semantic status colors — reserved for MEANING only (not brand identity):
-// success = positive/accept/go, danger = destructive/reject, warning, info.
-const status = {
-  success: '#12B76A',
-  warning: '#F79009',
-  danger: '#F04438',
-  info: '#2F6BFF',
-};
-
 // ─────────────────────────────────────────────────────────────────────────
-// Rafeeq Design System v7 — "Onyx".
-// A premium, formal, globally-legible identity built on three pillars:
-//   1. INK  — a near-black structural color for primary buttons, headers,
-//      active anchors and hero surfaces. This is the calm, serious anchor.
-//   2. SIGNATURE BLUE — one confident interactive accent for selected states,
-//      links, the online indicator and key call-to-actions. Blue always
-//      carries white text.
-//   3. A soft, near-white canvas (light) / deep ink canvas (dark) with real
-//      LAYERED ELEVATION instead of hard borders — this is what makes it feel
-//      modern and expensive rather than flat.
-// Semantic green/amber/red are used ONLY for meaning (accept / warn / reject).
-// This is our own system: no gold, no navy-heavy chrome, no toy colors.
+// Rafeeq Design System — "Stitch" (THE single, final identity).
+// Source of truth: docs/03-DESIGN-SYSTEM.md + stitch_rafeeq_ai_student_platform.zip.
+//
+// Pillars:
+//   1. DEEP ROYAL BLUE (#002045) — the official, trusted anchor for primary
+//      buttons, headers, navigation and grounding chrome. Carries white text.
+//   2. SMART TEAL (#006A65) — the accent of innovation, used for AI features,
+//      live-tracking indicators and successful-state completions.
+//   3. An off-white canvas (#F9F9FF) with pure-white cards floating on very
+//      soft, navy-tinted ambient shadows — a clean-room, "effortless control"
+//      aesthetic.
+//
+// LIGHT-MODE ONLY (by design mandate). `buildTheme` keeps the (role, scheme)
+// signature for backward compatibility but ALWAYS returns the light Stitch
+// palette — there is no dark theme.
 // ─────────────────────────────────────────────────────────────────────────
-const INK_LIGHT = '#0F1216'; // structural ink on light surfaces (buttons/headers)
-const INK_DARK = '#F4F6F8'; // on dark surfaces the "ink" role flips to near-white
-const BLUE_LIGHT = '#2F6BFF'; // signature interactive blue on light
-const BLUE_DARK = '#5B8CFF'; // slightly brighter blue for dark surfaces (contrast)
 
-const roleAccent: Record<ThemeRole, { light: string; dark: string }> = {
-  // Unified family: same ink + signature blue across all three apps.
-  // Differentiation is done at the layout / density level, not by hue.
-  student: { light: BLUE_LIGHT, dark: BLUE_DARK },
-  driver: { light: BLUE_LIGHT, dark: BLUE_DARK },
-  admin: { light: BLUE_LIGHT, dark: BLUE_DARK },
-};
+const NAVY = '#002045'; // primary — deep royal blue
+const NAVY_CONTAINER = '#1A365D'; // primary-container
+const NAVY_DEEP = '#001B3C'; // on-primary-fixed (pressed/darker)
+const TEAL = '#006A65'; // secondary — smart teal (AI / live / success)
 
 /** hex (#RRGGBB) → rgba string at the given alpha. */
 function hexToRgba(hex: string, alpha: number): string {
@@ -89,63 +76,53 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// Light — a soft, near-white canvas (not glaring pure white) with pure-white
-// cards floating on subtle layered shadows. Ink text, generous neutrals.
-const neutralsLight = {
-  background: '#F4F6F8',
+// Semantic status. `success`/`info` use Smart Teal to match the Stitch spec
+// (completed steps + successful states are teal). Warning amber, danger coral.
+const status = {
+  success: TEAL,
+  warning: '#F79009',
+  danger: '#BA1A1A',
+  info: TEAL,
+};
+
+// Off-white canvas with pure-white floating cards + generous neutrals.
+const neutrals = {
+  background: '#F9F9FF', // surface / background
   surface: '#FFFFFF',
   card: '#FFFFFF',
   elevated: '#FFFFFF',
-  text: '#0F1216',
-  textSecondary: '#59616E',
-  muted: '#98A2B3',
-  border: '#E7EAEF',
-  hairline: '#F1F3F6',
-  overlay: 'rgba(15,18,22,0.42)',
-  scrim: 'rgba(15,18,22,0.62)',
+  text: '#111C2C', // on-surface
+  textSecondary: '#43474E', // on-surface-variant
+  muted: '#74777F', // outline
+  border: '#C4C6CF', // outline-variant
+  hairline: '#E7EEFF', // surface-container
+  overlay: hexToRgba(NAVY, 0.42),
+  scrim: hexToRgba(NAVY, 0.62),
 };
 
-// Dark — a true deep-ink canvas (premium, not muddy) with clearly layered
-// elevation: background → surface → card → elevated each step lighter.
-const neutralsDark = {
-  background: '#0A0D12',
-  surface: '#12161D',
-  card: '#171C24',
-  elevated: '#1F2630',
-  text: '#F4F6F8',
-  textSecondary: '#A2ABB9',
-  muted: '#6B7686',
-  border: '#242B36',
-  hairline: '#1A2028',
-  overlay: 'rgba(0,0,0,0.5)',
-  scrim: 'rgba(0,0,0,0.74)',
-};
-
-/** Build a full semantic palette for a role + scheme. */
-export function buildTheme(role: ThemeRole, scheme: ColorScheme): ThemeColors {
-  const isDark = scheme === 'dark';
-  const neutrals = isDark ? neutralsDark : neutralsLight;
-  const accent = isDark ? roleAccent[role].dark : roleAccent[role].light;
-  const primary = isDark ? INK_DARK : INK_LIGHT;
-  // On light, the ink primary carries white text; on dark, the primary flips to
-  // near-white so it must carry ink text.
-  const onPrimary = isDark ? '#0A0D12' : '#FFFFFF';
-  const softAlpha = isDark ? 0.22 : 0.12;
-
+/**
+ * Build the Stitch palette. `role` and `scheme` are accepted for backward
+ * compatibility but do not change the palette: all three apps share the same
+ * navy + teal identity, and the design is light-mode only.
+ */
+export function buildTheme(_role: ThemeRole = 'student', _scheme: ColorScheme = 'light'): ThemeColors {
   return {
-    primary,
-    primaryDark: isDark ? '#FFFFFF' : '#000000',
-    primarySoft: hexToRgba(primary, isDark ? 0.16 : 0.08),
-    accent,
-    accentSoft: hexToRgba(accent, isDark ? 0.24 : 0.12),
-    onPrimary,
+    primary: NAVY,
+    primaryDark: NAVY_DEEP,
+    primarySoft: hexToRgba(NAVY, 0.08),
+    accent: TEAL,
+    accentSoft: hexToRgba(TEAL, 0.12),
+    onPrimary: '#FFFFFF',
     onAccent: '#FFFFFF',
     textInverse: '#FFFFFF',
     ...neutrals,
     ...status,
-    successSoft: hexToRgba(status.success, softAlpha),
-    warningSoft: hexToRgba(status.warning, softAlpha),
-    dangerSoft: hexToRgba(status.danger, softAlpha),
-    infoSoft: hexToRgba(status.info, softAlpha),
+    successSoft: hexToRgba(status.success, 0.12),
+    warningSoft: hexToRgba(status.warning, 0.12),
+    dangerSoft: hexToRgba(status.danger, 0.1),
+    infoSoft: hexToRgba(status.info, 0.12),
   };
 }
+
+/** Navy container tone — for secondary chrome layered on the primary. */
+export const PRIMARY_CONTAINER = NAVY_CONTAINER;

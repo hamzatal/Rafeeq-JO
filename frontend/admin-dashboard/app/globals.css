@@ -7,25 +7,24 @@
 @tailwind utilities;
 
 html, body { padding: 0; margin: 0; }
-body { background: #F4F6F8; color: #0F1216; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-html.dark body { background: #0A0D12; color: #F4F6F8; }
+body { background: #F9F9FF; color: #111C2C; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 * { box-sizing: border-box; }
 
-/* Modern, slim scrollbars (ink) */
-* { scrollbar-width: thin; scrollbar-color: rgba(15,18,22,0.45) transparent; }
+/* Modern, slim scrollbars (navy-tinted) */
+* { scrollbar-width: thin; scrollbar-color: rgba(0,32,69,0.35) transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: rgba(15,18,22,0.32);
+  background: rgba(0,32,69,0.28);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-*::-webkit-scrollbar-thumb:hover { background: rgba(15,18,22,0.55); background-clip: padding-box; }
-/* Sidebar (on ink) scrollbar — subtle light thumb */
+*::-webkit-scrollbar-thumb:hover { background: rgba(0,32,69,0.5); background-clip: padding-box; }
+/* Sidebar (on navy) scrollbar — subtle light thumb */
 aside ::-webkit-scrollbar-thumb,
 aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); background-clip: padding-box; }
-aside ::-webkit-scrollbar-thumb:hover { background: rgba(47,107,255,0.7); background-clip: padding-box; }
+aside ::-webkit-scrollbar-thumb:hover { background: rgba(0,106,101,0.7); background-clip: padding-box; }
 aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
 
 /* Material Symbols base */
