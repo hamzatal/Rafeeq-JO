@@ -1,31 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import type { SavedAddress, Subscription, Wallet } from '@rafeeq/shared';
+import type { RewardSummary } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
 import { getCurrentLocation, watchLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { Icon } from '../../src/components/Icon';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
-import { PressableScale, Skeleton } from '../../src/components/kit';
+import { PressableScale } from '../../src/components/kit';
 
-const SERVICES: { key: string; icon: IconName; href: string }[] = [
-  { key: 'subscriptions', icon: 'calendar', href: '/(app)/subscriptions' },
-  { key: 'parcels', icon: 'package', href: '/(app)/parcels' },
-  { key: 'rewards', icon: 'gift', href: '/(app)/rewards' },
-  { key: 'lostFound', icon: 'search', href: '/(app)/lost-found' },
-  { key: 'support', icon: 'help-circle', href: '/(app)/support' },
-];
-
-const LABEL_ICON: Record<string, IconName> = {
-  home: 'home',
-  university: 'book-open',
-  work: 'briefcase',
-  other: 'map-pin',
-};
+function greetingKey(): 'goodMorning' | 'goodAfternoon' | 'goodEvening' {
+  const h = new Date().getHours();
+  if (h < 12) return 'goodMorning';
+  if (h < 18) return 'goodAfternoon';
+  return 'goodEvening';
+}
 
 export default function Home() {
   const { t } = useI18n();
@@ -36,26 +30,25 @@ export default function Home() {
   const s = useMemo(() => makeStyles(theme), [theme]);
 
   const [unread, setUnread] = useState(0);
-  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
-  const [sub, setSub] = useState<Subscription | null>(null);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [loadingStrip, setLoadingStrip] = useState(true);
+  const [rewards, setRewards] = useState<RewardSummary | null>(null);
   const [myLoc, setMyLoc] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Bottom-sheet entrance animation.
+  // Bottom action-area entrance + ambient car-marker pulse.
   const rise = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(rise, { toValue: 1, duration: 460, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
-  }, [rise]);
+    Animated.timing(rise, { toValue: 1, duration: 500, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 1400, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ]),
+    ).start();
+  }, [rise, pulse]);
 
   useEffect(() => {
     api.notifications.unreadCount().then(setUnread).catch(() => undefined);
-    api.addresses.list().then((a) => setAddresses(a.slice(0, 2))).catch(() => undefined);
-    Promise.allSettled([
-      api.transport.mySubscriptions().then((l) => setSub(l.find((x) => x.usable) ?? null)),
-      api.wallet.show().then(setWallet),
-    ]).finally(() => setLoadingStrip(false));
-    // Show the user's REAL position immediately, then keep it live.
+    api.rewards.summary().then(setRewards).catch(() => undefined);
     void getCurrentLocation().then((loc) => loc && setMyLoc(loc));
     const stop = watchLocation((loc) => setMyLoc(loc));
     return stop;
@@ -67,28 +60,55 @@ export default function Home() {
   };
 
   const mapPoints: MapPoint[] = myLoc ? [{ lat: myLoc.lat, lng: myLoc.lng, kind: 'origin', label: t('home.nearby') }] : [];
-  const labelText = (a: SavedAddress) => {
-    const key = `home.label${a.label.charAt(0).toUpperCase()}${a.label.slice(1)}`;
-    return a.title || t(key);
-  };
-
-  const translateY = rise.interpolate({ inputRange: [0, 1], outputRange: [40, 0] });
+  const firstName = user?.full_name ? user.full_name.split(' ')[0] : '';
+  const translateY = rise.interpolate({ inputRange: [0, 1], outputRange: [56, 0] });
+  const pulseScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.35] });
+  const pulseOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0] });
 
   return (
     <View style={s.root}>
-      {/* Full-bleed map (the app IS the map) */}
+      {/* Full-bleed map — the app IS the map */}
       <View style={StyleSheet.absoluteFill}>
         <LiveMap points={mapPoints} legend={false} height={height} />
       </View>
 
-      {/* Floating top controls */}
+      {/* Ambient bottom fade so the action area reads clearly over the map */}
+      <LinearGradient
+        colors={['rgba(249,249,255,0)', 'rgba(249,249,255,0.85)', theme.colors.background]}
+        locations={[0, 0.5, 1]}
+        style={s.mapOverlay}
+        pointerEvents="none"
+      />
+
+      {/* Decorative nearby-captain marker (ambient) */}
+      <View style={s.carMarker} pointerEvents="none">
+        <View>
+          <Animated.View style={[s.carPulse, { transform: [{ scale: pulseScale }], opacity: pulseOpacity }]} />
+          <View style={s.carDisc}>
+            <MaterialIcons name="directions-car" size={28} color={theme.colors.primary} />
+          </View>
+        </View>
+        <View style={s.etaBadge}>
+          <Text style={s.etaText}>٣ دقائق</Text>
+        </View>
+      </View>
+
+      {/* Top bar: greeting glass pill (right) + notifications (left) */}
       <SafeAreaView edges={['top']} style={s.topBar} pointerEvents="box-none">
-        <Pressable onPress={() => router.push('/(app)/settings')} style={s.fab} hitSlop={6}>
-          <Text style={s.fabInitial}>{(user?.full_name ?? 'ر').charAt(0)}</Text>
-        </Pressable>
-        <Pressable onPress={() => router.push('/(app)/notifications')} style={s.fab} hitSlop={6}>
-          <Icon name="bell" size={20} color={theme.colors.text} />
-          {unread > 0 && <View style={s.fabDot} />}
+        <View style={s.greetPill}>
+          <View style={s.avatar}>
+            <Text style={s.avatarInitial}>{(firstName || 'ر').charAt(0)}</Text>
+          </View>
+          <View>
+            <Text style={s.greetName} numberOfLines={1}>
+              {t('home.hello').replace(' 👋', '')}{firstName ? `، ${firstName}` : ''}
+            </Text>
+            <Text style={s.greetSub}>{t(`home.${greetingKey()}`)}</Text>
+          </View>
+        </View>
+        <Pressable onPress={() => router.push('/(app)/notifications')} style={s.bellBtn} hitSlop={6}>
+          <Icon name="bell" size={20} color={theme.colors.primary} />
+          {unread > 0 && <View style={s.bellDot} />}
         </Pressable>
       </SafeAreaView>
 
@@ -97,120 +117,97 @@ export default function Home() {
         <Icon name="crosshair" size={20} color={theme.colors.accent} />
       </Pressable>
 
-      {/* Bottom sheet (animated entrance) */}
-      <Animated.View style={[s.sheet, { maxHeight: height * 0.6, opacity: rise, transform: [{ translateY }] }]}>
-        <View style={s.grabber} />
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.sheetContent}>
-          <Text style={s.hello}>{t('home.hello')}{user?.full_name ? `، ${user.full_name.split(' ')[0]}` : ''} 👋</Text>
-
-          {/* Hero "Where to?" CTA */}
-          <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.searchBar}>
-            <View style={s.searchIcon}>
-              <Icon name="navigation" size={18} color={theme.colors.onAccent} />
+      {/* Bottom action area */}
+      <Animated.View style={[s.bottomArea, { opacity: rise, transform: [{ translateY }] }]}>
+        {/* Points & status card (navy gradient) */}
+        <PressableScale onPress={() => router.push('/(app)/rewards')} style={s.pointsWrap}>
+          <LinearGradient colors={[theme.colors.primary, '#1A365D']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.pointsCard}>
+            <View style={s.pointsDecor} />
+            <View style={s.pointsLeft}>
+              <View style={s.pointsIcon}>
+                <Icon name="award" size={20} color={theme.colors.accent} />
+              </View>
+              <View>
+                <Text style={s.pointsLabel}>{t('home.points')}</Text>
+                <Text style={s.pointsValue}>{rewards ? rewards.points.toLocaleString('en-US') : '—'}</Text>
+              </View>
             </View>
-            <Text style={s.searchText}>{t('home.whereTo')}</Text>
-            <Icon name="chevron-left" size={20} color={theme.colors.muted} />
+            <View style={s.pointsRight}>
+              <Text style={s.pointsLabel}>{t('home.level')}</Text>
+              <Text style={s.pointsTier}>{rewards?.tier_label ?? '—'}</Text>
+            </View>
+          </LinearGradient>
+        </PressableScale>
+
+        {/* Where to? glass panel */}
+        <View style={s.panel}>
+          <Text style={s.panelTitle}>{t('home.whereTo')}</Text>
+          <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.searchBtn} scaleTo={0.98}>
+            <Icon name="search" size={20} color={theme.colors.accent} />
+            <Text style={s.searchText}>{t('home.searchDestination')}</Text>
           </PressableScale>
-
-          {/* Saved destinations (compact) */}
-          {addresses.map((a) => (
-            <Pressable key={a.id} onPress={() => router.push('/(app)/ride-request')} style={({ pressed }) => [s.placeRow, pressed && s.pressed]}>
-              <View style={s.placeIcon}>
-                <Icon name={LABEL_ICON[a.label] ?? 'map-pin'} size={18} color={theme.colors.primary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={s.placeTitle} numberOfLines={1}>{labelText(a)}</Text>
-                <Text style={s.placeSub} numberOfLines={1}>{a.address_text}</Text>
-              </View>
-              <Icon name="chevron-left" size={18} color={theme.colors.muted} />
-            </Pressable>
-          ))}
-          <Pressable onPress={() => router.push('/(app)/addresses')} style={({ pressed }) => [s.placeRow, pressed && s.pressed]}>
-            <View style={[s.placeIcon, { backgroundColor: theme.colors.accentSoft }]}>
-              <Icon name="plus" size={18} color={theme.colors.primary} />
-            </View>
-            <Text style={[s.placeTitle, { flex: 1, color: theme.colors.primary }]}>{t('home.addPlace')}</Text>
-          </Pressable>
-
-          {/* Services strip */}
-          <Text style={s.section}>{t('home.services')}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.servicesRow}>
-            {SERVICES.map((item) => (
-              <PressableScale key={item.key} onPress={() => router.push(item.href as never)} style={s.serviceTile}>
-                <View style={s.serviceIcon}>
-                  <Icon name={item.icon} size={22} color={theme.colors.primary} />
-                </View>
-                <Text style={s.serviceLabel} numberOfLines={1}>{t(`home.${item.key}`)}</Text>
-              </PressableScale>
-            ))}
-          </ScrollView>
-
-          {/* Wallet + subscription compact strip */}
-          <View style={s.strip}>
-            <Pressable onPress={() => router.push('/(app)/wallet')} style={s.stripItem}>
-              <Icon name="credit-card" size={18} color={theme.colors.textSecondary} />
-              {loadingStrip ? <Skeleton width={40} height={16} /> : <Text style={s.stripValue}>{wallet ? wallet.balance_jod.toFixed(2) : '0.00'}</Text>}
-              <Text style={s.stripLabel}>{t('wallet.balance')}</Text>
-            </Pressable>
-            <View style={s.stripDivider} />
-            <Pressable onPress={() => router.push('/(app)/subscriptions')} style={s.stripItem}>
-              <Icon name="calendar" size={18} color={theme.colors.textSecondary} />
-              {loadingStrip ? <Skeleton width={30} height={16} /> : <Text style={s.stripValue}>{sub ? (sub.remaining_rides ?? '∞') : '—'}</Text>}
-              <Text style={s.stripLabel}>{t('home.remainingRides')}</Text>
-            </Pressable>
+          <View style={s.quickRow}>
+            <QuickAction theme={theme} icon="home" label={t('home.labelHome')} onPress={() => router.push('/(app)/ride-request')} />
+            <QuickAction theme={theme} icon="book-open" label={t('home.labelUniversity')} onPress={() => router.push('/(app)/ride-request')} />
           </View>
-        </ScrollView>
+        </View>
       </Animated.View>
     </View>
+  );
+}
+
+function QuickAction({ theme, icon, label, onPress }: { theme: AppTheme; icon: 'home' | 'book-open'; label: string; onPress: () => void }) {
+  const s = useMemo(() => makeStyles(theme), [theme]);
+  return (
+    <PressableScale onPress={onPress} style={s.quickTile} scaleTo={0.95}>
+      <View style={s.quickIcon}>
+        <Icon name={icon} size={22} color={theme.colors.primary} />
+      </View>
+      <Text style={s.quickLabel}>{label}</Text>
+    </PressableScale>
   );
 }
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: t.colors.background },
+    mapOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '58%' },
 
-    topBar: { position: 'absolute', top: 0, left: 0, right: 0, flexDirection: 'row-reverse', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingTop: t.spacing.sm },
-    fab: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.md },
-    fabInitial: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.primary },
-    fabDot: { position: 'absolute', top: 10, right: 11, width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.danger, borderWidth: 1.5, borderColor: t.colors.surface },
+    topBar: { position: 'absolute', top: 0, left: 0, right: 0, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: t.spacing.lg, paddingTop: t.spacing.sm },
+    greetPill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)', paddingRight: 8, paddingLeft: 16, paddingVertical: 8, borderRadius: t.radius.full, ...t.shadow.sm },
+    avatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
+    avatarInitial: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.onPrimary },
+    greetName: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary, textAlign: 'right' },
+    greetSub: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.textSecondary, textAlign: 'right' },
+    bellBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.95)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)', alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
+    bellDot: { position: 'absolute', top: 12, right: 13, width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.danger, borderWidth: 1.5, borderColor: '#fff' },
 
-    locateFab: { position: 'absolute', bottom: '42%', right: t.spacing.lg, width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.md },
+    carMarker: { position: 'absolute', top: '30%', left: 0, right: 0, alignItems: 'center' },
+    carPulse: { position: 'absolute', top: -8, left: -8, width: 80, height: 80, borderRadius: 40, backgroundColor: t.colors.primary },
+    carDisc: { width: 64, height: 64, borderRadius: 32, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.surface, ...t.shadow.md },
+    etaBadge: { marginTop: 8, backgroundColor: t.colors.primary, paddingHorizontal: 12, paddingVertical: 4, borderRadius: t.radius.full, ...t.shadow.sm },
+    etaText: { fontFamily: t.fontFamily.semibold, fontSize: 12, color: t.colors.onPrimary },
 
-    sheet: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: t.colors.surface,
-      borderTopLeftRadius: 28,
-      borderTopRightRadius: 28,
-      paddingHorizontal: t.spacing.lg,
-      paddingTop: t.spacing.sm,
-      ...t.shadow.lg,
-    },
-    grabber: { alignSelf: 'center', width: 38, height: 4, borderRadius: 2, backgroundColor: t.colors.border, marginBottom: t.spacing.base },
-    sheetContent: { paddingBottom: t.spacing.xl },
-    hello: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
+    locateFab: { position: 'absolute', bottom: '46%', right: t.spacing.lg, width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.md },
 
-    searchBar: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.xl, paddingHorizontal: t.spacing.md, height: 62, ...t.shadow.sm },
-    searchIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
-    searchText: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
+    bottomArea: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: t.spacing.lg, paddingBottom: t.spacing.base, gap: t.spacing.base },
 
-    placeRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, paddingVertical: 10 },
-    placeIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.hairline, alignItems: 'center', justifyContent: 'center' },
-    placeTitle: { fontFamily: t.fontFamily.semibold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
-    placeSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 1 },
-    pressed: { opacity: 0.6 },
+    pointsWrap: { borderRadius: t.radius.lg, ...t.shadow.md },
+    pointsCard: { borderRadius: t.radius.lg, padding: t.spacing.base, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden' },
+    pointsDecor: { position: 'absolute', right: -32, top: -32, width: 96, height: 96, borderRadius: 48, backgroundColor: 'rgba(255,255,255,0.10)' },
+    pointsLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
+    pointsIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+    pointsLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: '#D6E3FF', textAlign: 'right' },
+    pointsValue: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: '#fff', textAlign: 'right', lineHeight: 28 },
+    pointsRight: { alignItems: 'flex-start', borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.2)', paddingRight: t.spacing.base },
+    pointsTier: { fontFamily: t.fontFamily.bold, fontSize: 16, color: '#6FF7EE' },
 
-    section: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.base, marginBottom: t.spacing.sm },
-    servicesRow: { flexDirection: 'row-reverse', gap: t.spacing.sm },
-    serviceTile: { width: 78, alignItems: 'center', gap: 6 },
-    serviceIcon: { width: 64, height: 64, borderRadius: t.radius.xl, backgroundColor: t.colors.card, alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
-    serviceLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text, textAlign: 'center' },
-
-    strip: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.xl, marginTop: t.spacing.base, paddingVertical: t.spacing.base, ...t.shadow.sm },
-    stripItem: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6 },
-    stripValue: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.text },
-    stripLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
-    stripDivider: { width: 1, height: 28, backgroundColor: t.colors.border },
+    panel: { backgroundColor: 'rgba(255,255,255,0.97)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)', borderRadius: t.radius.xl, padding: t.spacing.lg, ...t.shadow.lg },
+    panelTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.base },
+    searchBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, backgroundColor: '#F0F3FF', borderWidth: 1, borderColor: t.colors.hairline, borderRadius: t.radius.md, paddingHorizontal: t.spacing.base, height: 56, marginBottom: t.spacing.base },
+    searchText: { flex: 1, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.textSecondary, textAlign: 'right' },
+    quickRow: { flexDirection: 'row-reverse', gap: t.spacing.md },
+    quickTile: { flex: 1, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.hairline, borderRadius: t.radius.md, paddingVertical: t.spacing.base, alignItems: 'center', gap: 8, ...t.shadow.sm },
+    quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#DEE8FF', alignItems: 'center', justifyContent: 'center' },
+    quickLabel: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.primary },
   });
