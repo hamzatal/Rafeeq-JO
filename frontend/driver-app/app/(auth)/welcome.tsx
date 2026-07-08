@@ -18,7 +18,7 @@ export default function Welcome() {
 
   return (
     <View style={s.root}>
-      <StatusBar style="dark" />
+      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
       <View style={s.tintA} pointerEvents="none" />
       <View style={s.tintB} pointerEvents="none" />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>

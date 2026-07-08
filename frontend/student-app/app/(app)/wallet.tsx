@@ -306,7 +306,7 @@ const makeStyles = (t: AppTheme) =>
     balanceValue: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: t.colors.primary, marginTop: 4 },
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.primary },
 
-    cliqCard: { backgroundColor: '#E7EEFF', borderRadius: t.radius.xl, padding: t.spacing.lg, marginTop: t.spacing.md },
+    cliqCard: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.xl, padding: t.spacing.lg, marginTop: t.spacing.md },
     cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, marginBottom: t.spacing.base },
     cliqTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
     cliqLink: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.accent, textAlign: 'right', marginTop: 2 },

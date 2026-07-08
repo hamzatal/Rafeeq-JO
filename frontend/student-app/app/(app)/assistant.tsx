@@ -143,7 +143,7 @@ const makeStyles = (t: AppTheme) =>
     messages: { padding: t.spacing.lg, gap: t.spacing.sm, flexGrow: 1 },
     bubble: { maxWidth: '85%', borderRadius: t.radius.lg, paddingHorizontal: t.spacing.base, paddingVertical: t.spacing.md },
     // User = light gray (dark text); AI = navy (white text) — per Stitch DESIGN.
-    userBubble: { alignSelf: 'flex-start', backgroundColor: '#F0F3FF', borderBottomLeftRadius: 4 },
+    userBubble: { alignSelf: 'flex-start', backgroundColor: t.colors.surfaceAlt, borderBottomLeftRadius: 4 },
     botBubble: { alignSelf: 'flex-end', backgroundColor: t.colors.primary, borderBottomRightRadius: 4 },
     bubbleText: { fontFamily: t.fontFamily.regular, fontSize: 14, color: t.colors.text, textAlign: 'right', lineHeight: 22 },
     botText: { color: t.colors.onPrimary },
@@ -158,6 +158,6 @@ const makeStyles = (t: AppTheme) =>
     suggestText: { flex: 1, fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.primary, textAlign: 'right' },
 
     inputRow: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 8, padding: t.spacing.base, borderTopWidth: 1, borderTopColor: t.colors.hairline, backgroundColor: t.colors.surface },
-    input: { flex: 1, maxHeight: 110, minHeight: 48, backgroundColor: '#F0F3FF', borderRadius: t.radius.md, paddingHorizontal: t.spacing.base, paddingTop: 13, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.text, textAlign: 'right' },
+    input: { flex: 1, maxHeight: 110, minHeight: 48, backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, paddingHorizontal: t.spacing.base, paddingTop: 13, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     sendBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
   });

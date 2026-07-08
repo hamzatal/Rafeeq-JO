@@ -30,6 +30,7 @@ export default function RootLayout() {
   const bootstrap = useAuth((s) => s.bootstrap);
   const hydrate = usePrefs((s) => s.hydrate);
   const hydrated = usePrefs((s) => s.hydrated);
+  const scheme = usePrefs((s) => s.scheme);
 
   useEffect(() => { void hydrate(); void loadAppConfig(); }, [hydrate]);
   useEffect(() => { if (hydrated) void bootstrap(); }, [hydrated, bootstrap]);
@@ -42,7 +43,7 @@ export default function RootLayout() {
       <ErrorBoundary>
         <I18nProvider>
           <FeedbackProvider>
-            <StatusBar style="dark" />
+            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
             <Slot />
           </FeedbackProvider>
         </I18nProvider>

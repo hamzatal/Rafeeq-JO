@@ -309,7 +309,7 @@ const makeStyles = (t: AppTheme) =>
     content: { padding: t.spacing.lg, paddingBottom: 120 },
 
     destRow: { marginBottom: t.spacing.md },
-    segment: { flexDirection: 'row-reverse', backgroundColor: '#F0F3FF', borderRadius: t.radius.md, padding: 4 },
+    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: 4 },
     segBtn: { flex: 1, paddingVertical: 9, borderRadius: t.radius.sm, alignItems: 'center' },
     segBtnOn: { backgroundColor: t.colors.surface, ...t.shadow.sm },
     segText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },
@@ -336,7 +336,7 @@ const makeStyles = (t: AppTheme) =>
     classMeta: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, marginTop: 4 },
     metaText: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
     metaDot: { color: t.colors.muted, fontSize: 12 },
-    classIcon: { width: 52, height: 52, borderRadius: t.radius.md, backgroundColor: '#DEE8FF', alignItems: 'center', justifyContent: 'center' },
+    classIcon: { width: 52, height: 52, borderRadius: t.radius.md, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
     classIconFeatured: { backgroundColor: t.colors.accentSoft },
     classPrice: { alignItems: 'center', gap: 6, minWidth: 64 },
     priceText: { fontFamily: t.fontFamily.extrabold, fontSize: 15, color: t.colors.primary },

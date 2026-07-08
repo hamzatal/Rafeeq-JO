@@ -204,10 +204,10 @@ const makeStyles = (t: AppTheme) =>
 
     panel: { backgroundColor: 'rgba(255,255,255,0.97)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)', borderRadius: t.radius.xl, padding: t.spacing.lg, ...t.shadow.lg },
     panelTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.base },
-    searchBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, backgroundColor: '#F0F3FF', borderWidth: 1, borderColor: t.colors.hairline, borderRadius: t.radius.md, paddingHorizontal: t.spacing.base, height: 56, marginBottom: t.spacing.base },
+    searchBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, backgroundColor: t.colors.surfaceAlt, borderWidth: 1, borderColor: t.colors.hairline, borderRadius: t.radius.md, paddingHorizontal: t.spacing.base, height: 56, marginBottom: t.spacing.base },
     searchText: { flex: 1, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.textSecondary, textAlign: 'right' },
     quickRow: { flexDirection: 'row-reverse', gap: t.spacing.md },
     quickTile: { flex: 1, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.hairline, borderRadius: t.radius.md, paddingVertical: t.spacing.base, alignItems: 'center', gap: 8, ...t.shadow.sm },
-    quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#DEE8FF', alignItems: 'center', justifyContent: 'center' },
+    quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
     quickLabel: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.primary },
   });

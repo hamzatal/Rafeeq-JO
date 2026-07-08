@@ -26,8 +26,8 @@ export function AuthShell({
 
   return (
     <View style={s.root}>
-      <StatusBar style="dark" />
-      {/* Soft ambient brand tints (very subtle, on light) */}
+      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      {/* Soft ambient brand tints */}
       <View style={s.tintA} pointerEvents="none" />
       <View style={s.tintB} pointerEvents="none" />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
@@ -69,7 +69,7 @@ const makeStyles = (t: AppTheme) =>
     },
 
     brandRow: { alignItems: 'center', marginBottom: t.spacing.base },
-    mark: { width: 64, height: 64, borderRadius: t.radius.lg, backgroundColor: '#F0F3FF', alignItems: 'center', justifyContent: 'center' },
+    mark: { width: 64, height: 64, borderRadius: t.radius.lg, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     markLogo: { width: 44, height: 44 },
 
     title: { fontFamily: t.fontFamily.extrabold, fontSize: 28, color: t.colors.primary, textAlign: 'center', lineHeight: 38 },

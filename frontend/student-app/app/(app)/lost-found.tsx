@@ -203,7 +203,7 @@ const makeStyles = (t: AppTheme) =>
 
     card: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.lg, marginBottom: t.spacing.lg, ...t.shadow.sm },
 
-    segment: { flexDirection: 'row-reverse', backgroundColor: '#F0F3FF', borderRadius: t.radius.md, padding: 4, marginBottom: t.spacing.base },
+    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: 4, marginBottom: t.spacing.base },
     segBtn: { flex: 1, paddingVertical: 10, borderRadius: t.radius.sm, alignItems: 'center' },
     segBtnOn: { backgroundColor: t.colors.primary },
     segText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
@@ -225,7 +225,7 @@ const makeStyles = (t: AppTheme) =>
     none: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.muted, textAlign: 'center', paddingVertical: t.spacing.base },
 
     reportRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, paddingVertical: t.spacing.sm },
-    reportIcon: { width: 48, height: 48, borderRadius: t.radius.md, backgroundColor: '#DEE8FF', alignItems: 'center', justifyContent: 'center' },
+    reportIcon: { width: 48, height: 48, borderRadius: t.radius.md, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
     reportInfo: { flex: 1 },
     reportTitle: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
     reportTime: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
