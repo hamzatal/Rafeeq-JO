@@ -598,6 +598,23 @@ export interface DriverPerformance {
   total_trips: number;
 }
 
+/** ── Smart ride suggestions (AI) ──────────────────────────────────── */
+export type SmartSuggestionKind = 'to_university' | 'to_home' | 'new';
+
+export interface SmartSuggestion {
+  id: string;
+  kind: SmartSuggestionKind;
+  icon: string;
+  title: string;
+  subtitle: string;
+  destination: { lat: number; lng: number; title: string } | null;
+}
+
+export interface SmartSuggestions {
+  headline: string;
+  suggestions: SmartSuggestion[];
+}
+
 /** ── Advertising banners ──────────────────────────────────────────── */
 export type AdPlacement = 'student_home' | 'student_wallet' | 'driver_home';
 
