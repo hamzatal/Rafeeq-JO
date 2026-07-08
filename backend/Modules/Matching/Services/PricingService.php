@@ -45,6 +45,63 @@ class PricingService
         return max(1.0, (float) config('rafeeq.max_surge_multiplier', 1.5));
     }
 
+    // ── Distance-based pricing knobs (Phase 3) ──────────────────────────────
+    public function openingFareFils(): int
+    {
+        return (int) config('rafeeq.base_fare_fils', 300);
+    }
+
+    public function perKmFils(): int
+    {
+        return (int) config('rafeeq.per_km_fils', 250);
+    }
+
+    public function perMinFils(): int
+    {
+        return (int) config('rafeeq.per_min_fils', 20);
+    }
+
+    public function minFareFils(): int
+    {
+        return (int) config('rafeeq.min_fare_fils', 1000);
+    }
+
+    public function nightMultiplier(): float
+    {
+        return max(1.0, (float) config('rafeeq.night_multiplier', 1.25));
+    }
+
+    public function nightStartHour(): int
+    {
+        return (int) config('rafeeq.night_start_hour', 21);
+    }
+
+    public function avgSpeedKmh(): int
+    {
+        return max(1, (int) config('rafeeq.avg_speed_kmh', 30));
+    }
+
+    /**
+     * Distance-based single-seat fare (opening + per-km + per-min), with the
+     * night tariff applied and floored at the minimum fare. Duration is
+     * estimated from distance / average speed when not supplied.
+     */
+    public function distanceFareFils(float $km, ?int $durationMin = null, ?\DateTimeInterface $when = null): int
+    {
+        $km = max(0.0, $km);
+        $min = $durationMin ?? (int) ceil(($km / $this->avgSpeedKmh()) * 60);
+        $fare = $this->openingFareFils()
+            + (int) round($this->perKmFils() * $km)
+            + $this->perMinFils() * max(0, $min);
+
+        $hour = $when ? (int) $when->format('G') : (int) now()->format('G');
+        if ($hour >= $this->nightStartHour()) {
+            $fare = (int) round($fare * $this->nightMultiplier());
+        }
+
+        return max($fare, $this->minFareFils());
+    }
+
     /**
      * Surge multiplier based on how far a group is below the min-fill target.
      * Linear ramp from 1.0 (full) up to the configured cap (1 rider).
@@ -103,9 +160,16 @@ class PricingService
         return $this->splitCommission($fareFils)['captain_share_fils'] * max(0, $riders);
     }
 
-    public function quote(?int $baseFareFils, bool $isExpress, int $riders, int $capacity): array
+    public function quote(?int $baseFareFils, bool $isExpress, int $riders, int $capacity, ?float $distanceKm = null, ?int $durationMin = null, ?\DateTimeInterface $when = null): array
     {
-        $base = $baseFareFils !== null && $baseFareFils > 0 ? $baseFareFils : $this->baseFareFils();
+        // When a GPS distance is available the fare is distance-based (opening +
+        // per-km + per-min, night-adjusted, floored). Otherwise fall back to the
+        // route/config flat per-seat base (backward compatible).
+        if ($distanceKm !== null && $distanceKm > 0) {
+            $base = $this->distanceFareFils($distanceKm, $durationMin, $when);
+        } else {
+            $base = $baseFareFils !== null && $baseFareFils > 0 ? $baseFareFils : $this->baseFareFils();
+        }
         $express = $isExpress ? $this->expressFeeFils() : 0;
         $surge = $this->surgeMultiplier(max(1, $riders), $isExpress);
 
@@ -131,6 +195,8 @@ class PricingService
             'expected_total_fils' => $expectedTotal,
             'expected_captain_earnings_fils' => $expectedCaptain,
             'below_min_fill' => $riders < $this->minFillRiders(),
+            'distance_km' => $distanceKm,
+            'duration_min' => $durationMin,
         ];
     }
 }

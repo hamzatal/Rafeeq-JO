@@ -5,8 +5,10 @@ namespace Rafeeq\Modules\Matching\Services;
 use Illuminate\Support\Collection;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Core\Support\Geo;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Trips\Models\Trip;
+use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
@@ -76,12 +78,23 @@ class MatchingService extends BaseService
             $first = $requests->first();
             $riders = $requests->count();
 
+            // Distance-based pricing: measure pickup → university (a fair
+            // representative for the pooled group, who share zone + university).
+            // Falls back to the flat base when coordinates are unavailable.
+            $distanceKm = null;
+            $uni = $first->university_id ? University::find($first->university_id) : null;
+            if ($uni && $uni->lat !== null && $uni->lng !== null && $first->pickup_lat !== null && $first->pickup_lng !== null) {
+                $distanceKm = Geo::haversineKm((float) $first->pickup_lat, (float) $first->pickup_lng, (float) $uni->lat, (float) $uni->lng);
+            }
+
             // Compute the real per-seat fare for this pooled car.
             $quote = $this->pricing->quote(
                 baseFareFils: $this->pricing->baseFareFils(),
                 isExpress: $isExpress,
                 riders: $riders,
                 capacity: self::SEAT_CAPACITY,
+                distanceKm: $distanceKm,
+                when: $first->desired_time instanceof \DateTimeInterface ? $first->desired_time : null,
             );
 
             $trip = Trip::create([

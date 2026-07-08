@@ -9,7 +9,23 @@ return [
     'commission_percent' => (int) env('RAFEEQ_COMMISSION_PERCENT', 15),
 
     // Default per-seat fare for pooled (door-to-door) rides, in fils.
+    // Used as a fallback when no GPS distance is available.
     'default_fare_fils' => (int) env('RAFEEQ_DEFAULT_FARE_FILS', 1000),
+
+    // ── Distance-based pricing (Phase 3) — money in fils ────────────────────
+    // Opening fare ("meter drop") added to every distance-priced ride.
+    'base_fare_fils' => (int) env('RAFEEQ_BASE_FARE_FILS', 300),
+    // Per-kilometre rate (GPS/Haversine distance pickup → destination).
+    'per_km_fils' => (int) env('RAFEEQ_PER_KM_FILS', 250),
+    // Per-minute rate (estimated from distance / avg speed unless provided).
+    'per_min_fils' => (int) env('RAFEEQ_PER_MIN_FILS', 20),
+    // Hard floor: no distance-priced ride is ever charged below this.
+    'min_fare_fils' => (int) env('RAFEEQ_MIN_FARE_FILS', 1000),
+    // Night tariff multiplier applied from `night_start_hour` onward.
+    'night_multiplier' => (float) env('RAFEEQ_NIGHT_MULTIPLIER', 1.25),
+    'night_start_hour' => (int) env('RAFEEQ_NIGHT_START_HOUR', 21),
+    // Average urban speed (km/h) used to estimate trip minutes from distance.
+    'avg_speed_kmh' => (int) env('RAFEEQ_AVG_SPEED_KMH', 30),
 
     // Express surcharge in fils.
     'express_fee_fils' => (int) env('RAFEEQ_EXPRESS_FEE_FILS', 1500),

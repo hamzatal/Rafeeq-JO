@@ -171,6 +171,16 @@ captain_share = fare − commission
 
 ## 7) خطة تنفيذ التسعير/الزون (تفصيل المرحلة 3 في MASTER-PLAN)
 
+> **الحالة (RFQ-336):** ✅ المحرك الأساسي منجز ومُختبَر (172 اختبار أخضر):
+> - مفاتيح config (`base_fare_fils` 300، `per_km_fils` 250، `per_min_fils` 20، `min_fare_fils` 1000، `night_multiplier` 1.25، `night_start_hour` 21، `avg_speed_kmh` 30).
+> - `Core/Support/Geo::haversineKm` (مصدر وحيد للمسافة).
+> - `PricingService::distanceFareFils()` + `quote()` أصبح مبنياً على المسافة (متوافق رجعياً: يعود للسعر الثابت عند غياب الإحداثيات).
+> - `MatchingService` يمرّر مسافة (نقطة الانطلاق → الجامعة) عند تكوين الرحلة.
+> - `splitCommission` (عمولة 15% zero-sum) مؤكّد بالاختبار.
+> **المتبقّي:** ربط endpoint التقدير بالإحداثيات + seed محافظات/جامعات الأردن + مصفوفة أسعار الاشتراك الموحّد + ضبط الأسعار/العمولة من لوحة التحكم + شاشة أرباح الكابتن التفصيلية.
+
+
+
 1. إضافة مفاتيح config الجديدة (`per_km_fils`, `per_min_fils`, `min_fare_fils`, `night_multiplier`) + جعل العمولة قابلة للضبط عبر Settings.
 2. إضافة `distanceKm(pickup, dropoff)` (Haversine موجود بالفعل في Zone — نستخرجه لأداة مشتركة) ودمجه في `PricingService::quote()`.
 3. حقن `dropoff`/الجامعة في تدفّق `RideRequest → Matching → Trip` بحيث تُحسب المسافة الحقيقية.
