@@ -14,6 +14,7 @@ use Rafeeq\Modules\Payouts\Controllers\PayoutAdminController;
 // Captain performance summary (tier + earnings + stats).
 Route::prefix('v1/driver')->middleware(['auth:sanctum', 'role:driver'])->group(function () {
     Route::get('performance', [DriverPerformanceController::class, 'show']);
+    Route::get('earnings-summary', [DriverPerformanceController::class, 'earnings']);
 });
 
 // Captain withdrawals.

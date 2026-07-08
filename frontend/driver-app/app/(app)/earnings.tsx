@@ -75,6 +75,18 @@ export default function Earnings() {
           </Pressable>
         </View>
 
+        {/* Earnings details entry */}
+        <Pressable onPress={() => router.push('/(app)/earnings-detail')} style={s.detailsCard}>
+          <View style={s.detailsIcon}>
+            <Icon name="bar-chart-2" size={20} color={theme.colors.onAccent} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.detailsTitle}>{t('driver.earningsDetails')}</Text>
+            <Text style={s.detailsSub}>{t('driver.viewEarningsDetails')}</Text>
+          </View>
+          <Icon name={locale === 'ar' ? 'chevron-left' : 'chevron-right'} size={20} color={theme.colors.muted} />
+        </Pressable>
+
         {/* CliQ payment info */}
         <Pressable onPress={() => router.push('/(app)/withdraw')} style={s.cliqCard}>
           <Icon name="edit-2" size={18} color={theme.colors.muted} />
@@ -134,6 +146,11 @@ const makeStyles = (t: AppTheme) =>
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 18, color: 'rgba(255,255,255,0.85)' },
     withdrawBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.accent, borderRadius: t.radius.md, height: 52, marginTop: t.spacing.base },
     withdrawText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onAccent },
+
+    detailsCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
+    detailsIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
+    detailsTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
+    detailsSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
     cliqCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
     cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },

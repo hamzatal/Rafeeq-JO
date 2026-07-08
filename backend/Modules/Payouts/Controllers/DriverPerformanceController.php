@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Payouts\Services\EarningsService;
 use Rafeeq\Modules\Rewards\Services\RewardService;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\RewardTier;
@@ -20,7 +21,18 @@ class DriverPerformanceController extends Controller
     public function __construct(
         private readonly RewardService $rewards,
         private readonly WalletService $wallets,
+        private readonly EarningsService $earnings,
     ) {}
+
+    /**
+     * Detailed earnings breakdown for the captain earnings screen:
+     * today/week/month/all-time totals + last 7 days + last 6 weeks.
+     * Route: GET /api/v1/driver/earnings-summary  (role:driver)
+     */
+    public function earnings(Request $request): JsonResponse
+    {
+        return $this->ok($this->earnings->summary($request->user()));
+    }
 
     public function show(Request $request): JsonResponse
     {

@@ -598,6 +598,28 @@ export interface DriverPerformance {
   total_trips: number;
 }
 
+/** Detailed captain earnings breakdown (money in fils). */
+export interface EarningsBucket {
+  earnings_fils: number;
+  trips: number;
+}
+
+export interface EarningsSummary {
+  totals: {
+    today_fils: number;
+    week_fils: number;
+    month_fils: number;
+    all_time_fils: number;
+    today_trips: number;
+    week_trips: number;
+    month_trips: number;
+    all_time_trips: number;
+  };
+  daily: (EarningsBucket & { date: string })[];
+  weekly: (EarningsBucket & { week_start: string })[];
+  available_fils: number;
+}
+
 
 /** ── Saved addresses (student) ────────────────────────────────────── */
 

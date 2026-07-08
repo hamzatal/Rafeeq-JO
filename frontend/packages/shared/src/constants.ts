@@ -81,6 +81,7 @@ export const ENDPOINTS = {
     submit: '/driver/submit',
     vehicles: '/driver/vehicles',
     performance: '/driver/performance',
+    earningsSummary: '/driver/earnings-summary',
     withdrawals: '/driver/wallet/withdrawals',
     location: '/driver/location',
   },

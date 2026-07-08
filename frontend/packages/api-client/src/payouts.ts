@@ -1,5 +1,11 @@
 import type { AxiosInstance } from 'axios';
-import { ENDPOINTS, type ApiSuccess, type DriverPerformance, type PayoutRequest } from '@rafeeq/shared';
+import {
+  ENDPOINTS,
+  type ApiSuccess,
+  type DriverPerformance,
+  type EarningsSummary,
+  type PayoutRequest,
+} from '@rafeeq/shared';
 import { unwrap } from './client';
 
 /** Captain payouts (withdraw earnings) + performance, and the admin queue. */
@@ -8,6 +14,11 @@ export class PayoutApi {
 
   async performance(): Promise<DriverPerformance> {
     const { data } = await this.http.get<ApiSuccess<DriverPerformance>>(ENDPOINTS.driver.performance);
+    return unwrap(data);
+  }
+
+  async earningsSummary(): Promise<EarningsSummary> {
+    const { data } = await this.http.get<ApiSuccess<EarningsSummary>>(ENDPOINTS.driver.earningsSummary);
     return unwrap(data);
   }
 
