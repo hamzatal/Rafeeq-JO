@@ -19,6 +19,8 @@ interface AuthState {
   register: (payload: RegisterPayload) => Promise<string | null>;
   verifyOtp: (payload: VerifyOtpPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
+  /** DEV ONLY: enter the app with a mock session to preview the UI without a backend. */
+  devLogin: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -76,6 +78,20 @@ export const useAuth = create<AuthState>((set) => {
         throw new Error('هذا الحساب يتطلب مصادقة ثنائية — سجّل الدخول عبر لوحة الإدارة');
       }
       await apply(result);
+    },
+
+    async devLogin() {
+      // Mock session for previewing the UI without a running backend.
+      await tokenStorage.set('dev-preview-token');
+      set({
+        user: {
+          id: 'dev-user',
+          full_name: 'طالب تجريبي',
+          phone: '0790000000',
+          type: 'student',
+        } as unknown as User,
+        status: 'authenticated',
+      });
     },
 
     async logout() {

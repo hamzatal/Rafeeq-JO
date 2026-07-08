@@ -6,12 +6,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Http\Controllers\Controller;
+use Rafeeq\Core\Support\Geo;
 use Rafeeq\Modules\Matching\Services\PricingService;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\RideRequests\Requests\CreateRideRequestRequest;
 use Rafeeq\Modules\RideRequests\Resources\RideRequestResource;
 use Rafeeq\Modules\RideRequests\Services\RideRequestService;
 use Rafeeq\Modules\Universities\Models\University;
+use Rafeeq\Modules\Zones\Services\ZonePricingService;
 use Rafeeq\Modules\Zones\Services\ZoneService;
 use Rafeeq\Shared\Enums\RideType;
 
@@ -21,6 +23,7 @@ class RideRequestController extends Controller
         private readonly RideRequestService $service,
         private readonly PricingService $pricing,
         private readonly ZoneService $zones,
+        private readonly ZonePricingService $zonePricing,
     ) {}
 
     /** Student: fare estimate (with min-fill surge preview) before requesting. */
@@ -37,39 +40,52 @@ class RideRequestController extends Controller
         ]);
 
         $isExpress = ($data['type'] ?? null) === RideType::Express->value;
-        $quote = $this->pricing->quote(
-            $data['base_fare_fils'] ?? null,
-            $isExpress,
-            (int) ($data['riders'] ?? 1),
-            (int) ($data['capacity'] ?? 4),
-        );
 
-        // Coverage + real trip distance to the university (informational — the
-        // pooled fare itself is flat per served zone, but the student should see
-        // how far the ride is and whether the pickup is inside our service area).
-        if (isset($data['pickup_lat'], $data['pickup_lng'])) {
-            $lat = (float) $data['pickup_lat'];
-            $lng = (float) $data['pickup_lng'];
-            $quote['in_coverage'] = $this->zones->covering($lat, $lng) !== null;
+        // Distance-based estimate: when pickup + university coordinates are
+        // provided, price the ride by GPS distance (pickup → university).
+        $lat = isset($data['pickup_lat']) ? (float) $data['pickup_lat'] : null;
+        $lng = isset($data['pickup_lng']) ? (float) $data['pickup_lng'] : null;
+        $uni = isset($data['university_id']) ? University::find($data['university_id']) : null;
 
-            $uni = isset($data['university_id']) ? University::find($data['university_id']) : null;
-            if ($uni && $uni->lat !== null && $uni->lng !== null) {
-                $quote['distance_km'] = round($this->haversineKm($lat, $lng, $uni->lat, $uni->lng), 2);
+        $riders = (int) ($data['riders'] ?? 1);
+        $capacity = (int) ($data['capacity'] ?? 4);
+
+        // 1) Unified fixed fare (zone ↔ university matrix) wins when the pickup
+        //    falls inside a covered zone that has an admin-set price. Gives the
+        //    student a predictable, fair price independent of GPS micro-distance.
+        $matrix = null;
+        if ($lat !== null && $lng !== null && $uni) {
+            $matrix = $this->zonePricing->fareForPoint($uni, $lat, $lng);
+        }
+
+        if ($matrix !== null) {
+            $quote = $this->pricing->fixedQuote($matrix['fare_fils'], $isExpress, $riders, $capacity);
+            $quote['pricing_source'] = 'zone_matrix';
+            $quote['zone_id'] = $matrix['zone_id'];
+        } else {
+            // 2) Distance-based estimate: when pickup + university coordinates are
+            //    provided, price the ride by GPS distance (pickup → university).
+            $distanceKm = null;
+            if ($lat !== null && $lng !== null && $uni && $uni->lat !== null && $uni->lng !== null) {
+                $distanceKm = round(Geo::haversineKm($lat, $lng, (float) $uni->lat, (float) $uni->lng), 2);
             }
+
+            $quote = $this->pricing->quote(
+                $data['base_fare_fils'] ?? null,
+                $isExpress,
+                $riders,
+                $capacity,
+                distanceKm: $distanceKm,
+            );
+            $quote['pricing_source'] = $distanceKm !== null ? 'distance' : 'flat';
+        }
+
+        // Coverage flag so the app can warn before requesting outside Irbid.
+        if ($lat !== null && $lng !== null) {
+            $quote['in_coverage'] = $this->zones->covering($lat, $lng) !== null;
         }
 
         return $this->ok($quote, 'تقدير الأجرة.');
-    }
-
-    /** Great-circle distance in km between two coordinates. */
-    private function haversineKm(float $lat1, float $lng1, float $lat2, float $lng2): float
-    {
-        $earth = 6371.0;
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLng = deg2rad($lng2 - $lng1);
-        $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
-
-        return $earth * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
     /** Student: create a ride request (door-to-door). */

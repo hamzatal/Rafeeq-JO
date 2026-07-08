@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#141B2E"
+      "backgroundColor": "#002045"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -19,14 +19,14 @@
     "android": {
       "package": "jo.rafeeq.driver",
       "adaptiveIcon": {
-        "backgroundColor": "#141B2E"
+        "backgroundColor": "#002045"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker", ["expo-notifications", { "color": "#E7A63A" }]],
+    "plugins": ["expo-router", "expo-secure-store", "expo-font", "expo-image-picker", "expo-document-picker", ["expo-notifications", { "color": "#006A65" }]],
     "extra": {
       "apiUrl": "http://localhost:8000"
     }

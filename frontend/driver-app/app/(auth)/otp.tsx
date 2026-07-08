@@ -47,7 +47,7 @@ export default function Otp() {
     <AuthShell title={t('auth.otpTitle')} subtitle={`${t('auth.otpSubtitle')} — ${params.phone}`}>
       {formError ? <Banner message={formError} variant="error" /> : null}
       {params.debug ? <Text style={s.debug}>{t('auth.testCode')}: {params.debug}</Text> : null}
-      <Input onDark value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="------" style={s.codeInput} />
+      <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="------" style={s.codeInput} />
       <Button title={t('auth.verify')} onPress={onVerify} loading={loading} />
     </AuthShell>
   );

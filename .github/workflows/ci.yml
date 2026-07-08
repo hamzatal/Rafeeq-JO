@@ -18,7 +18,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: mbstring, pdo, sqlite3, pdo_sqlite, redis
           coverage: none
 
@@ -34,6 +34,9 @@ jobs:
         run: |
           find Core Shared Infrastructure Modules database config bootstrap -name "*.php" -print0 \
             | xargs -0 -n1 -P4 php -l > /dev/null
+
+      - name: Static analysis (PHPStan / Larastan, level 5 + baseline)
+        run: php -d memory_limit=1G vendor/bin/phpstan analyse --no-progress --error-format=github
 
       - name: Boot smoke test (registers every module + route)
         env:
@@ -81,7 +84,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: mbstring, pdo, pgsql, pdo_pgsql
           coverage: none
 

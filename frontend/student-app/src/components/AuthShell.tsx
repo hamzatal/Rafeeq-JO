@@ -6,10 +6,11 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme, type AppTheme } from '../theme';
 
 /**
- * Unified, premium auth background for login / register / reset (Onyx DS v7).
- * A deep ink canvas with a soft signature-blue glow, the unified brand mark, a
- * clear title and a friendly subtitle — one shared visual language across the
- * student & captain apps, matching the welcome + splash surfaces.
+ * Unified auth surface for login / register / reset — Stitch design system.
+ * A clean light "clean-room" canvas (off-white) with a white rounded card,
+ * the teal brand mark, a centered navy title and a friendly subtitle. One
+ * shared visual language across the student & captain apps, matching the
+ * Stitch splash + onboarding + register (_14) screens. LIGHT-MODE ONLY.
  */
 export function AuthShell({
   title,
@@ -25,22 +26,24 @@ export function AuthShell({
 
   return (
     <View style={s.root}>
-      <StatusBar style="light" />
-      <View style={s.glow} />
-      <View style={s.glow2} />
+      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      {/* Soft ambient brand tints */}
+      <View style={s.tintA} pointerEvents="none" />
+      <View style={s.tintB} pointerEvents="none" />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <View style={s.brandRow}>
-            <View style={s.mark}>
-              <Image source={require('../../assets/r-logo.png')} style={s.markLogo} resizeMode="contain" />
+          <View style={s.card}>
+            <View style={s.brandRow}>
+              <View style={s.mark}>
+                <Image source={require('../../assets/r-logo.png')} style={s.markLogo} resizeMode="contain" />
+              </View>
             </View>
-            <Text style={s.brand}>رفيق</Text>
+
+            <Text style={s.title}>{title}</Text>
+            {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
+
+            <View style={s.form}>{children}</View>
           </View>
-
-          <Text style={s.title}>{title}</Text>
-          {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
-
-          <View style={s.form}>{children}</View>
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -49,19 +52,28 @@ export function AuthShell({
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: '#0A0D12', overflow: 'hidden' },
-    glow: { position: 'absolute', top: -120, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.16 },
-    glow2: { position: 'absolute', bottom: -140, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.accent, opacity: 0.07 },
+    root: { flex: 1, backgroundColor: t.colors.background, overflow: 'hidden' },
+    tintA: { position: 'absolute', top: -120, left: -90, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.06 },
+    tintB: { position: 'absolute', bottom: -140, right: -90, width: 280, height: 280, borderRadius: 140, backgroundColor: t.colors.primary, opacity: 0.05 },
     safe: { flex: 1 },
-    content: { flexGrow: 1, paddingHorizontal: t.spacing.lg, paddingTop: t.spacing.xl, paddingBottom: t.spacing.lg },
+    content: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.xl },
 
-    brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginBottom: t.spacing['2xl'] },
-    mark: { width: 52, height: 52, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
-    markLogo: { width: 38, height: 38 },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: '#FFFFFF' },
+    card: {
+      backgroundColor: t.colors.surface,
+      borderRadius: t.radius.xl,
+      borderWidth: 1,
+      borderColor: t.colors.hairline,
+      paddingHorizontal: t.spacing.lg,
+      paddingVertical: t.spacing['2xl'],
+      ...t.shadow.md,
+    },
 
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: '#FFFFFF', textAlign: 'right', lineHeight: 40 },
-    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: 'rgba(255,255,255,0.65)', textAlign: 'right', marginTop: 8 },
+    brandRow: { alignItems: 'center', marginBottom: t.spacing.base },
+    mark: { width: 64, height: 64, borderRadius: t.radius.lg, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    markLogo: { width: 44, height: 44 },
 
-    form: { marginTop: t.spacing['2xl'] },
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 28, color: t.colors.primary, textAlign: 'center', lineHeight: 38 },
+    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'center', marginTop: 8 },
+
+    form: { marginTop: t.spacing.xl },
   });

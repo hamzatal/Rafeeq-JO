@@ -1,60 +1,63 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Admin Console — Design System v7 "Onyx" (ink + signature blue).
- * Ink = structural/brand chrome (sidebar, table headers, primary CTA). Blue =
- * the single interactive accent (active nav, links, highlights, info pills).
- * Deep-ink dark scheme matches the mobile apps exactly.
+ * Admin Console — Design System "Stitch" (Deep Royal Blue + Smart Teal).
+ * Navy = structural/brand chrome (sidebar, table headers, primary CTA, carries
+ * white text). Teal = the single interactive accent (active nav, links,
+ * highlights, info pills, AI/live states). Light-mode only.
  *
- * NOTE (transitional aliases): the legacy `navy`, `gold` and `cyan` token names
- * are intentionally repointed to the Onyx ink + blue families so the many
- * existing `navy` / `gold-*` / `cyan-*` utility usages across pages render the
- * unified brand WITHOUT a mass class rename. Renaming the classes to
- * `ink-*` / `accent-*` is a cosmetic follow-up; the rendered brand is correct.
+ * NOTE (transitional aliases): the legacy `navy`, `gold`, `cyan` and `blue`
+ * token names are intentionally repointed to the Stitch navy + teal families so
+ * the many existing utility usages across pages render the correct brand
+ * WITHOUT a mass class rename. Renaming classes to `primary-*` / `accent-*` is
+ * a cosmetic follow-up; the rendered brand is already correct.
  */
 const config: Config = {
-  darkMode: 'class',
   content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // Brand — ink primary (main CTA fill, carries white text)
-        primary: { DEFAULT: '#0F1216', dark: '#000000', light: '#2A2F37' },
-        // "navy" (legacy alias) = structural ink used for sidebar / table headers / dark chrome
-        navy: { DEFAULT: '#12161D', light: '#171C24', deep: '#0A0D12', 900: '#0A0D12' },
-        // Signature blue accent family
-        blue: { DEFAULT: '#2F6BFF', soft: '#DCE7FF', deep: '#2454D8' },
-        // Legacy aliases: gold-* / cyan-* → signature blue (see note above)
-        gold: { DEFAULT: '#2F6BFF', soft: '#DCE7FF', deep: '#2454D8' },
-        cyan: { DEFAULT: '#2F6BFF', soft: '#DCE7FF', deep: '#2454D8' },
-        accent: '#2F6BFF',
-        // Neutrals
-        background: '#F4F6F8',
+        // Brand — deep royal blue primary (main CTA fill, carries white text)
+        primary: { DEFAULT: '#002045', dark: '#001B3C', light: '#1A365D' },
+        // "navy" (alias) = structural navy used for sidebar / table headers / chrome
+        navy: { DEFAULT: '#002045', light: '#1A365D', deep: '#001B3C', 900: '#001B3C' },
+        // Smart teal accent family
+        teal: { DEFAULT: '#006A65', soft: '#6FF7EE', deep: '#00504C' },
+        // Legacy aliases: gold-* / cyan-* / blue-* → smart teal (see note above)
+        gold: { DEFAULT: '#006A65', soft: '#6FF7EE', deep: '#00504C' },
+        cyan: { DEFAULT: '#006A65', soft: '#6FF7EE', deep: '#00504C' },
+        blue: { DEFAULT: '#006A65', soft: '#6FF7EE', deep: '#00504C' },
+        accent: '#006A65',
+        // Neutrals (off-white canvas + white cards)
+        background: '#F9F9FF',
         surface: '#FFFFFF',
-        line: '#E7EAEF',
-        ink: '#0F1216',
-        muted: '#59616E',
-        // Status (meaning only)
-        success: '#12B76A',
+        line: '#C4C6CF',
+        hairline: '#E7EEFF',
+        ink: '#111C2C',
+        muted: '#43474E',
+        // Status (meaning only — success/info use teal per Stitch)
+        success: '#006A65',
         warning: '#F79009',
-        danger: '#F04438',
-        info: '#2F6BFF',
-        // Dark scheme — deep ink (matches mobile scheme.ts)
-        dbg: '#0A0D12',
-        dsurface: '#12161D',
-        dcard: '#171C24',
-        dline: '#242B36',
-        dtext: '#F4F6F8',
-        dmuted: '#A2ABB9',
+        danger: '#BA1A1A',
+        info: '#006A65',
+        // Legacy dark aliases (light-only design) — repointed to light neutrals
+        // so any residual `dark:*` utilities render on-brand instead of breaking.
+        dbg: '#F9F9FF',
+        dsurface: '#FFFFFF',
+        dcard: '#FFFFFF',
+        dline: '#C4C6CF',
+        dtext: '#111C2C',
+        dmuted: '#43474E',
       },
       fontFamily: {
-        sans: ['var(--font-cairo)', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-ibm-plex)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-ibm-plex)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        card: '0 1px 3px rgba(15, 18, 22, 0.06), 0 1px 2px rgba(15, 18, 22, 0.04)',
-        lift: '0 8px 24px rgba(15, 18, 22, 0.12)',
+        // Ambient navy-tinted shadows (soft "lifted" depth)
+        card: '0 4px 12px rgba(0, 32, 69, 0.05), 0 1px 2px rgba(0, 32, 69, 0.04)',
+        lift: '0 16px 30px rgba(0, 32, 69, 0.08)',
       },
     },
   },

@@ -1,14 +1,17 @@
 /**
- * Typography scale. Font family: Cairo (Arabic-first, RTL-friendly).
- * Weights available: 400, 500, 600, 700, 800.
+ * Typography scale — Stitch design system.
+ * Font family: IBM Plex Sans Arabic (clean, technical, official, RTL-first).
+ * Available weights: 400 Regular, 500 Medium, 600 SemiBold, 700 Bold.
+ * (IBM Plex Sans Arabic has no 800 weight — `extrabold` maps to 700 Bold.)
  */
 
 export const fontFamily = {
-  regular: 'Cairo_400Regular',
-  medium: 'Cairo_500Medium',
-  semibold: 'Cairo_600SemiBold',
-  bold: 'Cairo_700Bold',
-  extrabold: 'Cairo_800ExtraBold',
+  regular: 'IBMPlexSansArabic_400Regular',
+  medium: 'IBMPlexSansArabic_500Medium',
+  semibold: 'IBMPlexSansArabic_600SemiBold',
+  bold: 'IBMPlexSansArabic_700Bold',
+  // No 800 weight in IBM Plex Sans Arabic — fall back to Bold for the heaviest.
+  extrabold: 'IBMPlexSansArabic_700Bold',
 } as const;
 
 export const fontWeight = {
@@ -16,32 +19,38 @@ export const fontWeight = {
   medium: '500',
   semibold: '600',
   bold: '700',
-  extrabold: '800',
+  extrabold: '700',
 } as const;
 
+// Modular scale aligned with the Stitch DESIGN.md tokens.
 export const fontSize = {
-  xs: 12,
-  sm: 14,
-  base: 16,
-  lg: 18,
+  xs: 12, // caption
+  sm: 14, // label-sm
+  base: 16, // body-md
+  lg: 18, // body-lg
   xl: 20,
-  '2xl': 24,
-  '3xl': 30,
-  '4xl': 36,
+  '2xl': 24, // headline-md
+  '3xl': 32, // display-lg (mobile)
+  '4xl': 40, // display-lg (desktop)
 } as const;
 
 export const lineHeight = {
   tight: 1.25,
-  normal: 1.5,
+  normal: 1.5, // generous — accommodates Arabic ascenders/descenders
   relaxed: 1.75,
 } as const;
 
 export const typography = {
-  h1: { fontFamily: fontFamily.extrabold, fontSize: fontSize['3xl'] },
-  h2: { fontFamily: fontFamily.bold, fontSize: fontSize['2xl'] },
-  h3: { fontFamily: fontFamily.bold, fontSize: fontSize.xl },
+  // display-lg (mobile 32 / desktop 40) — welcome/hero headers, weight 700
+  h1: { fontFamily: fontFamily.bold, fontSize: fontSize['3xl'] },
+  // headline-md 24 / 600
+  h2: { fontFamily: fontFamily.semibold, fontSize: fontSize['2xl'] },
+  h3: { fontFamily: fontFamily.semibold, fontSize: fontSize.xl },
+  // body-lg 18 (section titles)
   title: { fontFamily: fontFamily.semibold, fontSize: fontSize.lg },
+  // body-md 16 / 400
   body: { fontFamily: fontFamily.regular, fontSize: fontSize.base },
+  // label-sm 14 / 500 (buttons, interactive labels)
   caption: { fontFamily: fontFamily.regular, fontSize: fontSize.sm },
-  button: { fontFamily: fontFamily.bold, fontSize: fontSize.base },
+  button: { fontFamily: fontFamily.medium, fontSize: fontSize.base },
 } as const;

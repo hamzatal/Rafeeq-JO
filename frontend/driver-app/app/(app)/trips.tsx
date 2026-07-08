@@ -54,6 +54,11 @@ export default function DriverTrips() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
+      <View style={s.header}>
+        <View style={s.headerBtn} />
+        <Text style={s.brand}>رفيق</Text>
+        <View style={s.headerBtn} />
+      </View>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>{t('driver.myTrips')}</Text>
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
@@ -105,8 +110,11 @@ export default function DriverTrips() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
+    headerBtn: { width: 40, height: 40 },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
+    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.base },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
     chips: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginTop: 8 },
     chip: { borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.full, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: t.colors.surface },

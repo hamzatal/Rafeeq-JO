@@ -172,6 +172,17 @@ export interface Trip {
   ended_at: string | null;
   capacity: number;
   booked_count?: number;
+  /** Transparent fare breakdown + captain earnings preview (from TripResource). */
+  pricing?: {
+    fare_fils: number;
+    base_fare_fils: number;
+    express_fee_fils: number;
+    surge_multiplier: number;
+    commission_fils: number;
+    captain_share_fils: number;
+    riders: number;
+    expected_captain_earnings_fils: number;
+  };
   route?: { id: string; name: string; university_id: string };
   passengers?: TripPassenger[];
 }
@@ -585,6 +596,43 @@ export interface DriverPerformance {
   available_earnings_fils: number;
   rating: number;
   total_trips: number;
+}
+
+/** ── Advertising banners ──────────────────────────────────────────── */
+export type AdPlacement = 'student_home' | 'student_wallet' | 'driver_home';
+
+export interface AdBanner {
+  id: string;
+  title: string;
+  image_url: string;
+  link_url: string | null;
+  placement: AdPlacement;
+  is_active: boolean;
+  sort_order: number;
+  starts_at: string | null;
+  ends_at: string | null;
+}
+
+/** Detailed captain earnings breakdown (money in fils). */
+export interface EarningsBucket {
+  earnings_fils: number;
+  trips: number;
+}
+
+export interface EarningsSummary {
+  totals: {
+    today_fils: number;
+    week_fils: number;
+    month_fils: number;
+    all_time_fils: number;
+    today_trips: number;
+    week_trips: number;
+    month_trips: number;
+    all_time_trips: number;
+  };
+  daily: (EarningsBucket & { date: string })[];
+  weekly: (EarningsBucket & { week_start: string })[];
+  available_fils: number;
 }
 
 

@@ -103,23 +103,47 @@ export default function Dashboard() {
 
         {approved && (
           <>
-            {/* Map-first: captain location + online/offline */}
-            <View style={s.mapWrap}>
-              <LiveMap points={mapPoints} legend={false} height={280} />
+            {/* Status card — rating · daily income · online toggle (Stitch _20) */}
+            <View style={[s.statusCard, online && s.statusCardOn]}>
+              <View style={s.statusStats}>
+                <View style={s.statusStat}>
+                  <Text style={s.statusVal}>{perf?.rating?.toFixed(1) ?? driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
+                  <View style={s.statusLblRow}>
+                    <Icon name="star" size={13} color={theme.colors.accent} />
+                    <Text style={s.statusLbl}>{t('driver.myRating')}</Text>
+                  </View>
+                </View>
+                <View style={s.statusDivider} />
+                <View style={s.statusStat}>
+                  <Text style={s.statusVal}>{perf ? jod(perf.available_earnings_fils) : '—'}</Text>
+                  <Text style={s.statusLbl}>{t('driver.todayEarnings')}</Text>
+                </View>
+                <View style={s.statusDivider} />
+                <View style={s.statusStat}>
+                  <Text style={s.statusVal}>{perf?.total_trips ?? driver?.total_trips ?? 0}</Text>
+                  <Text style={s.statusLbl}>{t('driver.myTrips')}</Text>
+                </View>
+              </View>
+              <View style={s.onlineToggle}>
+                <Switch
+                  value={online}
+                  onValueChange={(v) => void setOnline(v)}
+                  trackColor={{ true: theme.colors.accent, false: theme.colors.border }}
+                  thumbColor={online ? theme.colors.onAccent : theme.colors.surface}
+                />
+                <View style={{ flex: 1 }}>
+                  <View style={s.onlineTitleRow}>
+                    <View style={[s.statusDot, { backgroundColor: online ? theme.colors.success : theme.colors.muted }]} />
+                    <Text style={s.toggleTitle}>{online ? t('driver.online') : t('driver.offline')}</Text>
+                  </View>
+                  <Text style={s.toggleHint} numberOfLines={1}>{online ? t('driver.onlineHint') : t('driver.offlineHint')}</Text>
+                </View>
+              </View>
             </View>
 
-            <View style={[s.toggleCard, online && s.toggleCardOn]}>
-              <View style={[s.statusDot, { backgroundColor: online ? theme.colors.success : theme.colors.muted }]} />
-              <View style={{ flex: 1 }}>
-                <Text style={s.toggleTitle}>{online ? t('driver.online') : t('driver.offline')}</Text>
-                <Text style={s.toggleHint} numberOfLines={2}>{online ? t('driver.onlineHint') : t('driver.offlineHint')}</Text>
-              </View>
-              <Switch
-                value={online}
-                onValueChange={(v) => void setOnline(v)}
-                trackColor={{ true: theme.colors.accent, false: theme.colors.border }}
-                thumbColor={online ? theme.colors.onAccent : theme.colors.surface}
-              />
+            {/* Map */}
+            <View style={s.mapWrap}>
+              <LiveMap points={mapPoints} legend={false} height={260} />
             </View>
 
             {online && (
@@ -132,26 +156,6 @@ export default function Dashboard() {
                 />
               </Card>
             )}
-
-            {/* Today earnings + stats */}
-            <View style={s.statsRow}>
-              <View style={s.statBoxWide}>
-                <Text style={s.statLbl}>{t('driver.todayEarnings')}</Text>
-                <Text style={s.statValBig}>{perf ? jod(perf.available_earnings_fils) : '—'} <Text style={s.cur}>{t('subscriptions.currency')}</Text></Text>
-              </View>
-            </View>
-            <View style={s.statsRow}>
-              <View style={s.statBox}>
-                <Icon name="star" size={18} color={theme.colors.accent} />
-                <Text style={s.statVal}>{perf?.rating?.toFixed(1) ?? driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
-                <Text style={s.statLbl}>{t('driver.myRating')}</Text>
-              </View>
-              <View style={s.statBox}>
-                <Icon name="navigation" size={18} color={theme.colors.primary} />
-                <Text style={s.statVal}>{perf?.total_trips ?? driver?.total_trips ?? 0}</Text>
-                <Text style={s.statLbl}>{t('driver.myTrips')}</Text>
-              </View>
-            </View>
 
             <Card style={{ padding: 6 }}>
               <ListRow icon="navigation" title={t('driver.myTrips')} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/trips')} />
@@ -184,6 +188,19 @@ const makeStyles = (t: AppTheme) =>
     name: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'right' },
 
     mapWrap: { borderRadius: t.radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.border, marginBottom: t.spacing.md },
+
+    // Combined status card (Stitch _20)
+    statusCard: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.md, ...t.shadow.sm },
+    statusCardOn: { borderColor: t.colors.accent },
+    statusStats: { flexDirection: 'row-reverse', alignItems: 'center', paddingBottom: t.spacing.base, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
+    statusStat: { flex: 1, alignItems: 'center', gap: 3 },
+    statusVal: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text },
+    statusLblRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
+    statusLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
+    statusDivider: { width: StyleSheet.hairlineWidth, height: 34, backgroundColor: t.colors.border },
+    onlineToggle: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, paddingTop: t.spacing.base },
+    onlineTitleRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
+
     toggleCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base, ...t.shadow.sm },
     toggleCardOn: { borderColor: t.colors.accent },
     statusDot: { width: 12, height: 12, borderRadius: 6 },

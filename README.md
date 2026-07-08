@@ -62,28 +62,30 @@ npm run driver    # تطبيق الكابتن
 
 ## التوثيق
 
-| الموضوع | الملف |
-|---------|-------|
-| نظرة عمل المشروع | [docs/business/overview.md](docs/business/overview.md) |
-| المعمارية | [docs/architecture/system-architecture.md](docs/architecture/system-architecture.md) |
-| قاعدة البيانات | [docs/database/schema.md](docs/database/schema.md) |
-| الأمان | [docs/security/security-model.md](docs/security/security-model.md) |
-| خارطة الطريق | [docs/business/roadmap.md](docs/business/roadmap.md) |
+كل التوثيق أُعيدت هيكلته في [`docs/`](docs/README.md) بترقيم نظيف:
+
+| # | الملف | الوصف |
+|---|------|-------|
+| 00 | [الرؤية](docs/00-VISION.md) | فكرة المشروع ومزاياه (غير تقني). |
+| 01 | [الخطة الرئيسية](docs/01-MASTER-PLAN.md) | **مصدر التخطيط والحالة الوحيد.** |
+| 02 | [التسعير والمناطق](docs/02-PRICING-ZONES.md) | محرّك التسعير بالمسافة + العمولة. |
+| 03 | [نظام التصميم (Stitch)](docs/03-DESIGN-SYSTEM.md) | **الهوية الوحيدة المعتمدة.** |
+| 04 | [المزايا](docs/04-FEATURES.md) | كتالوج المزايا + الإعلانات + AI. |
+| 05 | [المعمارية](docs/05-ARCHITECTURE.md) | البنية التقنية. |
+| 06–09 | [قاعدة البيانات](docs/06-DATABASE.md) · [الأمان](docs/07-SECURITY.md) · [النشر](docs/08-DEPLOYMENT.md) · [العلامة](docs/09-BRAND-NAMING.md) | مراجع تقنية. |
 
 ## خطة التنفيذ (Phases)
 
-- [x] **Phase 0** — الأساس (Monorepo + Backend foundation + Design system)
-- [x] **Phase 1** — الهوية والأمان (Auth / OTP / RBAC / Users / Students / Drivers + 3 واجهات)
-- [x] **Phase 2** — النقل (Universities / Areas / PickupPoints / Routes / Subscriptions / Trips / Zones / RideRequests / Matching / Wallet) — backend
-- [x] **Phase 3** — الدفع (CliQ + GPT Vision) — backend (Payments + بنية Gpt) ✅ · واجهات ⏳
-- [ ] **Phase 4** — الخدمات (Parcels / Lost & Found / Rewards)
-- [ ] **Phase 5** — الذكاء الاصطناعي (Rafeeq AI / Support / Safety / Fraud Monitor)
-- [~] **Phase 6** — لوحة الإدارة + التحليلات · **الإشعارات (FCM+SMS) ✅** · **التقييم الثنائي ✅** (backend)
-- [~] **Phase 7** — الإطلاق · **SOS + جهات اتصال الطوارئ ✅** · Notifications ✅ · **OTP صعود + OTP إنزال (تأكيد الطرفين) ✅** · **محرك تسعير + Express ✅** · **حجز الرصيد ✅** · **كشف احتيال GPS ✅** · (Deployment/CI/اختبارات شاملة ⏳)
+المسار الكامل خطوة بخطوة في [docs/01-MASTER-PLAN.md](docs/01-MASTER-PLAN.md). ملخّص:
 
-> الحالة الحيّة والتفصيلية: `docs/EXECUTION_PLAN.md` (M1–M10) + `docs/PROGRESS.md` (**المصدر الرسمي للحالة**). كتالوج المزايا: `docs/FEATURES.md`. **المتبقّي للإطلاق: `docs/LAUNCH_CHECKLIST.md`.** آخر commit: **RFQ-203**.
->
-> ملاحظة: حُذف نهائياً (RFQ-199) تطبيق ولي الأمر `guardian-app` ووحدة `Guardians` — استُبدل بجهات اتصال الطوارئ داخل تطبيق الطالب.
+- [x] **المرحلة 0** — التأسيس والترتيب: حذف الهويات السابقة (7) + إعادة هيكلة الدوكس + اعتماد تصميم Stitch مرجعياً.
+- [ ] **المرحلة 1** — أساس التصميم (توكنز Stitch + خط IBM Plex Sans Arabic + توحيد المكوّنات).
+- [ ] **المرحلة 2** — إعادة بناء شاشات التطبيقات الثلاثة على Stitch.
+- [ ] **المرحلة 3** — محرّك التسعير بالمسافة + العمولة + أرباح الكابتن + الزون.
+- [ ] **المرحلة 4** — إغلاق كل الثغرات الأمنية والتحقّق الفعلي.
+- [ ] **المرحلة 5** — فحص التكامل والصحّة (تشغيل الاختبارات فعلياً).
+- [ ] **المرحلة 6** — AI عبر GPT + مزايا جديدة + لوحة إعلانات.
+- [ ] **المرحلة 7** — صلابة الإطلاق (تكاملات/نشر/قانوني).
 
 ---
 

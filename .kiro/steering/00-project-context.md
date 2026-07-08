@@ -2,55 +2,45 @@
 inclusion: always
 ---
 
-# سياق مشروع رفيق (Rafeeq) — اقرأ أولاً
+# سياق مشروع رفيق (Rafeeq) — اقرأ أولاً (يُحمَّل تلقائياً)
 
-> هذا الملف يُحمَّل تلقائياً في كل جلسة. الهدف: استعادة سياق المشروع كاملاً دون إعادة شرح.
+> الهدف: تفهم المشروع فوراً **بدون إعادة دراسة كل الملفات**. للحالة والخطة راجع
+> [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md) و [`docs/10-STITCH-SCREENS.md`](../../docs/10-STITCH-SCREENS.md).
+> فهرس كل التوثيق: [`docs/README.md`](../../docs/README.md).
 
 ## ما هو رفيق
-منصة نقل وخدمات طلابية ذكية في الأردن، مدعومة بالذكاء الاصطناعي (GPT). ليست تطبيق حجز فقط — هي:
-شبكة نقل جامعية + منصة خدمات طلابية + شبكة إرسال أغراض + نظام أمان ومتابعة + مساعد ذكي + منصة إدارة للجامعات مستقبلاً.
+منصة **نقل وخدمات طلابية ذكية في الأردن**. النواة: الطالب يطلب رحلة بيته↔جامعته، ونجمّع طلاب نفس المنطقة+الجامعة مع كابتن معتمد بسعر عادل وتتبّع وأمان ودفع إلكتروني. نبدأ **إربد** ثم نتوسّع لكل الأردن بتفعيل `is_active`. تفاصيل الفكرة (غير تقنية): [`docs/00-VISION.md`](../../docs/00-VISION.md).
 
-## الفئات
-طالب · كابتن (سائق معتمد) · إدارة · دعم فني · (مستقبلاً) جامعات وشركات.
+## التطبيقات الثلاثة
+- `frontend/student-app` — تطبيق الطالب (Expo / React Native + TS).
+- `frontend/driver-app` — تطبيق الكابتن (Expo / RN + TS).
+- `frontend/admin-dashboard` — لوحة الإدارة (Next.js + Tailwind).
+- `frontend/packages/shared` (توكنز التصميم + الأنواع + i18n) و `packages/api-client` (عميل REST).
+- `backend` — Laravel 12 · PHP 8.4 · Modular Monolith (32 موديول).
 
-## الخدمات الأساسية
-1. النقل الجامعي (اشتراكات، رحلات يومية، تتبّع مباشر، تقييمات، إشعارات).
-2. إرسال الأغراض (parcel) بين الجامعات/النقاط مع OTP تسليم واستلام.
-3. المفقودات (Lost & Found) مع مطابقة ذكية بالـ GPT.
-4. التبادل الطلابي (Campus Exchange).
+## الحقائق التقنية (محدّثة — لا تثق بأي مصدر قديم يخالفها)
+- **Backend:** Laravel **12** · PHP **8.4** · PostgreSQL 16 · Redis · Reverb (realtime) · Sanctum. المبالغ بالفلس (int). مفاتيح UUID. namespaces: `Rafeeq\Core|Shared|Infrastructure|Modules`.
+- **الاختبارات:** 172 اختبار (PHPUnit). **شغّلها قبل دمج أي تعديل backend** (`cd backend && ./vendor/bin/phpunit`).
+- **التشغيل:** backend `composer install && php artisan migrate:fresh --seed && php artisan serve`. frontend `cd frontend && npm install` ثم `npm run student|driver|admin`.
 
-## محرّك الـ AI
-Rafeeq Assistant · Support Agent · Complaint Analyzer · Safety Monitor · Route Intelligence · Lost&Found Matching · Analytics · Payment Vision.
+## 🎨 التصميم — **Stitch** هو المصدر الوحيد والنهائي (كل الهويات السابقة مُلغاة)
+المرجع: `stitch_rafeeq_ai_student_platform.zip` (جذر الريبو) + [`docs/03-DESIGN-SYSTEM.md`](../../docs/03-DESIGN-SYSTEM.md).
+- **الألوان:** كحلي ملكي `#002045` (primary) + Smart Teal `#006A65` (accent/AI/حيّ/نجاح) + خلفيات off-white.
+- **الخط:** `IBM Plex Sans Arabic` حصراً (بديل Cairo نهائياً).
+- **الوضع:** فاتح + داكن مدعومان، **الافتراضي فاتح**. اللغة: عربي + إنجليزي، **الافتراضي عربي** + RTL.
+- **الملاحة:** موبايل = تبويب سفلي (زر «رفيق AI» مركزي في الطالب) · الإدارة = Sidebar يمين RTL.
+- **قاعدة:** اقرأ التوكنز من `useTheme()` (موبايل) / Tailwind (إدارة). **لا تكتب ألوان hex يدوياً** إلا الأبيض-على-كحلي.
+- توكنز الكود: `frontend/packages/shared/src/theme/scheme.ts` + `admin-dashboard/tailwind.config.ts`.
 
-## الدفع
-CliQ Jordan: إنشاء Payment Request برقم فريد (مثل RFQ-2026-83472) + مبلغ + انتهاء صلاحية، رفع إشعار التحويل، تحقق ذكي بـ GPT Vision، مركز شفافية مالية، ضمان رفيق (تذكرة تلقائية عند التأخير). مستقبلاً: Request-To-Pay → بوابة دفع → محفظة رفيق.
+## التسعير والعمولة (المرحلة 3)
+- **مبني على المسافة (GPS/Haversine)** — `Core/Support/Geo` + `Modules/Matching/Services/PricingService`. مفاتيح في `config/rafeeq.php` (فتح عداد 300 فلس + 250/كم + 20/دقيقة + حد أدنى 1000 + ليلي 1.25×).
+- **عمولة المنصة 15%** (`splitCommission`, zero-sum) تُخصم من الكابتن عبر المحفظة (لا كاش مباشر).
+- التفاصيل والدراسة: [`docs/02-PRICING-ZONES.md`](../../docs/02-PRICING-ZONES.md).
 
-## الأمان (9 طبقات)
-OTP → توثيق السائق → الوثائق الرسمية → Face Verification → Liveness → Trip OTP → SOS → Audit Logs → Risk Monitoring.
-مبدأ: **Trust First**. لا نخزّن صور الوجه/الـ liveness — نتيجة التحقق فقط.
+## الدفع والأمان و AI (باختصار)
+- **الدفع:** CliQ — Payment Request برقم `RFQ-2026-#####` + تحقّق GPT Vision + fallback يدوي. (لا علاقة له بترقيم الكوميت.)
+- **الأمان:** كباتن معتمدون + OTP صعود/إنزال + SOS + audit + مكافحة احتيال. (ثغرات موثّقة للمعالجة في المرحلة 4.)
+- **AI:** عبر GPT API مع `NullGptClient` fallback (مساعد/تحقّق دفع/مسارات/احتيال/شكاوى/مفقودات).
 
-## التقنيات (Stack)
-- Backend: Laravel 11 (PHP 8.2+) Modular Monolith. Namespaces: `Rafeeq\Core`, `Rafeeq\Shared`, `Rafeeq\Infrastructure`, `Rafeeq\Modules`, `Rafeeq\AI`.
-- DB: PostgreSQL 16 + PostGIS. مفاتيح UUID. المبالغ المالية بوحدة الفلس (integer).
-- Redis: cache/queue/session/broadcast. Realtime: Laravel Reverb.
-- Auth: Laravel Sanctum (tokens بـ UUID).
-- تطبيق الطالب + الكابتن: Expo (React Native + TypeScript) — iOS + Android + Web.
-- لوحة الإدارة: Next.js + TypeScript + Tailwind.
-- مشترك: `frontend/packages/shared` (design system + types + api client).
-- AI: OpenAI GPT + Vision. الدفع: CliQ. الإشعارات: Firebase FCM. الخرائط: Google/Mapbox.
-- عربي أولاً + RTL + ثنائي اللغة (ar/en).
-
-## التصميم (الحالة الفعلية — محدّثة)
-> ⚠️ الهوية تغيّرت عدة مرات؛ الألوان القديمة (أزرق/ذهبي/أخضر) **مهملة**. المصدر المعتمد الوحيد للتوكنز = **الكود**:
-> `frontend/packages/shared/src/theme/scheme.ts` (الطالب+الكابتن) و`frontend/admin-dashboard/tailwind.config.ts` (اللوحة).
-- **الخط الفعلي: Cairo** (400–800) للموبايل (وليس Tajawal رغم أسماء بعض المتغيّرات القديمة).
-- **الديفولت: عربي + لايت** في التطبيقات الثلاثة (مع دعم كامل للدارك والإنجليزية).
-- **توحيد الهوية جارٍ** على لون براندي أصلي واحد عبر التطبيقات الثلاثة (بعيداً عن الليموني المطابق لـ inDrive) — انظر `docs/audit/MASTER_REMEDIATION_PLAN.md` (المرحلة 1).
-- عند أي عمل تصميمي: اقرأ التوكنز من `useTheme()`/Tailwind، **لا تكتب ألوان hex يدوياً** في الشاشات.
-
-## أين تجد التفاصيل
-- خطة كاملة بالتفصيل: `docs/ROADMAP.md`
-- الحالة الحالية + الخطوة التالية: `docs/PROGRESS.md`
-- المعمارية: `docs/architecture/system-architecture.md`
-- قاعدة البيانات: `docs/database/schema.md`
-- الأمان: `docs/security/security-model.md`
+## القاعدة الذهبية
+شغل **كامل وجاهز للإنتاج** — لا skeleton ولا اختصار. التزام حرفي بتصميم Stitch. لا تكسر `main` (شغّل اختبارات backend قبل الدمج).

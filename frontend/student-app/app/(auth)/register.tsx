@@ -48,8 +48,8 @@ export default function Register() {
   return (
     <AuthShell title={t('auth.register')} subtitle={t('auth.welcomeSubtitle')}>
       {formError ? <Banner message={formError} variant="error" /> : null}
-      <Input onDark label={t('auth.fullName')} value={fullName} onChangeText={setFullName} error={errors.fullName} autoCapitalize="words" />
-      <Input onDark label={t('auth.phone')} value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+      <Input label={t('auth.fullName')} value={fullName} onChangeText={setFullName} error={errors.fullName} autoCapitalize="words" />
+      <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
       <Button title={t('auth.sendCode')} onPress={onSubmit} loading={loading} />
 
       <Pressable onPress={() => router.replace('/(auth)/login')} hitSlop={8} style={s.bottomLink}>
@@ -62,5 +62,5 @@ export default function Register() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     bottomLink: { alignItems: 'center', marginTop: t.spacing.xl },
-    bottomLinkText: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: 'rgba(255,255,255,0.8)' },
+    bottomLinkText: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.textSecondary },
   });

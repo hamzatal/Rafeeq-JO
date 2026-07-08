@@ -1,40 +1,41 @@
 /**
- * Brand constants — Design System v7 "Onyx" (ink + signature blue).
+ * Brand constants — Design System "Stitch" (Deep Royal Blue + Smart Teal).
  *
  * The single source of truth for runtime theming is `scheme.ts`
- * (`buildTheme` → `ThemeColors`), which is scheme-aware (light/dark). This
- * `palette` object holds ONLY the raw brand constants used by a few *static*
- * surfaces that must render without the theme provider (e.g. BrandSplash,
- * ErrorBoundary). Keep it aligned with `scheme.ts`. Do NOT add per-app theme
- * objects here — no gold, no navy, no legacy identities.
+ * (`buildTheme` → `ThemeColors`). This `palette` object holds ONLY the raw
+ * brand constants used by a few *static* surfaces that must render without the
+ * theme provider (e.g. BrandSplash, ErrorBoundary). Keep it aligned with
+ * `scheme.ts`. The design is light-mode only — no dark identities, no legacy
+ * ink/navy-gold/onyx colors.
  */
 export const palette = {
-  // Structural ink — deep canvas for splash / self-contained dark surfaces.
-  ink: '#0A0D12',
-  inkSurface: '#12161D',
-  inkCard: '#171C24',
+  // Deep royal blue — brand anchor used for splash / self-contained surfaces.
+  navy: '#002045',
+  navyContainer: '#1A365D',
+  navyDeep: '#001B3C',
 
-  // Signature interactive blue (matches scheme.ts BLUE_LIGHT / BLUE_DARK).
-  accent: '#2F6BFF',
-  accentBright: '#5B8CFF', // brighter blue for legibility on near-black
+  // Smart teal — AI / live / success accent.
+  accent: '#006A65',
+  accentBright: '#4EDBD2',
 
   // Neutrals
   white: '#FFFFFF',
-  background: '#F4F6F8',
+  background: '#F9F9FF',
   surface: '#FFFFFF',
-  border: '#E7EAEF',
-  muted: '#98A2B3',
-  textPrimary: '#0F1216',
-  textSecondary: '#59616E',
+  border: '#C4C6CF',
+  hairline: '#E7EEFF',
+  muted: '#74777F',
+  textPrimary: '#111C2C',
+  textSecondary: '#43474E',
   textInverse: '#FFFFFF',
 
-  // Semantic status (meaning only — never brand)
-  success: '#12B76A',
+  // Semantic status (meaning only)
+  success: '#006A65',
   warning: '#F79009',
-  danger: '#F04438',
-  info: '#2F6BFF',
+  danger: '#BA1A1A',
+  info: '#006A65',
 
   // Utility
-  overlay: 'rgba(15, 18, 22, 0.5)',
+  overlay: 'rgba(0, 32, 69, 0.5)',
   transparent: 'transparent',
 } as const;

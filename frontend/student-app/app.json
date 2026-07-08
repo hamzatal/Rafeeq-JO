@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#141B2E"
+      "backgroundColor": "#002045"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -19,7 +19,7 @@
     "android": {
       "package": "jo.rafeeq.student",
       "adaptiveIcon": {
-        "backgroundColor": "#141B2E"
+        "backgroundColor": "#002045"
       }
     },
     "web": {
@@ -39,7 +39,7 @@
       [
         "expo-notifications",
         {
-          "color": "#E7A63A"
+          "color": "#006A65"
         }
       ]
     ],

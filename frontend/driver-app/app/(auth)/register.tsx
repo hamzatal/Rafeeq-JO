@@ -67,10 +67,10 @@ export default function Register() {
   return (
     <AuthShell title={t('auth.register')} subtitle={t('auth.captainSignupSub')}>
       {formError ? <Banner message={formError} variant="error" /> : null}
-      <Input onDark label={t('auth.fullName')} value={fullName} onChangeText={setFullName} error={errors.fullName} autoCapitalize="words" />
-      <Input onDark label={t('auth.phone')} value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
-      <Input onDark label={t('auth.password')} value={password} onChangeText={setPassword} error={errors.password} secureTextEntry />
-      <Input onDark label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
+      <Input label={t('auth.fullName')} value={fullName} onChangeText={setFullName} error={errors.fullName} autoCapitalize="words" />
+      <Input label={t('auth.phone')} value={phone} onChangeText={setPhone} error={errors.phone} keyboardType="phone-pad" placeholder="07XXXXXXXX" />
+      <Input label={t('auth.password')} value={password} onChangeText={setPassword} error={errors.password} secureTextEntry />
+      <Input label={t('auth.confirmPassword')} value={confirm} onChangeText={setConfirm} secureTextEntry />
       <Button title={t('auth.sendCode')} onPress={onSubmit} loading={loading} />
 
       <Pressable onPress={() => router.push('/(auth)/login')} hitSlop={8} style={s.bottomLink}>
@@ -83,5 +83,5 @@ export default function Register() {
 const makeStyles = (_t: AppTheme) =>
   StyleSheet.create({
     bottomLink: { alignItems: 'center', marginTop: 24 },
-    bottomLinkText: { fontFamily: _t.fontFamily.semibold, fontSize: 14, color: 'rgba(255,255,255,0.8)' },
+    bottomLinkText: { fontFamily: _t.fontFamily.semibold, fontSize: 14, color: _t.colors.textSecondary },
   });

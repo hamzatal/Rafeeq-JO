@@ -236,6 +236,37 @@ export class AdminApi {
     return unwrap(data);
   }
 
+  // ── Pricing settings (permission: settings.manage) ───────────────
+  async getPricingSettings(): Promise<PricingSettings> {
+    const { data } = await this.http.get<ApiSuccess<PricingSettings>>(ENDPOINTS.admin.settingsPricing);
+    return unwrap(data);
+  }
+
+  async updatePricingSettings(payload: Partial<PricingSettings>): Promise<PricingSettings> {
+    const { data } = await this.http.patch<ApiSuccess<PricingSettings>>(ENDPOINTS.admin.settingsPricing, payload);
+    return unwrap(data);
+  }
+
+  // ── Unified (zone ↔ university) fare matrix (role: admin/supervisor) ─
+  async listZonePrices(params: { zone_id?: string; university_id?: string } = {}): Promise<ZoneUniversityPrice[]> {
+    const { data } = await this.http.get<ApiSuccess<ZoneUniversityPrice[]>>(ENDPOINTS.admin.zonePrices, { params });
+    return unwrap(data);
+  }
+
+  async createZonePrice(payload: ZonePricePayload): Promise<ZoneUniversityPrice> {
+    const { data } = await this.http.post<ApiSuccess<ZoneUniversityPrice>>(ENDPOINTS.admin.zonePrices, payload);
+    return unwrap(data);
+  }
+
+  async updateZonePrice(id: string, payload: Partial<ZonePricePayload>): Promise<ZoneUniversityPrice> {
+    const { data } = await this.http.patch<ApiSuccess<ZoneUniversityPrice>>(ENDPOINTS.admin.zonePrice(id), payload);
+    return unwrap(data);
+  }
+
+  async deleteZonePrice(id: string): Promise<void> {
+    await this.http.delete(ENDPOINTS.admin.zonePrice(id));
+  }
+
   // ── Broadcast notifications (permission: users.manage) ───────────
   async notificationAudience(): Promise<{ all: number; students: number; drivers: number }> {
     const { data } = await this.http.get<ApiSuccess<{ all: number; students: number; drivers: number }>>(
@@ -285,6 +316,41 @@ export interface CliqSettings {
   alias: string | null;
   beneficiary_name: string | null;
   bank_name: string | null;
+}
+
+/** Editable pricing knobs (money in fils). Mirrors SettingService::PRICING_KEYS. */
+export interface PricingSettings {
+  commission_percent: number;
+  default_fare_fils: number;
+  base_fare_fils: number;
+  per_km_fils: number;
+  per_min_fils: number;
+  min_fare_fils: number;
+  express_fee_fils: number;
+  night_multiplier: number;
+  night_start_hour: number;
+  avg_speed_kmh: number;
+  min_fill_riders: number;
+  max_surge_multiplier: number;
+}
+
+/** A row of the unified (zone ↔ university) fare matrix. */
+export interface ZoneUniversityPrice {
+  id: string;
+  zone_id: string;
+  university_id: string;
+  fare_fils: number;
+  fare_jod: number;
+  is_active: boolean;
+  zone?: { id: string; name_ar: string; name_en: string; city: string | null };
+  university?: { id: string; name_ar: string; name_en: string };
+}
+
+export interface ZonePricePayload {
+  zone_id: string;
+  university_id: string;
+  fare_fils: number;
+  is_active?: boolean;
 }
 
 
