@@ -134,9 +134,12 @@ class AuthService extends BaseService
      *
      * @return array{user: User, token: ?string, mfa_required: bool, mfa_token: ?string}
      */
-    public function login(string $phone, string $password, ?string $deviceName = null, ?Request $request = null): array
+    public function login(string $identifier, string $password, ?string $deviceName = null, ?Request $request = null): array
     {
-        $user = $this->users->findByPhone($phone);
+        // Accept either an email (admin dashboard) or a phone (mobile apps).
+        $user = str_contains($identifier, '@')
+            ? $this->users->findByEmail(mb_strtolower(trim($identifier)))
+            : $this->users->findByPhone($identifier);
 
         if (! $user || ! $user->password || ! Hash::check($password, $user->password)) {
             throw new BusinessRuleException('بيانات الدخول غير صحيحة.', 'INVALID_CREDENTIALS');

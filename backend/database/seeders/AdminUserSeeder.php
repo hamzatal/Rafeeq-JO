@@ -16,11 +16,11 @@ class AdminUserSeeder extends Seeder
 
         /** @var User $admin */
         $admin = User::updateOrCreate(
-            ['phone' => $phone],
+            ['email' => env('SEED_ADMIN_EMAIL', 'hamza.t.a.altal@gmail.com')],
             [
-                'full_name' => env('SEED_ADMIN_NAME', 'Rafeeq Admin'),
-                'email' => env('SEED_ADMIN_EMAIL', 'admin@rafeeq.jo'),
-                'password' => Hash::make(env('SEED_ADMIN_PASSWORD', 'Rafeeq@2026')),
+                'phone' => $phone,
+                'full_name' => env('SEED_ADMIN_NAME', 'Hamza Al-Tal'),
+                'password' => Hash::make(env('SEED_ADMIN_PASSWORD', '@GBq9961066384$')),
                 'type' => UserType::Admin,
                 'status' => UserStatus::Active,
                 'phone_verified_at' => now(),
@@ -31,6 +31,6 @@ class AdminUserSeeder extends Seeder
 
         $admin->syncRoles(['admin']);
 
-        $this->command?->info("Admin seeded: {$phone} (password from SEED_ADMIN_PASSWORD).");
+        $this->command?->info("Admin seeded: {$admin->email} (login by email + SEED_ADMIN_PASSWORD).");
     }
 }
