@@ -14,15 +14,22 @@ class LoginRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->filled('phone')) {
+        // Normalise a phone identifier only; email logins pass through untouched.
+        if ($this->filled('phone') && ! str_contains((string) $this->input('phone'), '@')) {
             $this->merge(['phone' => Phone::normalize((string) $this->input('phone')) ?? $this->input('phone')]);
+        }
+        if ($this->filled('email')) {
+            $this->merge(['email' => mb_strtolower(trim((string) $this->input('email')))]);
         }
     }
 
     public function rules(): array
     {
+        // Login accepts EITHER a Jordan phone (student/captain apps) OR an email
+        // (admin dashboard). One of the two is required, plus a password.
         return [
-            'phone' => ['required', 'string', 'regex:/^\+9627[789]\d{7}$/'],
+            'phone' => ['required_without:email', 'nullable', 'string', 'regex:/^\+9627[789]\d{7}$/'],
+            'email' => ['required_without:phone', 'nullable', 'email', 'max:150'],
             'password' => ['required', 'string'],
             'device_name' => ['sometimes', 'string', 'max:120'],
         ];
@@ -32,6 +39,7 @@ class LoginRequest extends FormRequest
     {
         return [
             'phone.regex' => 'رقم الهاتف غير صالح.',
+            'email.email' => 'البريد الإلكتروني غير صالح.',
             'password.required' => 'كلمة المرور مطلوبة.',
         ];
     }

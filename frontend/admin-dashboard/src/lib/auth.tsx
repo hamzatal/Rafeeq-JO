@@ -10,7 +10,7 @@ interface AuthContextValue {
   user: User | null;
   status: Status;
   /** Returns 'mfa' when a second factor is required (challenge stored). */
-  login: (phone: string, password: string) => Promise<'ok' | 'mfa'>;
+  login: (email: string, password: string) => Promise<'ok' | 'mfa'>;
   verifyMfa: (code: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -47,8 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, [signOut]);
 
-  const login = useCallback(async (phone: string, password: string): Promise<'ok' | 'mfa'> => {
-    const result = await api.auth.login({ phone, password, device_name: 'admin-dashboard' });
+  const login = useCallback(async (email: string, password: string): Promise<'ok' | 'mfa'> => {
+    const result = await api.auth.login({ email, password, device_name: 'admin-dashboard' });
     if (result.mfa_required) {
       setMfaToken(result.mfa_token);
       return 'mfa';

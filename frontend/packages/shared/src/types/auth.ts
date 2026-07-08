@@ -17,7 +17,10 @@ export interface VerifyOtpPayload {
 }
 
 export interface LoginPayload {
-  phone: string;
+  /** Jordan phone (mobile apps) — provide either phone or email. */
+  phone?: string;
+  /** Email (admin dashboard) — provide either phone or email. */
+  email?: string;
   password: string;
   device_name?: string;
 }

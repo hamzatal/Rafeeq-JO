@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { normalizeJordanPhone, validators } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { useAuth } from '../../src/lib/auth';
 import { LogoMark } from '../../src/components/Logo';
@@ -10,7 +9,7 @@ import { LogoMark } from '../../src/components/Logo';
 export default function LoginPage() {
   const { login, verifyMfa } = useAuth();
   const router = useRouter();
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'credentials' | 'mfa'>('credentials');
@@ -20,13 +19,12 @@ export default function LoginPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const phoneErr = validators.phone(phone);
-    if (phoneErr) return setError(phoneErr);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError('البريد الإلكتروني غير صالح');
     if (!password) return setError('كلمة المرور مطلوبة');
 
     setLoading(true);
     try {
-      const result = await login(normalizeJordanPhone(phone)!, password);
+      const result = await login(email.trim().toLowerCase(), password);
       if (result === 'mfa') {
         setStep('mfa');
       } else {
@@ -123,8 +121,8 @@ export default function LoginPage() {
             {step === 'credentials' ? (
               <form onSubmit={onSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm mb-1 font-medium">رقم الهاتف</label>
-                  <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07XXXXXXXX" />
+                  <label className="block text-sm mb-1 font-medium">البريد الإلكتروني</label>
+                  <input className="input" type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="username" />
                 </div>
                 <div>
                   <label className="block text-sm mb-1 font-medium">كلمة المرور</label>
