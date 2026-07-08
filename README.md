@@ -9,7 +9,7 @@
 <br/><br/>
 
 ![Status](https://img.shields.io/badge/status-active%20development-2ea44f?style=for-the-badge)
-![Backend Tests](https://img.shields.io/badge/backend%20tests-196%20passing-2ea44f?style=for-the-badge&logo=php&logoColor=white)
+![Backend Tests](https://img.shields.io/badge/backend%20tests-198%20passing-2ea44f?style=for-the-badge&logo=php&logoColor=white)
 ![PHPStan](https://img.shields.io/badge/PHPStan-level%205-8892BF?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-Proprietary-002045?style=for-the-badge)
 
@@ -181,7 +181,7 @@ Rafeeq-JO/
 | 4 | الأمان (طبقة التطبيق) | ✅ 100% |
 | 5 | التكامل والصحّة (عقود حيّة) | ✅ 100% |
 | 6 | AI (GPT) + مزايا + إعلانات | ✅ 100% |
-| 7 | صلابة الإطلاق (نشر/قانوني) | ⏳ |
+| 7 | صلابة الإطلاق (نشر/قانوني) | ✅ 100% |
 
 > التفاصيل الحيّة خطوة بخطوة في [docs/01-MASTER-PLAN.md](docs/01-MASTER-PLAN.md).
 
