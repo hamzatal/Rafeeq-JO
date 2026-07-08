@@ -50,15 +50,15 @@ export default function Earnings() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      {/* Header */}
+      {/* Header — avatar (right) · المحفظة · bell (left) per Stitch _22 */}
       <View style={s.header}>
-        <Pressable hitSlop={8} style={s.headerBtn}>
-          <Icon name="bell" size={22} color={theme.colors.primary} />
-        </Pressable>
-        <Text style={s.brand}>{t('driver.wallet')}</Text>
         <View style={s.avatar}>
           <Text style={s.avatarText}>{initial}</Text>
         </View>
+        <Text style={s.brand}>{t('driver.wallet')}</Text>
+        <Pressable hitSlop={8} style={s.headerBtn}>
+          <Icon name="bell" size={24} color={theme.colors.primary} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -75,28 +75,16 @@ export default function Earnings() {
           </Pressable>
         </View>
 
-        {/* Earnings details entry */}
-        <Pressable onPress={() => router.push('/(app)/earnings-detail')} style={s.detailsCard}>
-          <View style={s.detailsIcon}>
-            <Icon name="bar-chart-2" size={20} color={theme.colors.onAccent} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.detailsTitle}>{t('driver.earningsDetails')}</Text>
-            <Text style={s.detailsSub}>{t('driver.viewEarningsDetails')}</Text>
-          </View>
-          <Icon name={locale === 'ar' ? 'chevron-left' : 'chevron-right'} size={20} color={theme.colors.muted} />
-        </Pressable>
-
-        {/* CliQ payment info */}
+        {/* CliQ payment info — icon circle (right) + text · edit (left) per Stitch _22 */}
         <Pressable onPress={() => router.push('/(app)/withdraw')} style={s.cliqCard}>
-          <Icon name="edit-2" size={18} color={theme.colors.muted} />
+          <View style={s.cliqIcon}>
+            <Icon name="credit-card" size={20} color={theme.colors.primary} />
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={s.cliqTitle}>{t('driver.cliqPaymentInfo')}</Text>
             <Text style={s.cliqSub}>{t('driver.cliqAliasLabel')}: {alias}</Text>
           </View>
-          <View style={s.cliqIcon}>
-            <Icon name="credit-card" size={20} color={theme.colors.primary} />
-          </View>
+          <Icon name="edit-2" size={18} color={theme.colors.primary} />
         </Pressable>
 
         {/* Recent transactions */}
@@ -117,7 +105,7 @@ export default function Earnings() {
                   <Text style={s.txnType}>{tx.type_label}</Text>
                   {tx.created_at && <Text style={s.meta}>{new Date(tx.created_at).toLocaleString(locale)}</Text>}
                 </View>
-                <Text style={[s.txnAmount, { color: positive ? theme.colors.accent : theme.colors.primary }]}>
+                <Text style={[s.txnAmount, { color: positive ? theme.colors.accent : theme.colors.text }]}>
                   {positive ? '+ ' : '- '}{Math.abs(tx.amount_jod).toFixed(2)} د.أ
                 </Text>
               </View>
@@ -134,9 +122,9 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.primary },
-    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.onPrimary },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
+    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
     balanceCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, overflow: 'hidden', ...t.shadow.md },
@@ -146,11 +134,6 @@ const makeStyles = (t: AppTheme) =>
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 18, color: 'rgba(255,255,255,0.85)' },
     withdrawBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.accent, borderRadius: t.radius.md, height: 52, marginTop: t.spacing.base },
     withdrawText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onAccent },
-
-    detailsCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
-    detailsIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
-    detailsTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
-    detailsSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
     cliqCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
     cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },

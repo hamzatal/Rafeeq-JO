@@ -2,13 +2,17 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Constants from 'expo-constants';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { usePrefs } from '../../src/store/prefs';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { Icon, type IconName } from '../../src/components/Icon';
 
+/**
+ * Captain Settings & Support — pixel-faithful to Stitch `_23`:
+ * header (avatar · Rafeeq · bell) → title + subtitle → "إعدادات الحساب"
+ * grouped card → gradient "مركز الدعم" card → legal rows → centered logout pill.
+ */
 export default function Settings() {
   const { t } = useI18n();
   const router = useRouter();
@@ -17,76 +21,83 @@ export default function Settings() {
   const user = useAuth((a) => a.user);
   const logout = useAuth((a) => a.logout);
   const locale = usePrefs((p) => p.locale);
-  const scheme = usePrefs((p) => p.scheme);
   const setLocale = usePrefs((p) => p.setLocale);
-  const setScheme = usePrefs((p) => p.setScheme);
 
   const initial = (user?.full_name ?? 'ر').charAt(0);
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
+      {/* Header — avatar (right) · Rafeeq · bell (left) */}
       <View style={s.header}>
-        <View style={s.headerBtn} />
-        <Text style={s.brand}>رفيق</Text>
         <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
+        <Text style={s.brand}>رفيق</Text>
+        <Pressable hitSlop={8} style={s.headerBtn}>
+          <Icon name="bell" size={24} color={theme.colors.primary} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* General */}
-        <Text style={s.section}>{t('settings.general')}</Text>
-        <Row theme={theme} icon="globe" title={t('settings.appLanguage')} subtitle={locale === 'ar' ? t('settings.arabic') : t('settings.english')} onPress={() => void setLocale(locale === 'ar' ? 'en' : 'ar')} />
-        <Row theme={theme} icon={scheme === 'dark' ? 'moon' : 'sun'} title={t('settings.theme')} subtitle={scheme === 'dark' ? t('settings.dark') : t('settings.light')} onPress={() => void setScheme(scheme === 'dark' ? 'light' : 'dark')} />
+        <Text style={s.title}>{t('settings.settingsSupport')}</Text>
+        <Text style={s.subtitle}>{t('settings.manageAccount')}</Text>
 
-        {/* Account */}
+        {/* Account settings — grouped card with divided rows */}
         <Text style={s.section}>{t('settings.account')}</Text>
-        <Row theme={theme} icon="file-text" title={t('driver.documents')} onPress={() => router.push('/(app)/documents')} />
-        <Row theme={theme} icon="truck" title={t('driver.vehicle')} onPress={() => router.push('/(app)/vehicle')} />
-        <Row theme={theme} icon="credit-card" title={t('driver.wallet')} onPress={() => router.push('/(app)/earnings')} />
+        <View style={s.groupCard}>
+          <GroupRow theme={theme} icon="globe" title={t('settings.appLanguage')} subtitle={locale === 'ar' ? t('settings.arabic') : t('settings.english')} onPress={() => void setLocale(locale === 'ar' ? 'en' : 'ar')} border />
+          <GroupRow theme={theme} icon="file-text" title={t('driver.documents')} onPress={() => router.push('/(app)/documents')} border />
+          <GroupRow theme={theme} icon="truck" title={t('driver.vehicle')} onPress={() => router.push('/(app)/vehicle')} border />
+          <GroupRow theme={theme} icon="credit-card" title={t('driver.wallet')} onPress={() => router.push('/(app)/earnings')} />
+        </View>
 
-        {/* Support */}
-        <Text style={s.section}>{t('settings.supportCenter')}</Text>
-        <View style={s.supportRow}>
-          <SupportCard theme={theme} icon="headphones" label={t('settings.contactUs')} onPress={() => router.push('/(app)/chat')} />
-          <SupportCard theme={theme} icon="help-circle" label={t('settings.faq')} onPress={() => router.push('/(app)/chat')} />
+        {/* Support center — navy gradient-approx card */}
+        <View style={s.supportCard}>
+          <View style={s.supportBlob} pointerEvents="none" />
+          <View style={s.supportIcon}>
+            <Icon name="headphones" size={26} color={theme.colors.accentBright} />
+          </View>
+          <Text style={s.supportTitle}>{t('settings.supportCenter')}</Text>
+          <Text style={s.supportDesc}>{t('settings.supportDesc')}</Text>
+          <Pressable onPress={() => router.push('/(app)/chat')} style={({ pressed }) => [s.supportBtn, pressed && { opacity: 0.9 }]}>
+            <Icon name="message-circle" size={18} color={theme.colors.onAccent} />
+            <Text style={s.supportBtnText}>{t('settings.chatWithUs')}</Text>
+          </Pressable>
+          <View style={s.supportMeta}>
+            <Icon name="clock" size={16} color={theme.colors.onPrimaryMuted} />
+            <Text style={s.supportMetaText}>{t('settings.avgResponse')}</Text>
+          </View>
         </View>
 
         {/* Legal */}
         <Text style={s.section}>{t('settings.legal')}</Text>
-        <Row theme={theme} icon="shield" title={t('settings.privacy')} onPress={() => undefined} compact />
-        <Row theme={theme} icon="file-text" title={t('settings.terms')} onPress={() => undefined} compact />
+        <View style={s.groupCard}>
+          <GroupRow theme={theme} icon="shield" title={t('settings.privacy')} onPress={() => router.push('/(app)/chat')} border />
+          <GroupRow theme={theme} icon="file-text" title={t('settings.terms')} onPress={() => router.push('/(app)/chat')} />
+        </View>
 
-        <Pressable style={s.logoutBtn} onPress={logout}>
-          <Icon name="log-out" size={18} color={theme.colors.danger} />
-          <Text style={s.logout}>{t('auth.logout')}</Text>
-        </Pressable>
-        <Text style={s.version}>{t('settings.version')} {Constants.expoConfig?.version ?? '1.0.0'}</Text>
+        {/* Logout — centered pill */}
+        <View style={s.logoutWrap}>
+          <Pressable style={({ pressed }) => [s.logoutBtn, pressed && { opacity: 0.9 }]} onPress={logout}>
+            <Icon name="log-out" size={18} color={theme.colors.danger} />
+            <Text style={s.logout}>{t('auth.logout')}</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Row({ theme, icon, title, subtitle, onPress, compact }: { theme: AppTheme; icon: IconName; title: string; subtitle?: string; onPress: () => void; compact?: boolean }) {
+function GroupRow({ theme, icon, title, subtitle, onPress, border }: { theme: AppTheme; icon: IconName; title: string; subtitle?: string; onPress: () => void; border?: boolean }) {
   const s = useMemo(() => makeStyles(theme), [theme]);
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [s.row, pressed && { opacity: 0.7 }]}>
-      <View style={[s.rowIcon, compact && s.rowIconCompact]}>
-        <Icon name={icon} size={compact ? 18 : 20} color={theme.colors.primary} />
+    <Pressable onPress={onPress} style={({ pressed }) => [s.row, border && s.rowBorder, pressed && { backgroundColor: theme.colors.surfaceAlt }]}>
+      <View style={s.rowIcon}>
+        <Icon name={icon} size={20} color={theme.colors.primary} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={s.rowTitle}>{title}</Text>
         {subtitle ? <Text style={s.rowSub}>{subtitle}</Text> : null}
       </View>
-      <Icon name="chevron-left" size={18} color={theme.colors.muted} />
-    </Pressable>
-  );
-}
-
-function SupportCard({ theme, icon, label, onPress }: { theme: AppTheme; icon: IconName; label: string; onPress: () => void }) {
-  const s = useMemo(() => makeStyles(theme), [theme]);
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [s.supportCard, pressed && { opacity: 0.8 }]}>
-      <View style={s.supportIcon}><Icon name={icon} size={22} color={theme.colors.accent} /></View>
-      <Text style={s.supportLabel}>{label}</Text>
+      <Icon name="chevron-left" size={20} color={theme.colors.muted} />
     </Pressable>
   );
 }
@@ -94,23 +105,36 @@ function SupportCard({ theme, icon, label, onPress }: { theme: AppTheme; icon: I
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
-    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
-    headerBtn: { width: 40, height: 40 },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.primary },
-    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.onPrimary },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
+    headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
+    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    section: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary, textAlign: 'right', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
-    row: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, paddingHorizontal: t.spacing.base, paddingVertical: 14, marginBottom: t.spacing.sm },
-    rowIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
-    rowIconCompact: { width: 38, height: 38, backgroundColor: 'transparent' },
-    rowTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
+
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'right' },
+    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'right', marginTop: 8, marginBottom: t.spacing.base },
+    section: { fontFamily: t.fontFamily.semibold, fontSize: 20, color: t.colors.primary, textAlign: 'right', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
+
+    groupCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, overflow: 'hidden', ...t.shadow.sm },
+    row: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, padding: t.spacing.base },
+    rowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
+    rowIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    rowTitle: { fontFamily: t.fontFamily.medium, fontSize: 16, color: t.colors.text, textAlign: 'right' },
     rowSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
-    supportRow: { flexDirection: 'row-reverse', gap: t.spacing.md, marginBottom: t.spacing.sm },
-    supportCard: { flex: 1, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, paddingVertical: t.spacing.lg, alignItems: 'center', gap: 8 },
-    supportIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
-    supportLabel: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.text },
-    logoutBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: t.spacing.xl, paddingVertical: t.spacing.base, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.danger },
-    logout: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.danger },
-    version: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, textAlign: 'center', marginTop: t.spacing.lg },
+
+    // Support center card
+    supportCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, marginTop: t.spacing.lg, overflow: 'hidden', ...t.shadow.md },
+    supportBlob: { position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: 60, backgroundColor: t.colors.accent, opacity: 0.2 },
+    supportIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.md },
+    supportTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.onPrimary, textAlign: 'right', marginBottom: 6 },
+    supportDesc: { fontFamily: t.fontFamily.regular, fontSize: 12, lineHeight: 18, color: t.colors.onPrimaryMuted, textAlign: 'right', marginBottom: t.spacing.lg },
+    supportBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.accent, borderRadius: t.radius.md, paddingVertical: 12 },
+    supportBtnText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.onAccent },
+    supportMeta: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginTop: t.spacing.base, paddingTop: t.spacing.base, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,255,255,0.1)' },
+    supportMetaText: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.onPrimaryMuted },
+
+    logoutWrap: { alignItems: 'center', paddingTop: t.spacing.xl, paddingBottom: t.spacing.base },
+    logoutBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, paddingHorizontal: t.spacing.xl, paddingVertical: 12, borderRadius: 9999, backgroundColor: t.colors.dangerSoft },
+    logout: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.danger },
   });

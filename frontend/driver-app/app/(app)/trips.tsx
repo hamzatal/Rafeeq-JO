@@ -5,9 +5,10 @@ import { useRouter } from 'expo-router';
 import type { Route, Trip } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
+import { Card, EmptyState, SectionTitle } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
+import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
@@ -16,6 +17,8 @@ export default function DriverTrips() {
   const router = useRouter();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
+  const user = useAuth((a) => a.user);
+  const initial = (user?.full_name ?? 'ر').charAt(0);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
@@ -54,10 +57,13 @@ export default function DriverTrips() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
+      {/* Header — avatar (right) · Rafeeq · bell (left) per Stitch _21 */}
       <View style={s.header}>
-        <View style={s.headerBtn} />
+        <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
         <Text style={s.brand}>رفيق</Text>
-        <View style={s.headerBtn} />
+        <Pressable hitSlop={8} style={s.headerBtn}>
+          <Icon name="bell" size={24} color={theme.colors.primary} />
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>{t('driver.myTrips')}</Text>
@@ -88,19 +94,39 @@ export default function DriverTrips() {
         ) : trips.length === 0 ? (
           <EmptyState icon="navigation" title={t('trips.none')} />
         ) : (
-          trips.map((tr) => (
-            <Card key={tr.id} onPress={() => router.push(`/(app)/trip/${tr.id}` as never)}>
-              <View style={s.row}>
-                <Text style={s.tripTitle}>{tr.route?.name ?? t('driver.pooledTrip')}</Text>
-                <Badge label={tr.status_label} tone={tr.status === 'completed' ? 'success' : 'primary'} />
-              </View>
-              {tr.scheduled_at && <Text style={s.meta}>{new Date(tr.scheduled_at).toLocaleString(locale)}</Text>}
-              <View style={s.paxRow}>
-                <Icon name="users" size={14} color={theme.colors.textSecondary} />
-                <Text style={s.meta}>{t('driver.passengers')}: {tr.booked_count ?? 0}/{tr.capacity}</Text>
-              </View>
-            </Card>
-          ))
+          trips.map((tr) => {
+            const completed = tr.status === 'completed';
+            const time = tr.scheduled_at ? new Date(tr.scheduled_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '';
+            const fareJod = tr.pricing?.fare_fils != null ? (tr.pricing.fare_fils / 1000).toFixed(2) : null;
+            return (
+              <Pressable key={tr.id} onPress={() => router.push(`/(app)/trip/${tr.id}` as never)} style={({ pressed }) => [s.tripCard, pressed && { opacity: 0.9 }]}>
+                <View style={s.tripMain}>
+                  <View style={s.tripIcon}>
+                    <Icon name="navigation" size={22} color={theme.colors.primary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    {time ? <Text style={s.tripTime}>{time}</Text> : null}
+                    <Text style={s.tripRoute} numberOfLines={1}>{tr.route?.name ?? t('driver.pooledTrip')}</Text>
+                    <View style={s.tripStatusRow}>
+                      <Icon name={completed ? 'check-circle' : 'clock'} size={13} color={completed ? theme.colors.accent : theme.colors.textSecondary} />
+                      <Text style={[s.tripStatus, { color: completed ? theme.colors.accent : theme.colors.textSecondary }]}>{tr.status_label}</Text>
+                      <Text style={s.tripPax}>· {tr.booked_count ?? 0}/{tr.capacity}</Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={s.tripFareCol}>
+                  {fareJod ? (
+                    <>
+                      <Text style={s.tripFare}>{fareJod}</Text>
+                      <Text style={s.tripFareCur}>{t('subscriptions.currency')}</Text>
+                    </>
+                  ) : (
+                    <Icon name="chevron-left" size={20} color={theme.colors.muted} />
+                  )}
+                </View>
+              </Pressable>
+            );
+          })
         )}
       </ScrollView>
     </SafeAreaView>
@@ -110,11 +136,25 @@ export default function DriverTrips() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
-    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
-    headerBtn: { width: 40, height: 40 },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.primary },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
+    headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
+    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.base },
+    h1: { fontFamily: t.fontFamily.semibold, fontSize: 24, lineHeight: 32, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.base },
+
+    tripCard: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: t.colors.border, padding: 16, marginBottom: t.spacing.sm, ...t.shadow.sm },
+    tripMain: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md, flex: 1 },
+    tripIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.surfaceHigh, alignItems: 'center', justifyContent: 'center' },
+    tripTime: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.primary, textAlign: 'right' },
+    tripRoute: { fontFamily: t.fontFamily.regular, fontSize: 16, color: t.colors.text, textAlign: 'right', marginTop: 2 },
+    tripStatusRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 4 },
+    tripStatus: { fontFamily: t.fontFamily.regular, fontSize: 12 },
+    tripPax: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted },
+    tripFareCol: { alignItems: 'flex-start', minWidth: 44 },
+    tripFare: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 30, color: t.colors.primary },
+    tripFareCur: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, textAlign: 'left' },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
     chips: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginTop: 8 },
     chip: { borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.full, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: t.colors.surface },
@@ -124,7 +164,4 @@ const makeStyles = (t: AppTheme) =>
     times: { flexDirection: 'row-reverse', gap: 10, marginTop: t.spacing.md },
     timeBtn: { flex: 1, backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10, alignItems: 'center' },
     timeText: { color: t.colors.onPrimary, fontFamily: t.fontFamily.bold, fontSize: 13 },
-    row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-    tripTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text },
-    paxRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, marginTop: 4 },
   });

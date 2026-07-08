@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { DriverStatus, DriverPerformance } from '@rafeeq/shared';
@@ -89,14 +89,23 @@ export default function Dashboard() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        {/* Header — avatar + Rafeeq (right) · bell (left) per Stitch _20 */}
         <View style={s.header}>
-          <View style={s.avatar}><Text style={s.avatarText}>{(user?.full_name ?? 'ر').charAt(0)}</Text></View>
-          <View style={s.headerText}>
-            <Text style={s.greeting}>{t('driver.dashboard')}</Text>
-            <Text style={s.name} numberOfLines={1}>{user?.full_name ?? ''}</Text>
+          <View style={s.headerBrand}>
+            <View style={s.avatar}><Text style={s.avatarText}>{(user?.full_name ?? 'ر').charAt(0)}</Text></View>
+            <Text style={s.brand}>رفيق</Text>
           </View>
-          <Badge label={t(meta.key)} tone={meta.tone} />
+          <Pressable hitSlop={8} style={s.headerBtn}>
+            <Icon name="bell" size={24} color={theme.colors.primary} />
+          </Pressable>
         </View>
+
+        {!approved && (
+          <View style={s.statusRow}>
+            <Text style={s.dashName} numberOfLines={1}>{user?.full_name ?? t('driver.dashboard')}</Text>
+            <Badge label={t(meta.key)} tone={meta.tone} />
+          </View>
+        )}
 
         {status === 'rejected' && driver?.review_note ? <Banner message={driver.review_note} variant="error" /> : null}
         {error ? <Banner message={error} variant="error" /> : null}
@@ -180,12 +189,14 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    header: { flexDirection: 'row-reverse', alignItems: 'center', marginBottom: t.spacing.lg },
-    avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.onPrimary },
-    headerText: { flex: 1 },
-    greeting: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
-    name: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'right' },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.md },
+    headerBrand: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md },
+    headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
+    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    statusRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.md },
+    dashName: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text, textAlign: 'right', flex: 1 },
 
     mapWrap: { borderRadius: t.radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.border, marginBottom: t.spacing.md },
 
