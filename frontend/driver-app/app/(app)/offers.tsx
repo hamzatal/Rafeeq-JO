@@ -6,7 +6,7 @@ import type { Trip } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Button } from '../../src/components/Button';
 import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState } from '../../src/components/ui';
+import { Card, EmptyState, SkeletonList, ErrorState } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
@@ -22,15 +22,17 @@ export default function Offers() {
 
   const [offers, setOffers] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       setOffers(await api.driverTrips.offers());
     } catch {
-      /* silent */
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,9 @@ export default function Offers() {
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {loading ? (
-          <Text style={s.meta}>{t('common.loading')}</Text>
+          <SkeletonList rows={3} />
+        ) : loadError ? (
+          <ErrorState title={t('common.error')} message={t('common.loadFailed')} retryLabel={t('common.retry')} onRetry={() => void load()} />
         ) : offers.length === 0 ? (
           <EmptyState icon="inbox" title={t('driver.noOffers')} />
         ) : (
