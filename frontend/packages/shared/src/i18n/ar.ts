@@ -16,6 +16,7 @@ export const ar = {
     success: 'تم بنجاح',
     soon: 'قريباً',
     unlimited: 'غير محدود',
+    viewAll: 'عرض الكل',
   },
   onboarding: {
     skip: 'تخطّي',

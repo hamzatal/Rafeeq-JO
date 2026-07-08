@@ -18,6 +18,7 @@ export const en: Translations = {
     success: 'Success',
     soon: 'Soon',
     unlimited: 'Unlimited',
+    viewAll: 'View all',
   },
   onboarding: {
     skip: 'Skip',
