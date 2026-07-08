@@ -379,6 +379,7 @@ export const en: Translations = {
     filterCompleted: 'Completed',
     filterCancelled: 'Cancelled',
     rebook: 'Rebook',
+    downloadInvoice: 'Download invoice',
     originLabel: 'Pickup point',
     noHistory: 'No trip history yet',
   },
