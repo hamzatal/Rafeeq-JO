@@ -19,6 +19,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property Carbon|null $starts_at
  * @property Carbon|null $ends_at
  * @property int|null $remaining_rides
+ * @property-read SubscriptionPlan|null $plan
  */
 class Subscription extends Model
 {

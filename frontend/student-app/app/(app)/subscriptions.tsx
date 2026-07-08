@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Subscription, SubscriptionPlan } from '@rafeeq/shared';
-import { EmptyState, SectionTitle } from '../../src/components/ui';
+import { EmptyState, SectionTitle, ErrorState } from '../../src/components/ui';
 import { ListSkeleton } from '../../src/components/kit';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
@@ -18,13 +18,17 @@ export default function Subscriptions() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const [p, sub] = await Promise.all([api.transport.listPlans(), api.transport.mySubscriptions()]);
       setPlans(p);
       setSubs(sub);
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -87,6 +91,8 @@ export default function Subscriptions() {
         <SectionTitle title={t('subscriptions.available')} />
         {loading ? (
           <ListSkeleton rows={3} />
+        ) : loadError ? (
+          <ErrorState title={t('common.error')} message={t('common.loadFailed')} retryLabel={t('common.retry')} onRetry={() => void load()} />
         ) : plans.length === 0 ? (
           <EmptyState icon="calendar" title={t('subscriptions.none')} />
         ) : (
