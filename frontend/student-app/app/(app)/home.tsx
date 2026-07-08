@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -13,12 +13,9 @@ import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
 import { PressableScale } from '../../src/components/kit';
 
 /**
- * Student home — pixel-faithful implementation of Stitch screen `_15`
- * (Main Dashboard). Layout, order, sizes, spacing, radii, shadows, colours and
- * type scale mirror the Stitch mockup exactly:
- *  map backdrop + fade → greeting pill + bell → car marker + ETA →
- *  points card (نقاط رفيق / الخصم القادم) → search panel (fake search + المنزل/الجامعة).
- * The bottom navigation is provided by TabBar (screen `_15` nav).
+ * Student home — map-first layout: a full-screen live map with a draggable
+ * "where to?" bottom sheet the rider can pull down to reveal the whole map.
+ * Points live in a compact chip in the sheet header (no more oversized card).
  */
 function greetingKey(): 'goodMorning' | 'goodAfternoon' | 'goodEvening' {
   const h = new Date().getHours();
@@ -26,6 +23,8 @@ function greetingKey(): 'goodMorning' | 'goodAfternoon' | 'goodEvening' {
   if (h < 18) return 'goodAfternoon';
   return 'goodEvening';
 }
+
+const PEEK = 96; // visible height of the sheet when collapsed (handle + header)
 
 export default function Home() {
   const { t } = useI18n();
@@ -38,9 +37,15 @@ export default function Home() {
   const [unread, setUnread] = useState(0);
   const [rewards, setRewards] = useState<RewardSummary | null>(null);
   const [myLoc, setMyLoc] = useState<{ lat: number; lng: number } | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   const rise = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
+  const sheetY = useRef(new Animated.Value(0)).current;
+  const sheetH = useRef(0);
+  const startY = useRef(0);
+
+
   useEffect(() => {
     Animated.timing(rise, { toValue: 1, duration: 500, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
     Animated.loop(
@@ -59,25 +64,46 @@ export default function Home() {
     return stop;
   }, []);
 
+  const snapTo = (toCollapsed: boolean) => {
+    const maxY = Math.max(0, sheetH.current - PEEK);
+    Animated.spring(sheetY, { toValue: toCollapsed ? maxY : 0, useNativeDriver: true, bounciness: 2, speed: 14 }).start();
+    setCollapsed(toCollapsed);
+  };
+
+  const pan = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 8 && Math.abs(g.dy) > Math.abs(g.dx),
+      onPanResponderGrant: () => sheetY.stopAnimation((v) => { startY.current = v; }),
+      onPanResponderMove: (_e, g) => {
+        const maxY = Math.max(0, sheetH.current - PEEK);
+        sheetY.setValue(Math.min(Math.max(0, startY.current + g.dy), maxY));
+      },
+      onPanResponderRelease: (_e, g) => {
+        const maxY = Math.max(0, sheetH.current - PEEK);
+        const current = Math.min(Math.max(0, startY.current + g.dy), maxY);
+        snapTo(g.vy > 0.4 || (g.vy >= -0.4 && current > maxY / 2));
+      },
+    }),
+  ).current;
+
   const mapPoints: MapPoint[] = myLoc ? [{ lat: myLoc.lat, lng: myLoc.lng, kind: 'origin', label: t('home.nearby') }] : [];
   const firstName = user?.full_name ? user.full_name.split(' ')[0] : '';
   const translateY = rise.interpolate({ inputRange: [0, 1], outputRange: [56, 0] });
   const pulseScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.35] });
   const pulseOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0] });
 
+
   return (
     <View style={s.root}>
-      {/* Full-bleed map backdrop */}
+      {/* Full-screen live map */}
       <View style={StyleSheet.absoluteFill}>
         <LiveMap points={mapPoints} legend={false} height={height} />
       </View>
 
-      {/* Ambient bottom fade to #F9F9FF (Stitch map-overlay, ~60% height) */}
-      <View style={[s.scrim, s.scrimA]} pointerEvents="none" />
-      <View style={[s.scrim, s.scrimB]} pointerEvents="none" />
-      <View style={[s.scrim, s.scrimC]} pointerEvents="none" />
+      {/* Light top fade for status-bar/greeting legibility only */}
+      <View style={s.topScrim} pointerEvents="none" />
 
-      {/* Simulated nearest-captain car marker (top 1/3) + ETA badge */}
+      {/* Nearest-captain marker + ETA (upper third) */}
       <View style={[s.carWrap, { top: height / 3 - 32 }]} pointerEvents="none">
         <View>
           <Animated.View style={[s.carPulse, { transform: [{ scale: pulseScale }], opacity: pulseOpacity }]} />
@@ -90,7 +116,7 @@ export default function Home() {
         </View>
       </View>
 
-      {/* Top bar: greeting pill (start/right) + notifications (end/left) */}
+      {/* Top bar: greeting pill + notifications */}
       <SafeAreaView edges={['top']} style={s.topBar} pointerEvents="box-none">
         <View style={s.greetPill}>
           <View style={s.greetAvatar}>
@@ -104,34 +130,34 @@ export default function Home() {
           </View>
         </View>
         <Pressable onPress={() => router.push('/(app)/notifications')} style={s.bellBtn} hitSlop={6}>
-          <MaterialIcons name="notifications" size={24} color={theme.colors.primary} />
+          <MaterialIcons name="notifications" size={22} color={theme.colors.primary} />
           {unread > 0 && <View style={s.bellDot} />}
         </Pressable>
       </SafeAreaView>
 
-      {/* Bottom action area */}
-      <Animated.View style={[s.bottomArea, { opacity: rise, transform: [{ translateY }] }]}>
-        {/* Points & status card */}
-        <PressableScale onPress={() => router.push('/(app)/rewards')} style={s.pointsCard} scaleTo={0.98}>
-          <View style={s.pointsDecor} />
-          <View style={s.pointsLeft}>
-            <View style={s.pointsIcon}>
-              <MaterialIcons name="workspace-premium" size={22} color={theme.colors.accentBright} />
-            </View>
-            <View>
-              <Text style={s.pointsLabel}>{t('home.points')}</Text>
-              <Text style={s.pointsValue}>{rewards ? rewards.points.toLocaleString('en-US') : '—'}</Text>
-            </View>
-          </View>
-          <View style={s.pointsRight}>
-            <Text style={s.pointsLabel}>{t('home.nextDiscount')}</Text>
-            <Text style={s.pointsDiscount}>{rewards?.next_tier_label ?? rewards?.tier_label ?? '—'}</Text>
-          </View>
-        </PressableScale>
 
-        {/* Where to? panel */}
-        <View style={s.panel}>
-          <Text style={s.panelTitle}>{t('home.whereTo')}</Text>
+      {/* Draggable "where to?" sheet */}
+      <Animated.View
+        style={[s.sheet, { transform: [{ translateY: Animated.add(sheetY, translateY) }], opacity: rise }]}
+        onLayout={(e) => { sheetH.current = e.nativeEvent.layout.height; }}
+      >
+        {/* Header (drag handle + title + points chip) */}
+        <View {...pan.panHandlers} style={s.sheetHeader}>
+          <View style={s.handle} />
+          <View style={s.headerRow}>
+            <Pressable onPress={() => snapTo(!collapsed)} hitSlop={8} style={s.titleRow}>
+              <Text style={s.sheetTitle}>{t('home.whereTo')}</Text>
+              <MaterialIcons name={collapsed ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={22} color={theme.colors.muted} />
+            </Pressable>
+            <PressableScale onPress={() => router.push('/(app)/rewards')} style={s.pointsChip} scaleTo={0.94}>
+              <MaterialIcons name="stars" size={16} color={theme.colors.accent} />
+              <Text style={s.pointsChipText}>{rewards ? rewards.points.toLocaleString('en-US') : '—'}</Text>
+            </PressableScale>
+          </View>
+        </View>
+
+        {/* Body */}
+        <View style={s.sheetBody}>
           <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.searchBtn} scaleTo={0.98}>
             <MaterialIcons name="search" size={24} color={theme.colors.accent} />
             <Text style={s.searchText}>{t('home.searchDestination')}</Text>
@@ -158,17 +184,13 @@ function QuickAction({ theme, icon, label, onPress }: { theme: AppTheme; icon: '
   );
 }
 
+
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: t.colors.background },
+    topScrim: { position: 'absolute', top: 0, left: 0, right: 0, height: 140, backgroundColor: 'rgba(249,249,255,0.55)' },
 
-    // Map fade overlay → solid #F9F9FF at the bottom (3 layers approximate the gradient)
-    scrim: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-    scrimA: { height: '55%', backgroundColor: 'rgba(249,249,255,0.45)' },
-    scrimB: { height: '32%', backgroundColor: 'rgba(249,249,255,0.75)' },
-    scrimC: { height: '16%', backgroundColor: t.colors.background },
-
-    // Car marker (64px disc) + ETA badge
+    // Car marker + ETA
     carWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
     carPulse: { position: 'absolute', top: 4, left: 4, width: 56, height: 56, borderRadius: 28, backgroundColor: t.colors.primary },
     carDisc: {
@@ -181,34 +203,35 @@ const makeStyles = (t: AppTheme) =>
 
     // Top bar
     topBar: { position: 'absolute', top: 0, left: 0, right: 0, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 8 },
-    greetPill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, backgroundColor: 'rgba(255,255,255,0.95)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 9999, ...t.shadow.sm },
+    greetPill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, backgroundColor: 'rgba(255,255,255,0.95)', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 9999, ...t.shadow.sm },
     greetAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: t.colors.primaryContainer, alignItems: 'center', justifyContent: 'center' },
     greetAvatarText: { ...text.labelSm, color: t.colors.onPrimary },
-    greetName: { ...text.headlineMd, color: t.colors.primary, textAlign: 'right' },
+    greetName: { ...text.bodyMd, fontFamily: t.fontFamily.bold, color: t.colors.primary, textAlign: 'right' },
     greetSub: { ...text.caption, color: t.colors.textSecondary, textAlign: 'right' },
-    bellBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.95)', alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
-    bellDot: { position: 'absolute', top: 12, right: 12, width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.danger },
+    bellBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.95)', alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
+    bellDot: { position: 'absolute', top: 11, right: 11, width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.danger },
 
-    // Bottom action area
-    bottomArea: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingBottom: 128, gap: 16 },
 
-    // Points card (rounded-xl 12, p-4 16)
-    pointsCard: { backgroundColor: t.colors.primary, borderRadius: 12, padding: 16, flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', overflow: 'hidden', ...t.shadow.lg },
-    pointsDecor: { position: 'absolute', right: -32, top: -32, width: 96, height: 96, borderRadius: 48, backgroundColor: 'rgba(255,255,255,0.10)' },
-    pointsLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12 },
-    pointsIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.20)', alignItems: 'center', justifyContent: 'center' },
-    pointsLabel: { ...text.caption, color: t.colors.onPrimaryMuted, textAlign: 'right' },
-    pointsValue: { ...text.headlineMd, color: '#FFFFFF', textAlign: 'right' },
-    pointsRight: { alignItems: 'flex-start', borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: 'rgba(255,255,255,0.20)', paddingRight: 16 },
-    pointsDiscount: { ...text.bodyMd, fontFamily: t.fontFamily.bold, color: t.colors.accentBright, textAlign: 'left' },
+    // Draggable sheet
+    sheet: {
+      position: 'absolute', left: 0, right: 0, bottom: 92,
+      backgroundColor: 'rgba(255,255,255,0.98)', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+      paddingHorizontal: 20, paddingBottom: 20,
+      shadowColor: '#002045', shadowOpacity: 0.12, shadowRadius: 24, shadowOffset: { width: 0, height: -8 }, elevation: 16,
+    },
+    sheetHeader: { paddingTop: 10, paddingBottom: 8 },
+    handle: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: t.colors.surfaceHighest, marginBottom: 12 },
+    headerRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+    titleRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 2 },
+    sheetTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, lineHeight: 28, color: t.colors.primary, textAlign: 'right' },
+    pointsChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, backgroundColor: t.colors.surfaceAlt, borderWidth: 1, borderColor: t.colors.hairline, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 9999 },
+    pointsChipText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.primary },
 
-    // Where-to panel (rounded-2xl 16, p-5 20)
-    panel: { backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', ...t.shadow.md },
-    panelTitle: { ...text.headlineMd, fontFamily: t.fontFamily.bold, color: t.colors.primary, textAlign: 'right', marginBottom: 16 },
-    searchBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, backgroundColor: t.colors.surfaceAlt, borderWidth: 1, borderColor: t.colors.hairline, borderRadius: 12, padding: 16, marginBottom: 16 },
+    sheetBody: { paddingTop: 8, gap: 12 },
+    searchBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, backgroundColor: t.colors.surfaceAlt, borderWidth: 1, borderColor: t.colors.hairline, borderRadius: 12, padding: 16 },
     searchText: { ...text.bodyMd, color: t.colors.textSecondary, flex: 1, textAlign: 'right' },
     quickRow: { flexDirection: 'row-reverse', gap: 12 },
-    quickTile: { flex: 1, backgroundColor: t.colors.surface, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.colors.hairline, alignItems: 'center', gap: 8, ...t.shadow.sm },
+    quickTile: { flex: 1, backgroundColor: t.colors.surface, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: t.colors.hairline, alignItems: 'center', gap: 8, ...t.shadow.sm },
     quickIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHigh, alignItems: 'center', justifyContent: 'center' },
     quickLabel: { ...text.labelSm, fontFamily: t.fontFamily.semibold, color: t.colors.primary },
   });
