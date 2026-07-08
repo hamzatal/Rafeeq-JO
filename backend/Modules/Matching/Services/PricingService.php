@@ -160,6 +160,38 @@ class PricingService
         return $this->splitCommission($fareFils)['captain_share_fils'] * max(0, $riders);
     }
 
+    /**
+     * Quote from a FIXED unified fare (zone ↔ university matrix). No distance
+     * math and no surge — the price is predictable by design — but the express
+     * surcharge and commission split still apply. Same output shape as quote().
+     *
+     * @return array<string, mixed>
+     */
+    public function fixedQuote(int $fixedFareFils, bool $isExpress, int $riders, int $capacity): array
+    {
+        $base = max(0, $fixedFareFils);
+        $express = $isExpress ? $this->expressFeeFils() : 0;
+        $fare = $base + $express;
+
+        $split = $this->splitCommission($fare);
+
+        return [
+            'base_fare_fils' => $base,
+            'express_fee_fils' => $express,
+            'surge_multiplier' => 1.0,
+            'fare_fils' => $fare,
+            'commission_fils' => $split['commission_fils'],
+            'captain_share_fils' => $split['captain_share_fils'],
+            'riders' => $riders,
+            'capacity' => $capacity,
+            'expected_total_fils' => $fare * max(1, $riders),
+            'expected_captain_earnings_fils' => $split['captain_share_fils'] * max(1, $riders),
+            'below_min_fill' => $riders < $this->minFillRiders(),
+            'distance_km' => null,
+            'duration_min' => null,
+        ];
+    }
+
     public function quote(?int $baseFareFils, bool $isExpress, int $riders, int $capacity, ?float $distanceKm = null, ?int $durationMin = null, ?\DateTimeInterface $when = null): array
     {
         // When a GPS distance is available the fare is distance-based (opening +
