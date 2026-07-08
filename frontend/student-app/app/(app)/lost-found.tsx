@@ -58,7 +58,7 @@ export default function LostFound() {
 
   const pickPhoto = async () => {
     const file = await pickProof();
-    if (file && 'uri' in (file as object)) setPhoto({ uri: (file as { uri: string }).uri });
+    if (file && 'uri' in (file as object)) setPhoto({ uri: (file as unknown as { uri: string }).uri });
   };
 
   const submit = async () => {

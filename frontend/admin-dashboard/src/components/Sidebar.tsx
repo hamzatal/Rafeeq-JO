@@ -28,6 +28,7 @@ const GROUPS: { titleKey: string; links: NavLink[] }[] = [
     links: [
       { href: '/routes', labelKey: 'nav.routes', icon: 'route' },
       { href: '/plans', labelKey: 'nav.plans', icon: 'card_membership' },
+      { href: '/zone-prices', labelKey: 'nav.zonePrices', icon: 'price_change' },
       { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: 'subscriptions' },
       { href: '/trips', labelKey: 'nav.trips', icon: 'directions_car' },
     ],
@@ -46,6 +47,7 @@ const GROUPS: { titleKey: string; links: NavLink[] }[] = [
       { href: '/coupons', labelKey: 'nav.coupons', icon: 'sell' },
       { href: '/withdrawals', labelKey: 'nav.withdrawals', icon: 'account_balance_wallet' },
       { href: '/cliq', labelKey: 'nav.cliq', icon: 'account_balance' },
+      { href: '/pricing', labelKey: 'nav.pricing', icon: 'tune' },
       { href: '/reports', labelKey: 'nav.reports', icon: 'monitoring' },
     ],
   },
@@ -88,6 +90,8 @@ const HINTS: Record<string, string> = {
   '/withdrawals': 'طلبات سحب أرباح الكباتن',
   '/reports': 'التقارير المالية والإيرادات',
   '/cliq': 'إعدادات CliQ وتغيير الاسم المستعار',
+  '/pricing': 'ضبط أسعار الرحلات وعمولة المنصة',
+  '/zone-prices': 'أسعار موحّدة ثابتة لكل منطقة↔جامعة',
   '/safety': 'بلاغات SOS وإدارة المخاطر',
   '/disputes': 'النزاعات المالية بين الأطراف',
   '/support': 'تذاكر الدعم مع فرز ذكي بالـ AI',
@@ -106,7 +110,7 @@ export function Sidebar() {
 
   const isAdmin = (user?.roles ?? []).includes('admin');
   // Hide admin-only links from non-admin staff.
-  const adminOnly = new Set(['/admins', '/cliq', '/notifications', '/audit']);
+  const adminOnly = new Set(['/admins', '/cliq', '/pricing', '/notifications', '/audit']);
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');

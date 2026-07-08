@@ -83,7 +83,7 @@ export default function Checkout() {
   // Step 1: pick the transfer screenshot (preview only). Step 2: confirm → submit.
   const pickFile = async () => {
     const file = await pickProof();
-    if (file && 'uri' in (file as object)) setProofFile({ uri: (file as { uri: string }).uri });
+    if (file && 'uri' in (file as object)) setProofFile({ uri: (file as unknown as { uri: string }).uri });
   };
 
   const copyAlias = () => setMsg({ text: t('checkout.copied'), ok: true });
