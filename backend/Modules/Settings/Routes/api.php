@@ -14,4 +14,7 @@ Route::prefix('v1/admin/settings')
     ->group(function () {
         Route::get('cliq', [SettingsController::class, 'cliq']);
         Route::patch('cliq', [SettingsController::class, 'updateCliq']);
+
+        Route::get('pricing', [SettingsController::class, 'pricing']);
+        Route::patch('pricing', [SettingsController::class, 'updatePricing']);
     });
