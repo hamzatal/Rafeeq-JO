@@ -598,6 +598,21 @@ export interface DriverPerformance {
   total_trips: number;
 }
 
+/** ── Advertising banners ──────────────────────────────────────────── */
+export type AdPlacement = 'student_home' | 'student_wallet' | 'driver_home';
+
+export interface AdBanner {
+  id: string;
+  title: string;
+  image_url: string;
+  link_url: string | null;
+  placement: AdPlacement;
+  is_active: boolean;
+  sort_order: number;
+  starts_at: string | null;
+  ends_at: string | null;
+}
+
 /** Detailed captain earnings breakdown (money in fils). */
 export interface EarningsBucket {
   earnings_fils: number;

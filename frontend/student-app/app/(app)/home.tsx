@@ -12,6 +12,7 @@ import { useTheme, type AppTheme } from '../../src/theme';
 import { Icon } from '../../src/components/Icon';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
 import { PressableScale } from '../../src/components/kit';
+import { AdBanner } from '../../src/components/AdBanner';
 
 function greetingKey(): 'goodMorning' | 'goodAfternoon' | 'goodEvening' {
   const h = new Date().getHours();
@@ -135,6 +136,9 @@ export default function Home() {
             </View>
           </View>
         </PressableScale>
+
+        {/* Sponsored ad slot (managed from the admin dashboard) */}
+        <AdBanner placement="student_home" />
 
         {/* Where to? glass panel */}
         <View style={s.panel}>

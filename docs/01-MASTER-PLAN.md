@@ -101,13 +101,15 @@
 ---
 
 ### 📌 تتبّع سريع (تقرأه الجلسة الجديدة أولاً)
-- **آخر RFQ مستخدم: `RFQ-346`. التالي: `RFQ-347`.**
-- **آخر دمج على `main`:** PR #41 (RFQ-346 تصليب الأمان: بوابة PHPStan + PHP 8.4 + throttle السحب). التسلسل: PR #39 (RFQ-344 توثيق) · PR #40 (RFQ-345 شاشة أرباح الكابتن التفصيلية) · PR #41 (RFQ-346 المرحلة 4).
-- **الحالة العامة:** المراحل 0،1،2 ✅ كاملة · **المرحلة 3 ✅ 100%** · المرحلة 4 🔄 (~50%) · 5–7 لم تبدأ.
+- **آخر RFQ مستخدم: `RFQ-348`. التالي: `RFQ-349`.**
+- **آخر دمج على `main`:** PR #43 (RFQ-348 المساحات الإعلانية). التسلسل: PR #41 (RFQ-346 أمان) · PR #42 (RFQ-347 اختبار عقد التكامل) · PR #43 (RFQ-348 الإعلانات).
+- **الحالة العامة:** المراحل 0،1،2،3 ✅ كاملة · المرحلة 4 🔄 (~50%) · المرحلة 5 🔄 (بدأت) · المرحلة 6 🔄 (بدأت) · 7 لم تبدأ.
 - **المرحلة 3 (مكتملة 100%):** ضبط الأسعار/العمولة من الأدمن (RFQ-341/343) · مصفوفة السعر الموحّد منطقة↔جامعة (RFQ-342/343) · معاينة أرباح الكابتن (RFQ-339) · شاشة الأرباح التفصيلية يومي/أسبوعي (RFQ-345).
 - **المرحلة 4 (جارية):**
-  1. ✅ (RFQ-346) بوابة PHPStan (Larastan L5 + baseline) في CI + توحيد PHP 8.4 (composer + CI) + `throttle:sensitive` على إنشاء طلب السحب + تحقّق فعلي من الضوابط (rate limiters/headers/بوابات المسارات).
+  1. ✅ (RFQ-346) بوابة PHPStan (Larastan L5 + baseline) في CI + توحيد PHP 8.4 (composer + CI) + `throttle:sensitive` على إنشاء طلب السحب + تحقّق فعلي من الضوابط.
   2. ⏳ المتبقّي (M10 قبل الإطلاق): توكن الأدمن → كوكي httpOnly · فرض HTTPS/HSTS إنتاجاً · أسرار عبر Secrets Manager · ترقية Expo/Next لمعالجة `npm audit`.
-- **الخطوة التالية المباشرة:** حرق ديون PHPStan baseline تدريجياً (`@property` للنماذج) · ثم المرحلة 5 (التكامل والصحّة الشاملة بين التطبيقات الثلاثة).
-- **ملفات الحالة:** هذا الملف + [02-PRICING-ZONES](./02-PRICING-ZONES.md) + [07-SECURITY](./07-SECURITY.md) + [10-STITCH-SCREENS](./10-STITCH-SCREENS.md) + [11-COMMIT-CONVENTION](./11-COMMIT-CONVENTION.md).
-- **بيئة الاختبار:** `cd backend && composer install && ./vendor/bin/phpunit` (**182 أخضر**) + `composer stan` (PHPStan نظيف) قبل أي دمج backend · للواجهات: `cd frontend && npm install && npm run typecheck --workspace=admin-dashboard` (+ driver/student).
+- **المرحلة 5 (بدأت):** ✅ (RFQ-347) اختبار عقد التكامل الحيّ `ApiContractTest` — 177 نقطة نهاية + 203 استدعاء api-client، صفر عدم تطابق ([12-INTEGRATION-CONTRACT](./12-INTEGRATION-CONTRACT.md)).
+- **المرحلة 6 (بدأت):** ✅ (RFQ-348) نظام المساحات الإعلانية — وحدة `Ads` (بانرات تُدار من الأدمن حسب الموضع + نافذة زمنية) · CRUD `/admin/ads` + عرض عام `/ads` · صفحة إدارة `/ads` بالداشبورد · مساحة إعلانية في رئيسية الطالب.
+- **الخطوة التالية المباشرة:** إكمال المرحلة 6 (مزايا AI بالاعتماد على GPT + مساحات إعلانية إضافية) أو حرق ديون PHPStan baseline.
+- **ملفات الحالة:** هذا الملف + [02-PRICING-ZONES](./02-PRICING-ZONES.md) + [07-SECURITY](./07-SECURITY.md) + [10-STITCH-SCREENS](./10-STITCH-SCREENS.md) + [11-COMMIT-CONVENTION](./11-COMMIT-CONVENTION.md) + [12-INTEGRATION-CONTRACT](./12-INTEGRATION-CONTRACT.md).
+- **بيئة الاختبار:** `cd backend && composer install && ./vendor/bin/phpunit` (**189 أخضر**) + `composer stan` (PHPStan نظيف) قبل أي دمج backend · للواجهات: `cd frontend && npm install && npm run typecheck --workspace=admin-dashboard` (+ driver/student).

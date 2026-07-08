@@ -45,6 +45,7 @@ const GROUPS: { titleKey: string; links: NavLink[] }[] = [
     links: [
       { href: '/payments', labelKey: 'nav.payments', icon: 'payments' },
       { href: '/coupons', labelKey: 'nav.coupons', icon: 'sell' },
+      { href: '/ads', labelKey: 'nav.ads', icon: 'ad_units' },
       { href: '/withdrawals', labelKey: 'nav.withdrawals', icon: 'account_balance_wallet' },
       { href: '/cliq', labelKey: 'nav.cliq', icon: 'account_balance' },
       { href: '/pricing', labelKey: 'nav.pricing', icon: 'tune' },
@@ -87,6 +88,7 @@ const HINTS: Record<string, string> = {
   '/users': 'كل المستخدمين + شحن المحافظ',
   '/payments': 'مراجعة شحنات CliQ + تدقيق الاحتيال بالـ AI',
   '/coupons': 'إنشاء وإدارة كوبونات الخصم',
+  '/ads': 'إدارة المساحات الإعلانية داخل التطبيقات',
   '/withdrawals': 'طلبات سحب أرباح الكباتن',
   '/reports': 'التقارير المالية والإيرادات',
   '/cliq': 'إعدادات CliQ وتغيير الاسم المستعار',

@@ -6,6 +6,7 @@ export const ENDPOINTS = {
   ping: '/ping',
   config: '/config',
   zones: '/zones',
+  ads: '/ads',
   coupons: {
     validate: '/coupons/validate',
   },
@@ -224,6 +225,8 @@ export const ENDPOINTS = {
     settingsPricing: '/admin/settings/pricing',
     zonePrices: '/admin/zone-prices',
     zonePrice: (id: string) => `/admin/zone-prices/${id}`,
+    ads: '/admin/ads',
+    ad: (id: string) => `/admin/ads/${id}`,
     notify: '/admin/notifications/send',
     notifyAudience: '/admin/notifications/audience',
     reportsFinancial: '/admin/reports/financial',
