@@ -2,41 +2,41 @@
 inclusion: always
 ---
 
-# معايير العمل والاتفاقيات (Rafeeq)
+# قواعد العمل والاتفاقيات (Rafeeq) — يُحمَّل تلقائياً
 
-## قاعدة ذهبية
-ممنوع الاختصار، ممنوع تخطّي أي ميزة، ممنوع الشغل الناقص أو الـ skeleton فقط.
-كل ميزة تُبنى **كاملة وجاهزة للإنتاج**. نمشي خطوة خطوة عبر جلسات متعددة حتى يكتمل المشروع 100% حسب `docs/ROADMAP.md`.
+## 1) استئناف العمل في جلسة جديدة (ابدأ من هنا)
+1. اقرأ [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md) — لوحة الحالة (المنجز/الجاري/التالي) خطوة بخطوة.
+2. اقرأ [`docs/10-STITCH-SCREENS.md`](../../docs/10-STITCH-SCREENS.md) — حالة كل شاشة مقابل Stitch.
+3. اقرأ [`docs/11-COMMIT-CONVENTION.md`](../../docs/11-COMMIT-CONVENTION.md) — تسلسل RFQ.
+**لا تعِد دراسة كل الملفات ولا تطلب من المستخدم إعادة الشرح** — استأنف من «التالي».
 
-## الـ Commits
-- صيغة الرسالة: `[RFQ-###] <type>: <وصف واضح>`
-  - `###` رقم متسلسل بثلاث خانات يزيد عبر كامل المشروع (RFQ-001, RFQ-002, ...).
-  - `type` واحد من: feat, fix, refactor, docs, chore, test, infra.
-- كل commit يوضّح بدقّة ما أُنجز في ذلك القسم.
-- آخر رقم RFQ مستخدم مسجّل في `docs/PROGRESS.md` (خانة "آخر Commit").
+## 2) ترقيم الكوميت (RFQ)
+- الصيغة: `RFQ-<n> — <وصف عربي موجز>` (رقم متزايد بواحد، لا يتكرّر ولا يرجع).
+- **آخر رقم مستخدم مسجّل في نهاية جدول [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md)** — خذه وزِد 1.
+- تفاصيل + تصحيح التسلسل التاريخي: [`docs/11-COMMIT-CONVENTION.md`](../../docs/11-COMMIT-CONVENTION.md).
 
-## تتبّع التقدّم (إلزامي مع كل push)
-1. حدّث `docs/PROGRESS.md`: المنجز ✅، الجاري 🔄، المتبقي ⏳ لكل مرحلة/موديول، وآخر رقم commit.
-2. حدّث قائمة المراحل في `README.md`.
+## 3) سير الدمج (المستخدم لا يعمل merge يدوي)
+المستخدم يسحب `git pull origin main` فقط. لكل دفعة:
+1. `git checkout -b <feat|fix>/<وصف>` من `main` محدّث.
+2. عدّل + commit بصيغة `RFQ-<n> — ...`.
+3. `push_to_remote` للفرع ثم `create_pull_request` (للسجل).
+4. **ادمج بنفسك:** `git checkout main && git merge --ff-only <branch>` ثم `push_to_remote main`.
+   (استخدم أدوات github power؛ لا `git push` مباشر. لا force-push على main.)
+5. حدّث الدوكس (`01-MASTER-PLAN` + `10-STITCH-SCREENS`) مع كل دفعة.
 
-## استئناف العمل بمحادثة جديدة
-ابدأ دائماً بقراءة: `docs/PROGRESS.md` ثم `docs/ROADMAP.md` ثم ملفات `.kiro/steering/`.
-لا تطلب من المستخدم إعادة شرح المشروع. استأنف من "الخطوة التالية" في PROGRESS.
+## 4) بوابة الجودة قبل الدمج
+- **backend:** `cd backend && ./vendor/bin/phpunit` يجب أن يكون **أخضر** (خط الأساس 172 اختبار) + `./vendor/bin/pint --dirty`. لا تدمج backend بلا تشغيل الاختبارات.
+- **تعديلات backend الحسّاسة** (تسعير/محفظة/مطابقة): أضِف/شغّل اختبارات.
+- **frontend:** استخدم فقط حزماً مثبّتة فعلاً (تحقّق من `package.json`). حزم غير مثبّتة = شاشة بيضاء. (سبق أن كسر `expo-linear-gradient` غير المثبّت الطالبَ — الدرس: تأكّد من الاستيراد.)
 
-## الفروع و PRs
-- لا تدفع على main مباشرة. افتح فرع per-phase: `feature/phaseN-<اسم>`.
-- بعد كل قسم منطقي: push + (تحديث/فتح) PR، وأعطِ المستخدم رابط المراجعة على GitHub.
+## 5) التصميم (إلزامي)
+- **Stitch فقط.** توكنز من `useTheme()` / Tailwind — لا hex يدوي (إلا أبيض على كحلي).
+- افتراضي: **عربي + لايت**. دعم كامل للدارك والإنجليزية.
+- نصوص المستخدم عبر i18n (`packages/shared/src/i18n` + `src/i18n` بكل تطبيق) — لا نصوص عربية مكتوبة داخل المكوّنات المشتركة.
 
-## معايير الكود (Backend - Laravel)
-- Controllers رفيعة → كل المنطق في Services. الوصول للبيانات عبر Repositories.
-- مدخلات عبر FormRequest. مخرجات عبر API Resources. استجابة موحّدة عبر `ApiResponse`.
-- كل موديول مكتفٍ ذاتياً: Controllers/Services/Models/Repositories/Requests/Resources/Events/Jobs/Policies/Routes/Database/Migrations + ServiceProvider خاص يُسجَّل في `bootstrap/providers.php`.
-- Enums في `Shared/Enums`. UUID عبر trait `HasUuid`. نصوص عربية في الرسائل الموجّهة للمستخدم.
-- العمليات الحساسة تُسجَّل في `audit_logs`. الحقول الحساسة مشفّرة.
+## 6) معايير الكود
+- **Backend:** Controllers رفيعة → Services → Repositories. مدخلات FormRequest، مخرجات Resources، استجابة `ApiResponse` موحّدة. كل موديول مكتفٍ ذاتياً + ServiceProvider مُسجّل في `bootstrap/providers.php`. Enums في `Shared/Enums`. عمليات حسّاسة → `audit_logs`.
+- **Frontend:** TypeScript صارم. أعِد استخدام مكوّنات `packages/shared`. RTL + ثنائي اللغة.
 
-## معايير الكود (Frontend)
-- TypeScript صارم. مكوّنات قابلة لإعادة الاستخدام. RTL + ثنائي اللغة من البداية.
-- design tokens والأنواع من `frontend/packages/shared` (لا تكرار).
-
-## التشغيل المحلي
-طريقة التشغيل محدّثة دائماً في `README.md` و`docs/deployment/local-setup.md`.
+## 7) القاعدة الذهبية
+شغل **كامل جاهز للإنتاج** — لا skeleton، لا اختصار، لا كسر لمزايا قائمة. خطوة خطوة عبر الجلسات حتى الاكتمال 100% حسب [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md).
