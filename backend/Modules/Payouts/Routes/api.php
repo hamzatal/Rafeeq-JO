@@ -17,10 +17,11 @@ Route::prefix('v1/driver')->middleware(['auth:sanctum', 'role:driver'])->group(f
     Route::get('earnings-summary', [DriverPerformanceController::class, 'earnings']);
 });
 
-// Captain withdrawals.
+// Captain withdrawals. The POST creates a money movement (reserves funds), so
+// it is rate-limited with throttle:sensitive on top of the global api limit.
 Route::prefix('v1/driver/wallet/withdrawals')->middleware(['auth:sanctum', 'role:driver'])->group(function () {
     Route::get('/', [DriverPayoutController::class, 'index']);
-    Route::post('/', [DriverPayoutController::class, 'store']);
+    Route::post('/', [DriverPayoutController::class, 'store'])->middleware('throttle:sensitive');
 });
 
 // Admin payout queue.
