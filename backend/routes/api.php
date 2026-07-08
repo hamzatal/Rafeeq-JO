@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
+    // Shallow liveness probe — "is the app process up?" (no dependencies touched).
     Route::get('/ping', fn () => response()->json([
         'data' => [
             'service' => 'rafeeq-api',
@@ -20,6 +23,43 @@ Route::prefix('v1')->group(function () {
         ],
         'message' => 'pong',
     ]));
+
+    /*
+     | Deep readiness probe — "can this instance actually serve traffic?"
+     | Verifies the critical dependencies (database + cache) and reports each
+     | component. Returns 200 when healthy, 503 when degraded so a load
+     | balancer / orchestrator pulls the instance out of rotation.
+     */
+    Route::get('/health', function () {
+        $checks = [];
+
+        try {
+            DB::select('select 1');
+            $checks['database'] = 'ok';
+        } catch (Throwable) {
+            $checks['database'] = 'fail';
+        }
+
+        try {
+            Cache::put('health:probe', '1', 5);
+            $checks['cache'] = Cache::get('health:probe') === '1' ? 'ok' : 'fail';
+        } catch (Throwable) {
+            $checks['cache'] = 'fail';
+        }
+
+        $healthy = ! in_array('fail', $checks, true);
+
+        return response()->json([
+            'data' => [
+                'service' => 'rafeeq-api',
+                'status' => $healthy ? 'healthy' : 'degraded',
+                'version' => (string) config('app.version'),
+                'checks' => $checks,
+                'time' => now()->toIso8601String(),
+            ],
+            'message' => $healthy ? 'ok' : 'degraded',
+        ], $healthy ? 200 : 503);
+    });
 
     /*
      | Public client bootstrap config. Lets every app (student/captain/admin)
