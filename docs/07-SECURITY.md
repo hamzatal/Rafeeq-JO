@@ -62,6 +62,20 @@
 - التحقق من تشغيل التطبيقات فعلياً على الأجهزة/المتصفح.
 - **الإجراء**: بعد `git pull` شغّل محلياً: `cd backend && composer install && php artisan migrate:fresh --seed && php artisan test`، و `cd frontend && npm install && npm run typecheck -ws`. الـ CI يقوم بهذا تلقائياً عند الرفع.
 
+## 🛡️ المرحلة 4 — تصليب الأمان والجودة (RFQ-346)
+
+تحقّق فعلي من الضوابط الموثّقة + بوابات جودة جديدة في CI:
+
+- **تحقّق فعلي (مؤكّد في الكود):**
+  - محدِّدات المعدّل معرّفة فعلاً: `api` (120/دقيقة) و`sensitive` (20/دقيقة) في `CoreServiceProvider`، و`auth` (6/دقيقة) في `AuthServiceProvider`.
+  - `SecurityHeaders` + `throttle:api` مثبّتان في مقدّمة/ذيل مكدّس `api` بـ`bootstrap/app.php`.
+  - كل المسارات الإدارية الجديدة مُبوَّبة: `settings/pricing` (`permission:settings.manage`)، `zone-prices` (`role:admin,supervisor`)، `earnings-summary` (`role:driver`).
+- **تصليب جديد:** إضافة `throttle:sensitive` على **إنشاء طلب سحب الأرباح** (`POST /driver/wallet/withdrawals`) — عملية مالية كانت محميّة بالحدّ العام فقط.
+- **بوابة PHPStan (Larastan) في CI:** المستوى 5 مع **baseline** يُجمِّد الأخطاء الحالية (253، غالبيتها نمط خصائص Eloquent الديناميكية) ويمنع أي خطأ **جديد**. أمر محلي: `composer stan`.
+- **توحيد PHP 8.4:** `composer.json` صار `"php": "^8.4"` + CI يستخدم `php-version: '8.4'` في وظيفتَي Backend وDatabase (كان 8.2).
+
+> **الديون التقنية المتبقية (baseline):** 253 تنبيه PHPStan مجمّدة، تُحرَق تدريجياً بإضافة `@property` docblocks للنماذج. لا تكسر البناء ولا تمنع اكتشاف الأخطاء الجديدة.
+
 ## 🚀 صلابة الإنتاج (قبل الإطلاق — M10)
 - ضبط `APP_DEBUG=false` و`APP_ENV=production` + HTTPS/HSTS.
 - إدارة الأسرار عبر Secrets Manager (لا `.env` على الخوادم).

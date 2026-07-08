@@ -1,0 +1,1315 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Using nullsafe property access "\?\-\>locale" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Core/Http/Middleware/SetLocale.php
+
+		-
+			message: '#^Instanceof between mixed and Illuminate\\Http\\Resources\\Json\\ResourceCollection will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: Core/Http/Responses/ApiResponse.php
+
+		-
+			message: '#^Offset ''tokens'' on array\{content\: string, ai\: bool, tokens\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: Modules/AI/Services/AssistantService.php
+
+		-
+			message: '#^Variable \$lines in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: Modules/AI/Services/AssistantService.php
+
+		-
+			message: '#^Instanceof between Rafeeq\\Shared\\Enums\\RiskSeverity and Rafeeq\\Shared\\Enums\\RiskSeverity will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: Modules/AI/Services/FraudMonitorService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Addresses\\Resources\\SavedAddressResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Addresses/Resources/SavedAddressResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type Laravel\\Sanctum\\PersonalAccessToken\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/Auth/Controllers/AuthController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:flatMap\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(array\<mixed\>\|Illuminate\\Support\\Collection\<int\|string, mixed\>\), Closure\(Rafeeq\\Core\\Permissions\\Models\\Role\)\: Illuminate\\Support\\Collection\<int\|string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Auth/Models/User.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Auth\\Repositories\\UserRepository\:\:findByEmail\(\) should return Rafeeq\\Modules\\Auth\\Models\\User\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Auth/Repositories/UserRepository.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Auth\\Repositories\\UserRepository\:\:findByPhone\(\) should return Rafeeq\\Modules\\Auth\\Models\\User\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Auth/Repositories/UserRepository.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Auth\\Resources\\UserResource\:\:\$avatar_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Auth/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Auth\\Resources\\UserResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Auth/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Auth\\Models\\OtpCode\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Auth/Services/OtpService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Chat/Resources/ChatConversationResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Chat/Resources/ChatConversationResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Chat\\Resources\\ChatMessageResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Chat/Resources/ChatMessageResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Chat/Services/ChatService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Chat\\Models\\ChatMessage\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Chat/Services/ChatService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Complaints/Resources/ComplaintResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Complaints/Resources/ComplaintResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Complaints/Resources/ComplaintResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Complaints\\Resources\\ComplaintResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Complaints/Resources/ComplaintResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Complaints\\Resources\\ComplaintResource\:\:\$resolved_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Complaints/Resources/ComplaintResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Coupons\\Resources\\CouponResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Coupons/Resources/CouponResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Coupons\\Resources\\CouponResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Coupons/Resources/CouponResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Disputes\\Models\\Dispute\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Disputes\\Models\\Dispute\:\:\$resolution\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Disputes\\Models\\Dispute\:\:\$resolved_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Disputes\\Models\\Dispute\:\:\$summary\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Controllers/DisputeAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$lat\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$lng\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$reason\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$meta\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$resolved_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Rafeeq\\Modules\\Safety\\Models\\CancellationLog\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Rafeeq\\Modules\\Safety\\Models\\RiskFlag\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/Disputes/Services/DisputeService.php
+
+		-
+			message: '#^Match expression does not handle remaining value\: mixed$#'
+			identifier: match.unhandled
+			count: 1
+			path: Modules/Drivers/Controllers/DriverAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverDocumentResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Resources/DriverDocumentResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverDocumentResource\:\:\$expires_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Resources/DriverDocumentResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverProfileResource\:\:\$face_verified_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Resources/DriverProfileResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverProfileResource\:\:\$liveness_verified_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Resources/DriverProfileResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverProfileResource\:\:\$rating_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Resources/DriverProfileResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverProfileResource\:\:\$review_note\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Resources/DriverProfileResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverProfileResource\:\:\$submitted_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Resources/DriverProfileResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$file_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Services/DriverDocumentService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Drivers\\Services\\DriverDocumentService\:\:upload\(\) should return Rafeeq\\Modules\\Drivers\\Models\\DriverDocument but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Drivers/Services/DriverDocumentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Drivers/Services/DriverReviewService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Drivers\\Services\\VehicleService\:\:store\(\) should return Rafeeq\\Modules\\Drivers\\Models\\Vehicle but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Drivers/Services/VehicleService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\LostFound\\Models\\LostFoundItem\:\:\$category\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/LostFound/Services/LostFoundService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Models\\RideRequest\:\:\$coupon_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Matching/Services/MatchingService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Models\\RideRequest\:\:\$direction\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Matching/Services/MatchingService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Models\\RideRequest\:\:\$subscription_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Matching/Services/MatchingService.php
+
+		-
+			message: '#^Instanceof between Illuminate\\Support\\Carbon and DateTimeInterface will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: Modules/Matching/Services/MatchingService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between float and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: Modules/Matching/Services/MatchingService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Notifications\\Resources\\NotificationResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Notifications/Resources/NotificationResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Parcels\\Resources\\ParcelResource\:\:\$category\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Parcels\\Resources\\ParcelResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Parcels\\Resources\\ParcelResource\:\:\$delivered_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Parcels\\Resources\\ParcelResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Parcels\\Resources\\ParcelResource\:\:\$from_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Parcels\\Resources\\ParcelResource\:\:\$picked_up_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Parcels\\Resources\\ParcelResource\:\:\$to_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: Modules/Parcels/Resources/ParcelResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Parcels/Services/ParcelService.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Rafeeq\\Modules\\Notifications\\Services\\NotificationService\:\:notify\(\) expects Rafeeq\\Modules\\Auth\\Models\\User, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Modules/Parcels/Services/ParcelService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/AI/PaymentVerificationService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>full_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/Payments/AI/PaymentVerificationService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Payments\\Models\\PaymentRequest\:\:latestPayment\(\) should return Rafeeq\\Modules\\Payments\\Models\\Payment\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Payments/Models/PaymentRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/Resources/PaymentRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/Resources/PaymentRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/Resources/PaymentRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payments\\Resources\\PaymentRequestResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/Resources/PaymentRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payments\\Resources\\PaymentResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/Resources/PaymentResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$bank_reference\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payments\\Models\\PaymentRequest\:\:\$coupon_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payments\\Models\\PaymentRequest\:\:\$discount_fils\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Payments\\Services\\PaymentService\:\:submitProof\(\) should return Rafeeq\\Modules\\Payments\\Models\\Payment but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Offset ''confidence'' on array\{decision\: string, confidence\: int, verified_by\: string, extracted\: array\<string, mixed\>, available\: bool\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Offset ''extracted'' on array\{decision\: string, confidence\: int, verified_by\: string, extracted\: array\<string, mixed\>, available\: bool\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Offset ''verified_by'' on array\{decision\: string, confidence\: int, verified_by\: string, extracted\: array\<string, mixed\>, available\: bool\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Parameter \#1 \$request of method Rafeeq\\Modules\\Payments\\AI\\PaymentVerificationService\:\:verify\(\) expects Rafeeq\\Modules\\Payments\\Models\\PaymentRequest, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Parameter \#1 \$request of method Rafeeq\\Modules\\Payments\\Services\\PaymentService\:\:approve\(\) expects Rafeeq\\Modules\\Payments\\Models\\PaymentRequest, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Rafeeq\\Modules\\Notifications\\Services\\NotificationService\:\:notify\(\) expects Rafeeq\\Modules\\Auth\\Models\\User, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 4
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Rafeeq\\Modules\\Wallet\\Services\\WalletService\:\:forUser\(\) expects Rafeeq\\Modules\\Auth\\Models\\User, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Parameter \#2 \$user of method Rafeeq\\Modules\\Coupons\\Services\\CouponService\:\:redeem\(\) expects Rafeeq\\Modules\\Auth\\Models\\User, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Payments/Services/PaymentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Resources/PayoutResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Resources/PayoutResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Resources/PayoutResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payouts\\Resources\\PayoutResource\:\:\$admin_note\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Resources/PayoutResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payouts\\Resources\\PayoutResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Resources/PayoutResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payouts\\Resources\\PayoutResource\:\:\$note\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Resources/PayoutResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Payouts\\Resources\\PayoutResource\:\:\$processed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Resources/PayoutResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Models\\WalletTransaction\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Payouts/Services/EarningsService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Ratings\\Resources\\RatingResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Ratings/Resources/RatingResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Ratings/Services/RatingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Reports/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$auditable_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Reports/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$auditable_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Reports/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Reports/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ip\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Reports/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Reports/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to protected property Illuminate\\Database\\Eloquent\\Model\:\:\$changes\.$#'
+			identifier: property.protected
+			count: 2
+			path: Modules/Reports/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Rewards/Services/RewardService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Rewards\\Services\\RewardService\:\:earn\(\) should return Rafeeq\\Modules\\Rewards\\Models\\RewardTransaction but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Rewards/Services/RewardService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Rewards\\Services\\RewardService\:\:redeem\(\) should return Rafeeq\\Modules\\Rewards\\Models\\RewardTransaction but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Rewards/Services/RewardService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Resources\\RideRequestResource\:\:\$direction\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Resources\\RideRequestResource\:\:\$express_fee_fils\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Resources\\RideRequestResource\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Resources\\RideRequestResource\:\:\$pickup_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Rafeeq\\Shared\\Enums\\RideType\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type Rafeeq\\Shared\\Enums\\RideType\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/RideRequests/Resources/RideRequestResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type Rafeeq\\Modules\\Zones\\Models\\Zone\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/RideRequests/Services/RideRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Routes/Resources/RouteResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Routes/Resources/RouteResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Routes/Resources/RouteStopResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lat\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Routes/Resources/RouteStopResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lng\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Routes/Resources/RouteStopResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Routes/Resources/RouteStopResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Routes/Resources/RouteStopResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/DriverLocationController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\EmergencyContact\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/EmergencyContactController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$lat\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$lng\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\CancellationLog\:\:\$reason\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$meta\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\RiskFlag\:\:\$resolved_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Pagination\\AbstractPaginator\<int,Rafeeq\\Modules\\Safety\\Models\\CancellationLog\>\:\:through\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Pagination\\AbstractPaginator\<int,Rafeeq\\Modules\\Safety\\Models\\RiskFlag\>\:\:through\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: Modules/Safety/Controllers/SafetyAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SosController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\SosIncident\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Safety/Controllers/SosController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\SosIncident\:\:\$lat\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SosController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\SosIncident\:\:\$lng\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SosController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\SosIncident\:\:\$note\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Controllers/SosController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Pagination\\AbstractPaginator\<int,Rafeeq\\Modules\\Safety\\Models\\SosIncident\>\:\:through\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: Modules/Safety/Controllers/SosController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between bool and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: Modules/Safety/Services/EmergencyContactService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: Modules/Safety/Services/EmergencyContactService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Safety/Services/GpsFraudService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripPassenger\:\:\$pickup_lat\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Safety/Services/GpsFraudService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripPassenger\:\:\$pickup_lng\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Safety/Services/GpsFraudService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{lat\: float, lng\: float, student_id\: string\}, Closure\(Rafeeq\\Modules\\Trips\\Models\\TripPassenger\)\: array\{lat\: float, lng\: float, student_id\: string\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Safety/Services/GpsFraudService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tier" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/Students/Models/StudentProfile.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Students\\Resources\\StudentProfileResource\:\:\$default_pickup_point_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Students/Resources/StudentProfileResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$duration_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Subscriptions/Services/SubscriptionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price_fils\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Subscriptions/Services/SubscriptionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rides_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Subscriptions/Services/SubscriptionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Support/Resources/SupportTicketResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Support/Resources/SupportTicketResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Support/Resources/SupportTicketResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Support\\Resources\\SupportTicketResource\:\:\$ai_triage\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Support/Resources/SupportTicketResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Support\\Resources\\SupportTicketResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Support/Resources/SupportTicketResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Support\\Resources\\TicketMessageResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Support/Resources/TicketMessageResource.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Support\\Services\\TicketService\:\:reply\(\) should return Rafeeq\\Modules\\Support\\Models\\TicketMessage but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Support/Services/TicketService.php
+
+		-
+			message: '#^Parameter \#1 \$user of method Rafeeq\\Modules\\Notifications\\Services\\NotificationService\:\:notify\(\) expects Rafeeq\\Modules\\Auth\\Models\\User, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 2
+			path: Modules/Support/Services/TicketService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Trips/Controllers/DriverTripController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Controllers/DriverTripController.php
+
+		-
+			message: '#^Parameter \#1 \$driver of method Rafeeq\\Modules\\Trips\\Services\\TripService\:\:schedule\(\) expects Rafeeq\\Modules\\Drivers\\Models\\DriverProfile, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Trips/Controllers/DriverTripController.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripTracking\:\:\$recorded_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Controllers/StudentTripController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripPassengerResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$boarded_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripPassengerResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$dropoff_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripPassengerResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$dropoff_confirmed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripPassengerResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$pickup_lat\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripPassengerResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$pickup_lng\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripPassengerResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$pickup_order\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripPassengerResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Trips/Resources/TripResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Trips/Resources/TripResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$university_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Resources/TripResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripResource\:\:\$direction\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Trips/Resources/TripResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/Trips/Resources/TripResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Services/RideBillingService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripPassenger\:\:\$coupon_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Services/RideBillingService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripPassenger\:\:\$paid_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Services/RideBillingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$student\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$student_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscription_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripTracking\:\:\$recorded_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Trips\\Services\\TripService\:\:book\(\) should return Rafeeq\\Modules\\Trips\\Models\\TripPassenger but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Trips\\Services\\TripService\:\:confirmBoarding\(\) should return Rafeeq\\Modules\\Trips\\Models\\TripPassenger but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Trips\\Services\\TripService\:\:confirmDropoff\(\) should return Rafeeq\\Modules\\Trips\\Models\\TripPassenger but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Parameter \#1 \$passenger of method Rafeeq\\Modules\\Trips\\Services\\RideBillingService\:\:chargeForBoarding\(\) expects Rafeeq\\Modules\\Trips\\Models\\TripPassenger, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Parameter \#2 \$passenger of method Rafeeq\\Modules\\Safety\\Services\\GpsFraudService\:\:checkBoardingProximity\(\) expects Rafeeq\\Modules\\Trips\\Models\\TripPassenger, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Modules/Trips/Services/TripService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Trips/Support/TripChannelPolicy.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: Modules/Universities/Requests/UpdateUniversityRequest.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Universities\\Resources\\UniversityResource\:\:\$contact_phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Universities/Resources/UniversityResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Universities\\Resources\\UniversityResource\:\:\$logo_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Universities/Resources/UniversityResource.php
+
+		-
+			message: '#^Offset ''locale'' on array\{full_name\: string, phone\: string, email\?\: string\|null, password\: string, role\: string\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: Modules/Users/Services/StaffService.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Models\\WalletTransaction\:\:\$reversal_of\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Models/WalletTransaction.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Models\\WalletTransaction\:\:\$reversed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Models/WalletTransaction.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Resources\\WalletTransactionResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Resources/WalletTransactionResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Resources\\WalletTransactionResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Resources/WalletTransactionResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Resources\\WalletTransactionResource\:\:\$reference\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Resources/WalletTransactionResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Resources\\WalletTransactionResource\:\:\$reversal_of\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Resources/WalletTransactionResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Resources\\WalletTransactionResource\:\:\$reversed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Resources/WalletTransactionResource.php
+
+		-
+			message: '#^Access to an undefined property Rafeeq\\Modules\\Wallet\\Models\\WalletTransaction\:\:\$reference\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Wallet/Services/WalletService.php
+
+		-
+			message: '#^Method Rafeeq\\Modules\\Wallet\\Services\\WalletService\:\:apply\(\) should return Rafeeq\\Modules\\Wallet\\Models\\WalletTransaction but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: Modules/Wallet/Services/WalletService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Zones/Resources/ZoneUniversityPriceResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Zones/Resources/ZoneUniversityPriceResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Zones/Resources/ZoneUniversityPriceResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Zones/Resources/ZoneUniversityPriceResource.php

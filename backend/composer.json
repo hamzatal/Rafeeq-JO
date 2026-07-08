@@ -5,7 +5,7 @@
     "keywords": ["rafeeq", "laravel", "api", "mobility"],
     "license": "proprietary",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "ext-pdo": "*",
         "guzzlehttp/guzzle": "^7.8",
         "laravel/framework": "^12.0",
@@ -60,6 +60,9 @@
         ],
         "lint": [
             "./vendor/bin/pint"
+        ],
+        "stan": [
+            "@php -d memory_limit=1G ./vendor/bin/phpstan analyse --no-progress"
         ]
     },
     "extra": {
