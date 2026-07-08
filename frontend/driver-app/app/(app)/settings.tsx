@@ -22,6 +22,8 @@ export default function Settings() {
   const logout = useAuth((a) => a.logout);
   const locale = usePrefs((p) => p.locale);
   const setLocale = usePrefs((p) => p.setLocale);
+  const scheme = usePrefs((p) => p.scheme);
+  const setScheme = usePrefs((p) => p.setScheme);
 
   const initial = (user?.full_name ?? 'ر').charAt(0);
 
@@ -44,6 +46,7 @@ export default function Settings() {
         <Text style={s.section}>{t('settings.account')}</Text>
         <View style={s.groupCard}>
           <GroupRow theme={theme} icon="globe" title={t('settings.appLanguage')} subtitle={locale === 'ar' ? t('settings.arabic') : t('settings.english')} onPress={() => void setLocale(locale === 'ar' ? 'en' : 'ar')} border />
+          <GroupRow theme={theme} icon={scheme === 'dark' ? 'moon' : 'sun'} title={t('settings.theme')} subtitle={scheme === 'dark' ? t('settings.dark') : t('settings.light')} onPress={() => void setScheme(scheme === 'dark' ? 'light' : 'dark')} border />
           <GroupRow theme={theme} icon="file-text" title={t('driver.documents')} onPress={() => router.push('/(app)/documents')} border />
           <GroupRow theme={theme} icon="truck" title={t('driver.vehicle')} onPress={() => router.push('/(app)/vehicle')} border />
           <GroupRow theme={theme} icon="credit-card" title={t('driver.wallet')} onPress={() => router.push('/(app)/earnings')} />
