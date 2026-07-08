@@ -53,15 +53,15 @@
 > **إصلاح حرج (RFQ-327/328):** كل شاشات الدخول في التطبيقين (الطالب + الكابتن) حُوّلت من خلفية داكنة `#0A0D12` إلى **Stitch لايت**، وأُضيف **دخول تجريبي** (`__DEV__`) للمعاينة بدون خادم. الافتراضي عربي + Light مؤكّد.
 
 ## لوحة الإدارة (Admin) — المرحلة 2.5
-> **مطابِقة أصلاً لـ Stitch** عبر توكنز المرحلة 1 (Sidebar كحلي `bg-navy` يمين RTL + تيل `cyan→teal` + خط IBM Plex + بطاقات/جداول لايت). البنية تطابق `_26` (KPIs + رسم بياني + جدول نشاطات + Sidebar).
+> **pixel RFQ-358:** تصحيح جوهري بعد تدقيق `_25/_26/_28` — **Sidebar لايت** (`surface-container-low #F0F3FF` + حد `border-e` + وسم primary + عنصر نشط `secondary-container #6FF7EE` بنص `on-secondary-container`)، **رؤوس الجداول لايت** (`table-head`/`data-table thead` → `#F0F3FF` بنص muted بدل `bg-navy` أبيض) — يسري على 22+ صفحة عبر الأصناف المشتركة. بطاقات KPI للتحليلات `_26` (بلاطة أيقونة rounded-lg + شارة اتجاه علوية، بلا شريط سفلي). البنية تطابق `_26` (KPIs + رسم بياني + جدول نشاطات + Sidebar).
 
 | شاشة Stitch | الملف | الحالة |
 |-------------|-------|--------|
-| Sidebar يمين RTL (كحلي+تيل) | `Sidebar.tsx` + `(dashboard)/layout` | ✅ (توكنز م.1) |
-| التحليلات `_26` | `app/(dashboard)/page.tsx` (KPIs + chart + disputes) | ✅ |
-| إدارة الطلاب `_25` | `.../users` | ✅ (توكنز) |
-| إدارة الكباتن `_27` | `.../drivers` | ✅ (توكنز) |
-| الرحلات `_28` | `.../trips` | ✅ (توكنز) |
-| المالية `_29` | `.../payments` · `cliq` · `reports` | ✅ (توكنز) |
+| Sidebar يمين RTL (**لايت** surface-container-low + نشط تيل) | `Sidebar.tsx` + `(dashboard)/layout` | ✅ · **pixel RFQ-358** (مطابق `_26`) |
+| التحليلات `_26` | `app/(dashboard)/page.tsx` (KPIs + chart + disputes) | ✅ · **pixel RFQ-358** (KPI بلاطة أيقونة + شارة اتجاه) |
+| إدارة الطلاب `_25` | `.../users` | ✅ · **pixel RFQ-358** (رأس جدول لايت + sidebar) |
+| إدارة الكباتن `_27` | `.../drivers` | ✅ · **pixel RFQ-358** |
+| الرحلات `_28` | `.../trips` | ✅ · **pixel RFQ-358** |
+| المالية `_29` | `.../payments` · `cliq` · `reports` | ✅ · **pixel RFQ-358** |
 
 > ملاحظة: صفحات الأدمن تستخدم مكوّنات مشتركة (`kpi-card`,`data-table`,`pill-*`,`nav-item`) معرّفة في `globals.css` وكلها على توكنز Stitch. أي ضبط دقيق مستقبلي = تجميلي فقط.

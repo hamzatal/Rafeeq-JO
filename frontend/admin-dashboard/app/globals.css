@@ -21,11 +21,11 @@ body { background: #F9F9FF; color: #111C2C; -webkit-font-smoothing: antialiased;
   background-clip: padding-box;
 }
 *::-webkit-scrollbar-thumb:hover { background: rgba(0,32,69,0.5); background-clip: padding-box; }
-/* Sidebar (on navy) scrollbar — subtle light thumb */
+/* Sidebar (light Stitch) scrollbar — subtle navy-tinted thumb */
 aside ::-webkit-scrollbar-thumb,
-aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); background-clip: padding-box; }
+aside::-webkit-scrollbar-thumb { background: rgba(0,32,69,0.18); background-clip: padding-box; }
 aside ::-webkit-scrollbar-thumb:hover { background: rgba(0,106,101,0.7); background-clip: padding-box; }
-aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
+aside { scrollbar-color: rgba(0,32,69,0.22) transparent; }
 
 /* Material Symbols base */
 .material-symbols-outlined {
@@ -70,21 +70,21 @@ aside { scrollbar-color: rgba(255,255,255,0.22) transparent; }
   .pill-info    { @apply pill bg-cyan/15 text-cyan-deep border-cyan/30; }
   .pill-muted   { @apply pill bg-background text-muted border-line; }
 
-  /* Tables — ink header, zebra rows (enterprise data density) */
+  /* Tables — light Stitch header (surface-container-low), zebra rows */
   .data-table { @apply w-full text-sm text-right; }
-  .data-table thead { @apply bg-navy text-white; }
-  .data-table th { @apply py-3 px-4 font-semibold text-xs uppercase tracking-wider; }
+  .data-table thead { @apply bg-[#F0F3FF] border-b border-line; }
+  .data-table th { @apply py-3.5 px-4 font-semibold text-xs tracking-wider text-muted; }
   .data-table tbody tr { @apply border-t border-line even:bg-background/60 hover:bg-cyan/5 transition-colors dark:border-dline; }
   .data-table td { @apply py-3 px-4 text-ink dark:text-dtext; }
-  .table-head { @apply bg-navy text-white; }
+  .table-head { @apply bg-[#F0F3FF] text-muted border-b border-line; }
   .row-line { @apply border-t border-line dark:border-dline; }
 
-  /* Sidebar nav items */
+  /* Sidebar nav items — light Stitch (_26): muted text, teal-container active */
   .nav-item {
-    @apply flex items-center gap-3 mx-2 my-0.5 px-3 py-2.5 rounded-lg text-sm font-medium
-           text-white/70 hover:text-white hover:bg-white/10 transition-colors;
+    @apply flex items-center gap-3 mx-2 my-0.5 px-4 py-3 rounded-lg text-sm font-medium
+           text-muted hover:text-primary hover:bg-[#DEE8FF] transition-colors;
   }
   .nav-item-active {
-    @apply text-white bg-cyan hover:bg-cyan hover:text-white font-bold border-s-4 border-cyan-soft;
+    @apply text-teal-deep bg-teal-soft hover:bg-teal-soft hover:text-teal-deep font-bold;
   }
 }
