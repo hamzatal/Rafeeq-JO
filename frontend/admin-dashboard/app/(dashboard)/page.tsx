@@ -27,32 +27,34 @@ interface Kpi {
 
 function KpiCard({ k }: { k: Kpi }) {
   return (
-    <div className={`kpi-card ${k.danger ? 'border-danger/40' : ''}`}>
-      <div className="flex justify-between items-start mb-3">
-        <span className="text-xs font-bold uppercase tracking-wider muted-text">{k.label}</span>
+    <div className={`kpi-card p-6 flex flex-col justify-between ${k.danger ? 'border-danger/40' : ''}`}>
+      <div className="flex justify-between items-start mb-4">
+        {/* Icon tile (right) — Stitch _26 */}
         <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center ${
-            k.danger ? 'bg-danger/10 text-danger' : 'bg-cyan/15 text-cyan-deep'
+          className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+            k.danger ? 'bg-danger/10 text-danger' : 'bg-[#E7EEFF] text-primary'
           }`}
         >
-          <span className="material-symbols-outlined text-[20px]">{k.icon}</span>
+          <span className="material-symbols-outlined text-[22px]">{k.icon}</span>
         </div>
+        {/* Trend pill (left) */}
+        {k.trend && (
+          <span
+            className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+              k.danger ? 'bg-danger/10 text-danger' : 'bg-teal-soft/40 text-teal-deep'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[14px]">{k.danger ? 'priority_high' : 'trending_up'}</span>
+            {k.trend}
+          </span>
+        )}
       </div>
-      <div className={`stat-number ${k.danger ? 'text-danger' : ''}`}>
-        {k.unit && <span className="text-xl font-bold ml-1 align-middle">{k.unit}</span>}
-        {k.value}
-      </div>
-      {k.trend && (
-        <div className={`text-xs mt-2 flex items-center gap-1 ${k.danger ? 'text-danger' : 'text-success'}`}>
-          <span className="material-symbols-outlined text-[15px]">{k.danger ? 'priority_high' : 'trending_up'}</span>
-          {k.trend}
+      <div>
+        <p className="muted-text text-sm mb-1">{k.label}</p>
+        <div className={`stat-number ${k.danger ? 'text-danger' : ''}`}>
+          {k.value}
+          {k.unit && <span className="text-base font-bold mr-1 align-baseline muted-text">{k.unit}</span>}
         </div>
-      )}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-line">
-        <div
-          className={`h-full ${k.danger ? 'bg-danger' : 'bg-cyan'}`}
-          style={{ width: `${Math.max(8, Math.min(100, k.bar * 100))}%` }}
-        />
       </div>
     </div>
   );
