@@ -117,6 +117,7 @@ export const en: Translations = {
     assistant: 'Rafeeq Assistant',
     emergency: 'Emergency',
     whereTo: 'Where to today?',
+    minutesShort: 'min',
     requestRideCta: 'Request your ride now',
     nearby: 'Your current location',
     locating: 'Locating you...',
