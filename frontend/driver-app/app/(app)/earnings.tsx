@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import type { PayoutRequest, Wallet, WalletTransaction } from '@rafeeq/shared';
-import { EmptyState } from '../../src/components/ui';
+import { EmptyState, SkeletonList, ErrorState } from '../../src/components/ui';
 import { Icon, type IconName } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
@@ -26,8 +26,12 @@ export default function Earnings() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [txns, setTxns] = useState<WalletTransaction[]>([]);
   const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const [w, tx, wd] = await Promise.all([
         api.wallet.show(),
@@ -38,7 +42,9 @@ export default function Earnings() {
       setTxns(tx);
       setPayouts(wd);
     } catch {
-      /* silent */
+      setLoadError(true);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -89,7 +95,11 @@ export default function Earnings() {
 
         {/* Recent transactions */}
         <Text style={s.section}>{t('driver.recentTransactions')}</Text>
-        {txns.length === 0 ? (
+        {loading ? (
+          <SkeletonList rows={3} />
+        ) : loadError ? (
+          <ErrorState title={t('common.error')} message={t('common.loadFailed')} retryLabel={t('common.retry')} onRetry={() => void load()} />
+        ) : txns.length === 0 ? (
           <EmptyState icon="credit-card" title={t('wallet.noTransactions')} />
         ) : (
           txns.map((tx) => {

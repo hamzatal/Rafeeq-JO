@@ -19,6 +19,7 @@ export const en: Translations = {
     soon: 'Soon',
     unlimited: 'Unlimited',
     viewAll: 'View all',
+    loadFailed: 'Could not load data. Check your connection and try again.',
   },
   onboarding: {
     skip: 'Skip',

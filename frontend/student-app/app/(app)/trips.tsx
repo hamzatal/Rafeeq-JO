@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import type { Trip, TripPassenger } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, Badge } from '../../src/components/ui';
+import { Card, EmptyState, Badge, SkeletonList, ErrorState } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
 import { LiveMap } from '../../src/components/LiveMap';
 import { TripTimeline } from '../../src/components/kit';
@@ -27,6 +27,7 @@ export default function Trips() {
   const [mine, setMine] = useState<TripPassenger[]>([]);
   const [available, setAvailable] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [location, setLocation] = useState<Record<string, string>>({});
@@ -37,10 +38,13 @@ export default function Trips() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const [m, a] = await Promise.all([api.transport.myTrips(), api.transport.availableTrips()]);
       setMine(m);
       setAvailable(a);
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -199,7 +203,9 @@ export default function Trips() {
         </View>
 
         {loading ? (
-          <Text style={s.meta}>{t('common.loading')}</Text>
+          <SkeletonList rows={3} />
+        ) : loadError ? (
+          <ErrorState title={t('common.error')} message={t('common.loadFailed')} retryLabel={t('common.retry')} onRetry={() => void load()} />
         ) : filtered.length === 0 ? (
           <EmptyState icon="navigation" title={t('trips.noHistory')} />
         ) : (

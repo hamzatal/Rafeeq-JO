@@ -13,9 +13,13 @@ class AssistantToolRegistry
     /** @var array<string, AssistantTool> */
     private array $tools = [];
 
-    public function __construct(TopupInstructionsTool $topup, CreateSupportTicketTool $ticket)
-    {
-        foreach ([$topup, $ticket] as $tool) {
+    public function __construct(
+        TopupInstructionsTool $topup,
+        CreateSupportTicketTool $ticket,
+        SubscriptionPlansTool $plans,
+        FileLostItemTool $lostItem,
+    ) {
+        foreach ([$topup, $ticket, $plans, $lostItem] as $tool) {
             $this->tools[$tool->name()] = $tool;
         }
     }
