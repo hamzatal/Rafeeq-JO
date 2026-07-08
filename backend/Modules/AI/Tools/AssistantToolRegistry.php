@@ -18,8 +18,10 @@ class AssistantToolRegistry
         CreateSupportTicketTool $ticket,
         SubscriptionPlansTool $plans,
         FileLostItemTool $lostItem,
+        SubscriptionStatusTool $subStatus,
+        MyLostReportsTool $myReports,
     ) {
-        foreach ([$topup, $ticket, $plans, $lostItem] as $tool) {
+        foreach ([$topup, $ticket, $plans, $lostItem, $subStatus, $myReports] as $tool) {
             $this->tools[$tool->name()] = $tool;
         }
     }

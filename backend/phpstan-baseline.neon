@@ -961,24 +961,6 @@ parameters:
 			path: Modules/Students/Resources/StudentProfileResource.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$duration_days\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Subscriptions/Services/SubscriptionService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price_fils\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Subscriptions/Services/SubscriptionService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rides_count\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Subscriptions/Services/SubscriptionService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
 			identifier: property.notFound
 			count: 1
