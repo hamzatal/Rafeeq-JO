@@ -113,20 +113,23 @@ export default function Trips() {
   const filtered = history.filter((p) => (filter === 'cancelled' ? isCancelled(p) : !isCancelled(p)));
   const initial = (user?.full_name ?? 'ر').charAt(0);
   const fmtDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
+  const fareJod = (p: TripPassenger) => {
+    const fils = p.trip?.pricing?.fare_fils;
+    return fils != null ? `${(fils / 1000).toFixed(2)} ${t('subscriptions.currency')}` : null;
+  };
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      {/* Header */}
+      {/* Header — avatar (right) · Rafeeq · bell (left) per Stitch _17 */}
       <View style={s.header}>
-        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={s.headerBtn}>
-          <Icon name="bell" size={22} color={theme.colors.primary} />
-        </Pressable>
-        <Text style={s.brand}>رفيق</Text>
         <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
+        <Text style={s.brand}>رفيق</Text>
+        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={s.headerBtn}>
+          <Icon name="bell" size={24} color={theme.colors.primary} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Text style={s.h1}>{t('trips.title')}</Text>
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {/* Active trips — full tracking (timeline + code + live map + rating) */}
@@ -182,14 +185,17 @@ export default function Trips() {
           </>
         )}
 
-        {/* History filter */}
-        <View style={s.segment}>
-          <Pressable onPress={() => setFilter('completed')} style={[s.segBtn, filter === 'completed' && s.segBtnOn]}>
-            <Text style={[s.segText, filter === 'completed' && s.segTextOn]}>{t('trips.filterCompleted')}</Text>
-          </Pressable>
-          <Pressable onPress={() => setFilter('cancelled')} style={[s.segBtn, filter === 'cancelled' && s.segBtnOn]}>
-            <Text style={[s.segText, filter === 'cancelled' && s.segTextOn]}>{t('trips.filterCancelled')}</Text>
-          </Pressable>
+        {/* Title + inline filter pills (Stitch _17) */}
+        <View style={s.titleRow}>
+          <Text style={s.h2}>{t('trips.title')}</Text>
+          <View style={s.filters}>
+            <Pressable onPress={() => setFilter('completed')} style={[s.pill, filter === 'completed' ? s.pillOn : s.pillOff]}>
+              <Text style={[s.pillText, filter === 'completed' ? s.pillTextOn : s.pillTextOff]}>{t('trips.filterCompleted')}</Text>
+            </Pressable>
+            <Pressable onPress={() => setFilter('cancelled')} style={[s.pill, filter === 'cancelled' ? s.pillOn : s.pillOff]}>
+              <Text style={[s.pillText, filter === 'cancelled' ? s.pillTextOn : s.pillTextOff]}>{t('trips.filterCancelled')}</Text>
+            </Pressable>
+          </View>
         </View>
 
         {loading ? (
@@ -200,46 +206,79 @@ export default function Trips() {
           filtered.map((p) => {
             const cancelled = isCancelled(p);
             const completed = p.trip?.status === 'completed' || p.status === 'dropped';
+            const fare = fareJod(p);
             return (
-              <View key={p.id} style={s.tripCard}>
-                <View style={s.rowBetween}>
-                  <Badge label={p.status_label} tone={cancelled ? 'danger' : 'success'} />
-                  <Text style={s.tripDate}>{fmtDate(p.trip?.scheduled_at)}</Text>
+              <View key={p.id} style={[s.tripCard, cancelled && s.tripCardCancelled]}>
+                {/* Top: driver placeholder + fare + status */}
+                <View style={s.topRow}>
+                  <View style={s.driverInfo}>
+                    <View style={s.driverAvatar}>
+                      <Icon name="user" size={22} color={theme.colors.textSecondary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.driverName} numberOfLines={1}>{p.trip?.route?.name ?? t('trips.defaultName')}</Text>
+                      <Text style={s.driverSub} numberOfLines={1}>{p.status_label}</Text>
+                    </View>
+                  </View>
+                  <View style={s.topLeft}>
+                    <Text style={[s.fare, cancelled && { color: theme.colors.textSecondary }]}>{cancelled ? `0.00 ${t('subscriptions.currency')}` : (fare ?? '—')}</Text>
+                    <View style={[s.statusPill, { backgroundColor: cancelled ? theme.colors.dangerSoft : theme.colors.accentSoft }]}>
+                      <Icon name={cancelled ? 'x-circle' : 'check-circle'} size={13} color={cancelled ? theme.colors.danger : theme.colors.accent} />
+                      <Text style={[s.statusText, { color: cancelled ? theme.colors.danger : theme.colors.accent }]}>{cancelled ? t('trips.filterCancelled') : t('trips.filterCompleted')}</Text>
+                    </View>
+                  </View>
                 </View>
-                {/* Route line */}
+
+                {/* Route timeline */}
                 <View style={s.route}>
                   <View style={s.routeSide}>
-                    <View style={[s.routeDot, { backgroundColor: theme.colors.accent }]} />
-                    <View style={s.routeConnector} />
-                    <Icon name="map-pin" size={14} color={theme.colors.primary} />
+                    <View style={[s.dot, { backgroundColor: cancelled ? theme.colors.muted : theme.colors.accent }]}>
+                      <View style={s.dotInner} />
+                    </View>
+                    <View style={s.connector} />
+                    <View style={[s.dot, { backgroundColor: cancelled ? theme.colors.muted : theme.colors.primary }]}>
+                      <Icon name="map-pin" size={11} color={theme.colors.onPrimary} />
+                    </View>
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.routeText} numberOfLines={1}>{t('trips.originLabel')}</Text>
-                    <View style={{ height: 14 }} />
-                    <Text style={s.routeText} numberOfLines={1}>{p.trip?.route?.name ?? t('trips.defaultName')}</Text>
+                  <View style={s.routeContent}>
+                    <View>
+                      <Text style={s.routeText} numberOfLines={1}>{t('trips.originLabel')}</Text>
+                      <Text style={s.routeTime}>{fmtDate(p.trip?.scheduled_at)}</Text>
+                    </View>
+                    <View>
+                      <Text style={s.routeText} numberOfLines={1}>{p.trip?.route?.name ?? t('trips.defaultName')}</Text>
+                    </View>
                   </View>
                 </View>
+
+                {/* Rating (completed & unrated) — preserved functionality */}
+                {completed && !rated[p.trip_id] ? (
+                  <View style={s.starsInline}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Pressable key={n} onPress={() => setStars((st) => ({ ...st, [p.trip_id]: n }))} hitSlop={4}>
+                        <Icon name="star" size={20} color={(stars[p.trip_id] ?? 0) >= n ? theme.colors.accent : theme.colors.border} />
+                      </Pressable>
+                    ))}
+                    {stars[p.trip_id] ? (
+                      <Pressable onPress={() => rate(p.trip_id)} style={s.rateBtn}>
+                        <Text style={s.rateText}>{t('rating.rate')}</Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : rated[p.trip_id] ? (
+                  <Text style={[s.meta, { color: theme.colors.success, textAlign: 'center' }]}>{t('rating.done')}</Text>
+                ) : null}
+
                 {/* Actions */}
-                <View style={s.actionRow}>
-                  {completed && !rated[p.trip_id] ? (
-                    <View style={s.starsInline}>
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <Pressable key={n} onPress={() => setStars((st) => ({ ...st, [p.trip_id]: n }))} hitSlop={4}>
-                          <Icon name="star" size={20} color={(stars[p.trip_id] ?? 0) >= n ? theme.colors.accent : theme.colors.border} />
-                        </Pressable>
-                      ))}
-                      {stars[p.trip_id] ? (
-                        <Pressable onPress={() => rate(p.trip_id)} style={s.rateBtn}>
-                          <Text style={s.rateText}>{t('rating.rate')}</Text>
-                        </Pressable>
-                      ) : null}
-                    </View>
-                  ) : rated[p.trip_id] ? (
-                    <Text style={[s.meta, { color: theme.colors.success }]}>{t('rating.done')}</Text>
-                  ) : <View style={{ flex: 1 }} />}
+                <View style={s.cardActions}>
                   <Pressable onPress={() => router.push('/(app)/ride-request')} style={s.rebookBtn}>
                     <Text style={s.rebookText}>{t('trips.rebook')}</Text>
                   </Pressable>
+                  {!cancelled && (
+                    <Pressable onPress={() => router.push('/(app)/payments')} style={s.invoiceBtn}>
+                      <Text style={s.invoiceText}>{t('trips.downloadInvoice')}</Text>
+                    </Pressable>
+                  )}
                 </View>
               </View>
             );
@@ -275,14 +314,24 @@ export default function Trips() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
-    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.primary },
-    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.onPrimary },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary },
+    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
+    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.base },
     section: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
+
+    // Title + filter pills row
+    titleRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.md },
+    h2: { fontFamily: t.fontFamily.semibold, fontSize: 24, lineHeight: 32, color: t.colors.text, textAlign: 'right' },
+    filters: { flexDirection: 'row-reverse', gap: t.spacing.sm },
+    pill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 9999, borderWidth: 1 },
+    pillOn: { backgroundColor: t.colors.primary, borderColor: 'transparent', ...t.shadow.sm },
+    pillOff: { backgroundColor: t.colors.surface, borderColor: t.colors.border },
+    pillText: { fontFamily: t.fontFamily.medium, fontSize: 14 },
+    pillTextOn: { color: t.colors.onPrimary },
+    pillTextOff: { color: t.colors.textSecondary },
 
     rowBetween: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
     cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, flex: 1, textAlign: 'right' },
@@ -297,25 +346,37 @@ const makeStyles = (t: AppTheme) =>
     ghostBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.md, paddingVertical: 9, paddingHorizontal: 14 },
     ghostText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.primary },
 
-    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: 4, marginTop: t.spacing.lg, marginBottom: t.spacing.md },
-    segBtn: { flex: 1, paddingVertical: 10, borderRadius: t.radius.sm, alignItems: 'center' },
-    segBtnOn: { backgroundColor: t.colors.primary },
-    segText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
-    segTextOn: { fontFamily: t.fontFamily.bold, color: t.colors.onPrimary },
+    // History trip card (_17)
+    tripCard: { backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: t.colors.border, padding: 16, marginBottom: t.spacing.sm, ...t.shadow.sm },
+    tripCardCancelled: { opacity: 0.75 },
+    topRow: { flexDirection: 'row-reverse', alignItems: 'flex-start', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: t.colors.border, paddingBottom: 16, marginBottom: 16 },
+    driverInfo: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, flex: 1 },
+    driverAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.surfaceHigh, alignItems: 'center', justifyContent: 'center' },
+    driverName: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.text, textAlign: 'right' },
+    driverSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
+    topLeft: { alignItems: 'flex-start' },
+    fare: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary },
+    statusPill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 9999, marginTop: 4 },
+    statusText: { fontFamily: t.fontFamily.medium, fontSize: 12 },
 
-    tripCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginBottom: t.spacing.md, ...t.shadow.sm },
-    tripDate: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
-    route: { flexDirection: 'row-reverse', gap: t.spacing.md, marginTop: t.spacing.md },
-    routeSide: { alignItems: 'center', paddingTop: 4 },
-    routeDot: { width: 10, height: 10, borderRadius: 5 },
-    routeConnector: { width: 2, height: 24, backgroundColor: t.colors.border, marginVertical: 2 },
-    routeText: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
+    route: { flexDirection: 'row-reverse', gap: 12, marginBottom: 16 },
+    routeSide: { alignItems: 'center', paddingTop: 3 },
+    dot: { width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.surface },
+    dotInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.surface },
+    connector: { width: 2, flex: 1, minHeight: 20, backgroundColor: t.colors.border, marginVertical: 2 },
+    routeContent: { flex: 1, gap: 20 },
+    routeText: { fontFamily: t.fontFamily.regular, fontSize: 16, color: t.colors.text, textAlign: 'right' },
+    routeTime: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
-    starsInline: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
+    starsInline: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 12 },
     rateBtn: { backgroundColor: t.colors.primary, borderRadius: t.radius.sm, paddingVertical: 6, paddingHorizontal: 12, marginRight: 6 },
     rateText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.onPrimary },
-    rebookBtn: { backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10, paddingHorizontal: t.spacing.lg },
-    rebookText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.onPrimary },
+
+    cardActions: { flexDirection: 'row-reverse', gap: 8, paddingTop: 8 },
+    rebookBtn: { flex: 1, backgroundColor: t.colors.primary, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
+    rebookText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.onPrimary },
+    invoiceBtn: { flex: 1, backgroundColor: 'transparent', borderWidth: 2, borderColor: t.colors.primary, borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
+    invoiceText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.primary },
 
     seats: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
     seatsText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },

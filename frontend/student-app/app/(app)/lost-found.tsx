@@ -167,7 +167,7 @@ export default function LostFound() {
                     <Text style={s.reportTime}>{timeAgo(it.created_at, locale)}</Text>
                   </View>
                   <View style={s.reportIcon}>
-                    <Icon name={iconFor(it.category)} size={20} color={theme.colors.primary} />
+                    <Icon name={iconFor(it.category)} size={20} color={theme.colors.textSecondary} />
                   </View>
                 </View>
               );
@@ -198,8 +198,8 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.primary, textAlign: 'center' },
-    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 14, lineHeight: 22, color: t.colors.textSecondary, textAlign: 'center', marginTop: 6, marginBottom: t.spacing.lg },
+    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'right' },
+    subtitle: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'right', marginTop: 8, marginBottom: t.spacing.lg },
 
     card: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.lg, marginBottom: t.spacing.lg, ...t.shadow.sm },
 
@@ -219,13 +219,13 @@ const makeStyles = (t: AppTheme) =>
     uploadPreview: { width: '100%', height: 140, borderRadius: t.radius.sm },
 
     reportsHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.base },
-    sectionTitle: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary, textAlign: 'right' },
+    sectionTitle: { fontFamily: t.fontFamily.semibold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
     countBadge: { backgroundColor: t.colors.primary, borderRadius: t.radius.full, paddingHorizontal: 10, paddingVertical: 3 },
     countText: { fontFamily: t.fontFamily.bold, fontSize: 11, color: t.colors.onPrimary },
     none: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.muted, textAlign: 'center', paddingVertical: t.spacing.base },
 
-    reportRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, paddingVertical: t.spacing.sm },
-    reportIcon: { width: 48, height: 48, borderRadius: t.radius.md, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    reportRow: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md, padding: t.spacing.sm, borderRadius: t.radius.md },
+    reportIcon: { width: 48, height: 48, borderRadius: t.radius.md, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center' },
     reportInfo: { flex: 1 },
     reportTitle: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
     reportTime: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
@@ -233,6 +233,6 @@ const makeStyles = (t: AppTheme) =>
     statusDot: { width: 6, height: 6, borderRadius: 3 },
     statusText: { fontFamily: t.fontFamily.semibold, fontSize: 11 },
 
-    viewAll: { marginTop: t.spacing.md, borderWidth: 1.5, borderColor: t.colors.border, borderRadius: t.radius.md, paddingVertical: 12, alignItems: 'center' },
-    viewAllText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
+    viewAll: { marginTop: t.spacing.base, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10, alignItems: 'center' },
+    viewAllText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.primary },
   });

@@ -377,6 +377,7 @@ export const ar = {
     filterCompleted: 'مكتملة',
     filterCancelled: 'ملغاة',
     rebook: 'إعادة الحجز',
+    downloadInvoice: 'تحميل الفاتورة',
     originLabel: 'نقطة الانطلاق',
     noHistory: 'لا يوجد سجل رحلات بعد',
   },
