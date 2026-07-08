@@ -93,6 +93,18 @@ export default function Earnings() {
           <Icon name="edit-2" size={18} color={theme.colors.primary} />
         </Pressable>
 
+        {/* Earnings details (daily/weekly breakdown) */}
+        <Pressable onPress={() => router.push('/(app)/earnings-detail')} style={({ pressed }) => [s.detailsLink, pressed && { opacity: 0.9 }]}>
+          <View style={s.detailsIcon}>
+            <Icon name="bar-chart-2" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.cliqTitle}>{t('driver.earningsDetails')}</Text>
+            <Text style={s.cliqSub}>{t('driver.viewEarningsDetails')}</Text>
+          </View>
+          <Icon name="chevron-left" size={20} color={theme.colors.muted} />
+        </Pressable>
+
         {/* Recent transactions */}
         <Text style={s.section}>{t('driver.recentTransactions')}</Text>
         {loading ? (
@@ -146,6 +158,8 @@ const makeStyles = (t: AppTheme) =>
     withdrawText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onAccent },
 
     cliqCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
+    detailsLink: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
+    detailsIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
     cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     cliqSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
     cliqIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },

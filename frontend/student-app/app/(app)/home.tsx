@@ -11,6 +11,7 @@ import { getCurrentLocation, watchLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
 import { PressableScale } from '../../src/components/kit';
+import { SmartSuggestions } from '../../src/components/SmartSuggestions';
 
 /**
  * Student home — map-first layout: a full-screen live map with a draggable
@@ -158,6 +159,7 @@ export default function Home() {
 
         {/* Body */}
         <View style={s.sheetBody}>
+          <SmartSuggestions />
           <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.searchBtn} scaleTo={0.98}>
             <MaterialIcons name="search" size={24} color={theme.colors.accent} />
             <Text style={s.searchText}>{t('home.searchDestination')}</Text>
