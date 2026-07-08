@@ -12,6 +12,8 @@ import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
+const jod = (fils: number) => (fils / 1000).toFixed(2);
+
 export default function Offers() {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -74,6 +76,23 @@ export default function Offers() {
                 </View>
               </View>
               {trip.scheduled_at && <Text style={s.meta}>{new Date(trip.scheduled_at).toLocaleString(locale)}</Text>}
+              {trip.pricing && (
+                <View style={s.earnings}>
+                  <View style={s.earnRow}>
+                    <Text style={s.earnLabel}>{t('driver.farePerSeat')}</Text>
+                    <Text style={s.earnValue}>{jod(trip.pricing.fare_fils)} د.أ</Text>
+                  </View>
+                  <View style={s.earnRow}>
+                    <Text style={s.earnLabel}>{t('driver.platformCommission')}</Text>
+                    <Text style={[s.earnValue, s.earnMinus]}>- {jod(trip.pricing.commission_fils)} د.أ</Text>
+                  </View>
+                  <View style={s.earnDivider} />
+                  <View style={s.earnRow}>
+                    <Text style={s.earnNetLabel}>{t('driver.yourNetEarnings')}</Text>
+                    <Text style={s.earnNetValue}>{jod(trip.pricing.expected_captain_earnings_fils)} د.أ</Text>
+                  </View>
+                </View>
+              )}
               <Button title={t('driver.acceptOffer')} onPress={() => accept(trip.id)} loading={busy === trip.id} style={s.btn} />
             </Card>
           ))
@@ -93,5 +112,13 @@ const makeStyles = (t: AppTheme) =>
     seats: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
     seatsText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
+    earnings: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: t.spacing.md, marginTop: t.spacing.md, gap: t.spacing.xs },
+    earnRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+    earnLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
+    earnValue: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text },
+    earnMinus: { color: t.colors.textSecondary },
+    earnDivider: { height: StyleSheet.hairlineWidth, backgroundColor: t.colors.hairline, marginVertical: 2 },
+    earnNetLabel: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text },
+    earnNetValue: { fontFamily: t.fontFamily.extrabold, fontSize: 17, color: t.colors.accent },
     btn: { marginTop: t.spacing.sm },
   });

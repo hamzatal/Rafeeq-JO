@@ -172,6 +172,17 @@ export interface Trip {
   ended_at: string | null;
   capacity: number;
   booked_count?: number;
+  /** Transparent fare breakdown + captain earnings preview (from TripResource). */
+  pricing?: {
+    fare_fils: number;
+    base_fare_fils: number;
+    express_fee_fils: number;
+    surge_multiplier: number;
+    commission_fils: number;
+    captain_share_fils: number;
+    riders: number;
+    expected_captain_earnings_fils: number;
+  };
   route?: { id: string; name: string; university_id: string };
   passengers?: TripPassenger[];
 }
