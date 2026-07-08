@@ -61,6 +61,44 @@ export function EmptyState({ icon = 'inbox', title, hint }: { icon?: IconName; t
   );
 }
 
+/** ── Skeleton loading list (card placeholders) ─────────────────────── */
+export function SkeletonList({ rows = 3 }: { rows?: number }) {
+  const t = useTheme();
+  const s = useMemo(() => makeStyles(t), [t]);
+  return (
+    <View>
+      {Array.from({ length: rows }).map((_, i) => (
+        <View key={i} style={s.skelCard}>
+          <View style={s.skelIcon} />
+          <View style={{ flex: 1 }}>
+            <View style={[s.skelLine, { width: '60%' }]} />
+            <View style={[s.skelLine, { width: '40%', marginTop: 8 }]} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** ── Error state (icon + message + retry) ──────────────────────────── */
+export function ErrorState({ title, message, retryLabel, onRetry }: { title: string; message?: string; retryLabel: string; onRetry: () => void }) {
+  const t = useTheme();
+  const s = useMemo(() => makeStyles(t), [t]);
+  return (
+    <View style={s.errorWrap}>
+      <View style={s.errorIcon}>
+        <Icon name="alert-circle" size={28} color={t.colors.danger} />
+      </View>
+      <Text style={s.errorTitle}>{title}</Text>
+      {message ? <Text style={s.errorMsg}>{message}</Text> : null}
+      <Pressable onPress={onRetry} style={({ pressed }) => [s.retryBtn, pressed && s.pressed]}>
+        <Icon name="refresh-cw" size={16} color={t.colors.primary} />
+        <Text style={s.retryText}>{retryLabel}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 /** ── Stat / balance card ───────────────────────────────────────────── */
 export function StatCard({ label, value, icon, onPress }: { label: string; value: string; icon?: IconName; onPress?: () => void }) {
   const t = useTheme();
@@ -106,6 +144,15 @@ const makeStyles = (t: AppTheme) =>
     pressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
     sectionRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.lg, marginBottom: t.spacing.sm },
     section: { fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
+    skelCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
+    skelIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.surfaceAlt },
+    skelLine: { height: 12, borderRadius: 6, backgroundColor: t.colors.surfaceAlt },
+    errorWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: t.spacing['3xl'] },
+    errorIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: t.colors.dangerSoft, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.base },
+    errorTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'center' },
+    errorMsg: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'center', marginTop: 4, maxWidth: 280 },
+    retryBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, marginTop: t.spacing.base, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 9, paddingHorizontal: 18 },
+    retryText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
     empty: { alignItems: 'center', justifyContent: 'center', paddingVertical: t.spacing['3xl'] },
     emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.base },
     emptyTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'center' },

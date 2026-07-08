@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import type { Route, Trip } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, SectionTitle } from '../../src/components/ui';
+import { Card, EmptyState, SectionTitle, SkeletonList, ErrorState } from '../../src/components/ui';
 import { Icon } from '../../src/components/Icon';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
@@ -23,15 +23,19 @@ export default function DriverTrips() {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const [tr, r] = await Promise.all([api.driverTrips.list(), api.catalog.listRoutes()]);
       setTrips(tr);
       setRoutes(r);
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -90,7 +94,9 @@ export default function DriverTrips() {
 
         <SectionTitle title={t('driver.tripsSection')} />
         {loading ? (
-          <Text style={s.meta}>{t('common.loading')}</Text>
+          <SkeletonList rows={3} />
+        ) : loadError ? (
+          <ErrorState title={t('common.error')} message={t('common.loadFailed')} retryLabel={t('common.retry')} onRetry={() => void load()} />
         ) : trips.length === 0 ? (
           <EmptyState icon="navigation" title={t('trips.none')} />
         ) : (

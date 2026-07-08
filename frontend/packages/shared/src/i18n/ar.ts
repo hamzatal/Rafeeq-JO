@@ -17,6 +17,7 @@ export const ar = {
     soon: 'قريباً',
     unlimited: 'غير محدود',
     viewAll: 'عرض الكل',
+    loadFailed: 'تعذّر تحميل البيانات. تحقّق من اتصالك وحاول مجدداً.',
   },
   onboarding: {
     skip: 'تخطّي',
