@@ -34,31 +34,32 @@ export default function Profile() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      {/* Header */}
+      {/* Header — avatar (right) · Rafeeq · bell (left) per Stitch _24 */}
       <View style={s.header}>
-        <Pressable hitSlop={8} style={s.headerBtn}>
-          <Icon name="bell" size={22} color={theme.colors.primary} />
-        </Pressable>
-        <Text style={s.brand}>رفيق</Text>
         <View style={s.avatarSm}>
           <Text style={s.avatarSmText}>{initial}</Text>
         </View>
+        <Text style={s.brand}>رفيق</Text>
+        <Pressable hitSlop={8} style={s.headerBtn}>
+          <Icon name="bell" size={24} color={theme.colors.primary} />
+        </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Profile card */}
+        {/* Profile hero — avatar (right) + verified badge, name/pill to the left */}
         <View style={s.profileCard}>
+          <View style={s.profileBlob} pointerEvents="none" />
+          <View style={s.avatarLg}>
+            <Text style={s.avatarLgText}>{initial}</Text>
+            <View style={s.verifiedBadge}>
+              <Icon name="check" size={12} color="#FFFFFF" />
+            </View>
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={s.name} numberOfLines={1}>{user?.full_name ?? '—'}</Text>
             <View style={s.verifiedPill}>
               <Icon name="check-circle" size={12} color={theme.colors.accent} />
               <Text style={s.verifiedText}>{t('driver.verifiedCaptain')}</Text>
-            </View>
-          </View>
-          <View style={s.avatarLg}>
-            <Text style={s.avatarLgText}>{initial}</Text>
-            <View style={s.verifiedBadge}>
-              <Icon name="check" size={12} color="#FFFFFF" />
             </View>
           </View>
         </View>
@@ -140,25 +141,26 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.primary },
-    avatarSm: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    avatarSmText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.onPrimary },
+    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    avatarSm: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
+    avatarSmText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
-    profileCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.base, backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.lg, ...t.shadow.sm },
-    name: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right' },
-    verifiedPill: { flexDirection: 'row-reverse', alignItems: 'center', alignSelf: 'flex-end', gap: 5, backgroundColor: t.colors.accentSoft, borderRadius: t.radius.full, paddingHorizontal: 10, paddingVertical: 4, marginTop: 8 },
-    verifiedText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.accent },
-    avatarLg: { width: 72, height: 72, borderRadius: 36, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    avatarLgText: { fontFamily: t.fontFamily.extrabold, fontSize: 30, color: t.colors.onPrimary },
-    verifiedBadge: { position: 'absolute', bottom: -2, left: -2, width: 24, height: 24, borderRadius: 12, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.surface },
+    profileCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.lg, backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.surfaceHighest, padding: t.spacing.lg, overflow: 'hidden', ...t.shadow.sm },
+    profileBlob: { position: 'absolute', top: -40, right: -40, width: 128, height: 128, borderRadius: 64, backgroundColor: t.colors.accentBright, opacity: 0.1 },
+    name: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary, textAlign: 'right' },
+    verifiedPill: { flexDirection: 'row-reverse', alignItems: 'center', alignSelf: 'flex-end', gap: 5, backgroundColor: t.colors.surfaceAlt, borderWidth: 1, borderColor: t.colors.accentSoft, borderRadius: t.radius.full, paddingHorizontal: 10, paddingVertical: 4, marginTop: 6 },
+    verifiedText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.accent },
+    avatarLg: { width: 80, height: 80, borderRadius: 40, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.surface, ...t.shadow.md },
+    avatarLgText: { fontFamily: t.fontFamily.extrabold, fontSize: 32, color: t.colors.onPrimary },
+    verifiedBadge: { position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderRadius: 12, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.surface },
 
     statsRow: { flexDirection: 'row-reverse', gap: t.spacing.md, marginTop: t.spacing.md },
     statCard: { flex: 1, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, ...t.shadow.sm },
     statHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
     statLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
-    statValue: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginTop: 6 },
-    statMax: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.muted },
+    statValue: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'right', marginTop: 6 },
+    statMax: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
 
     section: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.lg, marginBottom: t.spacing.sm },
 

@@ -106,20 +106,21 @@ export default function WalletScreen() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      {/* Header — bell · Rafeeq · avatar */}
+      {/* Header — avatar (right) · Rafeeq · bell (left) per Stitch _18 */}
       <View style={s.header}>
-        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={s.headerBtn}>
-          <Icon name="bell" size={22} color={theme.colors.primary} />
-        </Pressable>
-        <Text style={s.brand}>رفيق</Text>
         <Pressable onPress={() => router.push('/(app)/settings')} hitSlop={8} style={s.avatar}>
           <Text style={s.avatarText}>{initial}</Text>
+        </Pressable>
+        <Text style={s.brand}>رفيق</Text>
+        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={s.headerBtn}>
+          <Icon name="bell" size={22} color={theme.colors.primary} />
         </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Balance card */}
+        {/* Balance card — decorative blurred blob top-right per Stitch _18 */}
         <View style={s.balanceCard}>
+          <View style={s.balanceBlob} pointerEvents="none" />
           <Text style={s.balanceLabel}>{t('wallet.balance')}</Text>
           {loading ? (
             <Skeleton width={170} height={44} radius={10} style={{ alignSelf: 'center', marginVertical: 6 }} />
@@ -146,17 +147,19 @@ export default function WalletScreen() {
         ) : (
           <View style={s.cliqCard}>
             <View style={s.cliqHead}>
-              <View style={{ flex: 1 }}>
-                <Text style={s.cliqTitle}>{t('wallet.cliqTitle')}</Text>
-                <Pressable hitSlop={6}>
-                  <Text style={s.cliqLink}>{t('wallet.cliqHowTo')} ؟</Text>
-                </Pressable>
-              </View>
               <View style={s.cliqIcon}>
-                <Icon name="grid" size={22} color={theme.colors.onAccent} />
+                <Icon name="grid" size={22} color={theme.colors.accent} />
+              </View>
+              <View>
+                <Text style={s.cliqTitle}>{t('wallet.cliqTitle')}</Text>
+                <Pressable hitSlop={6} style={s.cliqLinkRow}>
+                  <Text style={s.cliqLink}>{t('wallet.cliqHowTo')}</Text>
+                  <Icon name="help-circle" size={13} color={theme.colors.accent} />
+                </Pressable>
               </View>
             </View>
             <View style={s.amountRow}>
+              <Text style={s.amountCur}>JOD</Text>
               <TextInput
                 value={amount}
                 onChangeText={setAmount}
@@ -166,7 +169,6 @@ export default function WalletScreen() {
                 style={s.amountInput}
                 textAlign="right"
               />
-              <Text style={s.amountCur}>JOD</Text>
             </View>
             <Pressable onPress={createTopup} style={({ pressed }) => [s.cliqBtn, pressed && { opacity: 0.85 }]} disabled={creating}>
               <Icon name="link" size={18} color={theme.colors.primary} />
@@ -195,6 +197,9 @@ export default function WalletScreen() {
         {/* Transactions */}
         <View style={s.txnHead}>
           <Text style={s.sectionTitle}>{t('wallet.transactions')}</Text>
+          <Pressable hitSlop={6}>
+            <Text style={s.viewAll}>{t('common.viewAll')}</Text>
+          </Pressable>
         </View>
         {loading ? (
           <View style={{ gap: theme.spacing.sm }}>
@@ -301,16 +306,18 @@ const makeStyles = (t: AppTheme) =>
     avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.onPrimary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
-    balanceCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.lg, alignItems: 'center', ...t.shadow.md },
+    balanceCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.surfaceHighest, padding: t.spacing.lg, alignItems: 'center', overflow: 'hidden', ...t.shadow.md },
+    balanceBlob: { position: 'absolute', top: -64, right: -64, width: 128, height: 128, borderRadius: 64, backgroundColor: t.colors.onPrimaryMuted, opacity: 0.2 },
     balanceLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
     balanceValue: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: t.colors.primary, marginTop: 4 },
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.primary },
 
     cliqCard: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.xl, padding: t.spacing.lg, marginTop: t.spacing.md },
-    cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, marginBottom: t.spacing.base },
-    cliqTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
-    cliqLink: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.accent, textAlign: 'right', marginTop: 2 },
-    cliqIcon: { width: 48, height: 48, borderRadius: t.radius.md, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
+    cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', gap: t.spacing.sm, marginBottom: t.spacing.base },
+    cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary, textAlign: 'right' },
+    cliqLinkRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 2 },
+    cliqLink: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.accent, textAlign: 'right' },
+    cliqIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.accentBright, alignItems: 'center', justifyContent: 'center' },
     amountRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderRadius: t.radius.md, borderWidth: 1, borderColor: t.colors.hairline, paddingHorizontal: t.spacing.base, height: 54, marginBottom: t.spacing.md },
     amountInput: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text },
     amountCur: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.textSecondary },
@@ -330,7 +337,8 @@ const makeStyles = (t: AppTheme) =>
     rowValue: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text },
 
     sectionTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
-    txnHead: { marginTop: t.spacing.lg, marginBottom: t.spacing.md },
+    viewAll: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.accent },
+    txnHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
     txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginBottom: t.spacing.sm },
     txnIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     txnBody: { flex: 1 },
