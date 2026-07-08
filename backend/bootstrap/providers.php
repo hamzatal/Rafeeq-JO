@@ -4,6 +4,7 @@ use App\Providers\AppServiceProvider;
 use Rafeeq\Core\Providers\CoreServiceProvider;
 use Rafeeq\Infrastructure\Providers\InfrastructureServiceProvider;
 use Rafeeq\Modules\Addresses\Providers\AddressesServiceProvider;
+use Rafeeq\Modules\Ads\Providers\AdsServiceProvider;
 use Rafeeq\Modules\AI\Providers\AIServiceProvider;
 use Rafeeq\Modules\Areas\Providers\AreasServiceProvider;
 use Rafeeq\Modules\Auth\Providers\AuthServiceProvider;
@@ -59,6 +60,7 @@ return [
     CouponsServiceProvider::class,
     TripsServiceProvider::class,
     ZonesServiceProvider::class,
+    AdsServiceProvider::class,
     RideRequestsServiceProvider::class,
     MatchingServiceProvider::class,
     WalletServiceProvider::class,
