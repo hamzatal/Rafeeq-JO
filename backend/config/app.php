@@ -3,6 +3,10 @@
 return [
     'name' => env('APP_NAME', 'Rafeeq'),
     'env' => env('APP_ENV', 'production'),
+
+    // Deployed release version — surfaced by the /api/v1/health probe so ops can
+    // confirm which build is live. Set APP_VERSION at deploy time (e.g. git tag).
+    'version' => env('APP_VERSION', '1.0.0'),
     'debug' => (bool) env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost'),
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),

@@ -13,6 +13,7 @@ import { Icon } from '../../src/components/Icon';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
 import { PressableScale } from '../../src/components/kit';
 import { AdBanner } from '../../src/components/AdBanner';
+import { SmartSuggestions } from '../../src/components/SmartSuggestions';
 
 function greetingKey(): 'goodMorning' | 'goodAfternoon' | 'goodEvening' {
   const h = new Date().getHours();
@@ -136,6 +137,9 @@ export default function Home() {
             </View>
           </View>
         </PressableScale>
+
+        {/* AI-powered context-aware ride suggestions */}
+        <SmartSuggestions />
 
         {/* Sponsored ad slot (managed from the admin dashboard) */}
         <AdBanner placement="student_home" />

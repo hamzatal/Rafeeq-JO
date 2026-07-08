@@ -1,6 +1,7 @@
 # Production image for the Rafeeq Laravel API.
 # Uses serversideup/php which bundles a hardened nginx + php-fpm + healthcheck.
-FROM serversideup/php:8.2-fpm-nginx AS base
+# PHP 8.4 to match composer.json (^8.4) and the CI matrix.
+FROM serversideup/php:8.4-fpm-nginx AS base
 
 USER root
 RUN install-php-extensions pdo_pgsql pgsql redis gd intl bcmath pcntl
