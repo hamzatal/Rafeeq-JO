@@ -180,6 +180,11 @@ export const en: Translations = {
     legal: 'Legal',
     privacy: 'Privacy policy',
     terms: 'Terms & conditions',
+    settingsSupport: 'Settings & support',
+    manageAccount: 'Manage your account and get the help you need.',
+    supportDesc: 'Our team is available around the clock to answer your questions and provide instant help.',
+    chatWithUs: 'Chat with us',
+    avgResponse: 'Average response time: under a minute',
   },
   driver: {
     dashboard: 'Driver dashboard',
