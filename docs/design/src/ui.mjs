@@ -1,0 +1,145 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Rafeeq DS v2 «مسار» — mockup component library.
+   Screens are declared as data and assembled from these helpers, so the whole
+   spec is one source of truth and can be re-rendered after any token change.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// ── icons (Lucide paths, 1.75 stroke) ────────────────────────────────────
+const P = {
+  home:'M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z',
+  car:'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 12v4c0 .6.4 1 1 1h2|M9 17h6|M9 17a2 2 0 11-4 0 2 2 0 014 0|M19 17a2 2 0 11-4 0 2 2 0 014 0',
+  wallet:'M2 8a2 2 0 012-2h16a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2z|M2 11h20',
+  user:'M12 8a4 4 0 100-8 4 4 0 000 8z|M4 21a8 8 0 0116 0',
+  bell:'M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9|M13.7 21a2 2 0 01-3.4 0',
+  shield:'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z',
+  msg:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',
+  map:'M9 3l6 3 6-3v15l-6 3-6-3-6 3V6z|M9 3v15M15 6v15',
+  school:'M3 9l9-5 9 5-9 5z|M6 11v6c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-6',
+  clock:'M12 21a9 9 0 100-18 9 9 0 000 18z|M12 7v5l3.5 2',
+  search:'M11 18a7 7 0 100-14 7 7 0 000 14z|M20 20l-4.3-4.3',
+  chev:'M15 18l-6-6 6-6',
+  chevL:'M9 18l6-6-6-6',
+  back:'M15 18l-6-6 6-6',
+  plus:'M12 5v14M5 12h14',
+  star:'M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.5 2 9.5l7-1z',
+  file:'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z|M14 2v6h6',
+  gift:'M20 12v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8|M2 7h20v5H2z|M12 22V7',
+  phone:'M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012 4.2 2 2 0 014 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.6a2 2 0 01-.5 2.1L8.1 9.5a16 16 0 006 6l1.1-1.1a2 2 0 012.1-.5c.8.3 1.7.6 2.6.7A2 2 0 0122 16.9z',
+  logout:'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4|M16 17l5-5-5-5|M21 12H9',
+  globe:'M12 21a9 9 0 100-18 9 9 0 000 18z|M3 12h18M12 3a15 15 0 010 18 15 15 0 010-18',
+  trash:'M3 6h18|M8 6V4h8v2|M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6',
+  crosshair:'M12 21a9 9 0 100-18 9 9 0 000 18z|M12 15a3 3 0 100-6 3 3 0 000 6z|M12 1v4M12 19v4M1 12h4M19 12h4',
+  sparkle:'M12 3v2M12 19v2M5 12H3M21 12h-2M7 7L5.5 5.5M18.5 18.5L17 17M17 7l1.5-1.5M5.5 18.5L7 17|M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z',
+  send:'M22 2L11 13M22 2l-7 20-4-9-9-4z',
+  cam:'M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z|M12 17a4 4 0 100-8 4 4 0 000 8z',
+  truck:'M1 3h15v13H1z|M16 8h4l3 3v5h-7|M5.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z|M18.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z',
+  cash:'M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6',
+  chart:'M3 3v18h18|M7 15l4-5 3 3 4-6',
+  power:'M18.4 6.6a9 9 0 11-12.7 0|M12 2v8',
+  alert:'M12 3l9.5 17H2.5z|M12 9v4M12 17h.01',
+  check:'M20 6L9 17l-5-5',
+  x:'M18 6L6 18M6 6l12 12',
+  route:'M6 19a3 3 0 100-6 3 3 0 000 6z|M18 11a3 3 0 100-6 3 3 0 000 6z|M9 16h5a3 3 0 000-6H9',
+  lock:'M5 11h14v10H5z|M8 11V7a4 4 0 018 0v4',
+  headset:'M3 18v-6a9 9 0 0118 0v6|M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z',
+  id:'M2 5h20v14H2z|M8 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z|M4 17c.7-1.8 2.2-3 4-3s3.3 1.2 4 3M15 9h4M15 13h4',
+};
+export function ic(n, { s = 20, c = '#39415A', w = 1.75 } = {}) {
+  const paths = (P[n] || '').split('|').map(d => `<path d="${d}"/>`).join('');
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+}
+
+// ── chrome ───────────────────────────────────────────────────────────────
+export function statusBar(dark = false) {
+  const f = dark ? '#fff' : '#0E1524';
+  return `<div class="sb${dark ? ' on-dark' : ''}"><span>9:41</span><div class="rr">
+<svg width="16" height="10" viewBox="0 0 17 11" fill="${f}"><rect y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" width="3" height="11" rx="1"/></svg>
+<svg width="22" height="11" viewBox="0 0 24 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3" stroke="${f}" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="${f}"/><path d="M22 4v4" stroke="${f}" stroke-width="2" stroke-linecap="round" opacity=".4"/></svg>
+</div></div>`;
+}
+export function navBar(title, { back = true, action = '' } = {}) {
+  return `<div class="nav-h">${back ? `<div style="width:34px;height:34px;border-radius:10px;background:var(--n100);display:grid;place-items:center">${ic('back', { s: 18, c: '#39415A', w: 2 })}</div>` : ''}
+<span class="t-title-md">${title}</span><div class="sp"></div>${action}</div>`;
+}
+export function tabBar(active, set = 'student') {
+  const tabs = set === 'student'
+    ? [['home', 'الرئيسية'], ['car', 'رحلاتي'], ['wallet', 'المحفظة'], ['user', 'حسابي']]
+    : [['chart', 'الكوكبِت'], ['car', 'رحلاتي'], ['cash', 'أرباحي'], ['user', 'حسابي']];
+  return `<div class="tabs">${tabs.map(([n, l], i) => {
+    const on = i === active;
+    return `<div class="tab${on ? ' on' : ''}"><div class="tic">${ic(n, { s: 19, c: on ? '#1259E3' : '#67728A', w: 2 })}</div><span>${l}</span></div>`;
+  }).join('')}</div>`;
+}
+
+// ── pieces ───────────────────────────────────────────────────────────────
+export function pill(text, tone = 'mute', glyph = '') {
+  const g = glyph ? `<span class="i i-${glyph}"></span>` : '';
+  return `<span class="pill pill-${tone}">${g}${text}</span>`;
+}
+export function row({ icon, tone = '', title, sub = '', trail = '', chev = true, iconColor = '#1259E3' }) {
+  return `<div class="lr">
+${icon ? `<div class="ic ${tone}">${ic(icon, { s: 18, c: iconColor })}</div>` : ''}
+<div class="col" style="gap:1px;flex:1;min-width:0">
+  <span class="t-title-sm bold">${title}</span>
+  ${sub ? `<span class="t-caption" style="color:var(--n500)">${sub}</span>` : ''}
+</div>${trail}${chev ? `<span class="chev">${ic('chev', { s: 17, c: '#96A0B2', w: 2 })}</span>` : ''}</div>`;
+}
+export function money(v, { size = 't-title-md', color = 'var(--n900)', cur = 'د.أ' } = {}) {
+  return `<span class="row" style="align-items:baseline;gap:4px"><span class="${size} num" style="color:${color}">${v}</span><span class="t-caption" style="color:var(--n500);unicode-bidi:isolate">${cur}</span></span>`;
+}
+export function btn(label, variant = 'primary', extra = '') {
+  return `<button class="btn btn-${variant}" ${extra}>${label}</button>`;
+}
+export function field(label, value, { ph = false, state = '', hint = '', icon = '' } = {}) {
+  return `<div class="col" style="gap:6px">
+<span class="t-label" style="color:var(--n600)">${label}</span>
+<div class="input ${ph ? 'ph' : ''} ${state}" style="gap:9px">${icon ? ic(icon, { s: 17, c: '#67728A' }) : ''}<span style="flex:1">${value}</span></div>
+${hint ? `<span class="row t-caption" style="gap:5px;color:var(--${state === 'err' ? 'bad' : 'n500'})">${state === 'err' ? `<span class="i i-bad"></span>` : ''}${hint}</span>` : ''}</div>`;
+}
+export function seg(items, active) {
+  return `<div class="seg">${items.map((t, i) => `<div class="${i === active ? 'on' : ''}">${t}</div>`).join('')}</div>`;
+}
+
+/** A light, clean map surface with roads, blocks, a route and pins. */
+export function mapBg({ h = 844, route = '', pins = [], live = null, eta = '' } = {}) {
+  return `<div class="map" style="height:${h}px">
+  <div class="grn" style="left:-20px;top:${h * .15}px;width:120px;height:100px"></div>
+  <div class="grn" style="right:-28px;top:${h * .48}px;width:140px;height:110px"></div>
+  <div class="blk" style="left:32px;top:${h * .30}px;width:74px;height:58px"></div>
+  <div class="blk" style="left:124px;top:${h * .28}px;width:60px;height:50px"></div>
+  <div class="blk" style="right:38px;top:${h * .25}px;width:82px;height:66px"></div>
+  <div class="blk" style="left:54px;top:${h * .52}px;width:92px;height:54px"></div>
+  <div class="blk" style="right:48px;top:${h * .56}px;width:68px;height:60px"></div>
+  <div class="rdm" style="left:0;top:${h * .38}px;width:390px;height:10px"></div>
+  <div class="rdm" style="left:184px;top:${h * .10}px;width:10px;height:${h * .62}px"></div>
+  <div class="rd" style="left:0;top:${h * .245}px;width:390px;height:5px"></div>
+  <div class="rd" style="left:84px;top:${h * .13}px;width:5px;height:${h * .58}px"></div>
+  <div class="rd" style="right:92px;top:${h * .16}px;width:5px;height:${h * .52}px"></div>
+  ${route ? `<svg style="position:absolute;inset:0" width="390" height="${h}"><path class="rt-c" d="${route}"/><path class="rt" d="${route}"/></svg>` : ''}
+  ${pins.map(p => `<div class="pin" style="left:${p.x}px;top:${p.y}px"><svg width="28" height="37" viewBox="0 0 30 40"><path d="M15 1C7.3 1 1 7.3 1 15c0 10 14 24 14 24s14-14 14-24C29 7.3 22.7 1 15 1z" fill="${p.c}" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg></div>`).join('')}
+  ${live ? `<div class="disc" style="left:${live.x}px;top:${live.y}px"><svg width="19" height="19" viewBox="0 0 24 24" fill="#0E1524"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1H8v1a1 1 0 01-1 1H6a1 1 0 01-1-1z"/></svg></div>` : ''}
+  ${eta ? `<div class="eta" style="left:${live.x}px;top:${live.y + 20}px">${eta}</div>` : ''}
+</div>`;
+}
+
+// ── sheet scaffolding ────────────────────────────────────────────────────
+export function frame(inner) { return `<div class="frame">${inner}</div>`; }
+export function cell(n, title, desc, inner) {
+  return `<div class="cell"><div class="cap"><div><span class="n">${n}</span><span class="t">${title}</span></div>
+<div class="d">${desc}</div></div>${frame(inner)}</div>`;
+}
+export function page({ title, sub, width = 1420, cells = [], notes = [], extra = '' }) {
+  return `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+<link rel="stylesheet" href="kit.css"><style>body{width:${width}px}</style></head><body><div class="sheet-body">
+<div class="sheet-h">
+  <div class="mk"><svg width="30" height="30" viewBox="0 0 96 96" fill="none">
+    <circle cx="70" cy="26" r="8.5" stroke="#fff" stroke-width="7"/>
+    <path d="M70 43.5 C70 58 60 68 45 72" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="27" cy="73.5" r="7.5" fill="#fff"/></svg></div>
+  <div><h1>${title}</h1><div class="sub">${sub}</div></div>
+</div>
+${extra}
+<div class="grid">${cells.join('')}</div>
+${notes.map(n => `<div class="note ${n.t || ''}">${n.b}</div>`).join('')}
+</div></body></html>`;
+}
