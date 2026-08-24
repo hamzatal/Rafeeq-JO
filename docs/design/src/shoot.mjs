@@ -1,8 +1,10 @@
 import { chromium } from 'playwright';
 import { readdirSync, mkdirSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const OUT = resolve('/projects/sandbox/Rafeeq-JO/docs/design/identity');
+const HERE = dirname(fileURLToPath(import.meta.url));
+const OUT  = resolve(HERE, '../identity');
 mkdirSync(OUT, { recursive: true });
 
 // name -> viewport
@@ -28,9 +30,9 @@ for (const [name, target] of PAGES) {
   const { width, height, dsf } = TARGETS[target];
   const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: dsf });
   const page = await ctx.newPage();
-  await page.goto('file:///projects/sandbox/.shots/' + name + '.html', { waitUntil: 'networkidle' });
+  await page.goto('file://' + resolve(HERE, name + '.html'), { waitUntil: 'networkidle' });
   await page.waitForTimeout(1200); // let webfont settle
-  await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true });
+  await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: target !== 'phone' });
   console.log('shot', name, `${width}x${height}@${dsf}x`);
   await ctx.close();
 }
