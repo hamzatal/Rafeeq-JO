@@ -1,3 +1,12 @@
+
+
+
+git fetch origin
+git reset --hard origin/foundation/phase-0-1
+
+
+
+
 <div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:002045,100:006A65&height=210&section=header&text=Rafeeq%20%7C%20%D8%B1%D9%81%D9%8A%D9%82&fontColor=ffffff&fontSize=68&fontAlignY=38&desc=Smart%20University%20Mobility%20%26%20Services%20Platform&descSize=18&descAlignY=60" alt="Rafeeq" width="100%" />
