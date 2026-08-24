@@ -1,0 +1,150 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+<link rel="stylesheet" href="tokens.css">
+<style>
+body{padding:40px 48px;background:var(--n50)}
+.hdr{display:flex;align-items:flex-end;gap:20px;padding-bottom:20px;border-bottom:2px solid var(--n200);margin-bottom:32px}
+.mark{width:56px;height:56px;border-radius:16px;background:var(--b600);display:grid;place-items:center;
+  color:#fff;font:700 30px 'IBM Plex Sans Arabic'}
+h2{font-size:13px;font-weight:700;color:var(--n500);letter-spacing:.1em;margin:32px 0 14px;text-transform:uppercase}
+.grid{display:grid;gap:10px}
+.sw{border-radius:12px;padding:12px 14px;height:88px;display:flex;flex-direction:column;justify-content:space-between}
+.sw .k{font:700 12px 'IBM Plex Sans Arabic'}
+.sw .v{font:400 11px/1.4 ui-monospace,monospace;opacity:.85}
+.ratio{font:700 11px 'IBM Plex Sans Arabic';padding:2px 6px;border-radius:6px;align-self:flex-start}
+.tbl{width:100%;border-collapse:collapse;background:var(--n0);border:1px solid var(--n200);border-radius:16px;overflow:hidden}
+.tbl th{background:var(--n50);color:var(--n700);font:700 11px 'IBM Plex Sans Arabic';padding:10px 14px;text-align:right;
+  border-bottom:1px solid var(--n200);letter-spacing:.06em}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--n100);font-size:13px}
+.tbl tr:last-child td{border-bottom:none}
+.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--n600)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.chk{color:var(--ok);font-weight:700}
+.cross{color:var(--bad);font-weight:700}
+.elev{height:96px;border-radius:16px;display:grid;place-items:center;font:500 13px 'IBM Plex Sans Arabic';color:var(--n600)}
+.note{background:var(--b50);border-right:3px solid var(--b600);border-radius:8px;padding:12px 14px;font-size:13px;line-height:22px;color:var(--b900)}
+</style></head><body>
+
+<div class="hdr">
+  <div class="mark">ر</div>
+  <div>
+    <div class="t-display">هوية رفيق البصرية — «مسار»</div>
+    <div class="t-body" style="color:var(--n600);margin-top:2px">Design System v2 · الأساسيات · فاتح فقط · كل قيمة مفحوصة بحساب WCAG</div>
+  </div>
+  <div class="sp"></div>
+  <div class="col" style="align-items:flex-start;gap:6px">
+    <span class="pill pill-ok"><span class="i i-ok"></span>كل النصوص تعبر AA</span>
+    <span class="pill pill-info">3 أقطار · 7 أحجام خط · عائلة أيقونات واحدة</span>
+  </div>
+</div>
+
+<h2>سلّم اللون الأساسي — أزرق رفيق (الرقم = نسبة التباين على الأبيض)</h2>
+<div class="grid" style="grid-template-columns:repeat(10,1fr)">
+  <div class="sw" style="background:var(--b50);color:var(--b900)"><div><div class="k">50</div><div class="v hex"><span class="hex">#EFF6FF</span></div></div><span class="ratio hex" style="background:rgba(0,0,0,.06)">1.09</span></div>
+  <div class="sw" style="background:var(--b100);color:var(--b900)"><div><div class="k">100</div><div class="v hex">#DBEAFE</div></div><span class="ratio hex" style="background:rgba(0,0,0,.06)">1.22</span></div>
+  <div class="sw" style="background:var(--b200);color:var(--b900)"><div><div class="k">200</div><div class="v hex">#BFDBFE</div></div><span class="ratio hex" style="background:rgba(0,0,0,.06)">1.42</span></div>
+  <div class="sw" style="background:var(--b300);color:var(--b900)"><div><div class="k">300</div><div class="v hex">#8EC1FD</div></div><span class="ratio hex" style="background:rgba(0,0,0,.06)">1.88</span></div>
+  <div class="sw" style="background:var(--b400);color:var(--n900)"><div><div class="k">400</div><div class="v hex">#5AA2FB</div></div><span class="ratio hex" style="background:rgba(0,0,0,.06)">2.63</span></div>
+  <div class="sw" style="background:var(--b500);color:#fff"><div><div class="k">500</div><div class="v hex">#2E82F6</div></div><span class="ratio hex" style="background:rgba(255,255,255,.2)">3.72</span></div>
+  <div class="sw" style="background:var(--b600);color:#fff;outline:3px solid var(--b900);outline-offset:2px"><div><div class="k row" style="gap:4px"><span class="i i-star" style="width:11px;height:11px"></span>600</div><div class="v hex"><span class="hex">#1259E3</span></div></div><span class="ratio hex" style="background:rgba(255,255,255,.25)">5.89</span></div>
+  <div class="sw" style="background:var(--b700);color:#fff"><div><div class="k">700</div><div class="v hex">#0E47B4</div></div><span class="ratio hex" style="background:rgba(255,255,255,.2)">8.14</span></div>
+  <div class="sw" style="background:var(--b800);color:#fff"><div><div class="k">800</div><div class="v hex">#0F3A8C</div></div><span class="ratio hex" style="background:rgba(255,255,255,.2)">10.5</span></div>
+  <div class="sw" style="background:var(--b900);color:#fff"><div><div class="k">900</div><div class="v hex">#122F6B</div></div><span class="ratio hex" style="background:rgba(255,255,255,.2)">12.8</span></div>
+</div>
+<div class="note" style="margin-top:12px">
+  <b>600 هو المرساة</b> — <span class="hex">5.89:1</span> في <b>الاتجاهين</b>: يعمل كنص على أبيض <b>وكحشوة تحمل نصاً أبيض</b>. هذا ما لم يقدر عليه الكحلي القديم (<span class="hex">16.25:1</span> = أسود تقريباً، حشوة فقط).<br>
+  <b>التراتُب المحلول:</b> حشوة 600 مقابل حشوة 50 = <b><span class="hex">5.41:1</span></b> — الهوية القديمة كانت <span class="hex">2.51:1</span> بين الكحلي والتيل، أي بلا تراتُب.
+</div>
+
+<div class="two" style="margin-top:32px">
+<div>
+  <h2>الرمادي — 12 درجة</h2>
+  <div class="grid" style="grid-template-columns:repeat(6,1fr)">
+    <div class="sw" style="background:var(--n0);color:var(--n900);border:1px solid var(--n200);height:72px"><div><div class="k">0</div><div class="v hex">FFFFFF</div></div></div>
+    <div class="sw" style="background:var(--n25);color:var(--n900);height:72px"><div><div class="k">25</div><div class="v hex">F9FAFB</div></div></div>
+    <div class="sw" style="background:var(--n50);color:var(--n900);border:1px solid var(--n200);height:72px"><div><div class="k row" style="gap:4px"><span class="i i-star-b" style="width:11px;height:11px"></span>50</div><div class="v hex">F2F5F9</div></div></div>
+    <div class="sw" style="background:var(--n100);color:var(--n900);height:72px"><div><div class="k">100</div><div class="v hex">E9EDF4</div></div></div>
+    <div class="sw" style="background:var(--n200);color:var(--n900);height:72px"><div><div class="k row" style="gap:4px"><span class="i i-star-b" style="width:11px;height:11px"></span>200</div><div class="v hex">DDE3EC</div></div></div>
+    <div class="sw" style="background:var(--n300);color:var(--n900);height:72px"><div><div class="k">300</div><div class="v hex">C6CEDA</div></div></div>
+    <div class="sw" style="background:var(--n400);color:var(--n900);height:72px"><div><div class="k">400</div><div class="v hex">96A0B2</div></div></div>
+    <div class="sw" style="background:var(--n500);color:#fff;height:72px"><div><div class="k">500</div><div class="v hex">67728A</div></div></div>
+    <div class="sw" style="background:var(--n600);color:#fff;height:72px"><div><div class="k">600</div><div class="v hex">4E5872</div></div></div>
+    <div class="sw" style="background:var(--n700);color:#fff;height:72px"><div><div class="k row" style="gap:4px"><span class="i i-star" style="width:11px;height:11px"></span>700</div><div class="v hex">39415A</div></div></div>
+    <div class="sw" style="background:var(--n800);color:#fff;height:72px"><div><div class="k">800</div><div class="v hex">232939</div></div></div>
+    <div class="sw" style="background:var(--n900);color:#fff;height:72px"><div><div class="k row" style="gap:4px"><span class="i i-star" style="width:11px;height:11px"></span>900</div><div class="v hex">0E1524</div></div></div>
+  </div>
+  <div class="note" style="margin-top:12px">
+    <b>الخلفية 50 مقابل البطاقة 0 = <span class="hex">1.09:1</span>، زائد حدّ حقيقي 200 = <span class="hex">1.29:1</span>.</b><br>
+    القديم كان <span class="hex">1.05:1</span> <b>بلا حدّ فعّال</b> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:inline-block;vertical-align:-2px;opacity:.55"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> البطاقات غير مرئية، والاعتماد على ظل 5% يختفي في الشمس.
+  </div>
+</div>
+<div>
+  <h2>الدلالات + لون «الحيّ»</h2>
+  <div class="grid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="sw" style="background:var(--ok);color:#fff"><div><div class="k">نجاح</div><div class="v hex">#047857</div></div><span class="ratio hex" style="background:rgba(255,255,255,.2)">5.48</span><span class="i i-ok-w" style="position:absolute"></span></div>
+    <div class="sw" style="background:var(--bad);color:#fff"><div><div class="k">خطأ</div><div class="v hex">#D92D20</div></div><span class="ratio hex" style="background:rgba(255,255,255,.2)">4.83</span></div>
+    <div class="sw" style="background:var(--warn);color:#fff"><div><div class="k">تحذير</div><div class="v hex"><span class="hex">#B45309</span></div></div><span class="ratio hex" style="background:rgba(255,255,255,.2)">5.02</span></div>
+    <div class="sw" style="background:var(--live);color:var(--n900)"><div><div class="k">الحيّ · خرائط فقط</div><div class="v hex">#F59E0B</div></div><span class="ratio hex" style="background:rgba(0,0,0,.12)">8.49 بنص داكن</span></div>
+  </div>
+  <div class="note" style="margin-top:12px;background:var(--bad-soft);border-right-color:var(--bad);color:#7A1710">
+    <b>إصلاح خطأ حقيقي:</b> التحذير القديم <span class="mono hex">#F79009</span> = <b><span class="hex">2.35:1</span></b> كنص <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:inline-block;vertical-align:-2px;opacity:.55"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> <b>يفشل AA</b>، وهو مستخدم في كل شارة «قيد الانتظار» في التطبيقات الثلاثة. البديل <span class="mono hex">#B45309</span> = <span class="hex">5.02:1</span>.
+  </div>
+  <div class="note" style="margin-top:10px;background:var(--warn-soft);border-right-color:var(--live);color:#7C4A03">
+    <b>قاعدة «الحيّ»:</b> يُستخدم <b>على الخرائط فقط</b> (علامة الكابتن · شارة ETA · مؤشّر متصل)، ويحمل <b>نصاً داكناً دائماً</b> — الأبيض عليه 2.15:1 وفاشل. ممنوع في الأزرار والنماذج.
+  </div>
+</div>
+</div>
+
+<div class="two" style="margin-top:32px">
+<div>
+  <h2>مقياس الطباعة — 7 خطوات، ولا رقم غيرها</h2>
+  <table class="tbl">
+    <tr><th>التوكن</th><th>الحجم/السطر</th><th>الوزن</th><th>مثال</th></tr>
+    <tr><td class="mono">display</td><td class="mono">30/38</td><td class="mono">700</td><td class="t-display">١٢٪ خصم</td></tr>
+    <tr><td class="mono">title-lg</td><td class="mono">24/32</td><td class="mono">700</td><td class="t-title-lg">رحلاتي</td></tr>
+    <tr><td class="mono">title-md</td><td class="mono">20/28</td><td class="mono">700</td><td class="t-title-md">إلى أين؟</td></tr>
+    <tr><td class="mono">title-sm</td><td class="mono">17/24</td><td class="mono">500</td><td class="t-title-sm">جامعة اليرموك</td></tr>
+    <tr><td class="mono">body</td><td class="mono">15/24</td><td class="mono">400</td><td class="t-body">اختر نقطة الالتقاط من الخريطة</td></tr>
+    <tr><td class="mono">label</td><td class="mono">13/18</td><td class="mono">500</td><td class="t-label">الرصيد المتاح</td></tr>
+    <tr><td class="mono">caption</td><td class="mono">11/16</td><td class="mono">400</td><td class="t-caption">قبل ٣ دقائق</td></tr>
+  </table>
+  <div class="note" style="margin-top:12px">
+    <b>الخط: IBM Plex Sans Arabic — يبقى.</b> لكن نُصلح العطب: <span class="mono ltr">extrabold</span> كان = <span class="mono">bold</span> حرفياً بينما مستخدم في 40+ موضعاً <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:inline-block;vertical-align:-2px;opacity:.55"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> أعلى درجة عناوين غير موجودة. الآن <b>3 أوزان فقط: 400 · 500 · 700</b>.<br>
+    <b>القديم كان فيه 7 أحجام خارج المقياس</b> (26 · 22 · 17 · 15 · 13 · 30 · 11) <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:inline-block;vertical-align:-2px;opacity:.55"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> ولا شي يتراصف.<br>
+    <b>كل مبلغ مالي بـ</b> <span class="mono ltr">tabular-nums</span> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:inline-block;vertical-align:-2px;opacity:.55"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> <span class="num" style="font-weight:700">12.500 / 8.750 / 24.000</span> تتراصف عمودياً.
+  </div>
+</div>
+<div>
+  <h2>الأقطار والعمق — قاعدة واحدة تحلّ «مش مرتب»</h2>
+  <div class="row" style="gap:12px;margin-bottom:18px">
+    <div style="flex:1;height:72px;background:var(--b100);border-radius:12px;display:grid;place-items:center;font:700 13px 'IBM Plex Sans Arabic';color:var(--b900)">12 · تحكّم</div>
+    <div style="flex:1;height:72px;background:var(--b100);border-radius:16px;display:grid;place-items:center;font:700 13px 'IBM Plex Sans Arabic';color:var(--b900)">16 · بطاقة</div>
+    <div style="flex:1;height:72px;background:var(--b100);border-radius:24px;display:grid;place-items:center;font:700 13px 'IBM Plex Sans Arabic';color:var(--b900)">24 · شيت</div>
+    <div style="flex:1;height:72px;background:var(--b100);border-radius:9999px;display:grid;place-items:center;font:700 13px 'IBM Plex Sans Arabic';color:var(--b900)">full · حبّة</div>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="elev" style="background:var(--n50);border:1px dashed var(--n300)">L0 · canvas</div>
+    <div class="elev card">L1 · حدّ<br><span class="t-caption" style="color:var(--n500)">بلا ظل</span></div>
+    <div class="elev float">L2 · ظل<br><span class="t-caption" style="color:var(--n500)">بلا حدّ</span></div>
+    <div class="elev" style="background:var(--n0);box-shadow:var(--sh-lg);border-radius:24px">L3 · طبقة</div>
+  </div>
+  <div class="note" style="margin-top:14px;background:var(--ok-soft);border-right-color:var(--ok);color:#04503A">
+    <b>القاعدة الحاكمة: حدّ <u>أو</u> ظل — أبداً الاثنان معاً.</b><br>
+    الحدّ = «على السطح». الظل = «يطفو فوق السطح».<br>
+    الكود الحالي فيه <b>4 أنماط مختلفة لرسم بطاقة</b> على نفس الشاشة (ظل بلا حدّ · حدّ+ظل · حدّ أبيض شفاف · حشوة بلا شيء) وأقطار 16 و24 و28 مخلوطة — <b>وهذا بالضبط سبب إحساس «التخبيص»</b>.
+  </div>
+</div>
+</div>
+
+<h2 style="margin-top:34px">المسافات — أساس 4، سبع قيم</h2>
+<div class="row" style="gap:10px;align-items:flex-end">
+  <div class="col" style="align-items:center;gap:6px"><div style="width:4px;height:34px;background:var(--b600);border-radius:2px"></div><span class="t-caption">4</span></div>
+  <div class="col" style="align-items:center;gap:6px"><div style="width:8px;height:34px;background:var(--b600);border-radius:2px"></div><span class="t-caption">8</span></div>
+  <div class="col" style="align-items:center;gap:6px"><div style="width:12px;height:34px;background:var(--b600);border-radius:2px"></div><span class="t-caption">12</span></div>
+  <div class="col" style="align-items:center;gap:6px"><div style="width:16px;height:34px;background:var(--b600);border-radius:2px"></div><span class="t-caption">16</span></div>
+  <div class="col" style="align-items:center;gap:6px"><div style="width:24px;height:34px;background:var(--b600);border-radius:2px"></div><span class="t-caption">24</span></div>
+  <div class="col" style="align-items:center;gap:6px"><div style="width:32px;height:34px;background:var(--b600);border-radius:2px"></div><span class="t-caption">32</span></div>
+  <div class="col" style="align-items:center;gap:6px"><div style="width:48px;height:34px;background:var(--b600);border-radius:2px"></div><span class="t-caption">48</span></div>
+  <div style="margin-inline-start:28px" class="t-body">هامش الشاشة (موبايل) <b>20</b> · هامش الصفحة (ويب) <b>32</b> · داخل البطاقة <b>16</b> · بين البطاقات <b>12</b> · بين الأقسام <b>24</b></div>
+</div>
+
+</body></html>

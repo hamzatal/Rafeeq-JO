@@ -415,6 +415,14 @@ export interface Complaint {
   created_at: string | null;
   reporter?: { id: string; name: string };
   against?: { id: string; name: string; status: string } | null;
+  /** AI safety-triage of the description (best-effort; null when GPT disabled). */
+  ai_report?: {
+    severity?: string;
+    summary?: string;
+    key_points?: string[];
+    recommended_action?: string;
+    confidence?: number;
+  } | null;
 }
 
 
@@ -478,6 +486,10 @@ export interface LostFoundItem {
   location: string | null;
   status: LostFoundStatus;
   created_at: string | null;
+  /** AI semantic-match score (0-100) — present only on candidate results. */
+  ai_confidence?: number | null;
+  /** Short Arabic reason for the AI match — present only on candidate results. */
+  ai_match_reason?: string | null;
 }
 
 export type ExchangeType = 'book' | 'notes' | 'tool' | 'other';

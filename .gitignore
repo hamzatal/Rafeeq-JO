@@ -78,3 +78,4 @@ backend/database/*.sqlite
 # ───────── Design reference archives (not source) ─────────
 *.zip
 stitch_*/
+stitch-ref/

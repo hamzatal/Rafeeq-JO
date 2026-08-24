@@ -11,12 +11,22 @@ export interface ThemeColors {
   accentSoft: string;
   onPrimary: string;
   onAccent: string;
+  /** Bright teal (Stitch secondary-fixed #6FF7EE) — AI accents, highlight text on navy. */
+  accentBright: string;
+  /** Navy container tone (Stitch primary-container #1A365D) — gradients, layered navy chrome. */
+  primaryContainer: string;
+  /** Muted light-blue text/icon ON navy surfaces (Stitch inverse-primary #ADC7F7). */
+  onPrimaryMuted: string;
   background: string;
   surface: string;
   card: string;
   elevated: string;
   /** Subtle tinted container (inputs, quiet tiles) — lavender on light, deep slate on dark. */
   surfaceAlt: string;
+  /** Material surface-container-high (#DEE8FF) — quick-action icon circles, tiles. */
+  surfaceHigh: string;
+  /** Material surface-container-highest / surface-variant (#D8E3FA) — pressed/selected tints. */
+  surfaceHighest: string;
   text: string;
   textSecondary: string;
   muted: string;
@@ -66,12 +76,17 @@ const light: ThemeColors = {
   accentSoft: hexToRgba(TEAL, 0.12),
   onPrimary: '#FFFFFF',
   onAccent: '#FFFFFF',
+  accentBright: '#6FF7EE',
+  primaryContainer: NAVY_CONTAINER,
+  onPrimaryMuted: '#ADC7F7',
   textInverse: '#FFFFFF',
   background: '#F9F9FF',
   surface: '#FFFFFF',
   card: '#FFFFFF',
   elevated: '#FFFFFF',
   surfaceAlt: '#F0F3FF',
+  surfaceHigh: '#DEE8FF',
+  surfaceHighest: '#D8E3FA',
   text: '#111C2C',
   textSecondary: '#43474E',
   muted: '#74777F',
@@ -101,12 +116,17 @@ const dark: ThemeColors = {
   accentSoft: hexToRgba(DARK_TEAL, 0.18),
   onPrimary: '#FFFFFF',
   onAccent: '#04211F',
+  accentBright: '#4EDBD2',
+  primaryContainer: '#22406E',
+  onPrimaryMuted: '#ADC7F7',
   textInverse: '#FFFFFF',
   background: '#0E1626',
   surface: '#16203A',
   card: '#1B2742',
   elevated: '#22304E',
   surfaceAlt: '#1E2B47',
+  surfaceHigh: '#22304E',
+  surfaceHighest: '#26324E',
   text: '#E8EDF7',
   textSecondary: '#AEB7C8',
   muted: '#7E889B',

@@ -15,11 +15,12 @@ interface Slide {
 }
 
 const SLIDES: Slide[] = [
-  { icon: 'map', titleKey: 'onboarding.d1Title', bodyKey: 'onboarding.d1Body' },
-  { icon: 'trending-up', titleKey: 'onboarding.d2Title', bodyKey: 'onboarding.d2Body' },
+  { icon: 'map-pin', titleKey: 'onboarding.d1Title', bodyKey: 'onboarding.d1Body' },
+  { icon: 'credit-card', titleKey: 'onboarding.d2Title', bodyKey: 'onboarding.d2Body' },
   { icon: 'truck', titleKey: 'onboarding.d3Title', bodyKey: 'onboarding.d3Body' },
 ];
 
+/** Captain onboarding — same Stitch `1/2/3` sheet layout as the rider app. */
 export default function Intro() {
   const { t } = useI18n();
   const router = useRouter();
@@ -53,55 +54,77 @@ export default function Intro() {
   return (
     <View style={s.root}>
       <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
-      <View style={s.glow} />
-      <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-        <View style={s.topBar}>
-          <Pressable onPress={skip} hitSlop={12}>
+
+      <SafeAreaView edges={['top']} style={s.skipSafe}>
+        <View style={s.skipRow}>
+          <Pressable onPress={skip} hitSlop={8} style={s.skipPill}>
             <Text style={s.skip}>{t('onboarding.skip')}</Text>
           </Pressable>
         </View>
+      </SafeAreaView>
 
-        <Animated.View style={[s.body, { opacity: fade }]}>
-          <View style={s.iconWrap}>
-            <Icon name={slide.icon} size={56} color={theme.colors.primary} />
-          </View>
-          <Text style={s.title}>{t(slide.titleKey)}</Text>
-          <Text style={s.text}>{t(slide.bodyKey)}</Text>
-        </Animated.View>
+      <Animated.View style={[s.hero, { opacity: fade }]}>
+        <View style={s.heroGlow} />
+        <View style={s.heroCircle}>
+          <Icon name={slide.icon} size={88} color={theme.colors.primary} />
+        </View>
+      </Animated.View>
 
-        <View style={s.footer}>
+      <View style={s.sheet}>
+        <SafeAreaView edges={['bottom']}>
           <View style={s.dots}>
             {SLIDES.map((_, i) => (
               <View key={i} style={[s.dot, i === index && s.dotActive]} />
             ))}
           </View>
+          <Animated.View style={{ opacity: fade }}>
+            <Text style={s.title}>{t(slide.titleKey)}</Text>
+            <Text style={s.text}>{t(slide.bodyKey)}</Text>
+          </Animated.View>
           <Pressable onPress={advance} style={({ pressed }) => [s.cta, pressed && s.pressed]}>
             <Text style={s.ctaText}>{last ? t('onboarding.getStarted') : t('common.next')}</Text>
+            <Icon name="arrow-left" size={22} color={theme.colors.onPrimary} />
           </Pressable>
-        </View>
-      </SafeAreaView>
+        </SafeAreaView>
+      </View>
     </View>
   );
 }
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.colors.background, overflow: 'hidden' },
-    glow: { position: 'absolute', top: -120, right: -80, width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.12 },
-    safe: { flex: 1, paddingHorizontal: t.spacing.lg },
-    topBar: { flexDirection: 'row-reverse', paddingTop: t.spacing.sm },
-    skip: { fontFamily: t.fontFamily.semibold, fontSize: 15, color: t.colors.textSecondary },
+    root: { flex: 1, backgroundColor: t.colors.background },
+    skipSafe: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20 },
+    skipRow: { flexDirection: 'row', justifyContent: 'flex-start', padding: t.spacing.lg },
+    skipPill: { backgroundColor: t.colors.surfaceAlt, borderRadius: 9999, paddingHorizontal: 16, paddingVertical: 8 },
+    skip: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.primary },
 
-    body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: t.spacing.lg },
-    iconWrap: { width: 128, height: 128, borderRadius: 64, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.accent + '33' },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'center', paddingHorizontal: t.spacing.lg },
-    text: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 26, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 330 },
+    hero: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.lg },
+    heroGlow: { position: 'absolute', width: 300, height: 300, borderRadius: 150, backgroundColor: t.colors.accent, opacity: 0.1 },
+    heroCircle: { width: 200, height: 200, borderRadius: 100, backgroundColor: t.colors.surfaceHigh, alignItems: 'center', justifyContent: 'center' },
 
-    footer: { paddingBottom: t.spacing.lg, gap: t.spacing.lg },
-    dots: { flexDirection: 'row', alignSelf: 'center', gap: 7 },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.border },
-    dotActive: { backgroundColor: t.colors.primary, width: 22 },
-    cta: { backgroundColor: t.colors.primary, height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center' },
-    ctaText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onPrimary },
-    pressed: { opacity: 0.88 },
+    sheet: {
+      backgroundColor: t.colors.surface,
+      borderTopLeftRadius: 32,
+      borderTopRightRadius: 32,
+      paddingHorizontal: 32,
+      paddingTop: 32,
+      paddingBottom: 8,
+      alignItems: 'center',
+      shadowColor: '#002045',
+      shadowOffset: { width: 0, height: -15 },
+      shadowOpacity: 0.06,
+      shadowRadius: 40,
+      elevation: 12,
+    },
+    dots: { flexDirection: 'row', alignSelf: 'center', gap: 8, marginBottom: 32 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.surfaceHighest },
+    dotActive: { backgroundColor: t.colors.primary, width: 32 },
+
+    title: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'center', marginBottom: 16 },
+    text: { fontFamily: t.fontFamily.regular, fontSize: 18, lineHeight: 28, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 300, alignSelf: 'center', marginBottom: 40 },
+
+    cta: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.primary, borderRadius: 16, paddingVertical: 16, paddingHorizontal: 24, alignSelf: 'stretch' },
+    ctaText: { fontFamily: t.fontFamily.semibold, fontSize: 24, lineHeight: 32, color: t.colors.onPrimary },
+    pressed: { opacity: 0.9, transform: [{ scale: 0.99 }] },
   });

@@ -116,8 +116,20 @@ export default function Checkout() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
+      {/* AppBar — back (right) · title · help (left) per Stitch _10 */}
+      <View style={s.appbar}>
+        <View style={s.appbarStart}>
+          <Pressable onPress={() => router.back()} hitSlop={8} style={s.appbarBtn}>
+            <Icon name="arrow-right" size={24} color={theme.colors.textSecondary} />
+          </Pressable>
+          <Text style={s.appbarTitle}>{t('checkout.title')}</Text>
+        </View>
+        <Pressable onPress={() => router.push('/(app)/support')} hitSlop={8} style={s.appbarBtn}>
+          <Icon name="help-circle" size={22} color={theme.colors.primary} />
+        </Pressable>
+      </View>
+
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Text style={s.h1}>{t('checkout.title')}</Text>
         {msg && <Banner message={msg.text} variant={msg.ok ? 'success' : 'error'} />}
 
         {/* Summary */}
@@ -180,51 +192,57 @@ export default function Checkout() {
             {/* Order card */}
             <View style={s.card}>
               <View style={s.orderRow}>
+                <View style={s.receiptIcon}>
+                  <Icon name="file-text" size={20} color={theme.colors.primary} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.orderLabel}>{t('checkout.orderNumber')}</Text>
                   <Text style={s.orderNumber}>{payment.number}</Text>
                 </View>
-                <View style={s.receiptIcon}>
-                  <Icon name="file-text" size={20} color={theme.colors.primary} />
-                </View>
               </View>
               <View style={s.cardDivider} />
-              <Text style={s.orderLabel}>{t('checkout.amountDue')}</Text>
-              <Text style={s.amountBig}>
-                <Text style={s.amountCur}>JOD </Text>{Number(instructions.amount_jod).toFixed(2)}
-              </Text>
-              {expiryText ? (
-                <View style={s.validityRow}>
-                  <Text style={s.validityText}>{expiryText}</Text>
-                  <Icon name="clock" size={14} color={theme.colors.accent} />
-                  <Text style={s.validityLabel}>{t('checkout.validity')}</Text>
+              <View style={s.amountRow}>
+                <View>
+                  <Text style={s.orderLabel}>{t('checkout.amountDue')}</Text>
+                  <Text style={s.amountBig}>
+                    {Number(instructions.amount_jod).toFixed(2)} <Text style={s.amountCur}>JOD</Text>
+                  </Text>
                 </View>
-              ) : null}
+                {expiryText ? (
+                  <View style={s.validityCol}>
+                    <Text style={s.validityLabel}>{t('checkout.validity')}</Text>
+                    <View style={s.validityRow}>
+                      <Icon name="clock" size={14} color={theme.colors.accent} />
+                      <Text style={s.validityText}>{expiryText}</Text>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
             </View>
 
             {/* Instructions card */}
             <View style={s.card}>
               <View style={s.cardHead}>
+                <Icon name="credit-card" size={20} color={theme.colors.accent} />
                 <Text style={s.cardTitle}>{t('checkout.payInstructions')}</Text>
-                <Icon name="credit-card" size={18} color={theme.colors.primary} />
               </View>
               <Text style={s.instrText}>{t('checkout.transferInstruction')}</Text>
               <View style={s.aliasBox}>
-                <Pressable onPress={copyAlias} hitSlop={8}>
-                  <Icon name="copy" size={18} color={theme.colors.muted} />
-                </Pressable>
                 <View style={{ flex: 1 }}>
                   <Text style={s.aliasLabel}>{t('checkout.cliqAlias')}</Text>
                   <Text style={s.aliasValue} selectable>{instructions.alias ?? instructions.beneficiary ?? '—'}</Text>
                 </View>
+                <Pressable onPress={copyAlias} hitSlop={8} style={s.aliasCopy}>
+                  <Icon name="copy" size={18} color={theme.colors.primary} />
+                </Pressable>
               </View>
             </View>
 
             {/* Proof of payment */}
             <View style={s.card}>
               <View style={s.cardHead}>
+                <Icon name="upload-cloud" size={20} color={theme.colors.accent} />
                 <Text style={s.cardTitle}>{t('checkout.proofTitle')}</Text>
-                <Icon name="upload-cloud" size={18} color={theme.colors.accent} />
               </View>
               <Pressable onPress={pickFile} style={s.upload}>
                 {proofFile ? (
@@ -240,11 +258,14 @@ export default function Checkout() {
                 )}
               </Pressable>
               <View style={s.aiNote}>
+                <View style={s.aiEdge} />
+                <View style={s.aiIcon}>
+                  <Icon name="zap" size={16} color={theme.colors.onAccent} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.aiTitle}>{t('checkout.aiVerify')}</Text>
                   <Text style={s.aiHint}>{t('checkout.aiVerifyHint')}</Text>
                 </View>
-                <Icon name="zap" size={18} color={theme.colors.accent} />
               </View>
             </View>
           </>
@@ -277,7 +298,7 @@ export default function Checkout() {
 
       {step === 'instructions' && (
         <View style={s.footer}>
-          <Button title={t('checkout.confirmPay')} icon="check-circle" onPress={confirmPay} loading={uploading} />
+          <Button title={t('checkout.confirmPay')} icon="check-circle" onPress={confirmPay} loading={uploading} disabled={!proofFile} />
         </View>
       )}
     </SafeAreaView>
@@ -287,6 +308,10 @@ export default function Checkout() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
+    appbar: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
+    appbarStart: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm },
+    appbarBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+    appbarTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 28, lineHeight: 36, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
     card: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.sm },
@@ -313,26 +338,31 @@ const makeStyles = (t: AppTheme) =>
     orderRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md },
     orderLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right' },
     orderNumber: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right', marginTop: 2 },
-    receiptIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    receiptIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     cardDivider: { height: StyleSheet.hairlineWidth, backgroundColor: t.colors.border, marginVertical: t.spacing.base },
-    amountBig: { fontFamily: t.fontFamily.extrabold, fontSize: 34, color: t.colors.primary, textAlign: 'right', marginTop: 2 },
-    amountCur: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary },
-    validityRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, marginTop: t.spacing.sm },
+    amountRow: { flexDirection: 'row-reverse', alignItems: 'flex-end', justifyContent: 'space-between' },
+    amountBig: { fontFamily: t.fontFamily.extrabold, fontSize: 40, lineHeight: 52, color: t.colors.primary, textAlign: 'right', marginTop: 2 },
+    amountCur: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
+    validityCol: { alignItems: 'flex-start' },
+    validityRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 4 },
     validityLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
-    validityText: { fontFamily: t.fontFamily.semibold, fontSize: 12, color: t.colors.accent, marginRight: 'auto' },
+    validityText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.accent },
 
     cardHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: t.spacing.sm },
     instrText: { fontFamily: t.fontFamily.regular, fontSize: 14, lineHeight: 22, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.md },
-    aliasBox: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: t.spacing.base },
+    aliasBox: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', gap: t.spacing.md, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.md, padding: t.spacing.base },
     aliasLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right' },
     aliasValue: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary, textAlign: 'right', marginTop: 2 },
+    aliasCopy: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
 
     upload: { borderWidth: 1.5, borderColor: t.colors.border, borderStyle: 'dashed', borderRadius: t.radius.md, paddingVertical: t.spacing.lg, alignItems: 'center', gap: 6, overflow: 'hidden', marginBottom: t.spacing.md },
     uploadIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
     uploadHint: { fontFamily: t.fontFamily.semibold, fontSize: 13, color: t.colors.text },
     uploadTypes: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted },
     uploadPreview: { width: '100%', height: 150, borderRadius: t.radius.sm },
-    aiNote: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, borderWidth: 1, borderColor: t.colors.accent, borderRadius: t.radius.md, padding: t.spacing.md, backgroundColor: t.colors.accentSoft },
+    aiNote: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md, borderWidth: 1, borderColor: t.colors.accentSoft, borderRadius: t.radius.md, padding: t.spacing.md, backgroundColor: t.colors.surfaceAlt, overflow: 'hidden' },
+    aiEdge: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 4, backgroundColor: t.colors.accent },
+    aiIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
     aiTitle: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.text, textAlign: 'right' },
     aiHint: { fontFamily: t.fontFamily.regular, fontSize: 12, lineHeight: 18, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 

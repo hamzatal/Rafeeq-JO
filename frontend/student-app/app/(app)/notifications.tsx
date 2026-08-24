@@ -7,7 +7,7 @@ import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useCoupon } from '../../src/store/coupon';
 import { useTheme, type AppTheme } from '../../src/theme';
-import { Card, EmptyState, SectionTitle } from '../../src/components/ui';
+import { Card, EmptyState, SectionTitle, ErrorState } from '../../src/components/ui';
 import { ListSkeleton } from '../../src/components/kit';
 import { Icon, type IconName } from '../../src/components/Icon';
 
@@ -28,6 +28,7 @@ export default function Notifications() {
   const [prefs, setPrefs] = useState<NotificationPreference | null>(null);
   const [showPrefs, setShowPrefs] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [couponMsg, setCouponMsg] = useState<Record<string, { text: string; ok: boolean }>>({});
   const activateCoupon = useCoupon((c) => c.activate);
 
@@ -44,12 +45,13 @@ export default function Notifications() {
   };
 
   const load = async () => {
+    setLoadError(false);
     try {
       const [list, p] = await Promise.all([api.notifications.list(), api.notifications.preferences()]);
       setItems(list);
       setPrefs(p);
     } catch {
-      /* silent */
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -161,6 +163,8 @@ export default function Notifications() {
 
         {loading && items.length === 0 ? (
           <ListSkeleton rows={5} />
+        ) : loadError && items.length === 0 ? (
+          <ErrorState title={t('common.error')} message={t('common.loadFailed')} retryLabel={t('common.retry')} onRetry={() => { setLoading(true); void load(); }} />
         ) : items.length === 0 ? (
           <EmptyState icon="bell" title={t('notifications.none')} />
         ) : (

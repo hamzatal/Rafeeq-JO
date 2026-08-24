@@ -143,6 +143,31 @@ export default function ComplaintsPage() {
                   <div className="text-xs muted-text mb-1">{t('complaints.description')}</div>
                   <p className="text-sm surface-text bg-background dark:bg-dsurface rounded-lg p-3 whitespace-pre-wrap">{detail.description}</p>
                 </div>
+
+                {/* AI triage panel */}
+                {detail.ai_report?.summary || detail.ai_report?.recommended_action ? (
+                  <div className="mb-4 rounded-lg border border-cyan/30 bg-cyan/5 p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="material-symbols-outlined text-cyan-deep text-[18px]">smart_toy</span>
+                      <span className="text-sm font-bold text-cyan-deep">{t('complaints.aiTriage')}</span>
+                      {typeof detail.ai_report?.confidence === 'number' && (
+                        <span className="badge bg-white text-muted border border-line mr-auto">{detail.ai_report.confidence}%</span>
+                      )}
+                    </div>
+                    {detail.ai_report?.summary ? <p className="text-sm surface-text mb-2">{detail.ai_report.summary}</p> : null}
+                    {detail.ai_report?.recommended_action ? (
+                      <div className="text-xs">
+                        <span className="muted-text">{t('complaints.aiRecommended')}: </span>
+                        <span className="surface-text font-medium">{detail.ai_report.recommended_action}</span>
+                      </div>
+                    ) : null}
+                    {detail.ai_report?.key_points?.length ? (
+                      <ul className="mt-2 space-y-1 pr-4 list-disc marker:text-cyan">
+                        {detail.ai_report.key_points.map((p, i) => (<li key={i} className="text-xs surface-text">{p}</li>))}
+                      </ul>
+                    ) : null}
+                  </div>
+                ) : null}
                 <div className="flex flex-wrap gap-2">
                   <button onClick={() => setStatus(detail.id, 'investigating')} disabled={busy === detail.id} className="btn-outline px-3 py-1.5 text-xs">{t('complaints.markInvestigating')}</button>
                   <button onClick={() => setStatus(detail.id, 'resolved')} disabled={busy === detail.id} className="btn-primary px-3 py-1.5 text-xs">{t('complaints.resolve')}</button>

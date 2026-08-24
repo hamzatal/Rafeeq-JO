@@ -1,0 +1,96 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="_phone.css"></head><body>
+<div class="scr">
+  <!-- MAP: the hero. UI is a thin layer above it. -->
+  <div class="map">
+    <div class="grn" style="left:-20px;top:120px;width:130px;height:110px"></div>
+    <div class="grn" style="right:-30px;top:330px;width:150px;height:120px"></div>
+    <div class="blk" style="left:34px;top:250px;width:78px;height:62px"></div>
+    <div class="blk" style="left:130px;top:236px;width:64px;height:52px"></div>
+    <div class="blk" style="right:40px;top:210px;width:86px;height:70px"></div>
+    <div class="blk" style="left:56px;top:420px;width:96px;height:58px"></div>
+    <div class="blk" style="right:52px;top:440px;width:72px;height:64px"></div>
+    <div class="blk" style="left:150px;top:520px;width:80px;height:50px"></div>
+    <div class="rd-m" style="left:0;top:318px;width:390px;height:11px"></div>
+    <div class="rd-m" style="left:186px;top:100px;width:11px;height:500px"></div>
+    <div class="rd" style="left:0;top:206px;width:390px;height:6px"></div>
+    <div class="rd" style="left:0;top:492px;width:390px;height:6px"></div>
+    <div class="rd" style="left:86px;top:120px;width:6px;height:480px"></div>
+    <div class="rd" style="right:96px;top:140px;width:6px;height:440px"></div>
+    <svg style="position:absolute;inset:0" width="390" height="844">
+      <path class="route-c" d="M126,398 L126,324 L192,324 L192,212 L268,212"/>
+      <path class="route"   d="M126,398 L126,324 L192,324 L192,212 L268,212"/>
+    </svg>
+    <!-- origin pin -->
+    <div class="pin" style="left:126px;top:398px">
+      <svg width="30" height="40" viewBox="0 0 30 40"><path d="M15 1C7.3 1 1 7.3 1 15c0 10 14 24 14 24s14-14 14-24C29 7.3 22.7 1 15 1z" fill="#1259E3" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg></div>
+    <!-- destination pin -->
+    <div class="pin" style="left:268px;top:212px">
+      <svg width="30" height="40" viewBox="0 0 30 40"><path d="M15 1C7.3 1 1 7.3 1 15c0 10 14 24 14 24s14-14 14-24C29 7.3 22.7 1 15 1z" fill="#047857" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg></div>
+    <!-- live captain: amber, dark glyph -->
+    <div class="disc" style="left:200px;top:288px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#0E1524"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1H8v1a1 1 0 01-1 1H6a1 1 0 01-1-1z"/></svg></div>
+    <div class="eta" style="left:200px;top:310px">كابتن · 4 دقائق</div>
+  </div>
+
+  <div class="status"><span>9:41</span><div class="r">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#0E1524"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+    <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="0.5" y="0.5" width="20" height="11" rx="3" stroke="#0E1524" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="#0E1524"/><path d="M22 4v4" stroke="#0E1524" stroke-width="2" stroke-linecap="round" opacity=".4"/></svg>
+  </div></div>
+
+  <!-- top: greeting + bell. ONE floating row, not four stacked blocks. -->
+  <div class="topcap">
+    <div class="gpill">
+      <div class="av">ح</div>
+      <div class="col" style="gap:0"><span class="t-label" style="font-weight:700;color:var(--n900)">صباح الخير، حمزة</span>
+      <span class="t-caption" style="color:var(--n500)">جامعة اليرموك · إربد</span></div>
+    </div>
+    <div class="fab" style="position:relative">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+      <div style="position:absolute;top:9px;inset-inline-end:10px;width:9px;height:9px;border-radius:50%;background:var(--bad);border:2px solid #fff"></div>
+    </div>
+  </div>
+
+  <!-- one small AI pill — NOT the center tab -->
+  <div style="position:absolute;top:104px;inset-inline-start:16px;z-index:50;background:var(--b50);
+    border:1px solid var(--b200);border-radius:999px;height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 13px">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1259E3" stroke-width="2" stroke-linecap="round"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M7 7L5.5 5.5M18.5 18.5L17 17M17 7l1.5-1.5M5.5 18.5L7 17"/><circle cx="12" cy="12" r="3.5"/></svg>
+    <span class="t-label" style="color:var(--b700);font-weight:700">اسأل رفيق</span>
+  </div>
+
+  <div class="fab" style="inset-inline-end:16px;bottom:396px">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#1259E3" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+  </div>
+
+  <!-- ONE sheet, peek snap point -->
+  <div class="bs" style="height:300px;bottom:76px;border-radius:24px 24px 0 0">
+    <div class="grab"></div>
+    <div class="t-title-md" style="margin-bottom:12px">إلى أين؟</div>
+    <div class="row" style="border:1px solid var(--n300);border-radius:12px;height:52px;padding:0 14px;margin-bottom:14px">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#67728A" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg>
+      <span class="t-body" style="color:var(--n500)">ابحث عن وجهة</span>
+    </div>
+    <div class="row" style="padding:11px 0;border-bottom:1px solid var(--n100)">
+      <div style="width:38px;height:38px;border-radius:12px;background:var(--n100);display:grid;place-items:center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#4E5872" stroke-width="1.75" stroke-linecap="round"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg></div>
+      <div class="col" style="gap:1px"><span class="t-title-sm" style="font-weight:700">البيت</span>
+        <span class="t-caption" style="color:var(--n500)">حي الجامعة، شارع الملكة نور</span></div>
+      <div class="sp"></div><span class="t-label num" style="color:var(--n600)">1.750 د.أ</span>
+    </div>
+    <div class="row" style="padding:11px 0">
+      <div style="width:38px;height:38px;border-radius:12px;background:var(--b50);display:grid;place-items:center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1259E3" stroke-width="1.75" stroke-linecap="round"><path d="M3 9l9-5 9 5-9 5z"/><path d="M6 11v6c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-6"/></svg></div>
+      <div class="col" style="gap:1px"><span class="t-title-sm" style="font-weight:700">جامعة اليرموك</span>
+        <span class="t-caption" style="color:var(--n500)">البوابة الشمالية · وجهتك المعتادة</span></div>
+      <div class="sp"></div><span class="t-label num" style="color:var(--n600)">1.250 د.أ</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1259E3" stroke-width="2" stroke-linecap="round"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg></div><span>الرئيسية</span></div>
+    <div class="tab"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#67728A" stroke-width="2" stroke-linecap="round"><path d="M5 17h14M7 17V9l2-4h6l2 4v8"/><circle cx="8.5" cy="17" r="1.5"/><circle cx="15.5" cy="17" r="1.5"/></svg></div><span>رحلاتي</span></div>
+    <div class="tab"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#67728A" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 11h20"/></svg></div><span>المحفظة</span></div>
+    <div class="tab"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#67728A" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg></div><span>حسابي</span></div>
+  </div>
+</div>
+</body></html>

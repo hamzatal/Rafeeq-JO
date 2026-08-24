@@ -40,6 +40,22 @@ export const lineHeight = {
   relaxed: 1.75,
 } as const;
 
+/**
+ * EXACT Stitch text styles (Material-3 type scale from the design source).
+ * Each includes fontSize + lineHeight (absolute px) + letterSpacing (px) so
+ * screens render pixel-identically to the Stitch mockups. letterSpacing is
+ * converted from em: -0.02em·40 = -0.8px, 0.01em·14 = 0.14px.
+ */
+export const text = {
+  displayLg: { fontFamily: fontFamily.bold, fontSize: 40, lineHeight: 52, letterSpacing: -0.8 },
+  displayLgMobile: { fontFamily: fontFamily.bold, fontSize: 32, lineHeight: 40 },
+  headlineMd: { fontFamily: fontFamily.semibold, fontSize: 24, lineHeight: 32 },
+  bodyLg: { fontFamily: fontFamily.regular, fontSize: 18, lineHeight: 28 },
+  bodyMd: { fontFamily: fontFamily.regular, fontSize: 16, lineHeight: 24 },
+  labelSm: { fontFamily: fontFamily.medium, fontSize: 14, lineHeight: 20, letterSpacing: 0.14 },
+  caption: { fontFamily: fontFamily.regular, fontSize: 12, lineHeight: 16 },
+} as const;
+
 export const typography = {
   // display-lg (mobile 32 / desktop 40) — welcome/hero headers, weight 700
   h1: { fontFamily: fontFamily.bold, fontSize: fontSize['3xl'] },
