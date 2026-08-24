@@ -1,0 +1,76 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+<link rel="stylesheet" href="tokens.css"><link rel="stylesheet" href="_phone.css"></head><body>
+<div class="scr" style="background:var(--n900)">
+  <!-- FULL-SCREEN TAKEOVER. Not a list row in a card. Captain is driving. -->
+  <div class="map" style="bottom:auto;height:300px">
+    <div class="grn" style="left:-16px;top:30px;width:110px;height:84px"></div>
+    <div class="blk" style="left:50px;top:150px;width:80px;height:54px"></div>
+    <div class="blk" style="right:44px;top:120px;width:78px;height:60px"></div>
+    <div class="rd-m" style="left:0;top:212px;width:390px;height:11px"></div>
+    <div class="rd-m" style="left:180px;top:0;width:11px;height:300px"></div>
+    <svg style="position:absolute;inset:0" width="390" height="300">
+      <path class="route-c" d="M104,262 L104,218 L186,218 L186,108 L282,108"/>
+      <path class="route"   d="M104,262 L104,218 L186,218 L186,108 L282,108"/>
+    </svg>
+    <div class="disc" style="left:104px;top:262px;width:38px;height:38px">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="#0E1524"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1H8v1a1 1 0 01-1 1H6a1 1 0 01-1-1z"/></svg></div>
+    <div class="pin" style="left:282px;top:108px"><svg width="28" height="38" viewBox="0 0 30 40"><path d="M15 1C7.3 1 1 7.3 1 15c0 10 14 24 14 24s14-14 14-24C29 7.3 22.7 1 15 1z" fill="#047857" stroke="#fff" stroke-width="2"/><circle cx="15" cy="15" r="5.5" fill="#fff"/></svg></div>
+  </div>
+
+  <div class="status" style="color:#0E1524"><span>9:41</span><div class="r">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#0E1524"><rect y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" width="3" height="11" rx="1"/></svg>
+    <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3" stroke="#0E1524" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="#0E1524"/><path d="M22 4v4" stroke="#0E1524" stroke-width="2" stroke-linecap="round" opacity=".4"/></svg>
+  </div></div>
+
+  <!-- countdown ring -->
+  <div style="position:absolute;top:56px;inset-inline-end:16px;width:60px;height:60px;z-index:60">
+    <svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="#fff" opacity=".95"/>
+      <circle cx="30" cy="30" r="26" fill="none" stroke="#DDE3EC" stroke-width="5"/>
+      <circle cx="30" cy="30" r="26" fill="none" stroke="#1259E3" stroke-width="5" stroke-linecap="round"
+        stroke-dasharray="163" stroke-dashoffset="52" transform="rotate(-90 30 30)"/>
+      <text x="30" y="36" text-anchor="middle" font-family="IBM Plex Sans Arabic" font-size="21" font-weight="700" fill="#0E1524">12</text></svg>
+  </div>
+
+  <!-- offer panel -->
+  <div style="position:absolute;inset-inline:0;bottom:0;top:276px;background:#fff;border-radius:24px 24px 0 0;padding:20px">
+    <div class="row" style="margin-bottom:16px">
+      <span class="pill pill-live"><span class="i i-dot-live"></span>طلب جديد</span><div class="sp"></div>
+      <span class="t-label" style="color:var(--n500)">رحلة فورية</span>
+    </div>
+
+    <!-- the number that decides: net earnings -->
+    <div class="row" style="align-items:baseline;gap:7px;margin-bottom:4px">
+      <span class="num" style="font:700 42px/46px 'IBM Plex Sans Arabic';color:var(--ok)">1.900</span>
+      <span class="t-title-md" style="color:var(--n600)">د.أ</span>
+      <div class="sp"></div>
+      <div class="col" style="align-items:flex-start;gap:0">
+        <span class="t-caption" style="color:var(--n500)">صافي لك بعد العمولة</span>
+        <span class="t-label num" style="color:var(--n600)">الأجرة 2.100 · العمولة 0.200</span></div>
+    </div>
+
+    <div class="row" style="gap:0;margin:18px 0;padding:14px 0;border-top:1px solid var(--n100);border-bottom:1px solid var(--n100)">
+      <div class="col" style="flex:1;gap:2px"><span class="t-caption" style="color:var(--n500)">المسافة للطالب</span><span class="t-title-md num">1.8 كم</span></div>
+      <div style="width:1px;height:38px;background:var(--n200)"></div>
+      <div class="col" style="flex:1;gap:2px;padding-inline-start:16px"><span class="t-caption" style="color:var(--n500)">مسافة الرحلة</span><span class="t-title-md num">6.4 كم</span></div>
+      <div style="width:1px;height:38px;background:var(--n200)"></div>
+      <div class="col" style="flex:1;gap:2px;padding-inline-start:16px"><span class="t-caption" style="color:var(--n500)">الوقت المتوقّع</span><span class="t-title-md num">14 د</span></div>
+    </div>
+
+    <div class="row" style="gap:11px;align-items:flex-start;margin-bottom:22px">
+      <div class="col" style="align-items:center;gap:0;padding-top:5px">
+        <div style="width:9px;height:9px;border-radius:50%;background:var(--b600)"></div>
+        <div style="width:2px;height:24px;background:var(--n300)"></div>
+        <div style="width:9px;height:9px;border-radius:50%;background:var(--ok)"></div></div>
+      <div class="col" style="flex:1;gap:13px">
+        <span class="t-title-sm" style="font-weight:700">حي الجامعة، شارع الملكة نور</span>
+        <span class="t-title-sm" style="font-weight:700">جامعة اليرموك — البوابة الشمالية</span></div>
+    </div>
+
+    <!-- 56px tall targets. Accept dominates. -->
+    <div class="row" style="gap:11px">
+      <button class="btn" style="height:56px;flex:.4;background:var(--n100);color:var(--n700);font-size:16px">تجاهل</button>
+      <button class="btn btn-primary" style="height:56px;flex:1;font-size:17px;font-weight:700">اقبل الرحلة</button>
+    </div>
+  </div>
+</div>
+</body></html>

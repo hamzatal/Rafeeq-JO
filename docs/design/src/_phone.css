@@ -1,0 +1,56 @@
+/* Shared phone-frame chrome for screen mockups */
+body{width:390px;height:844px;overflow:hidden;position:relative;background:var(--n0)}
+.status{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+  font:700 13px 'IBM Plex Sans Arabic';color:var(--n900);position:relative;z-index:60}
+.status .r{display:flex;gap:5px;align-items:center}
+.scr{position:absolute;inset:0}
+
+/* Map surface — light, clean, brand-tinted (not raw tiles) */
+.map{position:absolute;inset:0;background:
+  radial-gradient(circle at 74% 22%, #E4EDFB 0%, transparent 46%),
+  radial-gradient(circle at 22% 68%, #E8F0EC 0%, transparent 42%),
+  #EEF1F6;}
+.map .blk{position:absolute;background:#E3E8F0;border-radius:3px}
+.map .grn{position:absolute;background:#DDEBDF;border-radius:8px}
+.map .rd{position:absolute;background:#FFFFFF;border-radius:2px}
+.map .rd-m{position:absolute;background:#FFFFFF;border-radius:3px;box-shadow:0 0 0 1px #E1E6EF}
+
+/* Route line: white casing + brand core */
+.route-c{position:absolute;stroke:#fff;stroke-width:9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.route{position:absolute;stroke:#1259E3;stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.pin{position:absolute;transform:translate(-50%,-100%)}
+.disc{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;
+  background:#F59E0B;border:3px solid #fff;box-shadow:0 3px 10px rgba(14,21,36,.28);display:grid;place-items:center}
+.eta{position:absolute;transform:translate(-50%,10px);background:#F59E0B;color:#0E1524;
+  font:700 12px 'IBM Plex Sans Arabic';padding:4px 10px;border-radius:999px;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(14,21,36,.2)}
+
+/* Floating chrome over map (L2) */
+.fab{position:absolute;width:44px;height:44px;border-radius:50%;background:#fff;
+  box-shadow:var(--sh-md);display:grid;place-items:center}
+.topcap{position:absolute;top:44px;inset-inline:16px;display:flex;gap:10px;align-items:center;z-index:50}
+.gpill{background:#fff;box-shadow:var(--sh-md);border-radius:999px;height:44px;display:flex;align-items:center;
+  gap:9px;padding-inline-start:5px;padding-inline-end:16px;flex:1}
+.av{width:34px;height:34px;border-radius:50%;background:var(--b600);display:grid;place-items:center;
+  color:#fff;font:700 15px 'IBM Plex Sans Arabic'}
+
+/* Bottom sheet (L3) */
+.bs{position:absolute;inset-inline:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;
+  box-shadow:var(--sh-lg);padding:10px 20px 0;z-index:55}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--n300);margin:0 auto 14px}
+
+/* Tab bar */
+.tabs{position:absolute;inset-inline:0;bottom:0;height:76px;background:#fff;
+  border-top:1px solid var(--n200);display:flex;padding-bottom:12px;z-index:58}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.tab span{font:500 11px 'IBM Plex Sans Arabic';color:var(--n500)}
+.tab.on span{font-weight:700;color:var(--b700)}
+.tab .ic{width:52px;height:30px;border-radius:999px;display:grid;place-items:center}
+.tab.on .ic{background:var(--b50)}
+
+.hd{padding:4px 20px 12px}
+.body-pad{padding:0 20px}
+.seg{display:flex;background:var(--n100);border-radius:12px;padding:4px;gap:4px}
+.seg div{flex:1;text-align:center;padding:8px 0;border-radius:9px;font:500 13px 'IBM Plex Sans Arabic';color:var(--n600)}
+.seg div.on{background:#fff;color:var(--n900);font-weight:700;box-shadow:0 1px 3px rgba(14,21,36,.1)}
