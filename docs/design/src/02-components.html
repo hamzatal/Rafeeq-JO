@@ -1,0 +1,155 @@
+<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+<link rel="stylesheet" href="tokens.css">
+<style>
+body{padding:38px 48px}
+h1{font-size:28px;font-weight:700}
+.sub{color:var(--n600);font-size:15px;margin:4px 0 30px}
+h2{font-size:12px;font-weight:700;color:var(--n500);letter-spacing:.11em;margin:30px 0 13px;text-transform:uppercase}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.box{background:var(--n0);border:1px solid var(--n200);border-radius:16px;padding:18px}
+.box .lbl{font:700 11px 'IBM Plex Sans Arabic';color:var(--n500);margin-bottom:11px;letter-spacing:.06em}
+.seg{display:flex;background:var(--n100);border-radius:12px;padding:4px;gap:4px}
+.seg div{flex:1;text-align:center;padding:8px 0;border-radius:9px;font:500 13px 'IBM Plex Sans Arabic';color:var(--n600)}
+.seg div.on{background:#fff;color:var(--n900);font-weight:700;box-shadow:0 1px 3px rgba(14,21,36,.1)}
+.chip{border:1px solid var(--n300);border-radius:999px;padding:8px 14px;font:500 13px 'IBM Plex Sans Arabic';color:var(--n700);background:#fff}
+.chip.on{background:var(--b600);border-color:var(--b600);color:#fff;font-weight:700}
+.sk{background:var(--n100);border-radius:8px}
+.step{display:flex;align-items:flex-start;flex:1}
+.dot{width:13px;height:13px;border-radius:50%;flex-shrink:0}
+.ln{height:2px;flex:1;margin-top:5.5px}
+.note{background:var(--b50);border-right:3px solid var(--b600);border-radius:8px;padding:11px 13px;font-size:13px;line-height:21px;color:var(--b900);margin-top:12px}
+.icg{display:grid;grid-template-columns:repeat(10,1fr);gap:12px;text-align:center}
+.icg div{display:flex;flex-direction:column;align-items:center;gap:5px}
+.icg span{font:400 10px 'IBM Plex Sans Arabic';color:var(--n500)}
+</style></head><body>
+
+<h1>المكوّنات — <span style="color:var(--b600)">packages/ui</span></h1>
+<div class="sub">مكتبة واحدة مشتركة بين التطبيقات الثلاثة. تحلّ 962 سطراً مكرراً حرفياً + 9 ملفات منحرفة.</div>
+
+<h2>الأزرار — 4 أنواع فقط (كانت 6)</h2>
+<div class="g4">
+  <div class="box"><div class="lbl">PRIMARY · الفعل الأساسي</div>
+    <button class="btn btn-primary" style="margin-bottom:9px">اطلب الآن</button>
+    <button class="btn btn-primary" style="opacity:.45">معطّل</button></div>
+  <div class="box"><div class="lbl">SECONDARY · فعل ثانوي</div>
+    <button class="btn btn-secondary" style="margin-bottom:9px">اسأل رفيق</button>
+    <button class="btn btn-secondary btn-md">حجم متوسّط 44</button></div>
+  <div class="box"><div class="lbl">GHOST · محايد</div>
+    <button class="btn btn-ghost" style="margin-bottom:9px">تجاهل</button>
+    <button class="btn btn-ghost btn-md">لاحقاً</button></div>
+  <div class="box"><div class="lbl">DANGER · هدّام</div>
+    <button class="btn btn-danger" style="margin-bottom:9px">حذف الحساب</button>
+    <button class="btn btn-danger btn-md">إلغاء الرحلة</button></div>
+</div>
+<div class="note">حُذفت <b>accent</b> و<b>positive</b> — كانتا موجودتين فقط لأن الهوية القديمة عندها لونان داكنان متساويان. الآن الأزرق يفعل الاثنين، والأخضر دلالة لا فعل.</div>
+
+<div class="g3" style="margin-top:30px">
+  <div>
+    <h2 style="margin-top:0">الحقول</h2>
+    <div class="box">
+      <div class="lbl">افتراضي · تركيز · خطأ</div>
+      <input class="input" placeholder="رقم الهاتف" style="margin-bottom:10px">
+      <input class="input input-focus" value="0791234567" style="margin-bottom:10px">
+      <input class="input" value="07912" style="border-color:var(--bad);margin-bottom:7px">
+      <div class="row" style="gap:6px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D92D20" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span class="t-label" style="color:var(--bad)">الرقم يجب أن يكون 10 أرقام</span></div>
+      <div class="note" style="margin-top:12px;font-size:12px;line-height:19px">الخطأ = <b>لون + أيقونة + نص</b>. أبداً لون وحده (عمى الألوان ~8% من الذكور).</div>
+    </div>
+  </div>
+  <div>
+    <h2 style="margin-top:0">الشارات — كلها تعبر AA</h2>
+    <div class="box">
+      <div class="lbl">الحالات</div>
+      <div class="row" style="flex-wrap:wrap;gap:7px;margin-bottom:16px">
+        <span class="pill pill-ok"><span class="i i-ok"></span>مكتملة</span><span class="pill pill-ok"><span class="i i-ok"></span>معتمد</span>
+        <span class="pill pill-warn"><span class="i i-wait"></span>قيد المراجعة</span><span class="pill pill-warn"><span class="i i-warn"></span>متأخّرة</span>
+        <span class="pill pill-bad"><span class="i i-bad"></span>ملغاة</span><span class="pill pill-bad"><span class="i i-bad"></span>مرفوض</span>
+        <span class="pill pill-info"><span class="i i-dot-info"></span>اشتراك</span><span class="pill pill-live"><span class="i i-dot-live"></span>جارية</span>
+      </div>
+      <div class="lbl">اختيار — شرائح وحبوب</div>
+      <div class="seg" style="margin-bottom:12px"><div class="on">الكل</div><div>قادمة</div><div>منتهية</div></div>
+      <div class="row" style="flex-wrap:wrap;gap:7px">
+        <span class="chip on">اقتصادي</span><span class="chip">عائلي</span><span class="chip">بلس</span></div>
+    </div>
+  </div>
+  <div>
+    <h2 style="margin-top:0">حالات القوائم — إلزامية</h2>
+    <div class="box">
+      <div class="lbl">تحميل (skeleton)</div>
+      <div class="row" style="gap:11px;margin-bottom:9px">
+        <div class="sk" style="width:38px;height:38px;border-radius:12px"></div>
+        <div class="col" style="flex:1;gap:6px"><div class="sk" style="width:70%;height:12px"></div><div class="sk" style="width:45%;height:10px"></div></div></div>
+      <div class="row" style="gap:11px;margin-bottom:16px">
+        <div class="sk" style="width:38px;height:38px;border-radius:12px"></div>
+        <div class="col" style="flex:1;gap:6px"><div class="sk" style="width:58%;height:12px"></div><div class="sk" style="width:38%;height:10px"></div></div></div>
+      <div class="lbl">فراغ</div>
+      <div class="col" style="align-items:center;gap:7px;padding:14px 0">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--n100);display:grid;place-items:center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#96A0B2" stroke-width="1.75" stroke-linecap="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.5L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.5A2 2 0 0016.8 4H7.2a2 2 0 00-1.7 1.5z"/></svg></div>
+        <span class="t-title-sm" style="font-weight:700">لا رحلات بعد</span>
+        <span class="t-caption" style="color:var(--n500);text-align:center">أول رحلة لك تظهر هنا</span></div>
+    </div>
+  </div>
+</div>
+
+<h2>مؤشّر تقدّم الرحلة</h2>
+<div class="box">
+  <div class="row" style="align-items:flex-start">
+    <div class="step"><div class="dot" style="background:var(--ok)"></div><div class="ln" style="background:var(--ok)"></div></div>
+    <div class="step"><div class="dot" style="background:var(--ok)"></div><div class="ln" style="background:var(--ok)"></div></div>
+    <div class="step"><div class="dot" style="background:var(--b600);box-shadow:0 0 0 4px var(--b100)"></div><div class="ln" style="background:var(--n200)"></div></div>
+    <div class="step"><div class="dot" style="background:#fff;border:2px solid var(--n300)"></div><div class="ln" style="background:var(--n200)"></div></div>
+    <div style="flex:0"><div class="dot" style="background:#fff;border:2px solid var(--n300)"></div></div>
+  </div>
+  <div class="row" style="margin-top:9px">
+    <span class="t-caption" style="flex:1;color:var(--ok);font-weight:500">تم الطلب</span>
+    <span class="t-caption" style="flex:1;color:var(--ok);font-weight:500">قُبلت</span>
+    <span class="t-caption" style="flex:1;color:var(--n900);font-weight:700">الكابتن قادم</span>
+    <span class="t-caption" style="flex:1;color:var(--n500)">في الطريق</span>
+    <span class="t-caption" style="color:var(--n500)">وصلت</span>
+  </div>
+</div>
+
+<h2>الأيقونات — Lucide، عائلة واحدة، خط 1.75، مقاسات 16/20/24</h2>
+<div class="box">
+  <div class="icg">
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg><span>home</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M5 17h14M7 17V9l2-4h6l2 4v8"/><circle cx="8.5" cy="17" r="1.5"/><circle cx="15.5" cy="17" r="1.5"/></svg><span>car</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 11h20"/></svg><span>wallet</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>user</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span>bell</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg><span>shield</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>message</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M9 3l6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15M15 6v15"/></svg><span>map</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><path d="M3 9l9-5 9 5-9 5z"/><path d="M6 11v6c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-6"/></svg><span>school</span></div>
+    <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#39415A" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg><span>clock</span></div>
+  </div>
+  <div class="note">يحلّ 3 عائلات (Feather + MaterialIcons خام + Material Symbols). <b>Lucide تعمل في React Native والويب من نفس الحزمة</b> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:inline-block;vertical-align:-2px;opacity:.55"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> نفس البكسل حرفياً في التطبيقات الثلاثة — مستحيل مع الخلط الحالي.</div>
+</div>
+
+<h2>الاتجاه — نفس المكوّن، عربي وإنجليزي، بلا كود مكرر</h2>
+<div class="row" style="gap:20px;align-items:stretch">
+  <div class="box" style="flex:1">
+    <div class="lbl">AR · RTL (افتراضي)</div>
+    <div dir="rtl" class="row" style="border:1px solid var(--n200);border-radius:12px;padding:12px">
+      <div style="width:38px;height:38px;border-radius:12px;background:var(--b50);display:grid;place-items:center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1259E3" stroke-width="1.75" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 11h20"/></svg></div>
+      <div class="col" style="gap:0;flex:1"><span class="t-title-sm" style="font-weight:700">شحن المحفظة</span>
+        <span class="t-caption" style="color:var(--n500)">عبر CliQ</span></div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#96A0B2" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+  </div>
+  <div class="box" style="flex:1">
+    <div class="lbl">EN · LTR</div>
+    <div dir="ltr" class="row" style="border:1px solid var(--n200);border-radius:12px;padding:12px">
+      <div style="width:38px;height:38px;border-radius:12px;background:var(--b50);display:grid;place-items:center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1259E3" stroke-width="1.75" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 11h20"/></svg></div>
+      <div class="col" style="gap:0;flex:1"><span class="t-title-sm" style="font-weight:700">Top up wallet</span>
+        <span class="t-caption" style="color:var(--n500)">via CliQ</span></div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#96A0B2" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>
+  </div>
+</div>
+<div class="note">مكوّن واحد، <span style="font-family:ui-monospace"><span class='ltr'>flexDirection:'row'</span></span> + <span style="font-family:ui-monospace">margin-start/end</span> فقط. الكود الحالي فيه <b>198 <span class="ltr" style="font-family:ui-monospace">row-reverse</span></span> + 190 <span class="ltr" style="font-family:ui-monospace">textAlign:'right'</span></span></b> مكتوبة يدوياً <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:inline-block;vertical-align:-2px;opacity:.55"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> الوضع الإنجليزي (704 سطر ترجمة كاملة!) مكسور تماماً.</div>
+
+</body></html>
