@@ -13,6 +13,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $reporter_id
  * @property string $type
  * @property string $title
+ * @property string|null $description
+ * @property string|null $location
  * @property string $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at

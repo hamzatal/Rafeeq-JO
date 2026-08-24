@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\LostFound\Models\LostFoundItem;
+use Rafeeq\Modules\LostFound\Services\LostFoundMatchService;
 use Rafeeq\Modules\LostFound\Services\LostFoundService;
 
 class LostFoundController extends Controller
@@ -48,9 +49,10 @@ class LostFoundController extends Controller
         return $this->created($this->service->report($request->user(), $data), 'تم نشر البلاغ.');
     }
 
-    public function candidates(Request $request, LostFoundItem $item): JsonResponse
+    public function candidates(Request $request, LostFoundItem $item, LostFoundMatchService $matcher): JsonResponse
     {
-        return $this->ok($this->service->candidates($item));
+        // Keyword candidates from the opposite pool, semantically re-ranked by AI.
+        return $this->ok($matcher->rank($item, $this->service->candidates($item)));
     }
 
     public function resolve(Request $request, LostFoundItem $item): JsonResponse

@@ -590,6 +590,8 @@ const DICT: Dict = {
   'complaints.dismissReinstate': { ar: 'رفض + استعادة', en: 'Dismiss + reinstate' },
   'complaints.details': { ar: 'تفاصيل الشكوى', en: 'Complaint details' },
   'complaints.description': { ar: 'الوصف', en: 'Description' },
+  'complaints.aiTriage': { ar: 'تحليل الذكاء الاصطناعي', en: 'AI triage' },
+  'complaints.aiRecommended': { ar: 'الإجراء الموصى به', en: 'Recommended action' },
   'complaints.reporter': { ar: 'المُبلِّغ', en: 'Reporter' },
   'complaints.against': { ar: 'المُبلَّغ عنه', en: 'Reported party' },
   'complaints.resolution': { ar: 'ملاحظة الحل', en: 'Resolution' },
