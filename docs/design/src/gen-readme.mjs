@@ -336,6 +336,7 @@ out('r-logo.html', page(1400, `
            ['المنحنى', 'المسار — وهو جسم الحرف نفسه', '#DDE3EC', '#1259E3', '#DDE3EC'],
            ['النقطة المصمتة', 'الوجهة — مصمتة لأنّها تحقّقت، وكهرمانية لأنّها المكافأة', '#DDE3EC', '#DDE3EC', '#F59E0B']].map(([t, d, a, b, c]) => `
         <div style="flex:1;background:#fff;border:1px solid var(--n200);border-radius:16px;padding:15px;text-align:center">
+          <!-- exploded diagram: each part is coloured on its own, so mark() cannot serve it -->
           <svg width="72" height="72" viewBox="0 0 96 96" fill="none" style="margin:0 auto 9px">
             <circle cx="70" cy="26" r="8.5" stroke="${a}" stroke-width="7"/>
             <path d="M70 43.5 C70 58 60 68 45 72" stroke="${b}" stroke-width="7" stroke-linecap="round"/>
