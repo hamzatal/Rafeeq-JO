@@ -1,12 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatFils } from '@rafeeq/shared';
 import type { PayoutRequest } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
-const jod = (fils: number) => `${(fils / 1000).toFixed(3)} د.أ`;
+const jod = (fils: number) => formatFils(fils);
 
 export default function WithdrawalsPage() {
   const { t } = useT();

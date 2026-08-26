@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { formatDinars } from '@rafeeq/shared';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import type { PaymentRequest } from '@rafeeq/shared';
@@ -9,7 +10,7 @@ import type { PaymentRequest } from '@rafeeq/shared';
  */
 function invoiceHtml(p: PaymentRequest, holderName: string): string {
   const date = p.created_at ? new Date(p.created_at).toLocaleString('ar') : '';
-  const amount = `${p.amount_jod.toFixed(3)} ${p.currency}`;
+  const amount = formatDinars(p.amount_jod);
   return `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"/>
   <style>
     *{font-family:-apple-system,'Segoe UI',Tahoma,sans-serif;box-sizing:border-box}

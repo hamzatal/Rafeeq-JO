@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -119,7 +120,7 @@ export default function Trips() {
   const fmtDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
   const fareJod = (p: TripPassenger) => {
     const fils = p.trip?.pricing?.fare_fils;
-    return fils != null ? `${(fils / 1000).toFixed(2)} ${t('subscriptions.currency')}` : null;
+    return fils != null ? formatFils(fils) : null;
   };
 
   return (

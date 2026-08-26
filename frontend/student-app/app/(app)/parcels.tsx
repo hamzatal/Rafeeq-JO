@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { formatDinars } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Parcel, ParcelSize } from '@rafeeq/shared';
@@ -98,7 +99,7 @@ export default function Parcels() {
                 <Text style={s.cardTitle}>{p.number}</Text>
                 <Badge label={p.status_label} tone={p.status === 'delivered' ? 'success' : p.status === 'cancelled' ? 'danger' : 'primary'} />
               </View>
-              <Text style={s.meta}>{p.receiver_name} · {p.size_label} · {p.fee_jod.toFixed(3)} {t('subscriptions.currency')}</Text>
+              <Text style={s.meta}>{p.receiver_name} · {p.size_label} · {formatDinars(p.fee_jod)}</Text>
               {p.pickup_code && (
                 <View style={s.codeRow}>
                   <Text style={s.codeLabel}>{t('parcels.pickupCode')}</Text>

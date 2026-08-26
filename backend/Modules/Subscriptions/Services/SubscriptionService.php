@@ -107,13 +107,44 @@ class SubscriptionService extends BaseService
     }
 
     /** Consume one ride from an active subscription (called on boarding). */
-    public function consumeRide(Subscription $subscription): void
+    /**
+     * Spend one ride from the subscription.
+     *
+     * Returns false — rather than throwing — when the subscription can no longer
+     * cover the ride. It used to throw from inside the boarding transaction with
+     * no fallback, which meant a rider whose subscription lapsed between booking
+     * and boarding could not board at all, even with money in their wallet. The
+     * caller decides what to do instead; see TripService::confirmBoarding.
+     */
+    public function consumeRide(Subscription $subscription): bool
     {
-        if (! $subscription->isUsable()) {
-            throw new BusinessRuleException('الاشتراك غير صالح للاستخدام.', 'SUBSCRIPTION_NOT_USABLE');
-        }
-        if ($subscription->remaining_rides !== null) {
-            $subscription->decrement('remaining_rides');
-        }
+        return $this->transaction(function () use ($subscription) {
+            // Locked: `remaining_rides` is read and then decremented, so without a
+            // row lock two concurrent boardings both read the last ride and both
+            // spend it.
+            $locked = Subscription::whereKey($subscription->id)->lockForUpdate()->first();
+            if (! $locked || ! $locked->isUsable()) {
+                return false;
+            }
+            if ($locked->remaining_rides !== null) {
+                if ($locked->remaining_rides < 1) {
+                    return false;
+                }
+                $locked->decrement('remaining_rides');
+            }
+
+            return true;
+        });
+    }
+
+    /** Give a ride back after a booking is cancelled before boarding. */
+    public function restoreRide(Subscription $subscription): void
+    {
+        $this->transaction(function () use ($subscription) {
+            $locked = Subscription::whereKey($subscription->id)->lockForUpdate()->first();
+            if ($locked && $locked->remaining_rides !== null) {
+                $locked->increment('remaining_rides');
+            }
+        });
     }
 }

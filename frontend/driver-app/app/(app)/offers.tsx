@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { dinarsFromFils, formatFils, formatFilsSigned } from '@rafeeq/shared';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -12,7 +13,7 @@ import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-const jod = (fils: number) => (fils / 1000).toFixed(2);
+const jod = (fils: number) => dinarsFromFils(fils);
 
 export default function Offers() {
   const { t, locale } = useI18n();
@@ -84,16 +85,16 @@ export default function Offers() {
                 <View style={s.earnings}>
                   <View style={s.earnRow}>
                     <Text style={s.earnLabel}>{t('driver.farePerSeat')}</Text>
-                    <Text style={s.earnValue}>{jod(trip.pricing.fare_fils)} د.أ</Text>
+                    <Text style={s.earnValue}>{formatFils(trip.pricing.fare_fils)}</Text>
                   </View>
                   <View style={s.earnRow}>
                     <Text style={s.earnLabel}>{t('driver.platformCommission')}</Text>
-                    <Text style={[s.earnValue, s.earnMinus]}>- {jod(trip.pricing.commission_fils)} د.أ</Text>
+                    <Text style={[s.earnValue, s.earnMinus]}>{formatFilsSigned(-trip.pricing.commission_fils)}</Text>
                   </View>
                   <View style={s.earnDivider} />
                   <View style={s.earnRow}>
                     <Text style={s.earnNetLabel}>{t('driver.yourNetEarnings')}</Text>
-                    <Text style={s.earnNetValue}>{jod(trip.pricing.expected_captain_earnings_fils)} د.أ</Text>
+                    <Text style={s.earnNetValue}>{formatFils(trip.pricing.expected_captain_earnings_fils)}</Text>
                   </View>
                 </View>
               )}

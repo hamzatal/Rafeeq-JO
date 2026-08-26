@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Trips\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Traits\HasUuid;
@@ -16,6 +17,17 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string|null $pickup_point_id
  * @property TripPassengerStatus $status
  * @property string $boarding_code
+ * @property string|null $dropoff_code
+ * @property Carbon|null $boarded_at
+ * @property Carbon|null $dropoff_confirmed_at
+ * @property int|null $fare_fils
+ * @property int|null $commission_fils
+ * @property int|null $captain_share_fils
+ * @property string|null $coupon_code
+ * @property int|null $coupon_discount_fils
+ * @property Carbon|null $paid_at Set once the fare is captured;
+ *                                its presence is what makes billing idempotent and what forbids
+ *                                cancelling the seat. See TripService::cancelBooking.
  */
 class TripPassenger extends Model
 {

@@ -14,7 +14,9 @@
     "driver": "npm run start --workspace=driver-app",
     "admin": "npm run dev --workspace=admin-dashboard",
     "lint": "eslint . --ext .ts,.tsx",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "test": "npm run test --workspace=packages/shared",
+    "check:money": "node scripts/check-money-formatting.mjs"
   },
   "engines": {
     "node": ">=20"

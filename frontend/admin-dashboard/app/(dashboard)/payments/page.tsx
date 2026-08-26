@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { formatDinars } from '@rafeeq/shared';
 import type { PaymentRequest } from '@rafeeq/shared';
 import { ENDPOINTS } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
@@ -119,7 +120,7 @@ export default function PaymentsPage() {
                   <tr key={p.id} className="row-line align-top">
                     <td className="p-3 font-medium surface-text">{p.number}</td>
                     <td className="p-3 text-muted">{p.purpose_label}</td>
-                    <td className="p-3 text-muted">{p.amount_jod.toFixed(3)} د.أ</td>
+                    <td className="p-3 text-muted">{formatDinars(p.amount_jod)}</td>
                     <td className="p-3 text-muted">{ai !== null ? `${ai}%` : '—'}</td>
                     <td className="p-3">
                       {flags.length === 0 ? (

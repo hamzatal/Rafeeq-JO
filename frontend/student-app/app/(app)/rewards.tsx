@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { formatFils, formatFilsSigned } from '@rafeeq/shared';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { RewardRedemptionOption, RewardSummary } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
@@ -29,7 +30,7 @@ export default function Rewards() {
     setBusy(true);
     try {
       const r = await api.rewards.redeemToWallet(points);
-      setMsg({ text: `${t('rewards.redeemed')} +${(r.credited_fils / 1000).toFixed(2)} ${t('subscriptions.currency')}`, ok: true });
+      setMsg({ text: `${t('rewards.redeemed')} ${formatFilsSigned(r.credited_fils)}`, ok: true });
       load();
     } catch (e) {
       setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('rewards.insufficient'), ok: false });
@@ -79,7 +80,7 @@ export default function Rewards() {
                   style={[s.opt, !affordable && s.optDisabled]}
                 >
                   <Text style={s.optPoints}>{o.points}</Text>
-                  <Text style={s.optReward}>{(o.credit_fils / 1000).toFixed(0)} {t('subscriptions.currency')}</Text>
+                  <Text style={s.optReward}>{formatFils(o.credit_fils)}</Text>
                 </Pressable>
               );
             })}

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Coupons\Models\Coupon;
@@ -122,7 +123,7 @@ class CouponTest extends TestCase
             'scope' => CouponScope::Any, 'is_active' => true, 'usage_limit' => 2,
         ]);
 
-        $this->service()->redeem($coupon, $user, 1000, 'payment_request', 'abc');
+        $this->service()->redeem($coupon, $user, 1000, 'payment_request', (string) Str::uuid7());
 
         $this->assertSame(1, $coupon->fresh()->used_count);
         $this->assertSame(1, CouponRedemption::where('coupon_id', $coupon->id)->count());

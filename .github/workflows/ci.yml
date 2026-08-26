@@ -12,6 +12,20 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    # The suite runs against Postgres, not SQLite. SQLite silently ignores
+    # SELECT ... FOR UPDATE, which made every lockForUpdate untestable and let
+    # three concurrency bugs through a green suite.
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: rafeeq_test
+          POSTGRES_USER: rafeeq
+          POSTGRES_PASSWORD: secret
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -19,8 +33,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, pdo, sqlite3, pdo_sqlite, redis
-          coverage: none
+          extensions: mbstring, pdo, pgsql, pdo_pgsql, sqlite3, pdo_sqlite, redis
+          coverage: pcov
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
@@ -49,14 +63,37 @@ jobs:
           php artisan route:list > /dev/null
           php artisan config:clear
 
-      - name: Run PHPUnit tests
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
+      - name: Migrate against Postgres
+        env: &pg
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: rafeeq_test
+          DB_USERNAME: rafeeq
+          DB_PASSWORD: secret
           CACHE_STORE: array
           SESSION_DRIVER: array
           QUEUE_CONNECTION: sync
-        run: php artisan test
+        run: php artisan migrate:fresh --force
+
+      - name: Run PHPUnit tests (Postgres + coverage)
+        env: *pg
+        run: php -d memory_limit=1G vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          php -r '
+            $f = "coverage.xml";
+            if (! is_file($f)) { echo "no coverage file\n"; exit(0); }
+            $x = simplexml_load_file($f);
+            $m = $x->project->metrics;
+            $s = (int) $m["statements"]; $c = (int) $m["coveredstatements"];
+            $pct = $s ? round($c / $s * 100, 2) : 0;
+            printf("lines %d/%d = %s%%\n", $c, $s, $pct);
+            file_put_contents(getenv("GITHUB_STEP_SUMMARY") ?: "php://stdout",
+              sprintf("### Backend coverage\n\n**%s%%** — %d of %d statements\n", $pct, $c, $s), FILE_APPEND);
+          '
 
   database:
     name: Database (PostgreSQL migrations + seed)
@@ -133,9 +170,20 @@ jobs:
 
       - name: Typecheck shared packages + apps
         run: |
+          npm run typecheck --workspace=packages/shared
           npm run typecheck --workspace=student-app
           npm run typecheck --workspace=driver-app
           npm run typecheck --workspace=admin-dashboard
 
       - name: Lint admin dashboard
         run: npm run lint --workspace=admin-dashboard
+
+      # A dinar is 1000 fils. `toFixed(2)` rounds and displays an amount that is not
+      # the stored one — 1999 fils became "2.00" on the pages where prices are SET.
+      # And a hand-written "د.أ" has no bidi isolation, so it can reorder against
+      # the number. Both are now unrepresentable outside @rafeeq/shared.
+      - name: Money formatting gate
+        run: npm run check:money
+
+      - name: Shared package tests
+        run: npm run test --workspace=packages/shared

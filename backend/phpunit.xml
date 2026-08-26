@@ -2,7 +2,12 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         colors="true">
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         failOnSkipped="false"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnSkippedTests="true">
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
@@ -11,12 +16,38 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory>Core</directory>
+            <directory>Infrastructure</directory>
+            <directory>Modules</directory>
+        </include>
+        <exclude>
+            <directory>Modules/*/Database/Migrations</directory>
+            <directory>Core/Database/Migrations</directory>
+        </exclude>
+    </source>
+    <coverage>
+        <report>
+            <text outputFile="php://stdout" showOnlySummary="true"/>
+        </report>
+    </coverage>
     <php>
+        <!-- Postgres, not SQLite :memory:.
+             SQLite silently ignores SELECT ... FOR UPDATE, which made every
+             lockForUpdate in this codebase untestable and let three concurrency
+             bugs through. The test database must be the production engine.
+             `composer test:sqlite` exists as a local escape hatch and is NOT
+             what CI runs — see docs/OPERATIONS.md. -->
         <env name="APP_ENV" value="testing"/>
         <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="/>
         <env name="APP_DEBUG" value="true"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="DB_CONNECTION" value="pgsql" force="false"/>
+        <env name="DB_HOST" value="127.0.0.1" force="false"/>
+        <env name="DB_PORT" value="5432" force="false"/>
+        <env name="DB_DATABASE" value="rafeeq_test" force="false"/>
+        <env name="DB_USERNAME" value="rafeeq" force="false"/>
+        <env name="DB_PASSWORD" value="secret" force="false"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

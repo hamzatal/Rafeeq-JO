@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { formatDinars } from '@rafeeq/shared';
 import type { Zone, University } from '@rafeeq/shared';
 import { RafeeqApiError, type ZoneUniversityPrice, type ZonePricePayload } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
@@ -130,7 +131,7 @@ export default function ZonePricesPage() {
                     <div className="text-xs text-muted">{p.zone?.city ?? ''}</div>
                   </td>
                   <td className="p-3 text-muted">{p.university?.name_ar ?? '—'}</td>
-                  <td className="p-3 surface-text font-bold">{p.fare_jod.toFixed(2)} <span className="text-xs font-normal text-muted">د.أ</span></td>
+                  <td className="p-3 surface-text font-bold">{formatDinars(p.fare_jod)}</td>
                   <td className="p-3">
                     {p.is_active ? (
                       <span className="badge bg-success/10 text-success">{t('zonePrices.active')}</span>

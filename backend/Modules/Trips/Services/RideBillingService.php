@@ -3,6 +3,7 @@
 namespace Rafeeq\Modules\Trips\Services;
 
 use Rafeeq\Core\Audit\AuditLogger;
+use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Coupons\Models\Coupon;
@@ -74,36 +75,60 @@ class RideBillingService extends BaseService
 
         $this->transaction(function () use ($passenger, $trip, $fare, $payable, $discount, $couponToRedeem, $commission, $captainShare) {
             // Student pays from wallet only when no subscription covers this ride.
+            $student = null;
             if (! $passenger->subscription_id) {
                 $student = User::find($passenger->student_id);
-                if ($student) {
-                    $wallet = $this->wallets->forUser($student);
-                    $hold = $this->wallets->findActiveHold($wallet, $trip->id);
-                    if ($hold) {
-                        $this->wallets->capture($hold, $payable, WalletTxnType::RidePayment, 'دفع رحلة', $trip->id);
-                    } elseif ($payable > 0) {
-                        $this->wallets->debit($wallet, $payable, WalletTxnType::RidePayment, 'دفع رحلة', $trip->id);
-                    }
 
-                    // Consume the coupon now that the discounted ride is charged.
-                    if ($couponToRedeem instanceof Coupon && $discount > 0) {
-                        $this->coupons->redeem($couponToRedeem, $student, $discount, 'trip', $trip->id);
-                    }
+                // No payer means nobody can be debited. Previously this branch was
+                // skipped silently, yet paid_at was still written and the captain
+                // was still credited — the platform paid out against a debit that
+                // never happened, minting unbacked balance in the ledger. Fail loudly
+                // and let the transaction roll back.
+                if (! $student) {
+                    throw new BusinessRuleException(
+                        'لا يمكن تحصيل أجرة رحلة لراكب بلا حساب.',
+                        'PASSENGER_USER_MISSING',
+                    );
+                }
+
+                $wallet = $this->wallets->forUser($student);
+                $hold = $this->wallets->findActiveHold($wallet, $trip->id);
+                if ($hold) {
+                    $this->wallets->capture($hold, $payable, WalletTxnType::RidePayment, 'دفع رحلة', $trip->id);
+                } elseif ($payable > 0) {
+                    $this->wallets->debit($wallet, $payable, WalletTxnType::RidePayment, 'دفع رحلة', $trip->id);
+                }
+
+                // Consume the coupon now that the discounted ride is charged.
+                if ($couponToRedeem instanceof Coupon && $discount > 0) {
+                    $this->coupons->redeem($couponToRedeem, $student, $discount, 'trip', $trip->id);
                 }
             }
 
             // Credit the captain's earnings (platform pays the captain).
+            //
+            // This used to be `if ($captainUser) { credit }` with no else. Since
+            // trips.driver_id is nullable with nullOnDelete and pooled trips are
+            // created before a captain accepts, a capture could debit the student,
+            // credit nobody, and then write paid_at — which makes the operation
+            // idempotent, so it was never retried and the fare was simply gone.
+            // A ride cannot be billed without a captain to pay; refuse and roll back.
             $trip->loadMissing('driver');
             $captainUser = $trip->driver ? User::find($trip->driver->user_id) : null;
-            if ($captainUser) {
-                $this->wallets->credit(
-                    $this->wallets->forUser($captainUser),
-                    $captainShare,
-                    WalletTxnType::Payout,
-                    'أرباح رحلة',
-                    $trip->id,
+            if (! $captainUser) {
+                throw new BusinessRuleException(
+                    'لا يمكن تحصيل أجرة رحلة بلا كابتن مُسنَد.',
+                    'TRIP_HAS_NO_CAPTAIN',
                 );
             }
+
+            $this->wallets->credit(
+                $this->wallets->forUser($captainUser),
+                $captainShare,
+                WalletTxnType::Payout,
+                'أرباح رحلة',
+                $trip->id,
+            );
 
             $passenger->forceFill([
                 'fare_fils' => $fare,
@@ -114,7 +139,7 @@ class RideBillingService extends BaseService
             ])->save();
 
             // Loyalty: reward the student for completing a ride (+ first-ride bonus).
-            $student = $student ?? User::find($passenger->student_id);
+            $student ??= User::find($passenger->student_id);
             if ($student) {
                 $this->rewards->grantForRide($student, $trip->id);
             }

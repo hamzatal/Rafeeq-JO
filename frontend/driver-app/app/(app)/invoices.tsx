@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { formatDinars } from '@rafeeq/shared';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -128,7 +129,7 @@ export default function Invoices() {
                 <Text style={s.cardTitle}>{p.number}</Text>
                 <Badge label={p.status_label} tone={tone(p.status)} />
               </View>
-              <Text style={s.meta}>{p.purpose_label} · {p.amount_jod.toFixed(3)} {t('subscriptions.currency')}</Text>
+              <Text style={s.meta}>{p.purpose_label} · {formatDinars(p.amount_jod)}</Text>
               {p.created_at && <Text style={s.meta}>{new Date(p.created_at).toLocaleString(locale)}</Text>}
               {p.reject_reason && <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text>}
               {canUpload(p.status) && (

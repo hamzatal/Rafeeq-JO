@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { formatFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -131,7 +132,7 @@ export default function RideRequestScreen() {
     ...(hasDest ? [{ lat: uni!.lat!, lng: uni!.lng!, kind: 'destination' as const, label: uniName }] : []),
   ];
   const route = hasPickup && hasDest ? [{ lat: lat!, lng: lng! }, { lat: uni!.lat!, lng: uni!.lng! }] : undefined;
-  const fmt = (fils: number | null) => (fils == null ? '—' : `${(fils / 1000).toFixed(2)} JOD`);
+  const fmt = (fils: number | null) => (fils == null ? '—' : formatFils(fils));
   const dirLabel = direction === 'to_university' ? t('rideRequest.toUniversity') : t('rideRequest.fromUniversity');
 
   return (
