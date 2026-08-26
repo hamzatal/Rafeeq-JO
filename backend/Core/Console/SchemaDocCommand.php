@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
  * docs never drift from reality. Driver-agnostic (PostgreSQL + SQLite) via Laravel's
  * native Schema introspection.
  *
- *   php artisan db:schema-doc                 # writes docs/DATABASE_SCHEMA.generated.md
+ *   php artisan db:schema-doc                 # writes docs/engineering/SCHEMA.generated.md
  *   php artisan db:schema-doc --print         # prints to stdout instead
  */
 class SchemaDocCommand extends Command
@@ -51,7 +51,7 @@ class SchemaDocCommand extends Command
             return self::SUCCESS;
         }
 
-        $path = base_path('../docs/DATABASE_SCHEMA.generated.md');
+        $path = base_path('../docs/engineering/SCHEMA.generated.md');
         @mkdir(dirname($path), 0775, true);
         file_put_contents($path, $md);
         $this->info("Wrote schema reference: {$path}");
@@ -67,7 +67,7 @@ class SchemaDocCommand extends Command
 
         $out = "# مرجع قاعدة البيانات (مُولَّد آلياً) — Auto-Generated DB Reference\n\n";
         $out .= "> ⚠️ **لا تُعدّل هذا الملف يدوياً.** يُولَّد عبر `php artisan db:schema-doc`.\n";
-        $out .= "> للتوثيق الموصوف بالمجالات: `docs/DATABASE_SCHEMA.md`.\n\n";
+        $out .= "> للتوثيق الموصوف بالمجالات: `docs/engineering/DATABASE.md`.\n\n";
         $out .= "- المُولّد من: **{$driver}** · التاريخ: {$now}\n";
         $out .= '- المجموع: **'.($domain->count() + $system->count()).'** جدول ('.$domain->count().' نطاق + '.$system->count()." نظام)\n\n";
         $out .= "---\n\n## جداول النطاق (Domain)\n\n";

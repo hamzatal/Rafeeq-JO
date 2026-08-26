@@ -25,6 +25,21 @@ return [
      * basis has to be a specific version the user demonstrably accepted — not
      * "they agreed once".
      */
+    /*
+     * How much commission a captain may owe before they stop receiving trips.
+     *
+     * Cash inverts the money flow: the captain holds the whole fare and owes us the
+     * commission, so every cash trip makes the platform a creditor. Without a ceiling
+     * a captain could run cash-only indefinitely and never settle — the platform would
+     * be extending unsecured credit to an unbounded number of drivers.
+     *
+     * 10 dinars is roughly a full day of commission at the mid band, so a captain can
+     * work a normal day on cash and settle at the end of it. The block is on going
+     * online, not on finishing a trip in progress: stranding a rider mid-journey to
+     * collect a debt would be indefensible.
+     */
+    'captain_debt_ceiling_fils' => (int) env('RAFEEQ_CAPTAIN_DEBT_CEILING_FILS', 10000),
+
     'terms' => [
         'version' => env('RAFEEQ_TERMS_VERSION', '2026-08-26'),
         'url' => env('RAFEEQ_TERMS_URL', 'https://rafeeq.jo/legal/terms'),

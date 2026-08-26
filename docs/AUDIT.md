@@ -178,7 +178,7 @@ Payouts/Routes/api.php:30  POST {payout}/approve        ← اعتماد الس�
 المحرك الحالي `surge`-based؛ ونموذجك «المنفرد يدفع كل المقاعد».
 المقعد عند 6.4 كم = **2.160** (هدفك: أقل من 2.000) · المنفرد = **3.240** (هدفك: 7.000) ⇒ **خسارة 5.400 لكل رحلة منفردة**، والكابتن يرفضها.
 
-**التفصيل الكامل والنموذج البديل المُتحقَّق بالأرقام: [`PRICING.md`](PRICING.md)**
+**التفصيل الكامل والنموذج البديل المُتحقَّق بالأرقام: [`product/PRICING.md`](product/PRICING.md)**
 
 ---
 
@@ -279,5 +279,5 @@ Payouts/Routes/api.php:30  POST {payout}/approve        ← اعتماد الس�
 ---
 
 > **خطة التنفيذ التفصيلية:** [`ROADMAP.md`](ROADMAP.md)
-> **نموذج التسعير:** [`PRICING.md`](PRICING.md)
+> **نموذج التسعير:** [`product/PRICING.md`](product/PRICING.md)
 > **التصميم والواجهات:** [`design/SCREENS.md`](design/SCREENS.md)

@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\RideRequests\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\RideType;
 
@@ -22,6 +23,10 @@ class CreateRideRequestRequest extends FormRequest
             'pickup_lng' => ['required', 'numeric', 'between:-180,180'],
             'pickup_address' => ['nullable', 'string', 'max:200'],
             'desired_time' => ['required', 'date', 'after_or_equal:now'],
+            // Cash or wallet. The rider chooses before a captain is matched, because the
+            // captain must see it on the offer — one who cannot take cash today should be
+            // able to decline knowingly rather than discover it at pickup.
+            'payment_method' => ['sometimes', Rule::in(PaymentMethod::values())],
             'type' => ['sometimes', Rule::in(RideType::values())],
             'direction' => ['sometimes', Rule::in(RideDirection::values())],
             'notes' => ['nullable', 'string', 'max:255'],

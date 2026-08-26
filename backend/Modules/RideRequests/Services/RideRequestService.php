@@ -9,6 +9,7 @@ use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Zones\Services\ZoneService;
+use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\RideType;
@@ -57,6 +58,7 @@ class RideRequestService extends BaseService
             'pickup_address' => $data['pickup_address'] ?? null,
             // Same normalisation as TripService::schedule — see Core\Support\Clock.
             'desired_time' => Clock::fromClient((string) $data['desired_time']),
+            'payment_method' => PaymentMethod::tryFrom((string) ($data['payment_method'] ?? '')) ?? PaymentMethod::Wallet,
             'type' => $type,
             'direction' => RideDirection::tryFrom($data['direction'] ?? '') ?? RideDirection::ToUniversity,
             'is_express' => $isExpress,

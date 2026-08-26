@@ -122,6 +122,10 @@ class MatchingService extends BaseService
                     'pickup_lng' => $request->pickup_lng,
                     'pickup_order' => $index,
                     'status' => TripPassengerStatus::Booked,
+                    // Carried from the request onto the accounting row: how a fare was
+                    // settled is part of the record, not a lookup through a request that
+                    // may later be detached from this trip.
+                    'payment_method' => $request->payment_method,
                     'coupon_code' => $request->coupon_code,
                     'boarding_code' => $this->uniqueCode($usedBoarding),
                     'dropoff_code' => $this->uniqueCode($usedDropoff),
