@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ExchangeItem, ExchangeType } from '@rafeeq/shared';
@@ -99,7 +100,7 @@ export default function Exchange() {
                 <Text style={s.cardTitle}>{it.title}</Text>
                 <Badge label={t(`exchange.${it.type}`)} tone="primary" />
               </View>
-              <Text style={s.price}>{it.price_fils ? `${(it.price_fils / 1000).toFixed(3)} ${t('subscriptions.currency')}` : t('exchange.free')}</Text>
+              <Text style={s.price}>{it.price_fils ? formatFils(it.price_fils) : t('exchange.free')}</Text>
               {it.description ? <Text style={s.meta}>{it.description}</Text> : null}
               <Pressable onPress={() => reserve(it.id)} style={s.reserveBtn}>
                 <Text style={s.reserveText}>{t('exchange.reserve')}</Text>

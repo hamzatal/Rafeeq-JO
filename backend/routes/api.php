@@ -65,14 +65,17 @@ Route::prefix('v1')->group(function () {
      | Public client bootstrap config. Lets every app (student/captain/admin)
      | read runtime settings — notably the Maps provider + client key — from a
      | single place (backend .env) instead of baking keys into each app build.
-     | The Maps JS key is a client key (restricted by referrer/package) so it is
-     | safe to expose here.
+     | This endpoint is PUBLIC and unauthenticated, so it may only ever carry the
+     | CLIENT map key — the one restricted by referrer and bundle id. It used to
+     | return `services.maps.google_key`, which is the server key that bills
+     | Geocoding and Distance Matrix and is restricted by IP, not referrer. Anyone
+     | could read it and spend our Maps quota.
      */
     Route::get('/config', fn () => response()->json([
         'data' => [
             'maps' => [
                 'provider' => config('services.maps.provider', 'google'),
-                'key' => (string) config('services.maps.google_key', ''),
+                'key' => (string) config('services.maps.google_client_key', ''),
                 'mapbox_token' => (string) config('services.maps.mapbox_token', ''),
                 'default_center' => ['lat' => 32.5556, 'lng' => 35.85], // Irbid
             ],

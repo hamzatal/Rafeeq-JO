@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { formatFils } from '@rafeeq/shared';
 import type { Coupon, CouponScope, CouponType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
@@ -74,7 +75,7 @@ export default function CouponsPage() {
     if (confirm(`${t('coupons.deleteConfirm')} ${c.code}`)) api.admin.deleteCoupon(c.id).then(load);
   };
   const valueLabel = (c: Coupon) =>
-    c.type === 'percentage' ? `${c.value}%` : `${(c.value / 1000).toFixed(2)} د.أ`;
+    c.type === 'percentage' ? `${c.value}%` : formatFils(c.value);
 
   return (
     <div>

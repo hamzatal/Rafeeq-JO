@@ -58,7 +58,19 @@ return [
 
     'maps' => [
         'provider' => env('MAPS_PROVIDER', 'google'),
+
+        /*
+         * TWO keys, deliberately. `google_key` is the SERVER key: it bills
+         * Geocoding and Distance Matrix, it is restricted by IP, and it must never
+         * leave this process. `google_client_key` is the one apps embed in a map
+         * view; it is restricted by referrer and bundle id and is safe to publish.
+         *
+         * The public /config endpoint used to hand out the server key to anyone who
+         * asked, unauthenticated. An IP-restricted key cannot be protected by a
+         * referrer rule, so leaking it meant anyone could bill our Maps account.
+         */
         'google_key' => env('GOOGLE_MAPS_KEY'),
+        'google_client_key' => env('GOOGLE_MAPS_CLIENT_KEY'),
         'mapbox_token' => env('MAPBOX_TOKEN'),
     ],
 ];

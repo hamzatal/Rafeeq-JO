@@ -51,10 +51,10 @@ class StudentTripController extends Controller
 
     public function cancelBooking(Request $request, TripPassenger $passenger): JsonResponse
     {
-        if ($passenger->student_id !== $request->user()->id) {
-            throw new AuthorizationException('غير مصرّح.');
-        }
-        $passenger->forceFill(['status' => TripPassengerStatus::Cancelled])->save();
+        // Ownership, the hold release, the subscription refund and returning the
+        // request to the matching pool all live in the service, inside one
+        // transaction. See TripService::cancelBooking.
+        $this->service->cancelBooking($request->user(), $passenger);
 
         return $this->ok(null, 'تم إلغاء الحجز.');
     }

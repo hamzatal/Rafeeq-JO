@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DINAR, dinarsOf, formatDinarsSigned } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -73,7 +74,7 @@ export default function Earnings() {
           <View style={s.glow} />
           <Text style={s.balanceLabel}>{t('driver.availableBalance')}</Text>
           <Text style={s.balanceValue}>
-            {wallet ? wallet.balance_jod.toFixed(2) : '0.00'} <Text style={s.balanceCur}>د.أ</Text>
+            {wallet ? dinarsOf(wallet.balance_jod) : dinarsOf(0)} <Text style={s.balanceCur}>{DINAR}</Text>
           </Text>
           <Pressable onPress={() => router.push('/(app)/withdraw')} style={({ pressed }) => [s.withdrawBtn, pressed && { opacity: 0.9 }]}>
             <Icon name="home" size={18} color={theme.colors.onAccent} />
@@ -128,7 +129,7 @@ export default function Earnings() {
                   {tx.created_at && <Text style={s.meta}>{new Date(tx.created_at).toLocaleString(locale)}</Text>}
                 </View>
                 <Text style={[s.txnAmount, { color: positive ? theme.colors.accent : theme.colors.text }]}>
-                  {positive ? '+ ' : '- '}{Math.abs(tx.amount_jod).toFixed(2)} د.أ
+                  {formatDinarsSigned(positive ? Math.abs(tx.amount_jod) : -Math.abs(tx.amount_jod))}
                 </Text>
               </View>
             );

@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\Trips\Support;
 
+use Illuminate\Support\Str;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Trips\Models\Trip;
 
@@ -14,6 +15,14 @@ class TripChannelPolicy
     /** May this user subscribe to the given trip's live channel? */
     public static function canListen(User $user, string $tripId): bool
     {
+        // The channel name comes straight off the wire, so the id is whatever the
+        // client sent. Querying a uuid column with a non-uuid raises a driver cast
+        // error on Postgres (SQLite silently coerced it, which is how this reached
+        // production unnoticed). A malformed id is simply not authorised.
+        if (! Str::isUuid($tripId)) {
+            return false;
+        }
+
         $trip = Trip::find($tripId);
         if (! $trip) {
             return false;

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { dinarsOf, formatDinars, formatDinarsSigned } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -127,7 +128,7 @@ export default function WalletScreen() {
           ) : (
             <Text style={s.balanceValue}>
               <Text style={s.balanceCur}>JOD </Text>
-              {wallet ? wallet.balance_jod.toFixed(2) : '0.00'}
+              {wallet ? dinarsOf(wallet.balance_jod) : dinarsOf(0)}
             </Text>
           )}
           <Button title={t('wallet.topupCta')} icon="plus-circle" onPress={createTopup} loading={creating} style={{ marginTop: theme.spacing.base }} />
@@ -185,7 +186,7 @@ export default function WalletScreen() {
                 <Text style={s.payNumber}>{p.purpose_label}</Text>
                 <Badge label={p.status === 'pending' ? t('wallet.awaitingProof') : t('wallet.underReview')} tone={payTone(p.status)} />
               </View>
-              <Text style={s.meta}>{p.amount_jod.toFixed(2)} {t('subscriptions.currency')} · {p.number}</Text>
+              <Text style={s.meta}>{formatDinars(p.amount_jod)} · {p.number}</Text>
               {p.reject_reason ? <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text> : null}
               <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
                 <Icon name="upload" size={16} color={theme.colors.primary} />
@@ -224,7 +225,7 @@ export default function WalletScreen() {
                   {tx.created_at && <Text style={s.meta}>{new Date(tx.created_at).toLocaleString(locale)}</Text>}
                 </View>
                 <Text style={[s.txnAmount, { color: positive ? theme.colors.success : theme.colors.danger }]}>
-                  {positive ? '+ ' : '- '}{Math.abs(tx.amount_jod).toFixed(2)}
+                  {formatDinarsSigned(positive ? Math.abs(tx.amount_jod) : -Math.abs(tx.amount_jod))}
                 </Text>
               </View>
             );
@@ -262,7 +263,7 @@ function TopupGuide({
           <Icon name="x" size={18} color={theme.colors.muted} />
         </Pressable>
       </View>
-      <StepRow n={1} done label={`${data.request.amount_jod.toFixed(2)} ${t('subscriptions.currency')}`} s={s} theme={theme} />
+      <StepRow n={1} done label={formatDinars(data.request.amount_jod)} s={s} theme={theme} />
       <StepRow n={2} label={t('wallet.transferStep')} s={s} theme={theme} />
       <View style={s.cliqBox}>
         <Row label={t('wallet.alias')} value={ins.alias ?? '—'} s={s} />

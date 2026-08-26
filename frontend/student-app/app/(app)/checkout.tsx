@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { DINAR, dinarsOf, formatDinars } from '@rafeeq/shared';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -162,7 +163,7 @@ export default function Checkout() {
                   {balanceJod == null
                     ? '—'
                     : canWallet
-                      ? `${t('checkout.walletBalance')}: ${balanceJod.toFixed(3)} ${t('subscriptions.currency')}`
+                      ? `${t('checkout.walletBalance')}: ${formatDinars(balanceJod)}`
                       : t('checkout.insufficient')}
                 </Text>
               </View>
@@ -205,7 +206,7 @@ export default function Checkout() {
                 <View>
                   <Text style={s.orderLabel}>{t('checkout.amountDue')}</Text>
                   <Text style={s.amountBig}>
-                    {Number(instructions.amount_jod).toFixed(2)} <Text style={s.amountCur}>JOD</Text>
+                    {dinarsOf(Number(instructions.amount_jod))} <Text style={s.amountCur}>{DINAR}</Text>
                   </Text>
                 </View>
                 {expiryText ? (

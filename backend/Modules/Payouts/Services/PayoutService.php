@@ -72,17 +72,29 @@ class PayoutService extends BaseService
 
     public function approve(PayoutRequest $payout, User $admin): PayoutRequest
     {
-        if (! $payout->isPending()) {
-            throw new BusinessRuleException('لا يمكن اعتماد طلب غير معلّق.', 'PAYOUT_NOT_PENDING');
-        }
+        // The pending check and the status write have to be one atomic step against
+        // a locked row. Before, they were two unlocked statements with no
+        // transaction at all, so two supervisors clicking «اعتماد» at the same
+        // moment both saw `pending` and both marked it paid — a captain paid twice
+        // out of the platform's pocket, with two audit entries claiming it was fine.
+        $payout = $this->transaction(function () use ($payout, $admin) {
+            /** @var PayoutRequest $locked */
+            $locked = PayoutRequest::whereKey($payout->id)->lockForUpdate()->firstOrFail();
 
-        $payout->forceFill([
-            'status' => PayoutRequest::STATUS_PAID,
-            'processed_by' => $admin->id,
-            'processed_at' => now(),
-        ])->save();
+            if (! $locked->isPending()) {
+                throw new BusinessRuleException('لا يمكن اعتماد طلب غير معلّق.', 'PAYOUT_NOT_PENDING');
+            }
 
-        $this->audit->log('payout.paid', $admin, auditable: $payout);
+            $locked->forceFill([
+                'status' => PayoutRequest::STATUS_PAID,
+                'processed_by' => $admin->id,
+                'processed_at' => now(),
+            ])->save();
+
+            $this->audit->log('payout.paid', $admin, auditable: $locked);
+
+            return $locked;
+        });
 
         $captain = User::find($payout->captain_user_id);
         if ($captain) {
@@ -100,11 +112,17 @@ class PayoutService extends BaseService
 
     public function reject(PayoutRequest $payout, User $admin, ?string $reason = null): PayoutRequest
     {
-        if (! $payout->isPending()) {
-            throw new BusinessRuleException('لا يمكن رفض طلب غير معلّق.', 'PAYOUT_NOT_PENDING');
-        }
-
         return $this->transaction(function () use ($payout, $admin, $reason) {
+            // Locked and re-checked inside the transaction. The check used to sit
+            // outside it, so a concurrent reject could credit the captain's wallet
+            // twice for one rejected request.
+            /** @var PayoutRequest $payout */
+            $payout = PayoutRequest::whereKey($payout->id)->lockForUpdate()->firstOrFail();
+
+            if (! $payout->isPending()) {
+                throw new BusinessRuleException('لا يمكن رفض طلب غير معلّق.', 'PAYOUT_NOT_PENDING');
+            }
+
             $captain = User::find($payout->captain_user_id);
 
             // Credit the reserved funds back to the captain's wallet.

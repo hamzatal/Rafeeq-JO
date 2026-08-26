@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Rafeeq\Core\Permissions\Models\Role;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Chat\Events\ChatMessageSent;
@@ -76,7 +77,10 @@ class BroadcastChannelAuthTest extends TestCase
         $this->assertTrue(TripChannelPolicy::canListen($rider, $trip->id), 'rider allowed');
         $this->assertTrue(TripChannelPolicy::canListen($admin->fresh(), $trip->id), 'staff allowed');
         $this->assertFalse(TripChannelPolicy::canListen($stranger, $trip->id), 'stranger DENIED');
-        $this->assertFalse(TripChannelPolicy::canListen($stranger, 'no-such-trip'), 'missing trip DENIED');
+        $this->assertFalse(TripChannelPolicy::canListen($stranger, (string) Str::uuid7()), 'missing trip DENIED');
+        // A malformed id is something any client can send. It must be denied,
+        // not raise a driver-level cast error.
+        $this->assertFalse(TripChannelPolicy::canListen($stranger, 'not-a-uuid'), 'malformed id DENIED');
     }
 
     public function test_only_conversation_participants_may_listen_to_chat(): void

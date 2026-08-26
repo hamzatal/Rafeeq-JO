@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { DINAR, dinarsFromFils, dinarsOf, formatFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -9,7 +10,7 @@ import { useI18n } from '../../src/i18n';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { api } from '../../src/lib/api';
 
-const jod = (fils: number) => (fils / 1000).toFixed(2);
+const jod = (fils: number) => dinarsFromFils(fils);
 
 type Tab = 'daily' | 'weekly';
 
@@ -75,7 +76,7 @@ export default function EarningsDetail() {
             <View key={tot.key} style={[s.totalCard, tot.navy && s.totalCardNavy]}>
               <Text style={[s.totalLabel, tot.navy && s.totalLabelOn]}>{t(tot.labelKey)}</Text>
               <Text style={[s.totalValue, tot.navy && s.totalValueOn]}>
-                {data ? jod(data.totals[tot.key]) : '0.00'} <Text style={s.cur}>د.أ</Text>
+                {data ? jod(data.totals[tot.key]) : dinarsOf(0)} <Text style={s.cur}>{DINAR}</Text>
               </Text>
               <Text style={[s.totalTrips, tot.navy && s.totalLabelOn]}>
                 {data ? data.totals[tot.tripsKey] : 0} {t('driver.tripsShort')}
@@ -128,7 +129,7 @@ export default function EarningsDetail() {
                     <Text style={s.rowLabel}>{tab === 'weekly' ? `${t('driver.weekOf')} ${b.label}` : b.label}</Text>
                     <Text style={s.rowMeta}>{b.trips} {t('driver.tripsShort')}</Text>
                   </View>
-                  <Text style={s.rowValue}>{jod(b.earnings_fils)} د.أ</Text>
+                  <Text style={s.rowValue}>{formatFils(b.earnings_fils)}</Text>
                 </View>
               ))}
           </>

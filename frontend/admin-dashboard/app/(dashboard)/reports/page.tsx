@@ -1,13 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { formatFils } from '@rafeeq/shared';
 import type { FinancialReport } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { downloadBlob, stamp } from '../../../src/lib/download';
 
-const jod = (fils: number) => `${(fils / 1000).toFixed(3)} د.أ`;
+const jod = (fils: number) => formatFils(fils);
 
 const today = () => new Date().toISOString().slice(0, 10);
 const monthStart = () => {

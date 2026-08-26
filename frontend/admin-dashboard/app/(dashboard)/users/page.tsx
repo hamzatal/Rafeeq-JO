@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { dinarsFromFils, formatFils } from '@rafeeq/shared';
 import type { User, WalletTransaction } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
@@ -202,7 +203,7 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
         {balance !== null && (
           <div className="mb-4 rounded-xl bg-background dark:bg-dsurface p-3 flex items-center justify-between">
             <span className="text-xs muted-text">{t('wallet.balance')}</span>
-            <span className="font-extrabold surface-text">{(balance / 1000).toFixed(3)} د.أ</span>
+            <span className="font-extrabold surface-text">{formatFils(balance)}</span>
           </div>
         )}
 
@@ -249,7 +250,7 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
                   <div className="flex items-center gap-3 shrink-0">
                     <span className={`font-bold ${tx.amount_fils >= 0 ? 'text-success' : 'text-danger'}`}>
                       {tx.amount_fils >= 0 ? '+' : ''}
-                      {(tx.amount_fils / 1000).toFixed(3)}
+                      {dinarsFromFils(tx.amount_fils)}
                     </span>
                     {tx.reversed_at ? (
                       <span className="pill-muted">{t('wallet.reversedBadge')}</span>

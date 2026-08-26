@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { dinarsFromFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -103,7 +104,7 @@ export default function DriverTrips() {
           trips.map((tr) => {
             const completed = tr.status === 'completed';
             const time = tr.scheduled_at ? new Date(tr.scheduled_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '';
-            const fareJod = tr.pricing?.fare_fils != null ? (tr.pricing.fare_fils / 1000).toFixed(2) : null;
+            const fareJod = tr.pricing?.fare_fils != null ? dinarsFromFils(tr.pricing.fare_fils) : null;
             return (
               <Pressable key={tr.id} onPress={() => router.push(`/(app)/trip/${tr.id}` as never)} style={({ pressed }) => [s.tripCard, pressed && { opacity: 0.9 }]}>
                 <View style={s.tripMain}>

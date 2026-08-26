@@ -3,8 +3,10 @@
 namespace Rafeeq\Modules\Trips\Services;
 
 use Rafeeq\Core\Audit\AuditLogger;
+use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
@@ -49,7 +51,11 @@ class TripService extends BaseService
             'driver_id' => $driver->id,
             'vehicle_id' => $vehicleId,
             'fare_fils' => $route->price_fils,
-            'scheduled_at' => $scheduledAt,
+            // Normalised into app local time: the apps send `toISOString()` with a
+            // `Z`, and every datetime column here is a naive `timestamp` read back
+            // as Asia/Amman. Storing the UTC text verbatim shifted every scheduled
+            // trip by the UTC offset. See Core\Support\Clock.
+            'scheduled_at' => Clock::fromClient($scheduledAt),
             'status' => TripStatus::Scheduled,
             'capacity' => $route->capacity,
         ]);
@@ -227,6 +233,22 @@ class TripService extends BaseService
             throw new BusinessRuleException('لا يمكن إلغاء رحلة مكتملة.', 'TRIP_COMPLETED');
         }
 
+        // Cancelling twice ran the whole side-effect chain again: a second fraud
+        // log, a second ghost watch, and a second "your trip was cancelled" push.
+        if ($trip->status === TripStatus::Cancelled) {
+            throw new BusinessRuleException('الرحلة ملغاة بالفعل.', 'TRIP_ALREADY_CANCELLED');
+        }
+
+        // Once any fare has been captured, cancelling is no longer a cancellation —
+        // it is a paid ride being erased, which is a dispute. Money that has moved
+        // has to be reversed under audit, not dropped by flipping a status.
+        if ($trip->passengers()->whereNotNull('paid_at')->exists()) {
+            throw new BusinessRuleException(
+                'لا يمكن إلغاء رحلة تم تحصيل أجرة أحد ركّابها. افتح «مشكلة في الرحلة».',
+                'TRIP_ALREADY_CHARGED',
+            );
+        }
+
         $passengersCount = $trip->passengers()
             ->whereIn('status', [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value])
             ->count();
@@ -287,33 +309,98 @@ class TripService extends BaseService
         return $trip;
     }
 
+    /**
+     * Student cancels their own seat before boarding.
+     *
+     * This was a single `forceFill(['status' => Cancelled])->save()` in the
+     * controller. Three things were left behind: the wallet pre-authorisation hold
+     * stayed active so the money was frozen indefinitely and the student could not
+     * fund another ride; the RideRequest stayed Assigned to a trip they were no
+     * longer on, so matching never reconsidered them; and a subscription ride was
+     * never given back. All three now commit or roll back together.
+     */
+    public function cancelBooking(User $student, TripPassenger $passenger): TripPassenger
+    {
+        return $this->transaction(function () use ($student, $passenger) {
+            $locked = TripPassenger::whereKey($passenger->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->student_id !== $student->id) {
+                throw new AuthorizationException('غير مصرّح.');
+            }
+            if ($locked->status === TripPassengerStatus::Cancelled) {
+                throw new BusinessRuleException('الحجز ملغى بالفعل.', 'BOOKING_ALREADY_CANCELLED');
+            }
+            // Past boarding the seat was used and the fare taken. Undoing that is a
+            // refund decision under audit, not a cancellation.
+            if ($locked->paid_at !== null || $locked->status !== TripPassengerStatus::Booked) {
+                throw new BusinessRuleException(
+                    'لا يمكن إلغاء الحجز بعد الصعود. افتح «مشكلة في الرحلة».',
+                    'BOOKING_NOT_CANCELLABLE',
+                );
+            }
+
+            $locked->forceFill(['status' => TripPassengerStatus::Cancelled])->save();
+
+            // Release the seat money.
+            $hold = $this->wallets->findActiveHold($this->wallets->forUser($student), $locked->trip_id);
+            if ($hold) {
+                $this->wallets->release($hold);
+            }
+
+            // Give the subscription ride back if one was reserved for this seat.
+            if ($locked->subscription_id) {
+                $sub = Subscription::find($locked->subscription_id);
+                if ($sub) {
+                    $this->subscriptions->restoreRide($sub);
+                }
+            }
+
+            // Return the student's request to the matching pool rather than leaving
+            // it pinned to a trip they are no longer on.
+            RideRequest::where('trip_id', $locked->trip_id)
+                ->where('student_id', $student->id)
+                ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
+                ->update(['status' => RideRequestStatus::Pending->value, 'trip_id' => null]);
+
+            $this->audit->log('trip.booking_cancelled', $student, auditable: $locked);
+
+            return $locked;
+        });
+    }
+
     /** Student books a seat. Requires a usable subscription for the route. */
     public function book(User $student, Trip $trip, ?string $pickupPointId = null): TripPassenger
     {
-        if ($trip->status !== TripStatus::Scheduled) {
-            throw new BusinessRuleException('لا يمكن الحجز على هذه الرحلة.', 'TRIP_NOT_BOOKABLE');
-        }
-        if ($trip->bookedCount() >= $trip->capacity) {
-            throw new BusinessRuleException('اكتملت مقاعد الرحلة.', 'TRIP_FULL');
-        }
-        if ($trip->passengers()->where('student_id', $student->id)->exists()) {
-            throw new BusinessRuleException('أنت محجوز بالفعل على هذه الرحلة.', 'ALREADY_BOOKED');
-        }
+        // Every check that decides whether a seat exists has to run inside the
+        // transaction that takes it, against a locked trip row. Previously the
+        // capacity check sat outside, so two students could pass it on the same
+        // last seat and both insert — overbooking a car.
+        return $this->transaction(function () use ($student, $trip, $pickupPointId) {
+            $locked = Trip::whereKey($trip->id)->lockForUpdate()->firstOrFail();
 
-        $subscription = Subscription::activeForRoute($student->id, $trip->route_id)->get()
-            ->first(fn (Subscription $s) => $s->isUsable());
+            if ($locked->status !== TripStatus::Scheduled) {
+                throw new BusinessRuleException('لا يمكن الحجز على هذه الرحلة.', 'TRIP_NOT_BOOKABLE');
+            }
+            if ($locked->bookedCount() >= $locked->capacity) {
+                throw new BusinessRuleException('اكتملت مقاعد الرحلة.', 'TRIP_FULL');
+            }
+            if ($locked->passengers()->where('student_id', $student->id)->exists()) {
+                throw new BusinessRuleException('أنت محجوز بالفعل على هذه الرحلة.', 'ALREADY_BOOKED');
+            }
 
-        if (! $subscription) {
-            throw new BusinessRuleException('تحتاج اشتراكاً فعّالاً على هذا المسار.', 'NO_ACTIVE_SUBSCRIPTION');
-        }
+            $subscription = Subscription::activeForRoute($student->id, $locked->route_id)->get()
+                ->first(fn (Subscription $s) => $s->isUsable());
 
-        return $this->transaction(function () use ($student, $trip, $subscription, $pickupPointId) {
-            $passenger = $trip->passengers()->create([
+            if (! $subscription) {
+                throw new BusinessRuleException('تحتاج اشتراكاً فعّالاً على هذا المسار.', 'NO_ACTIVE_SUBSCRIPTION');
+            }
+
+            $passenger = $locked->passengers()->create([
                 'student_id' => $student->id,
                 'subscription_id' => $subscription->id,
                 'pickup_point_id' => $pickupPointId,
                 'status' => TripPassengerStatus::Booked,
-                'boarding_code' => $this->uniqueTripCode($trip, 'boarding_code'),
+                'boarding_code' => $this->uniqueTripCode($locked, 'boarding_code'),
             ]);
 
             $this->audit->log('trip.booked', $student, auditable: $passenger);
@@ -329,16 +416,24 @@ class TripService extends BaseService
             throw new BusinessRuleException('ابدأ الرحلة أولاً.', 'TRIP_NOT_STARTED');
         }
 
-        $passenger = $trip->passengers()
-            ->where('boarding_code', $code)
-            ->where('status', TripPassengerStatus::Booked->value)
-            ->first();
+        return $this->transaction(function () use ($trip, $code) {
+            // Locked inside the transaction: the read and the status flip have to be
+            // one step, or two concurrent confirmations of the same code both see
+            // `Booked` and both charge the fare.
+            $passenger = $trip->passengers()
+                ->where('boarding_code', $code)
+                ->where('status', TripPassengerStatus::Booked->value)
+                ->lockForUpdate()
+                ->first();
 
-        if (! $passenger) {
-            throw new BusinessRuleException('كود صعود غير صحيح.', 'INVALID_BOARDING_CODE');
-        }
+            if (! $passenger) {
+                // Audited: a wrong code is how a guessing sweep looks, and a sweep is
+                // only detectable if each miss is recorded.
+                $this->audit->log('trip.boarding_code_rejected', auditable: $trip);
 
-        return $this->transaction(function () use ($passenger, $trip) {
+                throw new BusinessRuleException('كود صعود غير صحيح.', 'INVALID_BOARDING_CODE');
+            }
+
             // Issue the drop-off OTP now: the student receives it on boarding and
             // reads it out to the captain on arrival to confirm the drop-off
             // in-app (both-ends confirmation — core anti-fraud control).
@@ -350,10 +445,12 @@ class TripService extends BaseService
                 'dropoff_code' => $dropoffCode,
             ])->save();
 
+            // A subscription that lapsed between booking and boarding must not strand
+            // the rider. Detach it and let billing charge the wallet instead.
             if ($passenger->subscription_id) {
                 $sub = Subscription::find($passenger->subscription_id);
-                if ($sub) {
-                    $this->subscriptions->consumeRide($sub);
+                if (! $sub || ! $this->subscriptions->consumeRide($sub)) {
+                    $passenger->forceFill(['subscription_id' => null])->save();
                 }
             }
 
@@ -393,16 +490,23 @@ class TripService extends BaseService
             throw new BusinessRuleException('الرحلة ليست جارية.', 'TRIP_NOT_STARTED');
         }
 
-        $passenger = $trip->passengers()
-            ->where('dropoff_code', $code)
-            ->where('status', TripPassengerStatus::Onboard->value)
-            ->first();
+        return $this->transaction(function () use ($trip, $code) {
+            // Locked, same reason as boarding: the read and the status flip must be
+            // one step so one drop-off cannot be confirmed twice.
+            $passenger = $trip->passengers()
+                ->where('dropoff_code', $code)
+                ->where('status', TripPassengerStatus::Onboard->value)
+                ->lockForUpdate()
+                ->first();
 
-        if (! $passenger) {
-            throw new BusinessRuleException('كود إنزال غير صحيح.', 'INVALID_DROPOFF_CODE');
-        }
+            if (! $passenger) {
+                // Audited: this is the code whose confirmation the dispute centre
+                // treats as the rider's own word, so every miss has to be on record.
+                $this->audit->log('trip.dropoff_code_rejected', auditable: $trip);
 
-        return $this->transaction(function () use ($trip, $passenger) {
+                throw new BusinessRuleException('كود إنزال غير صحيح.', 'INVALID_DROPOFF_CODE');
+            }
+
             $passenger->forceFill([
                 'status' => TripPassengerStatus::Dropped,
                 'dropoff_confirmed_at' => now(),

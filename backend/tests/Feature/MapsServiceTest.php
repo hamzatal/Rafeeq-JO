@@ -61,14 +61,19 @@ class MapsServiceTest extends TestCase
         $this->assertEqualsWithDelta(35.85, $loc['lng'], 0.001);
     }
 
-    public function test_config_endpoint_exposes_maps_provider(): void
+    /**
+     * The public config carries the CLIENT map key. It used to hand out
+     * `google_key`, which is the IP-restricted server key that bills Geocoding and
+     * Distance Matrix — see PublicConfigLeakTest.
+     */
+    public function test_config_endpoint_exposes_provider_and_the_client_key(): void
     {
-        config()->set('services.maps.google_key', 'PUB_KEY');
+        config()->set('services.maps.google_client_key', 'CLIENT_KEY');
         config()->set('services.maps.provider', 'google');
 
         $this->getJson('/api/v1/config')
             ->assertOk()
             ->assertJsonPath('data.maps.provider', 'google')
-            ->assertJsonPath('data.maps.key', 'PUB_KEY');
+            ->assertJsonPath('data.maps.key', 'CLIENT_KEY');
     }
 }

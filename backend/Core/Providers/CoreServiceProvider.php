@@ -58,5 +58,26 @@ class CoreServiceProvider extends ServiceProvider
 
             return [Limit::perMinute(20)->by((string) $key)];
         });
+
+        /*
+         * Boarding and drop-off codes. These are 4-digit codes — 10,000
+         * combinations — and confirming a drop-off is what the dispute centre
+         * treats as the rider's own confirmation that they got out. Unlimited
+         * attempts turn that evidence into a guessing game a captain always wins.
+         *
+         * Keyed per captain AND per trip, so exhausting one trip's code does not
+         * lock the captain out of a different rider, and a captain cannot spread
+         * guesses across trips to raise their rate. 6 per minute puts a full sweep
+         * of the space beyond a day.
+         */
+        RateLimiter::for('trip-code', function ($request) {
+            $captain = (string) ($request->user()?->getAuthIdentifier() ?: $request->ip());
+            $trip = (string) $request->route('trip');
+
+            return [
+                Limit::perMinute(6)->by($captain.'|'.$trip),
+                Limit::perMinute(30)->by($captain),
+            ];
+        });
     }
 }

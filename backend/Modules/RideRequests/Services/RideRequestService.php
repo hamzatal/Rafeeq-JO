@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\RideRequests\Services;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Zones\Services\ZoneService;
@@ -54,7 +55,8 @@ class RideRequestService extends BaseService
             'pickup_lat' => $lat,
             'pickup_lng' => $lng,
             'pickup_address' => $data['pickup_address'] ?? null,
-            'desired_time' => $data['desired_time'],
+            // Same normalisation as TripService::schedule — see Core\Support\Clock.
+            'desired_time' => Clock::fromClient((string) $data['desired_time']),
             'type' => $type,
             'direction' => RideDirection::tryFrom($data['direction'] ?? '') ?? RideDirection::ToUniversity,
             'is_express' => $isExpress,

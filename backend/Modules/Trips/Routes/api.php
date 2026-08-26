@@ -16,8 +16,15 @@ Route::prefix('v1/driver/trips')->middleware(['auth:sanctum', 'role:driver'])->g
     Route::post('{trip}/start', [DriverTripController::class, 'start']);
     Route::post('{trip}/end', [DriverTripController::class, 'end']);
     Route::post('{trip}/cancel', [DriverTripController::class, 'cancel']);
-    Route::post('{trip}/board', [DriverTripController::class, 'confirmBoarding']);
-    Route::post('{trip}/dropoff', [DriverTripController::class, 'confirmDropoff']);
+    // Boarding and drop-off codes are 4 digits, so 10,000 combinations. Without a
+    // rate limit a captain can simply guess a drop-off code and confirm dropping
+    // off a rider who never got out — which defeats the both-ends confirmation that
+    // the dispute centre relies on as evidence. 6 attempts per minute per captain
+    // makes exhausting the space take over a day, and every failure is audited.
+    Route::middleware('throttle:trip-code')->group(function () {
+        Route::post('{trip}/board', [DriverTripController::class, 'confirmBoarding']);
+        Route::post('{trip}/dropoff', [DriverTripController::class, 'confirmDropoff']);
+    });
     Route::post('{trip}/location', [DriverTripController::class, 'pushLocation']);
 });
 

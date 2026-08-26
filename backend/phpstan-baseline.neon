@@ -1039,24 +1039,6 @@ parameters:
 			path: Modules/Trips/Resources/TripPassengerResource.php
 
 		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$boarded_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Trips/Resources/TripPassengerResource.php
-
-		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$dropoff_code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Trips/Resources/TripPassengerResource.php
-
-		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$dropoff_confirmed_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Trips/Resources/TripPassengerResource.php
-
-		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Resources\\TripPassengerResource\:\:\$pickup_lat\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1106,18 +1088,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Trips/Services/RideBillingService.php
-
-		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripPassenger\:\:\$coupon_code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Trips/Services/RideBillingService.php
-
-		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripPassenger\:\:\$paid_at\.$#'
 			identifier: property.notFound
 			count: 1
 			path: Modules/Trips/Services/RideBillingService.php

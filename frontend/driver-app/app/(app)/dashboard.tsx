@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { dinarsFromFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -59,7 +60,7 @@ export default function Dashboard() {
     }
   }, [approved, restoreAvailability]);
 
-  const jod = (fils: number) => (fils / 1000).toFixed(3);
+  const jod = (fils: number) => dinarsFromFils(fils);
 
   const onSubmit = async () => {
     setError(null);

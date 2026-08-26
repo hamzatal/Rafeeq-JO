@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
@@ -43,9 +44,10 @@ class WalletHoldTest extends TestCase
 
     public function test_hold_reserves_funds_without_moving_money(): void
     {
+        $ref = (string) Str::uuid7();
         [, $wallet] = $this->fundedStudent(5000);
 
-        $hold = $this->wallets()->hold($wallet, 1000, 'trip-x', 'حجز رحلة');
+        $hold = $this->wallets()->hold($wallet, 1000, $ref, 'حجز رحلة');
 
         $this->assertSame(WalletHold::STATUS_ACTIVE, $hold->status);
         $fresh = $wallet->fresh();
@@ -56,10 +58,11 @@ class WalletHoldTest extends TestCase
 
     public function test_capture_debits_balance_and_clears_reservation(): void
     {
+        $ref = (string) Str::uuid7();
         [, $wallet] = $this->fundedStudent(5000);
-        $hold = $this->wallets()->hold($wallet, 1000, 'trip-x');
+        $hold = $this->wallets()->hold($wallet, 1000, $ref);
 
-        $this->wallets()->capture($hold, 1000, WalletTxnType::RidePayment, 'دفع رحلة', 'trip-x');
+        $this->wallets()->capture($hold, 1000, WalletTxnType::RidePayment, 'دفع رحلة', $ref);
 
         $fresh = $wallet->fresh();
         $this->assertSame(4000, $fresh->balance_fils);
@@ -69,8 +72,9 @@ class WalletHoldTest extends TestCase
 
     public function test_release_frees_reserved_funds(): void
     {
+        $ref = (string) Str::uuid7();
         [, $wallet] = $this->fundedStudent(5000);
-        $hold = $this->wallets()->hold($wallet, 1000, 'trip-x');
+        $hold = $this->wallets()->hold($wallet, 1000, $ref);
 
         $this->wallets()->release($hold);
 
@@ -82,14 +86,16 @@ class WalletHoldTest extends TestCase
 
     public function test_hold_fails_when_available_balance_is_insufficient(): void
     {
+        $ref = (string) Str::uuid7();
         [, $wallet] = $this->fundedStudent(1000);
 
         $this->expectException(BusinessRuleException::class);
-        $this->wallets()->hold($wallet, 1500, 'trip-x');
+        $this->wallets()->hold($wallet, 1500, $ref);
     }
 
     public function test_trip_start_holds_fare_and_boarding_captures_it(): void
     {
+        $ref = (string) Str::uuid7();
         [$student, $wallet] = $this->fundedStudent(5000);
 
         $captainUser = User::create([
@@ -137,6 +143,7 @@ class WalletHoldTest extends TestCase
 
     public function test_cancelling_a_trip_releases_the_hold(): void
     {
+        $ref = (string) Str::uuid7();
         [$student, $wallet] = $this->fundedStudent(5000);
 
         $captainUser = User::create([
