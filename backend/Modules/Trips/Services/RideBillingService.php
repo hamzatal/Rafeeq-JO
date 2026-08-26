@@ -12,8 +12,10 @@ use Rafeeq\Modules\Matching\Services\PricingService;
 use Rafeeq\Modules\Rewards\Services\RewardService;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
+use Rafeeq\Modules\Wallet\Services\CaptainDebtService;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\CouponScope;
+use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\WalletTxnType;
 
 /**
@@ -31,6 +33,7 @@ class RideBillingService extends BaseService
         private readonly RewardService $rewards,
         private readonly PricingService $pricing,
         private readonly CouponService $coupons,
+        private readonly CaptainDebtService $debts,
     ) {}
 
     public function chargeForBoarding(TripPassenger $passenger, Trip $trip): void
@@ -75,8 +78,18 @@ class RideBillingService extends BaseService
 
         $this->transaction(function () use ($passenger, $trip, $fare, $payable, $discount, $couponToRedeem, $commission, $captainShare) {
             // Student pays from wallet only when no subscription covers this ride.
+            // Cash inverts the money flow. On wallet the platform holds the fare and
+            // pays the captain their share. On cash the captain already holds the whole
+            // fare in notes, so there is nothing to debit from the rider — and the
+            // captain owes us the commission instead.
+            //
+            // The fare is still recorded at the published band price either way, so the
+            // accounting row is identical and the tariff stays auditable. What changes
+            // is only who is holding the money.
+            $method = $passenger->payment_method ?? PaymentMethod::Wallet;
+
             $student = null;
-            if (! $passenger->subscription_id) {
+            if (! $passenger->subscription_id && $method !== PaymentMethod::Cash) {
                 $student = User::find($passenger->student_id);
 
                 // No payer means nobody can be debited. Previously this branch was
@@ -122,13 +135,26 @@ class RideBillingService extends BaseService
                 );
             }
 
-            $this->wallets->credit(
-                $this->wallets->forUser($captainUser),
-                $captainShare,
-                WalletTxnType::Payout,
-                'أرباح رحلة',
-                $trip->id,
-            );
+            $captainWallet = $this->wallets->forUser($captainUser);
+
+            if ($method === PaymentMethod::Cash) {
+                // The captain has the whole fare in hand, so the platform is owed its
+                // commission. Taken from their balance where it covers it, and recorded
+                // as debt where it does not — see CaptainDebtService.
+                $this->debts->chargeCommission($captainWallet, $commission - $discount, $trip->id);
+            } else {
+                $this->wallets->credit(
+                    $captainWallet,
+                    $captainShare,
+                    WalletTxnType::Payout,
+                    'أرباح رحلة',
+                    $trip->id,
+                );
+
+                // Earnings settle any outstanding cash commission automatically, so a
+                // captain working a mix of methods never has to think about the debt.
+                $this->debts->settleFromBalance($captainWallet);
+            }
 
             $passenger->forceFill([
                 'fare_fils' => $fare,
@@ -136,6 +162,10 @@ class RideBillingService extends BaseService
                 'captain_share_fils' => $captainShare,
                 'coupon_discount_fils' => $discount > 0 ? $discount : null,
                 'paid_at' => now(),
+                // Separate from paid_at: that means "the platform finished billing this
+                // seat", which is true either way. This means "the captain confirmed
+                // receiving notes", which a disputed cash trip needs on its own.
+                'cash_collected_at' => $method === PaymentMethod::Cash ? now() : null,
             ])->save();
 
             // Loyalty: reward the student for completing a ride (+ first-ride bonus).

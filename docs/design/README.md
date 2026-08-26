@@ -11,12 +11,12 @@
 |---|---|---|
 | 1 | [`identity/01-foundations.png`](identity/01-foundations.png) | سلّم الألوان · الرمادي · الدلالات · مقياس الطباعة · الأقطار · نموذج العمق · المسافات |
 | 2 | [`identity/02-components.png`](identity/02-components.png) | الأزرار · الحقول · الشارات · حالات القوائم · مؤشّر الرحلة · الأيقونات · RTL/LTR |
-| 3 | [`identity/03-student-home.png`](identity/03-student-home.png) | **الطالب — الرئيسية**: خريطة + شيت واحد |
-| 4 | [`identity/04-student-ride.png`](identity/04-student-ride.png) | **الطالب — الطلب والدفع** في شيت واحد |
-| 5 | [`identity/05-student-wallet.png`](identity/05-student-wallet.png) | **الطالب — المحفظة** |
-| 6 | [`identity/06-driver-cockpit.png`](identity/06-driver-cockpit.png) | **الكابتن — الكوكبِت** |
-| 7 | [`identity/07-driver-offer.png`](identity/07-driver-offer.png) | **الكابتن — العرض الوارد** (ملء الشاشة) |
-| 8 | [`identity/08-admin.png`](identity/08-admin.png) | **الإدارة — لوحة القيادة** (سايدبار فاتح) |
+| 3 | [`v2/03-student-ride.png`](v2/03-student-ride.png) | **الطالب — الرئيسية**: خريطة + شيت واحد |
+| 4 | [`v2/03-student-ride.png`](v2/03-student-ride.png) | **الطالب — الطلب والدفع** في شيت واحد |
+| 5 | [`v2/04-student-money.png`](v2/04-student-money.png) | **الطالب — المحفظة** |
+| 6 | [`v2/05-driver.png`](v2/05-driver.png) | **الكابتن — الكوكبِت** |
+| 7 | [`v2/05-driver.png`](v2/05-driver.png) | **الكابتن — العرض الوارد** (ملء الشاشة) |
+| 8 | [`v2/06-admin-1.png`](v2/06-admin-1.png) | **الإدارة — لوحة القيادة** (سايدبار فاتح) |
 | 9 | [`identity/09-before-after.png`](identity/09-before-after.png) | **قبل/بعد** — نفس المحتوى بالحرف، والفروقات بالأرقام |
 
 **المصادر في [`src/`](src/)** — HTML+CSS حقيقي وسكربت التصوير. أي تعديل على الهوية يُعاد توليده بـ:
@@ -376,4 +376,4 @@ packages/ui/src/
 2. **رأيك في السايدبار الفاتح** للأدمن مقابل داكن.
 3. **شعار حقيقي** — عندك `r-logo.png` نقطي 36KB مكرّر 4 مرّات. أحتاج SVG، أو أصمّم لك مقترح wordmark عربي.
 
-> خطة التنفيذ الكاملة حتى الإطلاق: [`../plan/00-MASTER-PLAN.md`](../plan/00-MASTER-PLAN.md)
+> خطة التنفيذ الكاملة حتى الإطلاق: [`../ROADMAP.md`](../ROADMAP.md)

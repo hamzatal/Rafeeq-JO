@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\RideDirection;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\RideType;
@@ -22,6 +23,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property RideType $type
  * @property bool $is_express
  * @property RideRequestStatus $status
+ * @property PaymentMethod $payment_method Wallet or cash. Chosen before matching so the
+ *                                         captain sees it on the offer and can decline knowingly.
  * @property Carbon $desired_time
  */
 class RideRequest extends Model
@@ -31,7 +34,7 @@ class RideRequest extends Model
     protected $fillable = [
         'student_id', 'zone_id', 'university_id', 'subscription_id', 'trip_id',
         'pickup_lat', 'pickup_lng', 'pickup_address', 'desired_time',
-        'type', 'direction', 'is_express', 'express_fee_fils', 'status', 'notes', 'coupon_code',
+        'payment_method', 'type', 'direction', 'is_express', 'express_fee_fils', 'status', 'notes', 'coupon_code',
     ];
 
     protected function casts(): array
@@ -43,6 +46,7 @@ class RideRequest extends Model
             'type' => RideType::class,
             'direction' => RideDirection::class,
             'status' => RideRequestStatus::class,
+            'payment_method' => PaymentMethod::class,
             'is_express' => 'boolean',
             'express_fee_fils' => 'integer',
         ];

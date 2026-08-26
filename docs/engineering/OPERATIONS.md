@@ -74,7 +74,7 @@ git checkout <previous-tag> && docker compose -f deployment/docker-compose.prod.
 - **Reverb:** خدمة `reverb` للبثّ اللحظي (تتبّع الرحلة/الدردشة) — خلف WSS.
 - **النسخ الاحتياطي:** `pg_dump` يومي + تخزين خارج الموقع + **اختبار استعادة شهري**.
 - **المراقبة:** وجّه موازِن الأحمال إلى `/api/v1/health`؛ نبّه على 5xx و`audit_logs` الحسّاسة وطول الطابور.
-- **الأمان التشغيلي:** TLS/HSTS · Secrets Manager · WAF. ⚠️ **غير مُنفَّذ اليوم** — لا reverse proxy ولا TLS في أي compose، والتفصيل في [AUDIT](./AUDIT.md) §2 (خ24) والتنفيذ في [ROADMAP](./ROADMAP.md) المرحلة 11.
+- **الأمان التشغيلي:** TLS/HSTS · Secrets Manager · WAF. ⚠️ **غير مُنفَّذ اليوم** — لا reverse proxy ولا TLS في أي compose، والتفصيل في [AUDIT](../AUDIT.md) §2 (خ24) والتنفيذ في [ROADMAP](../ROADMAP.md) المرحلة 11.
 
 ## ✅ قائمة تدقيق الإصدار (Release checklist)
 

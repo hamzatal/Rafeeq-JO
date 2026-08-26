@@ -1,7 +1,7 @@
 # قاعدة البيانات — البنية والقرارات
 
 > **هذه الوثيقة تشرح «لماذا».** أمّا «ماذا» — كل جدول وعمود وفهرس — فمُولَّد آلياً من
-> السكيما الحيّة في [`DATABASE_SCHEMA.generated.md`](DATABASE_SCHEMA.generated.md)،
+> السكيما الحيّة في [`SCHEMA.generated.md`](SCHEMA.generated.md)،
 > ويُعاد توليده بأمر واحد فلا ينحرف عن الواقع أبداً:
 >
 > ```bash
@@ -125,7 +125,7 @@ users ──┬── driver_profiles ──┬── driver_documents   ← ا�
 ### السلامة والدعم — 9 · التواصل — 6 · النطاق المُرشَّح للحذف — 8
 
 `parcels` · `exchange_items` · `lost_found_items` · `ads` · `rewards` — مزايا خارج جوهر
-النقل، والمرحلة 4 تقرّر بقاءها أو حذفها. تفصيل في [`AUDIT.md`](AUDIT.md) §4.
+النقل، والمرحلة 4 تقرّر بقاءها أو حذفها. تفصيل في [`AUDIT.md`](../AUDIT.md) §4.
 
 ---
 
@@ -142,7 +142,7 @@ users ──┬── driver_profiles ──┬── driver_documents   ← ا�
 
 ## 5) الفجوات المعروفة — بصراحة
 
-هذه ليست قائمة أمنيات، بل عيوب **مقيسة** وكل واحدة لها بند في [`ROADMAP.md`](ROADMAP.md).
+هذه ليست قائمة أمنيات، بل عيوب **مقيسة** وكل واحدة لها بند في [`ROADMAP.md`](../ROADMAP.md).
 
 | # | الفجوة | القياس | الأثر | البند |
 |---|---|---|---|---|
@@ -194,8 +194,8 @@ COVERAGE=1 ./scripts/pg-test.sh             # مع التغطية
 
 | الملف | الدور |
 |---|---|
-| [`DATABASE_SCHEMA.generated.md`](DATABASE_SCHEMA.generated.md) | **مُولَّد** · 68 جدولاً بكل عمود وفهرس · `php artisan db:schema-doc` |
+| [`SCHEMA.generated.md`](SCHEMA.generated.md) | **مُولَّد** · 68 جدولاً بكل عمود وفهرس · `php artisan db:schema-doc` |
 | `backend/Core/Console/SchemaDocCommand.php` | المولِّد |
 | `backend/scripts/pg-test.sh` | تشغيل السويت على Postgres |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | حدود الموديولات والعقود |
-| [`AUDIT.md`](AUDIT.md) | تفصيل كل فجوة أعلاه |
+| [`AUDIT.md`](../AUDIT.md) | تفصيل كل فجوة أعلاه |

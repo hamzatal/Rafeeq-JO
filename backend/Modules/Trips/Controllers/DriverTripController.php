@@ -17,6 +17,8 @@ use Rafeeq\Modules\Trips\Requests\ScheduleTripRequest;
 use Rafeeq\Modules\Trips\Resources\TripPassengerResource;
 use Rafeeq\Modules\Trips\Resources\TripResource;
 use Rafeeq\Modules\Trips\Services\TripService;
+use Rafeeq\Modules\Wallet\Services\CaptainDebtService;
+use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripStatus;
 
@@ -71,6 +73,14 @@ class DriverTripController extends Controller
         if (! $driver || ! $driver->status->canDrive()) {
             throw new AuthorizationException('حسابك غير معتمد لتشغيل الرحلات.');
         }
+
+        // Cash makes the platform a creditor: the captain holds the whole fare and owes
+        // the commission. Checked here, when a NEW trip is claimed, and deliberately not
+        // during a trip already under way — stranding a rider halfway to collect a debt
+        // would be indefensible, and the fare being collected is what settles it anyway.
+        app(CaptainDebtService::class)->assertMayGoOnline(
+            app(WalletService::class)->forUser($request->user())
+        );
 
         // Atomic claim: only ONE captain's UPDATE can match `driver_id IS NULL`
         // for a still-pending trip. A concurrent second claim matches 0 rows and

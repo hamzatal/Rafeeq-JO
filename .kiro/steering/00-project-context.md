@@ -35,7 +35,7 @@ inclusion: always
 ## التسعير والعمولة (المرحلة 3)
 - **مبني على المسافة (GPS/Haversine)** — `Core/Support/Geo` + `Modules/Matching/Services/PricingService`. مفاتيح في `config/rafeeq.php` (فتح عداد 300 فلس + 250/كم + 20/دقيقة + حد أدنى 1000 + ليلي 1.25×).
 - **عمولة المنصة 15%** (`splitCommission`, zero-sum) تُخصم من الكابتن عبر المحفظة (لا كاش مباشر).
-- التفاصيل والدراسة: [`docs/PRICING.md`](../../docs/PRICING.md).
+- التفاصيل والدراسة: [`docs/product/PRICING.md`](../../docs/product/PRICING.md).
 
 ## الدفع والأمان و AI (باختصار)
 - **الدفع:** CliQ — Payment Request برقم `RFQ-2026-#####` + تحقّق GPT Vision + fallback يدوي. (لا علاقة له بترقيم الكوميت.)

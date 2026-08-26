@@ -1,6 +1,6 @@
 # 05 — المعمارية (Architecture)
 
-> مرجع تقني موجز. للحالة والخطة راجع [ROADMAP](./ROADMAP.md)، وللحالة الحقيقية للكود راجع [AUDIT](./AUDIT.md).
+> مرجع تقني موجز. للحالة والخطة راجع [ROADMAP](../ROADMAP.md)، وللحالة الحقيقية للكود راجع [AUDIT](../AUDIT.md).
 
 ## 1) النمط
 **Modular Monolith** على **Laravel 12 / PHP 8.4**، namespace `Rafeeq\`. كل مجال أعمال مغلّف في «Module» مستقل (Controllers / Services / Models / Repositories / Requests / Resources / Routes / Migrations / Providers) يسجّل نفسه عبر `ServiceProvider`. يتيح استخراج أي module كخدمة لاحقاً.
@@ -26,7 +26,7 @@ Auth · Users · Students · Drivers · Universities · Areas · PickupPoints ·
 - دورة الطلب: Route → middleware (`auth:sanctum` → RBAC → rate-limit → audit) → FormRequest → Controller رفيع → Service → Repository → Resource → Events.
 
 ## 6) دورة المال ومكافحة الاحتيال
-كل الدفع عبر **CliQ → محفظة مسبقة الدفع (فلس)**. الكابتن يتقاضى **من المنصة** (لا كاش) + حجز العمولة (config، افتراضي 15%). **OTP صعود + OTP إنزال/تسليم** على الطرفين. تسجيل الإلغاءات + Risk Flags + SOS. الشكوى الحرجة → تجميد + تحقيق. التسعير: راجع [PRICING](./PRICING.md) — **النموذج الحالي في الكود لا يطابق نموذج العمل وسيُعاد كتابته في المرحلة 5.**
+كل الدفع عبر **CliQ → محفظة مسبقة الدفع (فلس)**. الكابتن يتقاضى **من المنصة** (لا كاش) + حجز العمولة (config، افتراضي 15%). **OTP صعود + OTP إنزال/تسليم** على الطرفين. تسجيل الإلغاءات + Risk Flags + SOS. الشكوى الحرجة → تجميد + تحقيق. التسعير: راجع [PRICING](../product/PRICING.md) — **النموذج الحالي في الكود لا يطابق نموذج العمل وسيُعاد كتابته في المرحلة 5.**
 
 ## 7) عميل الـ API (نطاقات `RafeeqApi`)
 auth · profile · driver · admin · catalog · transport · driverTrips · wallet · payments · notifications · ratings · rideRequests · support · complaints · disputes · parcels · rewards · lostFound · exchange · coupons · zones · emergency. استجابة موحّدة، Accept-Language تلقائي.

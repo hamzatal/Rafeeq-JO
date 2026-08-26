@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Traits\HasUuid;
 
@@ -17,6 +18,10 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string|null $pickup_point_id
  * @property TripPassengerStatus $status
  * @property string $boarding_code
+ * @property PaymentMethod $payment_method How this seat settled. On the accounting row
+ *                                         rather than looked up through a request that may be detached.
+ * @property Carbon|null $cash_collected_at When the captain confirmed
+ *                                          receiving notes. Distinct from paid_at, which only means billing finished.
  * @property string|null $dropoff_code
  * @property Carbon|null $boarded_at
  * @property Carbon|null $dropoff_confirmed_at
@@ -36,7 +41,7 @@ class TripPassenger extends Model
     protected $fillable = [
         'trip_id', 'student_id', 'subscription_id', 'pickup_point_id',
         'pickup_lat', 'pickup_lng', 'pickup_order',
-        'status', 'boarding_code', 'dropoff_code', 'boarded_at', 'dropoff_confirmed_at',
+        'status', 'payment_method', 'cash_collected_at', 'boarding_code', 'dropoff_code', 'boarded_at', 'dropoff_confirmed_at',
         'fare_fils', 'commission_fils', 'captain_share_fils', 'coupon_code', 'coupon_discount_fils', 'paid_at',
     ];
 
@@ -46,6 +51,8 @@ class TripPassenger extends Model
     {
         return [
             'status' => TripPassengerStatus::class,
+            'payment_method' => PaymentMethod::class,
+            'cash_collected_at' => 'datetime',
             'boarded_at' => 'datetime',
             'dropoff_confirmed_at' => 'datetime',
             'paid_at' => 'datetime',
