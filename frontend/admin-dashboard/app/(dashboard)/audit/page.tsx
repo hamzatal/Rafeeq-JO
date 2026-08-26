@@ -89,7 +89,7 @@ export default function AuditPage() {
       <div className="card overflow-x-auto p-0">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-right muted-text border-b border-line dark:border-dline">
+            <tr className="text-right muted-text border-b border-line">
               <th className="px-4 py-3 font-semibold">{t('audit.when')}</th>
               <th className="px-4 py-3 font-semibold">{t('audit.action')}</th>
               <th className="px-4 py-3 font-semibold">{t('audit.user')}</th>
@@ -109,7 +109,7 @@ export default function AuditPage() {
               </tr>
             ) : (
               items.map((log) => (
-                <tr key={log.id} className="border-b border-line/60 dark:border-dline/60 align-top">
+                <tr key={log.id} className="border-b border-line/60 align-top">
                   <td className="px-4 py-3 whitespace-nowrap text-xs muted-text">
                     {new Date(log.created_at).toLocaleString()}
                   </td>

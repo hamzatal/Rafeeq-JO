@@ -37,7 +37,7 @@ const TARGETS: Target[] = [
 ];
 
 export function Topbar() {
-  const { locale, scheme, setLocale, setScheme } = usePrefs();
+  const { locale, setLocale } = usePrefs();
   const { t } = useT();
   const router = useRouter();
 
@@ -123,11 +123,11 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-surface/90 backdrop-blur border-b border-line flex items-center justify-between px-6 dark:bg-dcard/90 dark:border-dline">
+    <header className="sticky top-0 z-40 h-16 bg-surface/90 backdrop-blur border-b border-line flex items-center justify-between px-6">
       {/* Global search */}
       <div className="relative w-96 max-w-[48vw] hidden sm:block" ref={searchRef}>
         <form onSubmit={submitSearch}>
-          <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-line bg-background focus-within:border-cyan focus-within:ring-1 focus-within:ring-cyan dark:bg-dsurface dark:border-dline">
+          <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-line bg-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
             <span className="material-symbols-outlined text-muted text-[20px] leading-none shrink-0">search</span>
             <input
               value={query}
@@ -136,14 +136,14 @@ export function Topbar() {
                 setSearchOpen(true);
               }}
               onFocus={() => setSearchOpen(true)}
-              className="flex-1 h-full bg-transparent text-sm outline-none dark:text-dtext"
+              className="flex-1 h-full bg-transparent text-sm outline-none"
               placeholder={t('shell.search')}
             />
           </div>
         </form>
 
         {searchOpen && query.trim() && (
-          <div className="absolute mt-2 w-full rounded-xl border border-line bg-surface shadow-lift overflow-hidden dark:bg-dcard dark:border-dline">
+          <div className="absolute mt-2 w-full rounded-xl border border-line bg-surface shadow-lift overflow-hidden">
             {pageResults.length > 0 && (
               <div className="py-1">
                 <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">الصفحات</div>
@@ -151,21 +151,21 @@ export function Topbar() {
                   <button
                     key={r.href}
                     onClick={() => go(r.href)}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background dark:hover:bg-dsurface text-start"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background text-start"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-cyan-deep">{r.icon}</span>
+                    <span className="material-symbols-outlined text-[18px] text-primary-dark">{r.icon}</span>
                     <span className="surface-text">{locale === 'ar' ? r.ar : r.en}</span>
                   </button>
                 ))}
               </div>
             )}
-            <div className="py-1 border-t border-line dark:border-dline">
+            <div className="py-1 border-t border-line">
               <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">إجراءات</div>
               {entityActions.map((a) => (
                 <button
                   key={a.href}
                   onClick={() => go(a.href)}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background dark:hover:bg-dsurface text-start"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background text-start"
                 >
                   <span className="material-symbols-outlined text-[18px] text-muted">{a.icon}</span>
                   <span className="surface-text">{a.label}</span>
@@ -182,7 +182,7 @@ export function Topbar() {
           <Tooltip label={t('shell.notifications')}>
             <button
               onClick={togglePanel}
-              className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted hover:bg-background dark:hover:bg-dsurface transition-colors"
+              className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted hover:bg-background transition-colors"
             >
               <span className="material-symbols-outlined">notifications</span>
               {unread > 0 && (
@@ -194,10 +194,10 @@ export function Topbar() {
           </Tooltip>
 
           {open && (
-            <div className="absolute end-0 mt-2 w-80 max-h-[70vh] overflow-y-auto rounded-xl border border-line bg-surface shadow-lift dark:bg-dcard dark:border-dline">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-line dark:border-dline">
+            <div className="absolute end-0 mt-2 w-80 max-h-[70vh] overflow-y-auto rounded-xl border border-line bg-surface shadow-lift">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-line">
                 <span className="font-bold surface-text">{t('shell.notifications')}</span>
-                <button onClick={markAll} className="text-xs text-cyan-deep hover:underline">
+                <button onClick={markAll} className="text-xs text-primary-dark hover:underline">
                   {t('shell.markAllRead')}
                 </button>
               </div>
@@ -210,7 +210,7 @@ export function Topbar() {
                   {items.map((n) => (
                     <li
                       key={n.id}
-                      className={`px-4 py-3 border-b border-line/60 dark:border-dline/60 ${n.read ? 'opacity-60' : 'bg-cyan/5'}`}
+                      className={`px-4 py-3 border-b border-line/60 ${n.read ? 'opacity-60' : 'bg-primary/5'}`}
                     >
                       <div className="text-sm font-semibold surface-text">{n.title}</div>
                       <div className="text-xs text-muted mt-0.5 line-clamp-2">{n.body}</div>
@@ -226,19 +226,9 @@ export function Topbar() {
         <Tooltip label={t('shell.language')}>
           <button
             onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
-            className="h-10 px-3 rounded-lg border border-line text-sm font-semibold surface-text hover:bg-background dark:border-dline dark:hover:bg-dsurface transition-colors"
+            className="h-10 px-3 rounded-lg border border-line text-sm font-semibold surface-text hover:bg-background transition-colors"
           >
             {locale === 'ar' ? 'EN' : 'ع'}
-          </button>
-        </Tooltip>
-
-        {/* Theme */}
-        <Tooltip label={t('shell.theme')}>
-          <button
-            onClick={() => setScheme(scheme === 'dark' ? 'light' : 'dark')}
-            className="w-10 h-10 rounded-lg border border-line surface-text hover:bg-background dark:border-dline dark:hover:bg-dsurface transition-colors"
-          >
-            {scheme === 'dark' ? '☀︎' : '☾'}
           </button>
         </Tooltip>
       </div>

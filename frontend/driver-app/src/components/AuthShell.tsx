@@ -25,7 +25,7 @@ export function AuthShell({
 
   return (
     <View style={s.root}>
-      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
       <View style={s.tintA} pointerEvents="none" />
       <View style={s.tintB} pointerEvents="none" />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>

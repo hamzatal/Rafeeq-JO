@@ -11,7 +11,7 @@ const STATUSES = ['', 'pending', 'scheduled', 'started', 'completed', 'cancelled
 const tone = (status: string) =>
   status === 'completed' ? 'bg-green-100 text-success'
     : status === 'cancelled' ? 'bg-red-100 text-danger'
-    : status === 'started' ? 'bg-cyan/15 text-cyan-deep'
+    : status === 'started' ? 'bg-primary/15 text-primary-dark'
     : 'bg-slate-100 text-muted';
 
 export default function TripsPage() {

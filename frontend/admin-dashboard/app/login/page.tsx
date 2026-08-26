@@ -54,7 +54,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-navy">
+    <div className="relative min-h-screen w-full overflow-hidden bg-primary">
       {/* Amman map backdrop — kept clearly visible */}
       <div
         className="absolute inset-0 bg-cover bg-center"
@@ -62,7 +62,7 @@ export default function LoginPage() {
         aria-hidden
       />
       {/* Light scrim only on the info (left) side for text contrast; form side stays clear */}
-      <div className="absolute inset-0 bg-gradient-to-r from-navy/80 via-navy/45 to-navy/15" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/45 to-primary/15" aria-hidden />
 
       {/* Content */}
       <div className="relative z-10 min-h-screen grid lg:grid-cols-2">
@@ -71,7 +71,7 @@ export default function LoginPage() {
           <div className="flex items-center gap-3">
             <LogoMark size={52} />
             <div>
-              <div className="text-2xl font-extrabold text-cyan-soft leading-tight">رفيق</div>
+              <div className="text-2xl font-extrabold text-brand-200 leading-tight">رفيق</div>
               <div className="text-xs text-white/60">مركز قيادة المنصّة</div>
             </div>
           </div>
@@ -89,7 +89,7 @@ export default function LoginPage() {
               ].map((f) => (
                 <li key={f.icon} className="flex items-start gap-3">
                   <div className="mt-0.5 w-9 h-9 shrink-0 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-cyan-soft text-[20px]">{f.icon}</span>
+                    <span className="material-symbols-outlined text-brand-200 text-[20px]">{f.icon}</span>
                   </div>
                   <div>
                     <div className="font-bold text-white">{f.title}</div>

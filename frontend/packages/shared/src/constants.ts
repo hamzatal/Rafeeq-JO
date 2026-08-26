@@ -98,7 +98,6 @@ export const ENDPOINTS = {
   wallet: {
     show: '/wallet',
     transactions: '/wallet/transactions',
-    topupInstructions: '/wallet/topup-instructions',
   },
   payments: {
     list: '/payments',
@@ -141,16 +140,6 @@ export const ENDPOINTS = {
     adminOne: (id: string) => `/admin/complaints/${id}`,
     adminStatus: (id: string) => `/admin/complaints/${id}/status`,
   },
-  parcels: {
-    mine: '/parcels',
-    create: '/parcels',
-    one: (id: string) => `/parcels/${id}`,
-    cancel: (id: string) => `/parcels/${id}/cancel`,
-    courierAvailable: '/courier/parcels/available',
-    courierAccept: (id: string) => `/courier/parcels/${id}/accept`,
-    courierPickup: (id: string) => `/courier/parcels/${id}/pickup`,
-    courierDeliver: (id: string) => `/courier/parcels/${id}/deliver`,
-  },
   rewards: {
     show: '/rewards',
     transactions: '/rewards/transactions',
@@ -164,13 +153,6 @@ export const ENDPOINTS = {
     report: '/lost-found',
     candidates: (id: string) => `/lost-found/${id}/candidates`,
     resolve: (id: string) => `/lost-found/${id}/resolve`,
-  },
-  exchange: {
-    list: '/exchange',
-    mine: '/exchange/mine',
-    create: '/exchange',
-    reserve: (id: string) => `/exchange/${id}/reserve`,
-    close: (id: string) => `/exchange/${id}/close`,
   },
   rideRequests: {
     create: '/ride-requests',

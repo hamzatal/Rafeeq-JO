@@ -79,7 +79,7 @@ export default function AdminsPage() {
                   <td className="p-3 text-muted">{roleLabel(u.roles?.[0])}</td>
                   <td className="p-3 text-muted">{u.status_label}</td>
                   <td className="p-3 text-end">
-                    <button onClick={() => setEditing(u)} className="text-cyan-deep hover:underline text-xs font-semibold">
+                    <button onClick={() => setEditing(u)} className="text-primary-dark hover:underline text-xs font-semibold">
                       {t('admins.edit')}
                     </button>
                   </td>

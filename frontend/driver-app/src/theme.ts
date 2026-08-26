@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   buildTheme,
   fontFamily,
@@ -8,7 +7,6 @@ import {
   typography,
   type ThemeColors,
 } from '@rafeeq/shared';
-import { usePrefs } from './store/prefs';
 
 export interface AppTheme {
   colors: ThemeColors;
@@ -17,14 +15,29 @@ export interface AppTheme {
   shadow: typeof shadow;
   typography: typeof typography;
   fontFamily: typeof fontFamily;
-  scheme: 'light' | 'dark';
 }
 
-/** Reactive theme hook for the driver app (role = driver, gold accent). */
+/*
+ * One palette, built once.
+ *
+ * This used to be a hook that rebuilt on every colour-scheme change, reading a
+ * `scheme` value from the prefs store. Dark mode is gone (decision 7), so the
+ * dependency, the `useMemo` and the `scheme` field on AppTheme all went with it —
+ * the object is now a module constant and `useTheme()` is a plain accessor, which
+ * also removes a re-render source from every screen in the app.
+ */
+const theme: AppTheme = {
+  colors: buildTheme('driver'),
+  spacing,
+  radius,
+  shadow,
+  typography,
+  fontFamily,
+};
+
 export function useTheme(): AppTheme {
-  const scheme = usePrefs((s) => s.scheme);
-  const colors = useMemo(() => buildTheme('driver', scheme), [scheme]);
-  return { colors, spacing, radius, shadow, typography, fontFamily, scheme };
+  return theme;
 }
 
-export const staticColors = buildTheme('driver', 'light');
+/** For non-React usage (StyleSheet at module scope). */
+export const staticColors = theme.colors;

@@ -50,7 +50,7 @@ export default function DriversPage() {
           <button
             key={f.value}
             onClick={() => setStatus(f.value)}
-            className={`badge border ${status === f.value ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-dcard muted-text border-line dark:border-dline'}`}
+            className={`badge border ${status === f.value ? 'bg-primary text-white border-primary' : 'bg-white muted-text border-line'}`}
           >
             {f.label}
           </button>

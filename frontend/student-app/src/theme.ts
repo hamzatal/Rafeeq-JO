@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   buildTheme,
   fontFamily,
@@ -8,7 +7,6 @@ import {
   typography,
   type ThemeColors,
 } from '@rafeeq/shared';
-import { usePrefs } from './store/prefs';
 
 export interface AppTheme {
   colors: ThemeColors;
@@ -17,15 +15,29 @@ export interface AppTheme {
   shadow: typeof shadow;
   typography: typeof typography;
   fontFamily: typeof fontFamily;
-  scheme: 'light' | 'dark';
 }
 
-/** Reactive theme hook — rebuilds when the color scheme changes. */
+/*
+ * One palette, built once.
+ *
+ * This used to be a hook that rebuilt on every colour-scheme change, reading a
+ * `scheme` value from the prefs store. Dark mode is gone (decision 7), so the
+ * dependency, the `useMemo` and the `scheme` field on AppTheme all went with it —
+ * the object is now a module constant and `useTheme()` is a plain accessor, which
+ * also removes a re-render source from every screen in the app.
+ */
+const theme: AppTheme = {
+  colors: buildTheme('student'),
+  spacing,
+  radius,
+  shadow,
+  typography,
+  fontFamily,
+};
+
 export function useTheme(): AppTheme {
-  const scheme = usePrefs((s) => s.scheme);
-  const colors = useMemo(() => buildTheme('student', scheme), [scheme]);
-  return { colors, spacing, radius, shadow, typography, fontFamily, scheme };
+  return theme;
 }
 
-// Static fallback (light) for any non-React usage.
-export const staticColors = buildTheme('student', 'light');
+/** For non-React usage (StyleSheet at module scope). */
+export const staticColors = theme.colors;

@@ -29,10 +29,10 @@ function KpiCard({ k }: { k: Kpi }) {
   return (
     <div className={`kpi-card p-6 flex flex-col justify-between ${k.danger ? 'border-danger/40' : ''}`}>
       <div className="flex justify-between items-start mb-4">
-        {/* Icon tile (right) — Stitch _26 */}
+        {/* Icon tile (right) */}
         <div
           className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-            k.danger ? 'bg-danger/10 text-danger' : 'bg-[#E7EEFF] text-primary'
+            k.danger ? 'bg-danger/10 text-danger' : 'bg-brand-100 text-primary'
           }`}
         >
           <span className="material-symbols-outlined text-[22px]">{k.icon}</span>
@@ -41,7 +41,7 @@ function KpiCard({ k }: { k: Kpi }) {
         {k.trend && (
           <span
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-              k.danger ? 'bg-danger/10 text-danger' : 'bg-teal-soft/40 text-teal-deep'
+              k.danger ? 'bg-danger/10 text-danger' : 'bg-brand-100/40 text-primary-dark'
             }`}
           >
             <span className="material-symbols-outlined text-[14px]">{k.danger ? 'priority_high' : 'trending_up'}</span>
@@ -154,11 +154,11 @@ export default function CommandCenter() {
         {/* Chart */}
         <div className="lg:col-span-2 card p-0 overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-line flex justify-between items-center">
-            <h3 className="font-bold text-navy dark:text-dtext flex items-center gap-2">
-              <span className="material-symbols-outlined text-cyan-deep text-[20px]">monitoring</span>
+            <h3 className="font-bold text-ink flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary-dark text-[20px]">monitoring</span>
               {t('home.commissionByZone')}
             </h3>
-            <Link href="/reports" className="text-sm text-cyan-deep hover:underline">
+            <Link href="/reports" className="text-sm text-primary-dark hover:underline">
               {t('home.fullReports')}
             </Link>
           </div>
@@ -173,7 +173,7 @@ export default function CommandCenter() {
                   <div key={z.zone_id ?? i} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
                     <div className="text-[11px] font-mono text-muted">{jod(z.ride_commission_fils)}</div>
                     <div
-                      className="w-full rounded-t-md bg-gradient-to-t from-navy to-cyan-deep min-h-[6px] transition-all"
+                      className="w-full rounded-t-md bg-gradient-to-t from-primary to-primary-dark min-h-[6px] transition-all"
                       style={{ height: `${(z.ride_commission_fils / maxZone) * 100}%` }}
                     />
                     <div className="text-[10px] text-muted truncate w-full text-center">
@@ -188,7 +188,7 @@ export default function CommandCenter() {
 
         {/* Quick links / module summary */}
         <div className="card flex flex-col">
-          <h3 className="font-bold text-navy dark:text-dtext mb-4">{t('home.quickAccess')}</h3>
+          <h3 className="font-bold text-ink mb-4">{t('home.quickAccess')}</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: '/disputes', label: t('nav.disputes'), icon: 'gavel' },
@@ -201,9 +201,9 @@ export default function CommandCenter() {
               <Link
                 key={q.href}
                 href={q.href}
-                className="flex flex-col items-center justify-center gap-2 rounded-xl border border-line bg-background hover:bg-cyan/5 hover:border-cyan/40 transition-colors py-4 dark:bg-dsurface dark:border-dline"
+                className="flex flex-col items-center justify-center gap-2 rounded-xl border border-line bg-background hover:bg-primary/5 hover:border-primary/40 transition-colors py-4"
               >
-                <span className="material-symbols-outlined text-cyan-deep">{q.icon}</span>
+                <span className="material-symbols-outlined text-primary-dark">{q.icon}</span>
                 <span className="text-xs font-semibold surface-text">{q.label}</span>
               </Link>
             ))}
@@ -214,11 +214,11 @@ export default function CommandCenter() {
       {/* Recent open disputes */}
       <div className="card p-0 overflow-hidden">
         <div className="px-5 py-4 border-b border-line flex justify-between items-center">
-          <h3 className="font-bold text-navy dark:text-dtext flex items-center gap-2">
+          <h3 className="font-bold text-ink flex items-center gap-2">
             <span className="material-symbols-outlined text-danger text-[20px]">gavel</span>
             {t('home.recentDisputes')}
           </h3>
-          <Link href="/disputes" className="text-sm text-cyan-deep hover:underline">
+          <Link href="/disputes" className="text-sm text-primary-dark hover:underline">
             {t('common.viewAll')}
           </Link>
         </div>

@@ -81,16 +81,67 @@ class LedgerIntegrityTest extends TestCase
         ];
     }
 
+    /**
+     * Columns that hold money and are deliberately NOT constrained to `>= 0`.
+     *
+     * Both are documented in the migration with `COMMENT ON COLUMN`. Listed here
+     * too, because a test that skips a column silently is how an unconstrained
+     * column gets added.
+     *
+     * @return list<string>
+     */
+    private const SIGNED_BY_DESIGN = [
+        // A debit is negative — that is what makes the ledger read as a running total.
+        'wallet_transactions.amount_fils',
+    ];
+
+    /**
+     * Every `*_fils` column in the schema carries a non-negative CHECK.
+     *
+     * ── Why this derives its own expectation ───────────────────────────────────
+     *
+     * This used to assert `>= 24` — a number written down when 24 was the count.
+     * The moment Parcels was parked in phase 4 the count fell to 22 and the test
+     * failed, which is the RIGHT signal for a table disappearing and the WRONG
+     * signal for what it actually says on the tin. Worse, the failure mode in the
+     * other direction is silent: add a 25th money column with no constraint and
+     * `>= 24` still passes.
+     *
+     * So the test now reads the schema, finds every money column, and asserts each
+     * one individually. The list maintains itself, the number is never wrong, and
+     * a new unconstrained column names itself in the failure message.
+     */
     public function test_every_money_column_carries_a_non_negative_constraint(): void
     {
-        // The count is asserted rather than the list, so adding a money column without
-        // a constraint fails here instead of silently shipping unconstrained.
-        $constraints = DB::table('pg_constraint')
-            ->where('conname', 'like', 'chk_%_non_negative')
-            ->count();
+        $moneyColumns = DB::table('information_schema.columns')
+            ->where('table_schema', 'public')
+            ->where('column_name', 'like', '%\_fils')
+            ->whereIn('data_type', ['integer', 'bigint', 'smallint'])
+            ->selectRaw("table_name || '.' || column_name as col")
+            ->pluck('col')
+            ->reject(fn (string $c) => in_array($c, self::SIGNED_BY_DESIGN, true))
+            ->values();
 
-        $this->assertGreaterThanOrEqual(24, $constraints,
-            'every money column must carry a CHECK — Postgres silently drops "unsigned"');
+        $this->assertGreaterThan(0, $moneyColumns->count(), 'Found no money columns — the query is wrong.');
+
+        // Every constraint this project creates is named `chk_<table>_<column>_non_negative`.
+        $constrained = DB::table('pg_constraint')
+            ->where('conname', 'like', 'chk\_%\_non\_negative')
+            ->pluck('conname')
+            ->all();
+
+        $missing = [];
+        foreach ($moneyColumns as $col) {
+            [$table, $column] = explode('.', $col, 2);
+            if (! in_array("chk_{$table}_{$column}_non_negative", $constrained, true)) {
+                $missing[] = $col;
+            }
+        }
+
+        $this->assertSame([], $missing,
+            'These money columns accept a negative value at database level: '.implode(', ', $missing).
+            '. Postgres has no unsigned integer and Laravel drops the word silently, so a '.
+            'CHECK is the only thing stopping it.');
     }
 
     /**

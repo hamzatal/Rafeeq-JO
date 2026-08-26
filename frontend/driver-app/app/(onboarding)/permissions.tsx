@@ -47,7 +47,7 @@ export default function Permissions() {
 
   return (
     <View style={s.root}>
-      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <View style={s.header}>
           <Text style={s.title}>{t('permissions.title')}</Text>
