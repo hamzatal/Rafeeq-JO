@@ -9,7 +9,7 @@ const P = {
   home:'M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z',
   car:'M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 12v4c0 .6.4 1 1 1h2|M9 17h6|M9 17a2 2 0 11-4 0 2 2 0 014 0|M19 17a2 2 0 11-4 0 2 2 0 014 0',
   wallet:'M2 8a2 2 0 012-2h16a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2z|M2 11h20',
-  user:'M12 8a4 4 0 100-8 4 4 0 000 8z|M4 21a8 8 0 0116 0',
+  user:'M12 11a4 4 0 100-8 4 4 0 000 8z|M4.5 21a7.5 7.5 0 0115 0',
   bell:'M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9|M13.7 21a2 2 0 01-3.4 0',
   shield:'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z',
   msg:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',
@@ -35,6 +35,8 @@ const P = {
   truck:'M1 3h15v13H1z|M16 8h4l3 3v5h-7|M5.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z|M18.5 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5z',
   cash:'M4 7h16a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V9a2 2 0 012-2z|M12 15a3 3 0 100-6 3 3 0 000 6z|M6 12h.01M18 12h.01',
   chart:'M3 3v18h18|M7 15l4-5 3 3 4-6',
+  gauge:'M12 14l3.6-3.6|M3.5 18.5a10 10 0 1117 0',
+  wallet2:'M3 7.5A2.5 2.5 0 015.5 5h11A2.5 2.5 0 0119 7.5V8h1.5A1.5 1.5 0 0122 9.5v8a1.5 1.5 0 01-1.5 1.5h-15A2.5 2.5 0 013 16.5z|M17.5 13.5h.01',
   power:'M18.4 6.6a9 9 0 11-12.7 0|M12 2v8',
   alert:'M12 3l9.5 17H2.5z|M12 9v4M12 17h.01',
   check:'M20 6L9 17l-5-5',
@@ -44,6 +46,20 @@ const P = {
   headset:'M3 18v-6a9 9 0 0118 0v6|M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z',
   id:'M2 5h20v14H2z|M8 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z|M4 17c.7-1.8 2.2-3 4-3s3.3 1.2 4 3M15 9h4M15 13h4',
 };
+/** Solid counterparts of the tab glyphs. Outline for rest, solid for active,
+ * which is how every current platform signals the selected tab. */
+const PF = {
+  home:'M11.36 2.32a1 1 0 011.28 0l8.5 7.13A1 1 0 0121.5 10.2V20a2 2 0 01-2 2h-4.75v-6.4h-5.5V22H4.5a2 2 0 01-2-2v-9.8a1 1 0 01.36-.75z',
+  car:'M20.9 10.6C19.9 10.4 17 9.8 17 9.8s-1.5-1.6-2.5-2.6c-.6-.5-1.3-.8-2.1-.8H5.6c-.8 0-1.5.5-1.8 1.2L2.3 10.7c-.2.5-.3 1-.3 1.5V16c0 .8.7 1.5 1.5 1.5h.6a3 3 0 015.8 0h4.2a3 3 0 015.8 0h1.1c.8 0 1.5-.7 1.5-1.5v-2.9c0-1.2-.8-2.2-1.6-2.5zM6.6 15.6a1.9 1.9 0 100 3.8 1.9 1.9 0 000-3.8zm10 0a1.9 1.9 0 100 3.8 1.9 1.9 0 000-3.8z',
+  wallet:'M5.5 4.5h11A2.5 2.5 0 0119 7v.5H5.5a1 1 0 000 2h15A1.5 1.5 0 0122 11v6.5a2 2 0 01-2 2H5.5A2.5 2.5 0 013 17V7a2.5 2.5 0 012.5-2.5zm12.2 8.6a1.15 1.15 0 100 2.3 1.15 1.15 0 000-2.3z',
+  user:'M12 3.2a4.2 4.2 0 100 8.4 4.2 4.2 0 000-8.4zM12 13.2c-4.3 0-7.8 3-7.8 6.7 0 .6.5 1.1 1.1 1.1h13.4c.6 0 1.1-.5 1.1-1.1 0-3.7-3.5-6.7-7.8-6.7z',
+  gauge:'M12 2.6A9.4 9.4 0 002.9 14.3a1 1 0 001.9-.5 7.4 7.4 0 1114.4 0 1 1 0 001.9.5A9.4 9.4 0 0012 2.6zm4.3 6.1a1 1 0 00-1.4 0l-3.6 3.6a1.8 1.8 0 102.5 2.5l3.6-3.6a1 1 0 000-1.4z',
+  cash:'M4 6.2h16A2.3 2.3 0 0122.3 8.5v7A2.3 2.3 0 0120 17.8H4A2.3 2.3 0 011.7 15.5v-7A2.3 2.3 0 014 6.2zm8 2.9a2.9 2.9 0 100 5.8 2.9 2.9 0 000-5.8zM5.6 10.8a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4zm12.8 0a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z',
+};
+export function icf(n, { s = 20, c = '#1259E3' } = {}) {
+  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${c}">${(PF[n] || '').split('|').map(d => `<path d="${d}"/>`).join('')}</svg>`;
+}
+
 export function ic(n, { s = 20, c = '#39415A', w = 1.75 } = {}) {
   const paths = (P[n] || '').split('|').map(d => `<path d="${d}"/>`).join('');
   return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
@@ -61,13 +77,23 @@ export function navBar(title, { back = true, action = '' } = {}) {
   return `<div class="nav-h">${back ? `<div style="width:34px;height:34px;border-radius:10px;background:var(--n100);display:grid;place-items:center">${ic('back', { s: 18, c: '#39415A', w: 2 })}</div>` : ''}
 <span class="t-title-md">${title}</span><div class="sp"></div>${action}</div>`;
 }
-export function tabBar(active, set = 'student') {
-  const tabs = set === 'student'
-    ? [['home', 'الرئيسية'], ['car', 'رحلاتي'], ['wallet', 'المحفظة'], ['user', 'حسابي']]
-    : [['chart', 'الكوكبِت'], ['car', 'رحلاتي'], ['cash', 'أرباحي'], ['user', 'حسابي']];
-  return `<div class="tabs">${tabs.map(([n, l], i) => {
+export const TABS = {
+  student: [['home', 'الرئيسية'], ['car', 'رحلاتي'], ['wallet', 'المحفظة'], ['user', 'حسابي']],
+  driver:  [['gauge', 'الكوكبِت'], ['car', 'رحلاتي'], ['cash', 'أرباحي'], ['user', 'حسابي']],
+};
+
+/** variant: 'a' hairline+tint (old) · 'b' soft shadow + tinted capsule
+ *           'c' soft shadow + SOLID capsule + solid glyph  ← adopted
+ *           'd' soft shadow + solid glyph + top indicator, no capsule */
+export function tabBar(active, set = 'student', variant = 'c') {
+  const tabs = TABS[set];
+  return `<div class="tabs v${variant}">${tabs.map(([n, l], i) => {
     const on = i === active;
-    return `<div class="tab${on ? ' on' : ''}"><div class="tic">${ic(n, { s: 19, c: on ? '#1259E3' : '#67728A', w: 2 })}</div><span>${l}</span></div>`;
+    const glyph = (variant === 'a' || variant === 'b')
+      ? ic(n, { s: variant === 'a' ? 19 : 21, c: on ? '#0E47B4' : '#67728A', w: on ? 2.15 : 1.8 })
+      : (on ? icf(n, { s: 22, c: variant === 'c' ? '#fff' : '#1259E3' })
+            : ic(n, { s: 21, c: '#67728A', w: 1.8 }));
+    return `<div class="tab${on ? ' on' : ''}"><div class="tic">${glyph}</div><span>${l}</span></div>`;
   }).join('')}</div>`;
 }
 
