@@ -125,9 +125,11 @@ jobs:
         with:
           node-version: '20'
 
-      # Use install (not ci) so the lockfile is refreshed for newly added deps.
+      # `ci` (not `install`) so the tree is exactly the committed lockfile.
+      # Using `install` previously allowed a second nested @types/react to be
+      # resolved, which broke the admin typecheck on main.
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Typecheck shared packages + apps
         run: |
