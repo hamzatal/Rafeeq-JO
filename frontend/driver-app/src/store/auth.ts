@@ -9,6 +9,7 @@ import type {
 } from '@rafeeq/shared';
 import { api, setUnauthorizedHandler } from '../lib/api';
 import { tokenStorage } from '../lib/storage';
+import { useAvailability } from './availability';
 import { registerForPush, unregisterPush } from '../lib/push';
 
 type Status = 'idle' | 'authenticated' | 'unauthenticated';
@@ -26,7 +27,6 @@ interface AuthState {
   verifyOtp: (payload: VerifyOtpPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
   /** DEV ONLY: enter the app with a mock approved-captain session (no backend). */
-  devLogin: () => Promise<void>;
   refreshDriver: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -94,16 +94,6 @@ export const useAuth = create<AuthState>((set, get) => {
       await apply(result);
     },
 
-    async devLogin() {
-      // Mock approved-captain session for previewing the UI without a backend.
-      await tokenStorage.set('dev-preview-token');
-      set({
-        user: { id: 'dev-driver', full_name: 'كابتن تجريبي', phone: '0790000000', type: 'driver' } as unknown as User,
-        driver: { id: 'dev-driver-profile', status: 'approved' } as unknown as DriverProfile,
-        driverLoaded: true,
-        status: 'authenticated',
-      });
-    },
 
     async refreshDriver() {
       try {
@@ -116,6 +106,9 @@ export const useAuth = create<AuthState>((set, get) => {
     },
 
     async logout() {
+      // Stop the location broadcast BEFORE clearing the token, otherwise the
+      // in-flight ping fires unauthenticated and trips the 401 handler.
+      await useAvailability.getState().reset();
       await unregisterPush();
       try {
         await api.auth.logout();

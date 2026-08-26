@@ -65,7 +65,9 @@ class OtpService extends BaseService
             ]);
         }
 
-        return config('otp.debug_return_code') ? $code : null;
+        // The plaintext code never leaves this service. It goes out over SMS
+        // only; callers get null so no response can ever carry it.
+        return null;
     }
 
     /**
@@ -76,12 +78,6 @@ class OtpService extends BaseService
     public function verify(string $identifier, OtpPurpose $purpose, string $code): void
     {
         // Universal test code (non-production QA only).
-        $universal = config('otp.universal_code');
-        if ($universal && config('otp.debug_return_code') && hash_equals((string) $universal, $code)) {
-            OtpCode::forRequest($identifier, $purpose)->active()->update(['consumed_at' => now()]);
-
-            return;
-        }
 
         $otp = OtpCode::forRequest($identifier, $purpose)
             ->whereNull('consumed_at')

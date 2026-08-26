@@ -27,6 +27,6 @@ Route::prefix('v1/driver/wallet/withdrawals')->middleware(['auth:sanctum', 'role
 // Admin payout queue.
 Route::prefix('v1/admin/withdrawals')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', [PayoutAdminController::class, 'index'])->middleware('permission:payments.view');
-    Route::post('{payout}/approve', [PayoutAdminController::class, 'approve'])->middleware('permission:payments.approve');
-    Route::post('{payout}/reject', [PayoutAdminController::class, 'reject'])->middleware('permission:payments.approve');
+    Route::post('{payout}/approve', [PayoutAdminController::class, 'approve'])->middleware('permission:payouts.approve');
+    Route::post('{payout}/reject', [PayoutAdminController::class, 'reject'])->middleware('permission:payouts.approve');
 });

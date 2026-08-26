@@ -56,15 +56,27 @@ class WalletController extends Controller
     /** Admin: confirm a CliQ top-up and credit the user's wallet. */
     public function adminCredit(Request $request): JsonResponse
     {
+        // A manual credit mints balance, so it is capped and must be justified.
+        // Previously this accepted min:1 with no ceiling and an optional
+        // reference, which was weaker than the user's own top-up (min:1000).
+        $max = (int) config('rafeeq.admin_credit_max_fils', 50000);
+
         $data = $request->validate([
             'user_id' => ['required', 'uuid', 'exists:users,id'],
-            'amount_fils' => ['required', 'integer', 'min:1'],
+            'amount_fils' => ['required', 'integer', 'min:1000', 'max:'.$max],
+            'reason' => ['required', 'string', 'min:10', 'max:200'],
             'reference' => ['nullable', 'string', 'max:100'],
         ]);
 
         $user = User::findOrFail($data['user_id']);
         $wallet = $this->wallet->forUser($user);
-        $txn = $this->wallet->adminTopup($wallet, $data['amount_fils'], $data['reference'] ?? null);
+        $txn = $this->wallet->adminTopup(
+            $wallet,
+            $data['amount_fils'],
+            $data['reference'] ?? null,
+            $data['reason'],
+            $request->user(),
+        );
 
         return $this->ok([
             'wallet' => new WalletResource($wallet->fresh()),
@@ -99,11 +111,11 @@ class WalletController extends Controller
     {
         $data = $request->validate([
             'transaction_id' => ['required', 'uuid', 'exists:wallet_transactions,id'],
-            'reason' => ['nullable', 'string', 'max:200'],
+            'reason' => ['required', 'string', 'min:10', 'max:200'],
         ]);
 
         $original = WalletTransaction::findOrFail($data['transaction_id']);
-        $reversal = $this->wallet->reverseTransaction($original, $data['reason'] ?? null);
+        $reversal = $this->wallet->reverseTransaction($original, $data['reason']);
 
         return $this->ok([
             'wallet' => new WalletResource($original->wallet->fresh()),

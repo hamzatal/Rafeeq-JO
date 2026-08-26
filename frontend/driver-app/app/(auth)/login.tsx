@@ -19,7 +19,6 @@ export default function Login() {
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
   const login = useAuth((a) => a.login);
-  const devLogin = useAuth((a) => a.devLogin);
 
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -85,19 +84,6 @@ export default function Login() {
       <Pressable onPress={() => router.push('/(auth)/register')} hitSlop={8} style={s.bottomLink}>
         <Text style={s.bottomLinkText}>{t('auth.noAccount')}</Text>
       </Pressable>
-
-      {__DEV__ ? (
-        <Pressable
-          onPress={async () => {
-            await devLogin();
-            router.replace('/(app)/dashboard');
-          }}
-          hitSlop={8}
-          style={s.devLink}
-        >
-          <Text style={s.devText}>دخول تجريبي (معاينة بدون خادم)</Text>
-        </Pressable>
-      ) : null}
     </AuthShell>
   );
 }
@@ -124,6 +110,4 @@ const makeStyles = (t: AppTheme) =>
     pressed: { opacity: 0.7 },
     bottomLink: { alignItems: 'center', marginTop: t.spacing.xl },
     bottomLinkText: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.textSecondary },
-    devLink: { alignItems: 'center', marginTop: t.spacing.md, paddingVertical: 6 },
-    devText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.accent, textDecorationLine: 'underline' },
   });
