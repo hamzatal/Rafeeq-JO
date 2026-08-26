@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
+use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Auth\Repositories\UserRepository;
 use Rafeeq\Shared\Enums\OtpChannel;
@@ -42,6 +43,14 @@ class AuthService extends BaseService
                 'type' => $type,
                 'status' => UserStatus::Pending,
                 'locale' => $data['locale'] ?? 'ar',
+                // Persisted so the age gate is a fact on the record, not a one-time
+                // form check that nothing can be audited against later.
+                'date_of_birth' => $data['date_of_birth'] ?? null,
+                // WHICH terms version was accepted, and when. Every fare, commission
+                // and no-show fee needs a contractual basis, and that basis has to be
+                // a specific version — bumping the version re-asks everyone.
+                'terms_version' => (string) config('rafeeq.terms.version'),
+                'terms_accepted_at' => Clock::now(),
             ]);
 
             $code = $this->otp->issue($user->phone, OtpPurpose::Register, OtpChannel::Sms, $request);

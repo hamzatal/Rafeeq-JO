@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Database\Seeders\RolesPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\CouponScope;
 use Rafeeq\Shared\Enums\CouponType;
@@ -36,6 +37,8 @@ class EndToEndFlowTest extends TestCase
     {
         // Register → the OTP goes out over SMS only.
         $reg = $this->postJson('/api/v1/auth/register', [
+            'date_of_birth' => Clock::now()->subYears(20)->format('Y-m-d'),
+            'accept_terms' => true,
             'full_name' => 'طالب E2E',
             'phone' => '+962790004444',
             'type' => 'student',

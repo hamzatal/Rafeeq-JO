@@ -21,6 +21,11 @@ class RolesPermissionsSeeder extends Seeder
     private array $permissions = [
         'users' => [
             'users.view' => ['عرض المستخدمين', 'View users'],
+            // Separate from users.view on purpose. "Can see the user list" and "can
+            // read everyone's phone number and email" are different powers, and
+            // bundling them meant every support agent held the stronger one. Support
+            // work needs to confirm a number, not read it.
+            'users.view_pii' => ['عرض بيانات الاتصال الكاملة', 'View full contact details'],
             'users.manage' => ['إدارة المستخدمين', 'Manage users'],
         ],
         'drivers' => [
@@ -96,7 +101,7 @@ class RolesPermissionsSeeder extends Seeder
         $this->sync($roleModels['supervisor'], $permModels, [
             'support.view', 'support.respond', 'support.escalate',
             'complaints.view', 'complaints.resolve',
-            'users.view', 'drivers.view', 'drivers.review', 'drivers.approve', 'drivers.suspend',
+            'users.view', 'users.view_pii', 'drivers.view', 'drivers.review', 'drivers.approve', 'drivers.suspend',
             'payments.view', 'payments.approve',
             'trips.view',
             'analytics.view',

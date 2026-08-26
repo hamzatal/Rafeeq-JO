@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LEGAL_URLS, LegalDocument } from '@rafeeq/shared';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useI18n } from '../../src/i18n';
@@ -13,6 +14,17 @@ import { Icon, type IconName } from '../../src/components/Icon';
  * header (avatar · Rafeeq · bell) → title + subtitle → "إعدادات الحساب"
  * grouped card → gradient "مركز الدعم" card → legal rows → centered logout pill.
  */
+/**
+ * Open a legal document in the system browser.
+ *
+ * These buttons previously navigated to the support screen (student) and the chat
+ * screen (captain), so the app offered documents it never showed. Both stores require
+ * a reachable privacy policy from inside the app.
+ */
+const openLegal = (doc: LegalDocument) => {
+  Linking.openURL(LEGAL_URLS[doc]).catch(() => undefined);
+};
+
 export default function Settings() {
   const { t } = useI18n();
   const router = useRouter();
@@ -73,8 +85,8 @@ export default function Settings() {
         {/* Legal */}
         <Text style={s.section}>{t('settings.legal')}</Text>
         <View style={s.groupCard}>
-          <GroupRow theme={theme} icon="shield" title={t('settings.privacy')} onPress={() => router.push('/(app)/chat')} border />
-          <GroupRow theme={theme} icon="file-text" title={t('settings.terms')} onPress={() => router.push('/(app)/chat')} />
+          <GroupRow theme={theme} icon="shield" title={t('settings.privacy')} onPress={() => openLegal('privacy')} border />
+          <GroupRow theme={theme} icon="file-text" title={t('settings.terms')} onPress={() => openLegal('terms')} />
         </View>
 
         {/* Logout — centered pill */}

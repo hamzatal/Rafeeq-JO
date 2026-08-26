@@ -127,12 +127,22 @@ class ChatService extends BaseService
 
             $recipient = User::find($recipientId);
             if ($recipient) {
+                // No sender name and no message body.
+                //
+                // A push notification is rendered on a LOCKED screen, by the OS, and
+                // is mirrored to any paired watch or laptop. Putting 80 characters of
+                // a private conversation there publishes it to whoever is holding the
+                // phone — and the sender's name alone already reveals that a specific
+                // student and a specific captain are in contact.
+                //
+                // The notification is a doorbell: it says a message exists and where
+                // to read it. The content stays behind authentication.
                 $this->notifications->notify(
                     $recipient,
                     NotificationType::General,
-                    'رسالة جديدة من '.($user->full_name ?? 'مستخدم'),
-                    mb_strlen($body) > 80 ? mb_substr($body, 0, 80).'…' : $body,
-                    ['conversation_id' => $conversation->id, 'sender_user_id' => $user->id],
+                    'رسالة جديدة',
+                    'لديك رسالة جديدة في محادثة الرحلة. افتح التطبيق لقراءتها.',
+                    ['conversation_id' => $conversation->id],
                 );
             }
 

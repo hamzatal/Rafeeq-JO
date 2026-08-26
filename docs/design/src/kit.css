@@ -1,3 +1,16 @@
+/* ═══ THE TYPEFACE ═════════════════════════════════════════════════════════
+   Bundled rather than assumed. Before this, every sheet in this project silently
+   fell back to Noto Sans Arabic because IBM Plex Sans Arabic was not installed on
+   the machine, so the renders were never showing the real typeface — and an
+   inline `font:` shorthand naming only the missing family produced tofu boxes.
+   Three weights, matching the identity: 400 / 500 / 700. Nothing else. */
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:block;
+  src:url('fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:block;
+  src:url('fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:block;
+  src:url('fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2') format('woff2')}
+
 /* ═══════════════════════════════════════════════════════════════════════
    Rafeeq DS v2 «مسار» — kit
    DENSITY PASS: mobile sizes tightened after review feedback that elements
