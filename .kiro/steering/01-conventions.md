@@ -5,15 +5,15 @@ inclusion: always
 # قواعد العمل والاتفاقيات (Rafeeq) — يُحمَّل تلقائياً
 
 ## 1) استئناف العمل في جلسة جديدة (ابدأ من هنا)
-1. اقرأ [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md) — لوحة الحالة (المنجز/الجاري/التالي) خطوة بخطوة.
-2. اقرأ [`docs/10-STITCH-SCREENS.md`](../../docs/10-STITCH-SCREENS.md) — حالة كل شاشة مقابل Stitch.
-3. اقرأ [`docs/11-COMMIT-CONVENTION.md`](../../docs/11-COMMIT-CONVENTION.md) — تسلسل RFQ.
+1. اقرأ [`docs/ROADMAP.md`](../../docs/ROADMAP.md) — لوحة الحالة (المنجز/الجاري/التالي) خطوة بخطوة.
+2. اقرأ [`docs/design/SCREENS.md`](../../docs/design/SCREENS.md) — حالة كل شاشة مقابل Stitch.
+3. اقرأ [`docs/ROADMAP.md`](../../docs/ROADMAP.md) — تسلسل RFQ.
 **لا تعِد دراسة كل الملفات ولا تطلب من المستخدم إعادة الشرح** — استأنف من «التالي».
 
 ## 2) ترقيم الكوميت (RFQ)
 - الصيغة: `RFQ-<n> — <وصف عربي موجز>` (رقم متزايد بواحد، لا يتكرّر ولا يرجع).
-- **آخر رقم مستخدم مسجّل في نهاية جدول [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md)** — خذه وزِد 1.
-- تفاصيل + تصحيح التسلسل التاريخي: [`docs/11-COMMIT-CONVENTION.md`](../../docs/11-COMMIT-CONVENTION.md).
+- **آخر رقم مستخدم مسجّل في نهاية جدول [`docs/ROADMAP.md`](../../docs/ROADMAP.md)** — خذه وزِد 1.
+- تفاصيل + تصحيح التسلسل التاريخي: [`docs/ROADMAP.md`](../../docs/ROADMAP.md).
 
 ## 3) سير الدمج (المستخدم لا يعمل merge يدوي)
 المستخدم يسحب `git pull origin main` فقط. لكل دفعة:
@@ -22,7 +22,7 @@ inclusion: always
 3. `push_to_remote` للفرع ثم `create_pull_request` (للسجل).
 4. **ادمج بنفسك:** `git checkout main && git merge --ff-only <branch>` ثم `push_to_remote main`.
    (استخدم أدوات github power؛ لا `git push` مباشر. لا force-push على main.)
-5. حدّث الدوكس (`01-MASTER-PLAN` + `10-STITCH-SCREENS`) مع كل دفعة.
+5. حدّث الدوكس (`ROADMAP` + `design/SCREENS`) مع كل دفعة.
 
 ## 4) بوابة الجودة قبل الدمج
 - **backend:** `cd backend && ./vendor/bin/phpunit` يجب أن يكون **أخضر** (خط الأساس 172 اختبار) + `./vendor/bin/pint --dirty`. لا تدمج backend بلا تشغيل الاختبارات.
@@ -39,4 +39,4 @@ inclusion: always
 - **Frontend:** TypeScript صارم. أعِد استخدام مكوّنات `packages/shared`. RTL + ثنائي اللغة.
 
 ## 7) القاعدة الذهبية
-شغل **كامل جاهز للإنتاج** — لا skeleton، لا اختصار، لا كسر لمزايا قائمة. خطوة خطوة عبر الجلسات حتى الاكتمال 100% حسب [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md).
+شغل **كامل جاهز للإنتاج** — لا skeleton، لا اختصار، لا كسر لمزايا قائمة. خطوة خطوة عبر الجلسات حتى الاكتمال 100% حسب [`docs/ROADMAP.md`](../../docs/ROADMAP.md).

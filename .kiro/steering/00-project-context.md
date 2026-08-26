@@ -5,11 +5,11 @@ inclusion: always
 # سياق مشروع رفيق (Rafeeq) — اقرأ أولاً (يُحمَّل تلقائياً)
 
 > الهدف: تفهم المشروع فوراً **بدون إعادة دراسة كل الملفات**. للحالة والخطة راجع
-> [`docs/01-MASTER-PLAN.md`](../../docs/01-MASTER-PLAN.md) و [`docs/10-STITCH-SCREENS.md`](../../docs/10-STITCH-SCREENS.md).
+> [`docs/ROADMAP.md`](../../docs/ROADMAP.md) و [`docs/design/SCREENS.md`](../../docs/design/SCREENS.md).
 > فهرس كل التوثيق: [`docs/README.md`](../../docs/README.md).
 
 ## ما هو رفيق
-منصة **نقل وخدمات طلابية ذكية في الأردن**. النواة: الطالب يطلب رحلة بيته↔جامعته، ونجمّع طلاب نفس المنطقة+الجامعة مع كابتن معتمد بسعر عادل وتتبّع وأمان ودفع إلكتروني. نبدأ **إربد** ثم نتوسّع لكل الأردن بتفعيل `is_active`. تفاصيل الفكرة (غير تقنية): [`docs/00-VISION.md`](../../docs/00-VISION.md).
+منصة **نقل وخدمات طلابية ذكية في الأردن**. النواة: الطالب يطلب رحلة بيته↔جامعته، ونجمّع طلاب نفس المنطقة+الجامعة مع كابتن معتمد بسعر عادل وتتبّع وأمان ودفع إلكتروني. نبدأ **إربد** ثم نتوسّع لكل الأردن بتفعيل `is_active`. تفاصيل الفكرة (غير تقنية): [`docs/README.md`](../../docs/README.md).
 
 ## التطبيقات الثلاثة
 - `frontend/student-app` — تطبيق الطالب (Expo / React Native + TS).
@@ -24,7 +24,7 @@ inclusion: always
 - **التشغيل:** backend `composer install && php artisan migrate:fresh --seed && php artisan serve`. frontend `cd frontend && npm install` ثم `npm run student|driver|admin`.
 
 ## 🎨 التصميم — **Stitch** هو المصدر الوحيد والنهائي (كل الهويات السابقة مُلغاة)
-المرجع: `stitch_rafeeq_ai_student_platform.zip` (جذر الريبو) + [`docs/03-DESIGN-SYSTEM.md`](../../docs/03-DESIGN-SYSTEM.md).
+المرجع: [`docs/design/README.md`](../../docs/design/README.md) و [`docs/design/SCREENS.md`](../../docs/design/SCREENS.md) — 41 واجهة مصمّمة.
 - **الألوان:** كحلي ملكي `#002045` (primary) + Smart Teal `#006A65` (accent/AI/حيّ/نجاح) + خلفيات off-white.
 - **الخط:** `IBM Plex Sans Arabic` حصراً (بديل Cairo نهائياً).
 - **الوضع:** فاتح + داكن مدعومان، **الافتراضي فاتح**. اللغة: عربي + إنجليزي، **الافتراضي عربي** + RTL.
@@ -35,7 +35,7 @@ inclusion: always
 ## التسعير والعمولة (المرحلة 3)
 - **مبني على المسافة (GPS/Haversine)** — `Core/Support/Geo` + `Modules/Matching/Services/PricingService`. مفاتيح في `config/rafeeq.php` (فتح عداد 300 فلس + 250/كم + 20/دقيقة + حد أدنى 1000 + ليلي 1.25×).
 - **عمولة المنصة 15%** (`splitCommission`, zero-sum) تُخصم من الكابتن عبر المحفظة (لا كاش مباشر).
-- التفاصيل والدراسة: [`docs/02-PRICING-ZONES.md`](../../docs/02-PRICING-ZONES.md).
+- التفاصيل والدراسة: [`docs/PRICING.md`](../../docs/PRICING.md).
 
 ## الدفع والأمان و AI (باختصار)
 - **الدفع:** CliQ — Payment Request برقم `RFQ-2026-#####` + تحقّق GPT Vision + fallback يدوي. (لا علاقة له بترقيم الكوميت.)
