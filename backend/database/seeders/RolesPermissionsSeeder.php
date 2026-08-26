@@ -40,7 +40,19 @@ class RolesPermissionsSeeder extends Seeder
         ],
         'payments' => [
             'payments.view' => ['عرض المدفوعات', 'View payments'],
+            // Approving a CliQ receipt only confirms a transfer that already
+            // happened at the bank, so support supervisors may hold it.
             'payments.approve' => ['اعتماد المدفوعات', 'Approve payments'],
+            // Creating balance out of nothing, reversing the ledger and paying
+            // money out are a different class of act. They are admin-only and
+            // deliberately NOT bundled with payments.approve, otherwise one
+            // non-admin role could credit a wallet and then approve its payout.
+            'wallet.credit' => ['شحن المحافظ يدوياً', 'Credit wallets manually'],
+            'wallet.reverse' => ['عكس حركات المحفظة', 'Reverse wallet entries'],
+            'payouts.approve' => ['اعتماد سحب الأرباح', 'Approve captain payouts'],
+            // Checked by TripChannelPolicy but was never defined, so staff were
+            // silently barred from live trip channels.
+            'trips.view' => ['متابعة الرحلات', 'View trips'],
         ],
         'platform' => [
             'settings.manage' => ['إدارة الإعدادات', 'Manage settings'],
@@ -77,6 +89,7 @@ class RolesPermissionsSeeder extends Seeder
             'support.view', 'support.respond',
             'complaints.view',
             'users.view', 'drivers.view',
+            'trips.view',
         ]);
 
         // Supervisor: everything support has + escalate, approvals, analytics
@@ -85,6 +98,7 @@ class RolesPermissionsSeeder extends Seeder
             'complaints.view', 'complaints.resolve',
             'users.view', 'drivers.view', 'drivers.review', 'drivers.approve', 'drivers.suspend',
             'payments.view', 'payments.approve',
+            'trips.view',
             'analytics.view',
             'coupons.manage',
         ]);

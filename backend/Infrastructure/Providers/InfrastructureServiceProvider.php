@@ -21,10 +21,28 @@ class InfrastructureServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(SmsGateway::class, function () {
-            $make = fn (string $driver): SmsGateway => match ($driver) {
-                'http' => new HttpSmsGateway,
-                'whatsapp_cloud' => new WhatsAppCloudSmsGateway,
-                default => new LogSmsGateway,
+            $make = function (string $driver): SmsGateway {
+                // `log` silently swallows every message, so reaching it in
+                // production means OTPs are never delivered and nobody is told.
+                // A misspelled driver used to land here by default; now it
+                // fails loudly outside local/testing.
+                if (! in_array($driver, ['http', 'whatsapp_cloud', 'log'], true)) {
+                    throw new \RuntimeException("Unknown SMS driver [{$driver}].");
+                }
+
+                if ($driver === 'log' && ! app()->environment(['local', 'testing'])) {
+                    throw new \RuntimeException(
+                        'The `log` SMS driver cannot be used outside local/testing: '
+                        .'messages would be discarded instead of delivered. '
+                        .'Set SMS_DRIVER to `whatsapp_cloud` or `http`.'
+                    );
+                }
+
+                return match ($driver) {
+                    'http' => new HttpSmsGateway,
+                    'whatsapp_cloud' => new WhatsAppCloudSmsGateway,
+                    'log' => new LogSmsGateway,
+                };
             };
 
             $primary = $make((string) config('services.sms.driver', 'log'));

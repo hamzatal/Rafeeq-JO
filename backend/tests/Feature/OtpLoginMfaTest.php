@@ -13,6 +13,7 @@ use Rafeeq\Modules\Auth\Services\TotpService;
 use Rafeeq\Shared\Enums\OtpPurpose;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
+use Tests\Support\OtpProbe;
 use Tests\TestCase;
 
 /**
@@ -53,8 +54,10 @@ class OtpLoginMfaTest extends TestCase
         $admin = $this->makeAdmin();
         $this->enableMfa($admin);
 
-        $code = app(OtpService::class)->issue($admin->phone, OtpPurpose::Login);
-        $this->assertNotNull($code, 'debug code returned in non-production');
+        app(OtpService::class)->issue($admin->phone, OtpPurpose::Login);
+        // issue() deliberately returns null now: the plaintext never leaves the
+        // service. Recover it the way a real client does — see OtpProbe.
+        $code = OtpProbe::latestCodeFor($admin->phone, OtpPurpose::Login->value);
 
         $result = app(AuthService::class)->verifyOtp($admin->phone, $code, OtpPurpose::Login);
 
@@ -71,7 +74,8 @@ class OtpLoginMfaTest extends TestCase
             'type' => UserType::Student, 'status' => UserStatus::Active, 'locale' => 'ar',
         ]);
 
-        $code = app(OtpService::class)->issue($student->phone, OtpPurpose::Login);
+        app(OtpService::class)->issue($student->phone, OtpPurpose::Login);
+        $code = OtpProbe::latestCodeFor($student->phone, OtpPurpose::Login->value);
         $result = app(AuthService::class)->verifyOtp($student->phone, $code, OtpPurpose::Login);
 
         $this->assertFalse($result['mfa_required']);

@@ -59,6 +59,31 @@ class StaffService
             throw new BusinessRuleException('هذا الحساب ليس ضمن فريق الإدارة.', 'NOT_STAFF');
         }
 
+        // An admin must not be able to strip their own powers or remove the
+        // last admin: both leave the system with no way back in through the UI,
+        // recoverable only with direct database access.
+        $touchesPrivileges = (array_key_exists('role', $data) && $data['role'] !== null)
+            || (array_key_exists('status', $data) && $data['status'] !== null);
+
+        if ($touchesPrivileges && $actor !== null && $actor->id === $user->id) {
+            throw new BusinessRuleException(
+                'لا يمكنك تغيير دورك أو حالة حسابك بنفسك. اطلب ذلك من مدير آخر.',
+                'CANNOT_MODIFY_SELF_PRIVILEGES',
+            );
+        }
+
+        if ($touchesPrivileges && $user->hasRole('admin')) {
+            $demoting = (array_key_exists('role', $data) && $data['role'] !== null && $data['role'] !== 'admin')
+                || (array_key_exists('status', $data) && $data['status'] !== null && $data['status'] !== UserStatus::Active->value);
+
+            if ($demoting && $this->activeAdminCount() <= 1) {
+                throw new BusinessRuleException(
+                    'لا يمكن إزالة آخر مدير نشط في النظام.',
+                    'LAST_ACTIVE_ADMIN',
+                );
+            }
+        }
+
         $changes = [];
 
         if (array_key_exists('full_name', $data) && $data['full_name'] !== null) {
@@ -91,6 +116,15 @@ class StaffService
         $this->audit->log('staff.updated', $actor, auditable: $user, changes: $changes);
 
         return $user->fresh('roles');
+    }
+
+    /** Active users still holding the admin role. */
+    private function activeAdminCount(): int
+    {
+        return User::query()
+            ->where('status', UserStatus::Active->value)
+            ->whereHas('roles', fn ($q) => $q->where('name', 'admin'))
+            ->count();
     }
 
     private function assertRole(string $role): void

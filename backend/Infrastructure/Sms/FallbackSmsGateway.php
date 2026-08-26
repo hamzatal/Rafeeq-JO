@@ -24,7 +24,9 @@ class FallbackSmsGateway implements SmsGateway
             return $this->primary->send($to, $message);
         } catch (\Throwable $e) {
             Log::warning('[SMS] primary gateway failed, using fallback', [
-                'to' => $to,
+                // Masked: this line fires on every primary outage, so an
+                // unmasked number here builds a recipient list over time.
+                'to' => str_repeat('*', max(0, mb_strlen($to) - 2)).mb_substr($to, -2),
                 'error' => $e->getMessage(),
             ]);
 

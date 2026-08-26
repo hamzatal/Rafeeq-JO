@@ -5,6 +5,11 @@
  | These can later be overridden by a DB-backed settings module.
  */
 return [
+    // Hard ceiling on a single manual admin wallet credit, in fils. A manual
+    // credit creates balance with no incoming bank transfer behind it, so it is
+    // bounded here rather than trusted to the operator.
+    'admin_credit_max_fils' => (int) env('RAFEEQ_ADMIN_CREDIT_MAX_FILS', 50000),
+
     // Platform commission percentage taken from each ride fare.
     'commission_percent' => (int) env('RAFEEQ_COMMISSION_PERCENT', 15),
 

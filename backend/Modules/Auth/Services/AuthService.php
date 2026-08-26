@@ -26,7 +26,7 @@ class AuthService extends BaseService
     /**
      * Step 1 of registration: create a pending user and send a verification OTP.
      *
-     * @return array{user: User, otp_debug: ?string}
+     * @return array{user: User}
      */
     public function register(array $data, ?Request $request = null): array
     {
@@ -48,7 +48,7 @@ class AuthService extends BaseService
 
             $this->audit->log('auth.register', $user, $request, $user);
 
-            return ['user' => $user, 'otp_debug' => $code];
+            return ['user' => $user];
         });
     }
 

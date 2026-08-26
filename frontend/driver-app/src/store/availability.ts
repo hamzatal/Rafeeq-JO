@@ -28,13 +28,22 @@ interface AvailabilityState {
   setOnline: (online: boolean) => Promise<void>;
   restore: () => Promise<void>;
   pingNow: () => Promise<void>;
+  /** Stop broadcasting and forget the persisted flag. Called on sign-out. */
+  reset: () => Promise<void>;
 }
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
 function startPinging(get: () => AvailabilityState) {
-  if (timer) clearInterval(timer);
+  stopPinging();
   timer = setInterval(() => void get().pingNow(), PING_MS);
+}
+
+function stopPinging() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
 }
 
 export const useAvailability = create<AvailabilityState>((set, get) => ({
@@ -82,6 +91,21 @@ export const useAvailability = create<AvailabilityState>((set, get) => ({
       set({ lastPingAt: Date.now() });
     } catch {
       // best-effort — never break the UI over a failed ping
+    }
+  },
+
+  // The timer lives at module scope, outside any React lifecycle, so nothing
+  // tore it down on sign-out: the captain's GPS kept being read and posted
+  // without a token, looping through the 401 handler and draining the battery.
+  // Worse, the online flag was persisted, so restore() resumed broadcasting on
+  // the next launch — even for a different user on the same device.
+  async reset() {
+    stopPinging();
+    set({ online: false, restored: false, lastLat: null, lastLng: null, lastPingAt: null });
+    try {
+      await AsyncStorage.removeItem(KEY);
+    } catch {
+      // ignore — sign-out must not fail because storage did
     }
   },
 }));

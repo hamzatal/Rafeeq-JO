@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\CouponScope;
 use Rafeeq\Shared\Enums\CouponType;
+use Tests\Support\OtpProbe;
 use Tests\TestCase;
 
 /**
@@ -33,14 +34,16 @@ class EndToEndFlowTest extends TestCase
 
     public function test_student_registration_otp_and_protected_access(): void
     {
-        // Register → returns debug OTP in testing.
+        // Register → the OTP goes out over SMS only.
         $reg = $this->postJson('/api/v1/auth/register', [
             'full_name' => 'طالب E2E',
             'phone' => '+962790004444',
             'type' => 'student',
         ])->assertCreated();
 
-        $otp = (string) $reg->json('data.otp_debug');
+        // The code is no longer returned by the API. Take the plaintext from the
+        // gateway spy instead, which is how a real client receives it (SMS).
+        $otp = OtpProbe::latestCodeFor('+962790004444');
         $this->assertNotEmpty($otp);
 
         // Verify OTP → returns a bearer token.

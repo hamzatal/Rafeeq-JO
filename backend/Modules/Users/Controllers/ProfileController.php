@@ -43,7 +43,7 @@ class ProfileController extends Controller
     {
         $code = $this->profile->requestPhoneChange($request->user(), $request->input('phone'));
 
-        return $this->ok(['otp_debug' => $code], 'تم إرسال رمز التحقق إلى الرقم الجديد.');
+        return $this->ok(null, 'تم إرسال رمز التحقق إلى الرقم الجديد.');
     }
 
     public function confirmPhoneChange(ConfirmPhoneChangeRequest $request): JsonResponse

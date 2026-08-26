@@ -14,7 +14,6 @@ export default function Welcome() {
   const router = useRouter();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
-  const devLogin = useAuth((st) => st.devLogin);
 
   return (
     <View style={s.root}>
@@ -38,19 +37,6 @@ export default function Welcome() {
           <Pressable onPress={() => router.push('/(auth)/login')} style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
             <Text style={s.secondaryText}>{t('auth.login')}</Text>
           </Pressable>
-
-          {__DEV__ ? (
-            <Pressable
-              onPress={async () => {
-                await devLogin();
-                router.replace('/(app)/dashboard');
-              }}
-              hitSlop={8}
-              style={s.devLink}
-            >
-              <Text style={s.devText}>دخول تجريبي (معاينة بدون خادم)</Text>
-            </Pressable>
-          ) : null}
         </View>
       </SafeAreaView>
     </View>
@@ -75,6 +61,4 @@ const makeStyles = (t: AppTheme) =>
     secondary: { height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.primary, backgroundColor: 'transparent' },
     secondaryText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     pressed: { opacity: 0.75 },
-    devLink: { alignItems: 'center', marginTop: t.spacing.xs, paddingVertical: 6 },
-    devText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.accent, textDecorationLine: 'underline' },
   });

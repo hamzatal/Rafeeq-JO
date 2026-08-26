@@ -44,9 +44,9 @@ class WalletService extends BaseService
      * submit (or retry) never credits twice. Returns the existing transaction
      * if the same reference already topped up this wallet.
      */
-    public function adminTopup(Wallet $wallet, int $amountFils, ?string $reference = null, ?string $desc = null): WalletTransaction
+    public function adminTopup(Wallet $wallet, int $amountFils, ?string $reference = null, ?string $reason = null, ?User $actor = null): WalletTransaction
     {
-        return DB::transaction(function () use ($wallet, $amountFils, $reference, $desc) {
+        return DB::transaction(function () use ($wallet, $amountFils, $reference, $reason, $actor) {
             /** @var Wallet $locked */
             $locked = Wallet::whereKey($wallet->id)->lockForUpdate()->first();
 
@@ -60,7 +60,18 @@ class WalletService extends BaseService
                 }
             }
 
-            return $this->apply($locked, abs($amountFils), WalletTxnType::Topup, $desc ?? 'شحن معتمد من الإدارة', $reference);
+            $txn = $this->apply($locked, abs($amountFils), WalletTxnType::Topup, $reason ?? 'شحن معتمد من الإدارة', $reference);
+
+            // A manual credit is the one place balance appears without a bank
+            // transfer behind it, so who did it and why is recorded explicitly.
+            $this->audit->log('wallet.admin_credit', $actor, auditable: $locked, changes: [
+                'amount_fils' => abs($amountFils),
+                'reason' => $reason,
+                'reference' => $reference,
+                'transaction_id' => $txn->id,
+            ]);
+
+            return $txn;
         });
     }
 

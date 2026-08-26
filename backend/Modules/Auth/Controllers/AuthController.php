@@ -32,7 +32,6 @@ class AuthController extends Controller
 
         return $this->created([
             'user' => new UserResource($result['user']),
-            'otp_debug' => $result['otp_debug'],
         ], 'تم إنشاء الحساب. أدخل رمز التحقق المُرسل إلى هاتفك.');
     }
 
@@ -67,7 +66,7 @@ class AuthController extends Controller
     {
         $code = $this->auth->requestLoginOtp($request->input('phone'), $request);
 
-        return $this->ok(['otp_debug' => $code], 'تم إرسال رمز الدخول إلى هاتفك.');
+        return $this->ok(null, 'تم إرسال رمز الدخول إلى هاتفك.');
     }
 
     public function resendOtp(ResendOtpRequest $request): JsonResponse
@@ -79,7 +78,7 @@ class AuthController extends Controller
             request: $request,
         );
 
-        return $this->ok(['otp_debug' => $code], 'تم إعادة إرسال الرمز.');
+        return $this->ok(null, 'تم إعادة إرسال الرمز.');
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -152,7 +151,7 @@ class AuthController extends Controller
         $code = $this->auth->forgotPassword($request->input('phone'), $request);
 
         return $this->ok(
-            ['otp_debug' => $code],
+            null,
             'إذا كان الرقم مسجّلاً، فستصلك رسالة بإعادة التعيين.',
         );
     }
