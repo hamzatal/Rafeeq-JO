@@ -103,13 +103,37 @@ body{font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:var(--n5
 .sb .rr{display:flex;gap:4px;align-items:center}
 .nav-h{height:52px;display:flex;align-items:center;gap:10px;padding:0 var(--gutter);position:relative;z-index:60}
 .body{padding:0 var(--gutter);position:relative}
+/* ═══ TAB BAR ══════════════════════════════════════════════════════════════
+   A hairline reads as a divider; over a map the bar should read as LIFTED.
+   So: soft upward shadow, no border — and never both (elevation rule). */
 .tabs{position:absolute;inset-inline:0;bottom:0;height:var(--h-tab);background:#fff;
-  border-top:1px solid var(--n200);display:flex;padding-bottom:8px;z-index:65}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  display:flex;padding-bottom:8px;z-index:65}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .tab span{font:500 10px 'IBM Plex Sans Arabic';color:var(--n500)}
 .tab.on span{font-weight:700;color:var(--b700)}
 .tab .tic{width:46px;height:26px;border-radius:999px;display:grid;place-items:center}
-.tab.on .tic{background:var(--b50)}
+
+/* (أ) the old bar: hairline + a tint so faint it barely registers */
+.tabs.va{border-top:1px solid var(--n200)}
+.tabs.va .tab.on .tic{background:var(--b50)}
+
+/* (ب) lifted + a tinted capsule, outline glyph */
+.tabs.vb{box-shadow:0 -7px 22px rgba(18,47,107,.075)}
+.tabs.vb .tab .tic{width:50px;height:31px}
+.tabs.vb .tab.on .tic{background:var(--b50)}
+
+/* (ج) lifted + a SOLID capsule and a solid glyph — adopted */
+.tabs.vc{box-shadow:0 -7px 22px rgba(18,47,107,.075)}
+.tabs.vc .tab .tic{width:52px;height:32px;transition:none}
+.tabs.vc .tab.on .tic{background:var(--b600);box-shadow:0 3px 9px rgba(18,89,227,.34)}
+.tabs.vc .tab span{font-size:10.5px}
+
+/* (د) lifted + solid glyph + a top indicator, no capsule */
+.tabs.vd{box-shadow:0 -7px 22px rgba(18,47,107,.075)}
+.tabs.vd .tab{position:relative}
+.tabs.vd .tab.on::before{content:'';position:absolute;top:0;inset-inline:26px;height:3px;
+  border-radius:0 0 3px 3px;background:var(--b600)}
+.tabs.vd .tab span{font-size:10.5px}
 
 /* map */
 .map{position:absolute;inset:0;background:
