@@ -67,13 +67,25 @@ class SosService extends BaseService
     {
         User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'supervisor', 'support']))
             ->get()
-            ->each(function (User $staff) use ($incident, $reporter) {
+            ->each(function (User $staff) use ($incident) {
+                // The victim is not named in the notification body.
+                //
+                // This alert fans out to every admin, supervisor AND support agent,
+                // and critical notifications fall back to SMS — so naming the person
+                // who pressed the panic button broadcasts their identity, by text
+                // message, to the whole staff list, including people with no need to
+                // know. In a safety incident that is the exact opposite of what the
+                // control is for.
+                //
+                // The incident reference is enough to act: the responder opens the
+                // safety centre, which is authenticated and audited, and sees who it
+                // is there.
                 $this->notifications->notify(
                     $staff,
                     NotificationType::SosTriggered,
                     'نداء طوارئ جديد (SOS)',
-                    'قام '.($reporter->full_name ?? 'مستخدم').' بتفعيل زر الطوارئ. يتطلب تدخلاً فورياً.',
-                    ['incident_id' => $incident->id, 'reporter_id' => $reporter->id],
+                    'بلاغ طوارئ رقم '.substr($incident->id, 0, 8).' يتطلب تدخلاً فورياً. افتح مركز السلامة.',
+                    ['incident_id' => $incident->id],
                 );
             });
     }

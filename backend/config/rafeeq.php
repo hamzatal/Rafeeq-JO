@@ -5,6 +5,32 @@
  | These can later be overridden by a DB-backed settings module.
  */
 return [
+
+    /*
+     * Minimum age: 18, Jordan's age of majority.
+     *
+     * Not a preference. Under 18 a rider cannot form a binding contract for the
+     * fares, commissions and no-show fees this platform charges, and a guardian
+     * consent flow is a legal instrument that needs a Jordanian lawyer to draft —
+     * so the rule is a hard floor rather than a flow. Enforced at registration and
+     * asserted by test.
+     */
+    'min_age' => (int) env('RAFEEQ_MIN_AGE', 18),
+
+    /*
+     * Terms of service version.
+     *
+     * Bumping this invalidates every stored acceptance, so users are asked again.
+     * Every money movement in this codebase needs a contractual basis, and that
+     * basis has to be a specific version the user demonstrably accepted — not
+     * "they agreed once".
+     */
+    'terms' => [
+        'version' => env('RAFEEQ_TERMS_VERSION', '2026-08-26'),
+        'url' => env('RAFEEQ_TERMS_URL', 'https://rafeeq.jo/legal/terms'),
+        'privacy_url' => env('RAFEEQ_PRIVACY_URL', 'https://rafeeq.jo/legal/privacy'),
+    ],
+
     // Hard ceiling on a single manual admin wallet credit, in fils. A manual
     // credit creates balance with no incoming bank transfer behind it, so it is
     // bounded here rather than trusted to the operator.

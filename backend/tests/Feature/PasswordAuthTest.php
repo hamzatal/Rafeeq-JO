@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Database\Seeders\RolesPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Tests\TestCase;
 
@@ -25,6 +26,8 @@ class PasswordAuthTest extends TestCase
     public function test_registration_stores_a_password(): void
     {
         $res = $this->postJson('/api/v1/auth/register', [
+            'date_of_birth' => Clock::now()->subYears(20)->format('Y-m-d'),
+            'accept_terms' => true,
             'full_name' => 'طالب بكلمة مرور',
             'phone' => '+962790005551',
             'password' => 'Secret@2026',

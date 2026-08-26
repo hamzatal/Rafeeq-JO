@@ -61,12 +61,6 @@ parameters:
 			path: Modules/Auth/Repositories/UserRepository.php
 
 		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Auth\\Resources\\UserResource\:\:\$avatar_path\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Auth/Resources/UserResource.php
-
-		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\Auth\\Resources\\UserResource\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 1

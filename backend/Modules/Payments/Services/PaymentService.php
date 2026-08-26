@@ -193,7 +193,7 @@ class PaymentService extends BaseService
         }
 
         try {
-            $imageUrl = $this->proofUrl((string) $payment->proof_path);
+            $imageUrl = $this->proofDataUri((string) $payment->proof_path);
             $verdict = $this->verifier->verify($request, $imageUrl);
 
             $bankReference = $verdict['extracted']['bank_reference'] ?? null;
@@ -478,18 +478,24 @@ class PaymentService extends BaseService
         });
     }
 
-    /** Returns a URL the vision model can read; temporary URL or data URI. */
-    private function proofUrl(string $path): string
+    /**
+     * The bank receipt, as an inline data URI for the vision model.
+     *
+     * This used to try `temporaryUrl` first, which mints a PUBLIC presigned link to a
+     * bank transfer receipt — a document carrying the student's name, their bank, the
+     * amount and often their account number. Anyone holding that link could fetch it
+     * with no authentication for the whole validity window, it lands in a third
+     * party's request logs, and a presigned S3 URL is not revocable once issued.
+     *
+     * Inlining is strictly better here: the bytes go to exactly one recipient over
+     * TLS, nothing is left reachable afterwards, and there is no window at all.
+     */
+    private function proofDataUri(string $path): string
     {
-        try {
-            return Storage::disk(self::DISK)->temporaryUrl($path, now()->addMinutes(10));
-        } catch (\Throwable) {
-            // Local disk has no temporaryUrl — embed as a base64 data URI.
-            $contents = Storage::disk(self::DISK)->get($path);
-            $mime = Storage::disk(self::DISK)->mimeType($path) ?: 'image/jpeg';
+        $contents = Storage::disk(self::DISK)->get($path);
+        $mime = Storage::disk(self::DISK)->mimeType($path) ?: 'image/jpeg';
 
-            return 'data:'.$mime.';base64,'.base64_encode((string) $contents);
-        }
+        return 'data:'.$mime.';base64,'.base64_encode((string) $contents);
     }
 
     public function proofDownload(Payment $payment): StreamedResponse

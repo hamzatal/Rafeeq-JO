@@ -82,10 +82,17 @@ class ProfileService extends BaseService
         return $user->fresh('roles');
     }
 
+    /**
+     * Delete an account.
+     *
+     * This used to be a soft delete and nothing else, so the row kept the name, the
+     * phone, the email and every uploaded identity document — the app offered a right
+     * it did not honour. It now delegates to AccountErasureService, which destroys the
+     * identity and the documents while preserving the financial ledger, and refuses
+     * while a balance or a hold is outstanding.
+     */
     public function deleteAccount(User $user): void
     {
-        $this->audit->log('profile.deleted', $user, auditable: $user);
-        $user->tokens()->delete();
-        $user->delete(); // soft delete
+        app(AccountErasureService::class)->erase($user);
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
+use Rafeeq\Core\Support\Clock;
 use Rafeeq\Infrastructure\Sms\LogSmsGateway;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\UserStatus;
@@ -27,6 +28,8 @@ class OtpNeverLeavesTheServerTest extends TestCase
     public function test_register_response_carries_no_code(): void
     {
         $res = $this->postJson('/api/v1/auth/register', [
+            'date_of_birth' => Clock::now()->subYears(20)->format('Y-m-d'),
+            'accept_terms' => true,
             'full_name' => 'طالب اختبار',
             'phone' => '0791234567',
             'password' => 'Password123!',
