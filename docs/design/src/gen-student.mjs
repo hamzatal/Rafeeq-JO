@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs';
-import { ic, statusBar, navBar, tabBar, pill, row, money, btn, field, seg, mapBg, cell, page } from './ui.mjs';
+import { ic, statusBar, navBar, tabBar, pill, row, money, btn, field, seg, mapBg, cell, page, mark } from './ui.mjs';
 
 const B = '#1259E3', OK = '#047857';
 const out = (f, s) => writeFileSync(new URL(f, import.meta.url), s);
@@ -11,10 +11,7 @@ s1.push(cell('01', 'شاشة البداية', 'فاتحة — تطابق أول 
 ${statusBar()}
 <div style="position:absolute;inset:0;display:grid;place-items:center;background:var(--n25)">
   <div class="row" style="gap:12px">
-    <svg width="46" height="46" viewBox="0 0 96 96" fill="none">
-      <circle cx="70" cy="26" r="8.5" stroke="${B}" stroke-width="7"/>
-      <path d="M70 43.5 C70 58 60 68 45 72" stroke="${B}" stroke-width="7" stroke-linecap="round"/>
-      <circle cx="27" cy="73.5" r="7.5" fill="${B}"/></svg>
+    ${mark(46, { path: B })}
     <span style="font:700 34px 'IBM Plex Sans Arabic'">رفيق</span></div>
   <div style="position:absolute;bottom:74px;inset-inline:72px;height:3px;border-radius:2px;background:var(--n200)">
     <div style="width:62%;height:100%;border-radius:2px;background:${B}"></div></div>
@@ -46,10 +43,7 @@ ${statusBar()}
   <div style="position:absolute;top:400px;inset-inline:0;height:70px;background:linear-gradient(to bottom,rgba(242,245,249,0),var(--n50))"></div></div>
 <div style="position:absolute;inset-inline:0;bottom:0;top:430px;background:var(--n50);padding:0 20px">
   <div class="row" style="gap:11px;margin-bottom:20px">
-    <svg width="40" height="40" viewBox="0 0 96 96" fill="none">
-      <circle cx="70" cy="26" r="8.5" stroke="${B}" stroke-width="7"/>
-      <path d="M70 43.5 C70 58 60 68 45 72" stroke="${B}" stroke-width="7" stroke-linecap="round"/>
-      <circle cx="27" cy="73.5" r="7.5" fill="${B}"/></svg>
+    ${mark(40, { path: B })}
     <span style="font:700 28px 'IBM Plex Sans Arabic'">رفيق</span></div>
   <span class="t-title-lg">أهلاً بك</span>
   <div class="t-body" style="color:var(--n600);margin:6px 0 24px">سجّل برقم هاتفك وابدأ رحلتك الأولى</div>

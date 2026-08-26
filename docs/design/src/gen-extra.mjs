@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs';
-import { ic, statusBar, navBar, tabBar, pill, row, money, btn, seg, mapBg, cell, page } from './ui.mjs';
+import { ic, statusBar, navBar, tabBar, pill, row, money, btn, seg, mapBg, cell, page, mark, markOnDark } from './ui.mjs';
 const B = '#1259E3', OK = '#047857', BAD = '#D92D20', WARN = '#B45309';
 const out = (f, s) => writeFileSync(new URL(f, import.meta.url), s);
 
@@ -156,10 +156,7 @@ ${w > 700 ? `<div style="position:absolute;inset-inline-start:0;top:0;bottom:0;w
 out('08-responsive.html', `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
 <link rel="stylesheet" href="kit.css"><style>body{width:1560px}</style></head><body><div class="sheet-body">
 <div class="sheet-h">
-  <div class="mk"><svg width="30" height="30" viewBox="0 0 96 96" fill="none">
-    <circle cx="70" cy="26" r="8.5" stroke="#fff" stroke-width="7"/>
-    <path d="M70 43.5 C70 58 60 68 45 72" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="27" cy="73.5" r="7.5" fill="#fff"/></svg></div>
+  <div class="mk">${markOnDark(30)}</div>
   <div><h1>الاستجابة — نفس الشاشة على 4 مقاسات حقيقية</h1>
     <div class="sub">لا تصميم منفصل لكل مقاس · التخطيط يتكيّف بقواعد ثلاث فقط</div></div>
 </div>
@@ -196,10 +193,7 @@ out('09-density.html', `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta cha
 .tbl tr:last-child td{border-bottom:none}
 </style></head><body><div class="sheet-body">
 <div class="sheet-h">
-  <div class="mk"><svg width="30" height="30" viewBox="0 0 96 96" fill="none">
-    <circle cx="70" cy="26" r="8.5" stroke="#fff" stroke-width="7"/>
-    <path d="M70 43.5 C70 58 60 68 45 72" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="27" cy="73.5" r="7.5" fill="#fff"/></svg></div>
+  <div class="mk">${markOnDark(30)}</div>
   <div><h1>جولة التكثيف — استجابةً لملاحظة «العناصر كبيرة»</h1>
     <div class="sub">نفس المحتوى والتوكنز · شخصية التصميم لم تتغيّر · الطرف الأعلى من المقياس وإيقاع الحشو نزلا</div></div>
 </div>
