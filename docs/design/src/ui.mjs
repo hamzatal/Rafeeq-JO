@@ -100,6 +100,80 @@ export function seg(items, active) {
   return `<div class="seg">${items.map((t, i) => `<div class="${i === active ? 'on' : ''}">${t}</div>`).join('')}</div>`;
 }
 
+/** ═══ THE MARK — one definition, no copies ═══════════════════════════════
+ * «الطريق هو الحرف» — the Arabic letter Raa is written from the upper right
+ * down to the left, which is the shape of a journey. Three parts only:
+ *   open ring  → origin, open because the journey has not started
+ *   curve      → the route, and it IS the body of the letter
+ *   solid dot  → destination, solid because it was reached
+ *
+ * The destination dot is AMBER. That is the single sanctioned use of a second
+ * colour in the identity: the arrival is the payoff, so it carries the accent.
+ * Amber appears nowhere else except the `live` state on maps.
+ */
+export function mark(size, { path = '#1259E3', dot = '#F59E0B', w = 7 } = {}) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
+  <circle cx="70" cy="26" r="8.5" stroke="${path}" stroke-width="${w}"/>
+  <path d="M70 43.5 C70 58 60 68 45 72" stroke="${path}" stroke-width="${w}" stroke-linecap="round"/>
+  <circle cx="27" cy="73.5" r="7.5" fill="${dot}"/></svg>`;
+}
+
+/** The mark on a dark surface: white path, amber destination. */
+export const markOnDark = (size) => mark(size, { path: '#fff' });
+/** Single-colour fallback for print, 16px favicons and embroidery. */
+export const markMono = (size, c = '#1259E3') => mark(size, { path: c, dot: c });
+
+/** A near-monochrome city, faint enough to sit under a logo. For splashes.
+ * Blocks are small and many so it reads as a city, not a grid of cards. The
+ * layout is deterministic (seeded) so the asset is reproducible byte-for-byte. */
+export function mapGhost({ w = 390, h = 844, tint = 'rgba(18,89,227,.07)',
+  road = 'rgba(18,89,227,.10)', routeC = 'rgba(18,89,227,.26)', seed = 7 } = {}) {
+  let z = seed;
+  const rnd = () => (z = (z * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+
+  // three road tiers: two arterials, four collectors, the rest are lanes
+  const ax = [0.30, 0.70], ay = [0.26, 0.62];
+  const cx = [0.13, 0.47, 0.86], cy = [0.13, 0.44, 0.79, 0.92];
+  const band = (o) => `<div style="position:absolute;${o}"></div>`;
+  let out = '';
+  for (const f of ax) out += band(`left:${(w * f - 4).toFixed(1)}px;top:0;width:8px;height:${h}px;background:${road}`);
+  for (const f of ay) out += band(`left:0;top:${(h * f - 4).toFixed(1)}px;width:${w}px;height:8px;background:${road}`);
+  for (const f of cx) out += band(`left:${(w * f - 2).toFixed(1)}px;top:0;width:4px;height:${h}px;background:${road};opacity:.62`);
+  for (const f of cy) out += band(`left:0;top:${(h * f - 2).toFixed(1)}px;width:${w}px;height:4px;background:${road};opacity:.62`);
+
+  // city blocks: small, many, jittered, never crossing a road
+  const xs = [0, ...cx, ...ax, 1].sort((a, b) => a - b);
+  const ys = [0, ...cy, ...ay, 1].sort((a, b) => a - b);
+  for (let i = 0; i < xs.length - 1; i++) {
+    for (let j = 0; j < ys.length - 1; j++) {
+      const x0 = w * xs[i] + 7, x1 = w * xs[i + 1] - 7;
+      const y0 = h * ys[j] + 7, y1 = h * ys[j + 1] - 7;
+      if (x1 - x0 < 16 || y1 - y0 < 14) continue;
+      const cols = Math.max(1, Math.round((x1 - x0) / 52));
+      const rows = Math.max(1, Math.round((y1 - y0) / 46));
+      for (let a = 0; a < cols; a++) {
+        for (let b = 0; b < rows; b++) {
+          if (rnd() < 0.46) continue;                       // gaps: courtyards, lots, parks
+          const cw = (x1 - x0) / cols, ch = (y1 - y0) / rows;
+          const pw = cw * (0.34 + rnd() * 0.52), ph = ch * (0.30 + rnd() * 0.55);
+          out += band(`left:${(x0 + a * cw + (cw - pw) / 2).toFixed(1)}px;top:${(y0 + b * ch + (ch - ph) / 2).toFixed(1)}px;`
+            + `width:${pw.toFixed(1)}px;height:${ph.toFixed(1)}px;background:${tint};border-radius:2.5px`);
+        }
+      }
+    }
+  }
+
+  // one journey traced along the arterials, origin ring to destination dot
+  const P = [[0.13, 0.92], [0.13, 0.62], [0.30, 0.62], [0.30, 0.26], [0.70, 0.26], [0.70, 0.13], [0.86, 0.13]];
+  const d = P.map(([x, y], i) => `${i ? 'L' : 'M'}${(w * x).toFixed(1)} ${(h * y).toFixed(1)}`).join(' ');
+  out += `<svg style="position:absolute;inset:0" width="${w}" height="${h}" fill="none">
+    <path d="${d}" stroke="${routeC}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="15 11"/>
+    <circle cx="${(w * P[0][0]).toFixed(1)}" cy="${(h * P[0][1]).toFixed(1)}" r="6.5" stroke="${routeC}" stroke-width="4"/>
+    <circle cx="${(w * P[P.length - 1][0]).toFixed(1)}" cy="${(h * P[P.length - 1][1]).toFixed(1)}" r="5.5" fill="${routeC}"/>
+  </svg>`;
+  return `<div style="position:absolute;inset:0;overflow:hidden">${out}</div>`;
+}
+
 /** A light, clean map surface with roads, blocks, a route and pins. */
 export function mapBg({ h = 844, route = '', pins = [], live = null, eta = '' } = {}) {
   return `<div class="map" style="height:${h}px">

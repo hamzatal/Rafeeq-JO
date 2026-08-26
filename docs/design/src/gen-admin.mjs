@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs';
-import { ic, pill, money, btn, seg } from './ui.mjs';
+import { ic, pill, money, btn, seg, mark, markOnDark } from './ui.mjs';
 import { shell, table, kpi, panel, ADMIN_CSS } from './admin.mjs';
 const B = '#1259E3', OK = '#047857', LIVE = '#F59E0B', BAD = '#D92D20', WARN = '#B45309';
 const out = (f, s) => writeFileSync(new URL(f, import.meta.url), s);
@@ -293,10 +293,7 @@ for (let k = 0; k < 3; k++) {
   out(`06-admin-${k + 1}.html`, `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
 <link rel="stylesheet" href="kit.css"><style>body{width:1400px}${ADMIN_CSS}</style></head><body><div class="sheet-body">
 <div class="sheet-h">
-  <div class="mk"><svg width="30" height="30" viewBox="0 0 96 96" fill="none">
-    <circle cx="70" cy="26" r="8.5" stroke="#fff" stroke-width="7"/>
-    <path d="M70 43.5 C70 58 60 68 45 72" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="27" cy="73.5" r="7.5" fill="#fff"/></svg></div>
+  <div class="mk">${markOnDark(30)}</div>
   <div><h1>لوحة الإدارة ${k + 1}/3 — ${slice.map(s => s[1]).join(' · ')}</h1>
     <div class="sub">من 28 صفحة و6 مجموعات إلى 18 صفحة و4 مجموعات · سايدبار فاتح · رأس جدول فاتح · العرض 1280 بمقياس 1:1</div></div>
 </div>

@@ -1,4 +1,4 @@
-import { ic } from './ui.mjs';
+import { ic, markOnDark } from './ui.mjs';
 const B = '#1259E3', OK = '#047857';
 
 export const NAV = [
@@ -19,10 +19,7 @@ export function shell(activeLabel, title, sub, body, actions = '') {
 
   return `<div class="admin">
   <aside>
-    <div class="abrand"><div class="amk"><svg width="22" height="22" viewBox="0 0 96 96" fill="none">
-      <circle cx="70" cy="26" r="8.5" stroke="#fff" stroke-width="7"/>
-      <path d="M70 43.5 C70 58 60 68 45 72" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
-      <circle cx="27" cy="73.5" r="7.5" fill="#fff"/></svg></div>
+    <div class="abrand"><div class="amk">${markOnDark(22)}</div>
       <div class="col" style="gap:0"><span style="font:700 15px 'IBM Plex Sans Arabic'">رفيق</span>
         <span style="font:400 10px 'IBM Plex Sans Arabic';color:var(--n500)">لوحة التحكّم</span></div></div>
     <div style="flex:1;overflow:hidden">${nav}</div>

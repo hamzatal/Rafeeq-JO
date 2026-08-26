@@ -1,15 +1,19 @@
 import { writeFileSync } from 'fs';
-import { ic, statusBar, tabBar, pill, row, money, btn, seg, mapBg } from './ui.mjs';
+import { ic, statusBar, tabBar, pill, row, money, btn, seg, mapBg,
+  mark, markOnDark, markMono, mapGhost } from './ui.mjs';
 import { shell, table, kpi, panel, ADMIN_CSS } from './admin.mjs';
 
 const B = '#1259E3', OK = '#047857', LIVE = '#F59E0B';
 const out = (f, s) => writeFileSync(new URL(f, import.meta.url), s);
 const cur = `<span style="unicode-bidi:isolate">د.أ</span>`;
 
-const MARK = (size, c = '#1259E3', dot = null) => `<svg width="${size}" height="${size}" viewBox="0 0 96 96" fill="none">
-  <circle cx="70" cy="26" r="8.5" stroke="${c}" stroke-width="7"/>
-  <path d="M70 43.5 C70 58 60 68 45 72" stroke="${c}" stroke-width="7" stroke-linecap="round"/>
-  <circle cx="27" cy="73.5" r="7.5" fill="${dot || c}"/></svg>`;
+// ── the voice ─────────────────────────────────────────────────────────────
+const SLOGAN = 'مقعدك إلى الجامعة';
+const CLAIM  = 'تدفع مقعداً، لا رحلة';
+const EN     = 'YOUR SEAT TO CAMPUS';
+const MARK = (size, c = '#1259E3', dot = null) => mark(size, { path: c, dot: dot || '#F59E0B' });
+const squircle = (size, bg, inner) => `<div style="width:${size}px;height:${size}px;border-radius:22.37%;
+  background:${bg};display:grid;place-items:center">${inner}</div>`;
 
 const page = (w, body, extraCss = '') => `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
 <link rel="stylesheet" href="kit.css"><style>body{width:${w}px;background:#fff}${extraCss}</style></head><body>${body}</body></html>`;
@@ -85,7 +89,7 @@ ${statusBar()}
       <button class="btn btn-secondary btn-sm" style="flex:1">${ic('phone', { s: 16, c: '#0E47B4' })} اتصال</button></div></div>
   <div class="card" style="padding:12px;background:var(--live-soft);border-color:#F5D89B">
     <div class="row" style="gap:9px"><span class="i i-live"></span>
-      <span class="t-label" style="color:#7C4A03;font-weight:700">رمز الصعود: <span class="num ltr">741302</span></span>
+      <span class="t-label" style="color:#7C4A03;font-weight:700">رمز الصعود: <span class="num ltr" style="letter-spacing:.14em">7413</span></span>
       <div class="sp"></div><span class="t-caption" style="color:#7C4A03">أعطِه للكابتن</span></div></div>
   <div style="height:14px"></div></div>`;
 
@@ -223,6 +227,54 @@ ${statusBar()}
     <button class="btn btn-primary" style="height:54px;flex:1;font-size:16px">اقبل الرحلة</button>
     <button class="btn btn-ghost" style="height:54px;flex:.42;font-size:15px">تجاهل</button></div></div>`;
 
+/* ═════════════════════ 0 — BRAND PLATE ═════════════════════
+   The first thing in the README. Logo, name, slogan — nothing else competing. */
+out('r-brand.html', page(1600, `
+<div style="position:relative;width:1600px;height:448px;overflow:hidden;background:#FBFCFE;
+  display:grid;place-items:center">
+  ${mapGhost({ w: 1600, h: 470, tint: 'rgba(18,89,227,.05)', road: 'rgba(18,89,227,.075)', seed: 21 })}
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 700px 400px at 50% 50%,
+    rgba(251,252,254,.98) 0%, rgba(251,252,254,.95) 40%, rgba(251,252,254,.55) 68%, rgba(251,252,254,0) 88%)"></div>
+  <div style="position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;padding-top:22px">
+    ${squircle(124, '#0E1524', markOnDark(82))}
+    <div style="font:700 78px/1 'IBM Plex Sans Arabic';color:#0E1524;margin-top:26px">رفيق</div>
+    <div style="font:500 27px/1 'IBM Plex Sans Arabic';color:#1259E3;margin-top:16px">${SLOGAN}</div>
+    <div style="width:210px;height:1px;background:var(--n300);margin:24px 0 18px"></div>
+    <div style="font:400 15px/1 'IBM Plex Sans Arabic';color:var(--n600)">${CLAIM}</div>
+    <div style="font:500 11.5px/1 ui-sans-serif,system-ui;color:var(--n500);letter-spacing:.24em;
+      direction:ltr;margin-top:11px">${EN}</div>
+  </div>
+</div>`));
+
+/* ═════════════════════ 0b — SPLASH ═════════════════════ */
+const splash = ({ bg, tint, road, route, veil, veil2, path, name, sub, badge, badgeBg, badgeFg }) => `
+<div style="position:absolute;inset:0;background:${bg};overflow:hidden">
+  ${mapGhost({ w: 390, h: 844, tint, road, routeC: route })}
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 300px 300px at 50% 44%,
+    ${veil} 0%, ${veil} 34%, ${veil2} 62%, transparent 88%)"></div>
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:0;z-index:5">
+    ${mark(96, { path })}
+    <div style="font:700 54px/1 'IBM Plex Sans Arabic';color:${name};margin-top:22px">رفيق</div>
+    <div style="font:500 18px/1 'IBM Plex Sans Arabic';color:${sub};margin-top:13px">${SLOGAN}</div>
+  </div>
+  <div style="position:absolute;inset-inline:0;bottom:56px;display:grid;place-items:center;z-index:5">
+    <div style="background:${badgeBg};border-radius:999px;padding:6px 15px;
+      font:500 12px/1 'IBM Plex Sans Arabic';color:${badgeFg}">${badge}</div></div>
+</div>`;
+
+const splashStudent = splash({
+  bg: '#FFFFFF', tint: 'rgba(18,89,227,.065)', road: 'rgba(18,89,227,.10)',
+  route: 'rgba(18,89,227,.24)', veil: 'rgba(255,255,255,.97)', veil2: 'rgba(255,255,255,.72)',
+  path: '#1259E3', name: '#0E1524', sub: '#1259E3',
+  badge: 'للطلاب', badgeBg: 'var(--b50)', badgeFg: 'var(--b700)' });
+
+const splashDriver = splash({
+  bg: '#0E1524', tint: 'rgba(255,255,255,.045)', road: 'rgba(255,255,255,.062)',
+  route: 'rgba(255,255,255,.20)', veil: 'rgba(14,21,36,.95)', veil2: 'rgba(14,21,36,.66)',
+  path: '#FFFFFF', name: '#FFFFFF', sub: 'rgba(255,255,255,.72)',
+  badge: 'للكباتن', badgeBg: 'rgba(255,255,255,.11)', badgeFg: '#FFFFFF' });
+
 /* ═════════════════════ 1 — HERO ═════════════════════ */
 const heroPhone = (inner, rot, z, x, y) => `
 <div style="position:absolute;left:${x}px;top:${y}px;transform:rotate(${rot}deg);z-index:${z};
@@ -270,14 +322,19 @@ out('r-logo.html', page(1400, `
     </div>
     <div style="flex:1">
       <div style="font:700 25px 'IBM Plex Sans Arabic';margin-bottom:8px">«الطريق هو الحرف»</div>
-      <div style="font:400 15.5px/28px 'IBM Plex Sans Arabic';color:var(--n700);margin-bottom:24px">
+      <div style="font:400 15.5px/28px 'IBM Plex Sans Arabic';color:var(--n700);margin-bottom:16px">
         حرف <b>الراء</b> يُكتب من أعلى اليمين نازلاً إلى اليسار — وهذا حرفياً مسار رحلة من نقطة انطلاق إلى وجهة.
         فالطريق ليس شكلاً مُلحقاً بالحرف، بل <b>الحرف نفسه هو الطريق</b>. لا سيارة ولا عجلة ولا دبّوس خريطة:
         العلامة تقول «حركة» بأقلّ عدد ممكن من الأشكال، وتبقى مقروءة حتى عند 18 بكسل.</div>
-      <div class="row" style="gap:13px;align-items:stretch;margin-bottom:24px">
+      <div style="background:var(--live-soft);border:1px solid #F5D89B;border-radius:14px;padding:11px 14px;margin-bottom:18px">
+        <div style="font:400 13px/22px 'IBM Plex Sans Arabic';color:#7C4A03">
+        <b>ولماذا الوجهة كهرمانية؟</b> الوصول هو المكافأة، فهو وحده يحمل لون التمييز. وهذا
+        <b>الاستخدام الوحيد المسموح</b> للون ثانٍ في الهوية — قطرُه 7 من 96، ولا يظهر
+        الكهرماني في مكان آخر إلّا حالة <b>«الحيّ»</b> على الخرائط.</div></div>
+      <div class="row" style="gap:13px;align-items:stretch;margin-bottom:20px">
         ${[['الحلقة المفتوحة', 'نقطة الانطلاق — مفتوحة لأنّ الرحلة لم تبدأ', '#1259E3', '#DDE3EC', '#DDE3EC'],
            ['المنحنى', 'المسار — وهو جسم الحرف نفسه', '#DDE3EC', '#1259E3', '#DDE3EC'],
-           ['النقطة المصمتة', 'الوجهة — مصمتة لأنّها تحقّقت', '#DDE3EC', '#DDE3EC', '#1259E3']].map(([t, d, a, b, c]) => `
+           ['النقطة المصمتة', 'الوجهة — مصمتة لأنّها تحقّقت، وكهرمانية لأنّها المكافأة', '#DDE3EC', '#DDE3EC', '#F59E0B']].map(([t, d, a, b, c]) => `
         <div style="flex:1;background:#fff;border:1px solid var(--n200);border-radius:16px;padding:15px;text-align:center">
           <svg width="72" height="72" viewBox="0 0 96 96" fill="none" style="margin:0 auto 9px">
             <circle cx="70" cy="26" r="8.5" stroke="${a}" stroke-width="7"/>
@@ -290,9 +347,9 @@ out('r-logo.html', page(1400, `
         <div style="flex:1">
           <div style="font:700 14px 'IBM Plex Sans Arabic';margin-bottom:5px">أيقونة المتجر ومقاييس التصغير</div>
           <div style="font:400 12px/19px 'IBM Plex Sans Arabic';color:var(--n600)">
-            الطالب أزرق مصمت، والكابتن أسود مع نقطة وصول كهرمانية ليفرّق التطبيقين على الشاشة نفسها.
-            سماكة الخط ثابتة عند 7/96 فلا تختفي عند 18 بكسل.</div></div>
-        ${[['#1259E3', '#fff', '#fff', 'الطالب'], ['#0E1524', '#fff', '#F59E0B', 'الكابتن']].map(([bg, st, dt, lbl]) => `
+            الطالب أزرق والكابتن أسود — يفترقان بالخلفية لا بالعلامة، فتُقرأ العلامة
+            واحدةً على الشاشة نفسها. وسماكة الخط ثابتة عند 7/96 فلا تختفي عند 18 بكسل.</div></div>
+        ${[['#1259E3', '#fff', '#F59E0B', 'الطالب'], ['#0E1524', '#fff', '#F59E0B', 'الكابتن']].map(([bg, st, dt, lbl]) => `
         <div style="text-align:center">
           <div style="width:84px;height:84px;border-radius:22.37%;background:${bg};display:grid;place-items:center">
             ${MARK(55, st, dt)}</div>
@@ -414,7 +471,7 @@ out('r-student.html', strip(1330, [
   frameCap(rideScreen, 'مشتركة أم منفردة',
     'سعران معلنان قبل الطلب لا تقدير ولا مضاعف ذروة. المشتركة مقعد مع طلاب منطقتك، والمنفردة أنت تدفع كل المقاعد.'),
   frameCap(liveTrip, 'الرحلة الحيّة',
-    'شريط تقدّم من خمس مراحل، بيانات الكابتن ولوحة السيارة، رمز صعود من ستّة أرقام، وزرّ استغاثة ظاهر دائماً.'),
+    'شريط تقدّم من خمس مراحل، بيانات الكابتن ولوحة السيارة، رمز صعود من أربعة أرقام، وزرّ استغاثة ظاهر دائماً.'),
 ]));
 
 out('r-money.html', strip(900, [
@@ -424,6 +481,13 @@ out('r-money.html', strip(900, [
     'مبالغ جاهزة، ومرجع إلزامي يربط الحوالة بالحساب، وصورة الإشعار. الشحنة لا تُقيَّد على الرصيد إلا بعد اعتماد بشري.'),
 ]));
 
+out('r-splash.html', strip(900, [
+  frameCap(splashStudent, 'سبلاش الطالب',
+    'خريطة باهتة تحت العلامة — تقول «تنقّل» قبل أن يقرأ المستخدم كلمة. والشِعار حاضر لأنّ أوّل ثانيتين هما كل ما نملكه لتوضيح ما هذا التطبيق.'),
+  frameCap(splashDriver, 'سبلاش الكابتن',
+    'الداكن ليس ذوقاً: الكابتن يفتح التطبيق فجراً وليلاً في مركبة، والأبيض الكامل يُبهر. وشارة «للكباتن» تمنع تنزيل التطبيق الخطأ.'),
+]));
+
 out('r-driver.html', strip(900, [
   frameCap(cockpitScreen, 'الكوكبِت',
     'مفتاح «متصل» بعرض الشاشة، ورقم بطل واحد هو أرباح اليوم، وأوقات ذروة الجامعة. الكابتن يقرأه في ثانية وهو يسوق.'),
@@ -431,4 +495,4 @@ out('r-driver.html', strip(900, [
     'ملء الشاشة مع عدّاد تنازلي. الصافي بعد العمولة هو الرقم البطل لأنّه أساس القرار، ومسافة الوصول للطالب معلنة.'),
 ]));
 
-console.log('generated: hero, logo, palette, admin, student, money, driver');
+console.log('generated: brand, splash, hero, logo, palette, admin, student, money, driver');
