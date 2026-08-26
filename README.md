@@ -1,209 +1,432 @@
-
-
-
-git fetch origin
-git reset --hard origin/foundation/phase-0-1
-
-
-
-
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:002045,100:006A65&height=210&section=header&text=Rafeeq%20%7C%20%D8%B1%D9%81%D9%8A%D9%82&fontColor=ffffff&fontSize=68&fontAlignY=38&desc=Smart%20University%20Mobility%20%26%20Services%20Platform&descSize=18&descAlignY=60" alt="Rafeeq" width="100%" />
-
-<br/>
-
-<a href="#"><img src="https://readme-typing-svg.demolab.com/?font=IBM+Plex+Sans+Arabic&size=22&duration=3200&pause=800&color=006A65&center=true&vCenter=true&width=720&lines=%D9%85%D9%86%D8%B5%D8%A9+%D8%A7%D9%84%D9%86%D9%82%D9%84+%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9%D9%8A+%D8%A7%D9%84%D8%B0%D9%83%D9%8A+%D9%81%D9%8A+%D8%A7%D9%84%D8%A3%D8%B1%D8%AF%D9%86;Ride+%2B+Services+%2B+Safety+%2B+AI+in+one+platform;%D8%B7%D8%A7%D9%84%D8%A8+%D9%80+%D9%83%D8%A7%D8%A8%D8%AA%D9%86+%D9%80+%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9" alt="tagline" /></a>
+<img src="docs/design/readme/hero.png" alt="رفيق — منصّة النقل الجامعي المشترك في الأردن" width="100%" />
 
 <br/><br/>
 
-![Status](https://img.shields.io/badge/status-active%20development-2ea44f?style=for-the-badge)
-![Backend Tests](https://img.shields.io/badge/backend%20tests-198%20passing-2ea44f?style=for-the-badge&logo=php&logoColor=white)
-![PHPStan](https://img.shields.io/badge/PHPStan-level%205-8892BF?style=for-the-badge)
-![License](https://img.shields.io/badge/license-Proprietary-002045?style=for-the-badge)
+**منصّة النقل الجامعي المشترك في الأردن.**
+نجمع طلاب المنطقة نفسها في رحلة واحدة إلى الجامعة — بسعر ثابت معلن قبل الطلب.
+
+<br/>
+
+[![CI](https://github.com/hamzatal/Rafeeq-JO/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hamzatal/Rafeeq-JO/actions/workflows/ci.yml)
+![Tests](https://img.shields.io/badge/backend%20tests-222%20passing-047857?style=flat-square)
+![PHPStan](https://img.shields.io/badge/PHPStan-level%205-1259E3?style=flat-square)
+![Stage](https://img.shields.io/badge/stage-pre--launch%20·%20phase%201%20of%2012-B45309?style=flat-square)
+![License](https://img.shields.io/badge/license-proprietary-39415A?style=flat-square)
 
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel&logoColor=white)
 ![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat-square&logo=php&logoColor=white)
-![Expo](https://img.shields.io/badge/Expo-React%20Native-000020?style=flat-square&logo=expo&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-Admin-000000?style=flat-square&logo=next.js&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-51-000020?style=flat-square&logo=expo&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-PostGIS-4169E1?style=flat-square&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-cache%2Fqueue-DC382D?style=flat-square&logo=redis&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT%20%2B%20Vision-412991?style=flat-square&logo=openai&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-queue%20%2F%20cache-DC382D?style=flat-square&logo=redis&logoColor=white)
+
+<br/>
+
+[الفكرة](#الفكرة) · [التسعير](#التسعير--المقعد-الثابت) · [التطبيقات](#التطبيقات-الثلاثة) · [الهوية والشعار](#الهوية-البصرية-والشعار) · [المزايا](#المزايا) · [البنية](#البنية-التقنية) · [التشغيل](#التشغيل-المحلي) · [الحالة](#حالة-المشروع--بصراحة)
 
 </div>
 
 ---
 
-## 🎯 ما هو رفيق؟ · What is Rafeeq?
+## الفكرة
 
-**رفيق** منصّة متكاملة للنقل الجامعي والخدمات الطلابية في الأردن، مدعومة بالذكاء الاصطناعي.
-ليست مجرد تطبيق حجز — بل **شبكة نقل + منصّة خدمات + نظام أمان + مساعد ذكي** في مكان واحد.
+طالب في إربد يسكن على 6 كيلومترات من جامعة اليرموك أمامه ثلاثة خيارات، وكلّها سيّئة:
 
-Rafeeq is an AI-powered platform for **campus mobility & student services** in Jordan —
-pooled rides priced fairly by distance, a captain earnings system, safety controls,
-in-app services, and a GPT-powered assistant.
+| الخيار | الكلفة | المشكلة |
+|---|---|---|
+| تكسي إلى المجمّع، ثم باص | ~2.000 د.أ + أجرة الباص | انتظار، وتبديل مركبة، ووقت غير مضمون |
+| تكسي مباشر إلى الجامعة | 3–4 د.أ يومياً | ≈ 70 د.أ شهرياً — فوق قدرة معظم الطلاب |
+| مركبته الخاصة | وقود + اصطفاف | لا يملكها معظمهم |
 
-<div align="center">
+**رفيق يضيف الخيار الرابع:** الطلاب المتقاربون سكناً والمتّجهون إلى الجامعة نفسها في الوقت نفسه
+يتشاركون مركبة واحدة، فينقسم ثمنها. الطالب يدفع **مقعداً** لا **رحلة**.
 
-|  |  |  |
-|:--:|:--:|:--:|
-| 🚗 **رحلات مُجمّعة** | 💳 **محفظة + CliQ** | 🛡️ **أمان وتتبّع حيّ** |
-| تسعير عادل بالمسافة والزون | شحن ودفع واشتراكات | SOS · كود صعود/نزول · مكافحة احتيال |
-| 🧭 **مساعد رفيق (AI)** | 📊 **أرباح الكابتن** | 📣 **مساحات إعلانية** |
-| اقتراحات ودعم عبر GPT | معاينة + تجميع يومي/أسبوعي | تُدار كلياً من لوحة التحكم |
-
-</div>
-
----
-
-## 🧩 المنصّة تتكوّن من · The three apps + core
-
-| التطبيق | الوصف | التقنية | المنصّات |
-|---------|--------|---------|----------|
-| 📱 `frontend/student-app` | تطبيق الطالب | Expo (React Native + TS) | iOS · Android · Web |
-| 🚕 `frontend/driver-app` | تطبيق الكابتن | Expo (React Native + TS) | iOS · Android · Web |
-| 🖥️ `frontend/admin-dashboard` | لوحة الإدارة | Next.js + TS + Tailwind | Web |
-| ⚙️ `backend` | الـ API والمنطق | Laravel 12 · PHP 8.4 | REST + WebSockets |
-| 🎨 `frontend/packages/shared` | التصميم والأنواع المشتركة | TypeScript | — |
-| 🔌 `frontend/packages/api-client` | عميل API موحّد | TypeScript | — |
-
----
-
-## 🏗️ المعمارية · Architecture
-
-```mermaid
-flowchart TD
-    subgraph Clients
-        S["📱 Student App<br/>(Expo)"]
-        D["🚕 Driver App<br/>(Expo)"]
-        A["🖥️ Admin Dashboard<br/>(Next.js)"]
-    end
-
-    S & D & A -->|"@rafeeq/api-client<br/>REST + WebSockets"| API
-
-    subgraph Backend["⚙️ Laravel 12 · Modular Monolith"]
-        API["API Gateway<br/>(Sanctum · RBAC · Rate limit)"]
-        MOD["Modules: Trips · Matching · Pricing · Wallet<br/>Payouts · Ads · Safety · Ratings · AI · …"]
-        API --> MOD
-    end
-
-    MOD --> PG[("🐘 PostgreSQL<br/>+ PostGIS")]
-    MOD --> RD[("🧰 Redis<br/>cache · queue · realtime")]
-    MOD --> GPT["🤖 OpenAI<br/>GPT + Vision"]
-    MOD --> CLIQ["💳 CliQ Payments"]
-    MOD --> FCM["🔔 Firebase FCM"]
-    MOD --> MAPS["🗺️ Maps"]
+```
+┌─ حي الجامعة ──┐
+│  4 طلاب       │ ─────►  مركبة واحدة  ─────►  جامعة اليرموك
+│  6.4 كم       │         كابتن موثَّق             البوابة الشمالية
+└───────────────┘
+   1.500 د.أ للطالب              6.000 د.أ للرحلة
+   بدل 3.500 منفرداً             ربح الكابتن 5.100
 ```
 
-> **القرار المعماري:** *Modular Monolith* — أسرع للإطلاق، أرخص تشغيلياً، وقابل للتقسيم إلى خدمات لاحقاً.
-> المصادقة **stateless Bearer tokens** (Sanctum) لكل العملاء لتفادي تعقيد CSRF.
+والعكس صحيح: من الجامعة إلى البيت. ومَن أراد المركبة كاملة لنفسه دفع مقاعدها كلّها.
+
+> **القيمة ليست في إرسال مركبة — بل في التجميع.** لهذا المنصّة تجمع الطلبات في نافذة
+> زمنية قصيرة قبل الإرسال، لا لتُبطئ الطالب، بل لأنّ رحلة بمقعدين لا تُجدي الكابتن،
+> وتغطية العجز من جيب الطالب تنقض وعد السعر الثابت. التفصيل في [`docs/PRICING.md`](docs/PRICING.md).
 
 ---
 
-## 💸 نموذج التسعير · Pricing model
+## التسعير — «المقعد الثابت»
 
-```mermaid
-flowchart LR
-    R["طلب رحلة<br/>pickup → جامعة"] --> Z{"داخل منطقة<br/>مُغطّاة؟"}
-    Z -->|"نعم + سعر موحّد"| M["🎯 سعر ثابت عادل<br/>(zone ↔ university)"]
-    Z -->|"لا"| DPQ["📏 تسعير بالمسافة (GPS)<br/>فتح + كم + دقيقة + تعرفة ليلية"]
-    M & DPQ --> C["🧮 عمولة المنصّة (%)"]
-    C --> CAP["🚕 صافي أرباح الكابتن"]
+سعر المقعد يُقرأ من **مصفوفة نطاقات معلَنة** (منطقة ↔ جامعة)، لا من عدّاد GPS ولا مضاعف ذروة.
+الطالب يعرف كلفته **قبل** أن يطلب، وتبقى هي نفسها كلّ يوم.
+
+<table>
+<tr><th>النطاق</th><th>المسافة</th><th>سعر المقعد</th><th>المركبة كاملة</th></tr>
+<tr><td><b>A</b></td><td>حتى 3 كم</td><td><b>1.000</b></td><td>3.500</td></tr>
+<tr><td><b>B</b></td><td>3–5 كم</td><td><b>1.250</b></td><td>4.500</td></tr>
+<tr><td><b>C</b></td><td>5–7 كم</td><td><b>1.500</b></td><td>5.250</td></tr>
+<tr><td><b>D</b></td><td>7–10 كم</td><td><b>1.750</b></td><td>6.000</td></tr>
+<tr><td><b>E</b></td><td>10–14 كم</td><td><b>2.000</b></td><td><b>7.000</b></td></tr>
+<tr><td><b>F</b></td><td>فوق 14 كم</td><td><b>2.250</b></td><td>8.000</td></tr>
+</table>
+
+- **المقعد المشترك يبقى تحت الدينارين** حتى النطاق D — وهو يغطّي معظم أحياء إربد حول اليرموك.
+- **المركبة كاملة** = `سعر المقعد × مقاعد المركبة × 0.875`، مقرَّبة لأقرب 250 فلساً.
+- **لا `surge` ولا مضاعف ليلي على المقعد.** السعر الذي رآه الطالب هو الذي يُخصم.
+
+> ⚠️ نموذج التسعير مُصمَّم وموثَّق، وتنفيذه **المرحلة 5** من خطة العمل. سبعة أرقام
+> (العمولة، طول نافذة التجميع، سقف الضمان…) موثّقة في [`docs/PRICING.md`](docs/PRICING.md) §7.
+
+---
+
+## التطبيقات الثلاثة
+
+ثلاث واجهات على قاعدة واحدة: تطبيق الطالب، تطبيق الكابتن، ولوحة الإدارة.
+**الصور أدناه مُصمَّمة بالكامل من نظام التصميم نفسه** (نفس التوكنز والمكوّنات التي سيُبنى بها الكود)،
+ومولَّدة برمجياً من [`docs/design/src/`](docs/design/src/) — فأي تغيير في الهوية يُعاد توليد الصور منه.
+
+### تطبيق الطالب — رحلة الطلب
+
+<img src="docs/design/readme/student.png" alt="شاشات تطبيق الطالب: الرئيسية، اختيار نوع الرحلة، الرحلة الحيّة" width="100%" />
+
+| الشاشة | ما فيها ولماذا |
+|---|---|
+| **الرئيسية** (يميناً) | الخريطة تملأ الشاشة لأنّها السياق الحقيقي للقرار. فوقها كتلة عائمة واحدة فقط (التحيّة + الجرس)، وشيت سفلي واحد فيه البحث وثلاث وجهات متكرّرة **بأسعارها المعلنة** — فالطلب اليومي نقرة واحدة لا رحلة عبر أربع شاشات. |
+| **نوع الرحلة** (وسطاً) | خيارَان صريحان بسعرَيهما: **مشتركة** (مقعد مع طلاب منطقتك، مُعلَّمة «الأوفر») و**منفردة** (المركبة كاملة). تحتهما حالة المحفظة: هل الرصيد كافٍ أم لا — **قبل** الضغط على «اطلب»، لا بعده برسالة خطأ. |
+| **الرحلة الحيّة** (يساراً) | شريط تقدّم من خمس مراحل يجيب سؤال «وين صار؟» بلا قراءة. بيانات الكابتن ولوحة المركبة **بحجم يُقرأ من بعيد** ليطابقها الطالب بالمركبة الواصلة. رمز صعود من ستة أرقام يمنع رُكوب المركبة الخطأ. وزرّ الاستغاثة أحمر وظاهر **دائماً** لا مخفيّ في قائمة. |
+
+### تطبيق الطالب — المحفظة والشحن
+
+<img src="docs/design/readme/money.png" alt="شاشات المحفظة والشحن عبر CliQ" width="72%" />
+
+| الشاشة | ما فيها ولماذا |
+|---|---|
+| **المحفظة** (يميناً) | كل حركة مالية لها سطر يشرحها: خصم رحلة، شحنة **معتمدة**، شحنة **قيد المراجعة** (بلون التحذير ورصيدها غير محتسب)، استرداد **تلقائي** لرحلة ملغاة. القاعدة: **لا رصيد يتحرّك بلا سطر يفسّره** — وهذا شرط قابلية التدقيق لا رفاهية تصميم. |
+| **الشحن عبر CliQ** (يساراً) | مبالغ جاهزة، و**مرجع إلزامي** (`RFQ-8241-HZ`) يربط الحوالة البنكية بالحساب، وصورة الإشعار. الشريط الكهرماني يقول الحقيقة صراحةً: **الشحنة لا تُقيَّد على الرصيد إلا بعد اعتماد بشري** — لأنّ إخفاء ذلك يُنتج شكوى دعم لكل شحنة. |
+
+### تطبيق الكابتن
+
+<img src="docs/design/readme/driver.png" alt="شاشات تطبيق الكابتن: الكوكبِت والعرض الوارد" width="72%" />
+
+| الشاشة | ما فيها ولماذا |
+|---|---|
+| **الكوكبِت** (يميناً) | يُقرأ في ثانية وسائقُه يسوق. مفتاح «متصل» بعرض الشاشة كاملاً لأنّه القرار الأهمّ في يوم الكابتن. **رقم بطل واحد** هو أرباح اليوم — لا ستّ بطاقات متساوية الوزن. وأوقات ذروة الجامعة معلنة، فالكابتن يخطّط يومه بدل أن ينتظر. |
+| **العرض الوارد** (يساراً) | ملء الشاشة مع عدّاد تنازلي. الرقم البطل هو **الصافي بعد العمولة** لا الأجرة الكاملة، لأنّه أساس قرار القبول — وإظهار الأجرة الكاملة بحجم أكبر تضليل. ومسافة الوصول إلى الطالب معلنة بجانب مسافة الرحلة، فلا يقبل الكابتن رحلة تُكلّفه أكثر ممّا تُدخل. أزرار 54 بكسل لأنّ الإصبع مرتجفة والمركبة متحرّكة. |
+
+### لوحة الإدارة
+
+<img src="docs/design/readme/admin.png" alt="لوحة قيادة الإدارة" width="100%" />
+
+لوحة تشغيل لا لوحة تقارير. سايدبار **فاتح** مقسَّم إلى أربع مجموعات (العمليات · الشبكة · المالية · الثقة والنظام)
+مع شارات عدّ على ما يحتاج تدخّلاً. والصفحة نفسها مبنية على سؤال واحد: **ما الذي يحتاج قراراً الآن؟**
+
+- **أربعة مؤشّرات** لكلٍّ منها شريط تقدّم نحو هدفه ونصّ يفسّره — رقم بلا مرجع لا يعني شيئاً. المؤشّر الكهرماني (كباتن متصلون 38%) والأحمر (23 شحنة بانتظار المراجعة) يقولان «تدخّل» بلا قراءة.
+- **بطاقة «يحتاج إجراءً»** تسبق كل شيء: بلاغ SOS مفتوح، شحنات تجاوزت SLA، كباتن بانتظار توثيق، شكاوى دعم.
+- الرحلات الحيّة بحالاتها، وتوزيع أنواع الرحلات، و**متوسّط المقاعد المشغولة (2.7 من 4)** — وهو مؤشّر صحّة نموذج العمل نفسه لا رقم عرض.
+
+### كل الشاشات — الصفائح الكاملة
+
+41 شاشة مصمَّمة في إطار هاتف حقيقي 390×844. الصفائح مرتّبة للمراجعة لا للعرض:
+
+| الصفيحة | المحتوى |
+|---|---|
+| [`00-logo`](docs/design/v2/00-logo.png) | الشعار: البناء، التشريح، القفلات، أيقونات المتجر، مقاييس التصغير، الاستخدام الخطأ |
+| [`02-student-auth`](docs/design/v2/02-student-auth.png) | التمهيد، الدخول، رمز OTP، إنشاء الحساب، **بوّابة السنّ 18**، توثيق الطالب |
+| [`03-student-ride`](docs/design/v2/03-student-ride.png) | الرئيسية، البحث، الوجهات، نوع الرحلة، التأكيد، البحث عن كابتن، الرحلة الحيّة، التقييم |
+| [`04-student-money`](docs/design/v2/04-student-money.png) | المحفظة، الشحن عبر CliQ، الكوبونات، «خطّي الشهري»، فاتورة الرحلة |
+| [`05-driver`](docs/design/v2/05-driver.png) | الكوكبِت، العرض، الملاحة، الصعود بالرمز، إنهاء الرحلة، الأرباح والسحب، الوثائق |
+| [`06-admin-1`](docs/design/v2/06-admin-1.png) · [`-2`](docs/design/v2/06-admin-2.png) · [`-3`](docs/design/v2/06-admin-3.png) | لوحة القيادة، الطلبات الحيّة، الكباتن والتوثيق، المدفوعات، السحوبات، التسعير، SOS، التدقيق |
+| [`07-states`](docs/design/v2/07-states.png) | الحالات الفارغة والأخطاء والتحميل وانقطاع الشبكة — لكل شاشة حالتها |
+| [`08-responsive`](docs/design/v2/08-responsive.png) | من 360 إلى 1440 بكسل · هاتف صغير، هاتف، لوحي، سطح مكتب |
+| [`09-density`](docs/design/v2/09-density.png) | مقارنة قبل/بعد ضبط الكثافة — 3 صفوف مرئية صارت 5 مع بقاء اللمس ≥ 44 |
+
+كل الصفائح مولَّدة من [`docs/design/src/`](docs/design/src/) — الشرح في [`docs/design/README.md`](docs/design/README.md)،
+وسرد الشاشات كاملاً في [`docs/design/SCREENS.md`](docs/design/SCREENS.md).
+
+---
+
+## الهوية البصرية والشعار
+
+<img src="docs/design/readme/logo.png" alt="تشريح شعار رفيق: الطريق هو الحرف" width="100%" />
+
+### «الطريق هو الحرف»
+
+حرف **الراء** يُكتب من أعلى اليمين نازلاً إلى اليسار. وهذا — حرفياً — **مسار رحلة**
+من نقطة انطلاق إلى وجهة. فالعلامة لا تُلحق طريقاً بالحرف، بل تكتشف أنّ الحرف **هو** الطريق:
+
+| العنصر | معناه |
+|---|---|
+| **الحلقة المفتوحة** (أعلى اليمين) | نقطة الانطلاق — مفتوحة لأنّ الرحلة لم تبدأ |
+| **المنحنى** | المسار — وهو جسم الـ«ر» نفسه، لا زخرفة مُضافة |
+| **النقطة المصمتة** (أسفل اليسار) | الوجهة — مصمتة لأنّها تحقّقت |
+
+لا سيارة، ولا عجلة، ولا دبّوس خريطة. العلامة تقول «حركة» بثلاثة أشكال فقط،
+وسماكة خطّها ثابتة عند `7/96` فتبقى مقروءة عند **18 بكسل**.
+**الطالب** أزرق مصمت، و**الكابتن** أسود بنقطة وصول كهرمانية — ليفترقا على شاشة واحدة.
+
+### لوحة الألوان
+
+<img src="docs/design/readme/palette.png" alt="لوحة ألوان هوية مسار مع نسب التباين" width="100%" />
+
+**لون علامة واحد، بلا لون ثانوي.** والتراتُب البصري يأتي من تدرّج واحد لا من لون ثانٍ.
+كل نسبة تباين في الصورة **محسوبة بمعادلة WCAG لا مقدَّرة بالنظر**:
+
+| القرار | السبب |
+|---|---|
+| `#1259E3` مرساةً | **5.89:1 في الاتجاهين** — يعمل نصاً على أبيض *وحشوةً تحمل نصاً أبيض*. لون واحد يؤدّي الدورين، فلا حاجة لثانٍ. |
+| **بلا لون ثانوي** | الهوية القديمة كانت كحلي `#002045` (16.25:1 ≈ أسود) فاضطرّت لأخذ لون ثانٍ داكن (تيركواز 2.51:1 عنه فقط) ⇒ **صفر تراتُب**. المشكلة كانت في *الإضاءة* لا في درجة اللون. |
+| كهرماني `#F59E0B` للحالة **الحيّة**، خرائط فقط، بنصّ داكن | أبيض عليه = 2.15:1 ويسقط. والتيركواز القديم كان يذوب في أخضر الحدائق على بلاطات الخريطة. |
+| `warning` من `#F79009` إلى `#B45309` | القديم 2.35:1 كنصّ — يسقط AA، ويظهر في **كل** شارة «قيد المراجعة». |
+| **الوضع الداكن محذوف بالكامل** | كان متناقضاً مع نفسه: `colors.ts` يقول فاتح فقط، و`scheme.ts` فيه لوحة داكنة كاملة، و57 أداة `dark:` تشير إلى ألوان فاتحة. |
+
+**الخطّ:** IBM Plex Sans Arabic بأوزان 400/500/700 فقط.
+**الأيقونات:** Lucide حصراً. **الأنصاف:** 12 / 16 / 24. **الارتفاع:** L0–L3 بقاعدة «حدّ أو ظلّ، لا الاثنان معاً».
+
+---
+
+## المزايا
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+<img src="docs/design/readme/icons/school.png" width="20" align="right" />&nbsp; **التجميع من منطقة إلى جامعة**
+الطلاب المتقاربون سكناً ووقتاً في مركبة واحدة. الطالب يدفع مقعداً لا رحلة.
+
+<img src="docs/design/readme/icons/cash.png" width="20" align="right" />&nbsp; **سعر ثابت معلن**
+مصفوفة نطاقات لا عدّاد. الطالب يعرف كلفته قبل الطلب، وهي نفسها كلّ يوم.
+
+<img src="docs/design/readme/icons/route.png" width="20" align="right" />&nbsp; **نافذة تجميع لا إرسال فوري**
+المنصّة تجمع الطلبات قبل الإرسال، فتبقى الرحلة مُجدية للكابتن بلا رفع سعر الطالب.
+
+<img src="docs/design/readme/icons/crosshair.png" width="20" align="right" />&nbsp; **تتبّع حيّ**
+موقع المركبة والوقت المتوقّع على الخريطة، بلون مخصَّص للحالة الحيّة.
+
+<img src="docs/design/readme/icons/shield.png" width="20" align="right" />&nbsp; **سلامة ظاهرة**
+زرّ استغاثة ظاهر في كل شاشة رحلة، ومشاركة الرحلة، ورمز صعود من ستة أرقام.
+
+<img src="docs/design/readme/icons/wallet.png" width="20" align="right" />&nbsp; **محفظة بلا نقد**
+شحن عبر CliQ بمرجع إلزامي، ودفتر مزدوج القيد، وكل حركة لها سطر يفسّرها.
+
+</td>
+<td width="50%" valign="top">
+
+<img src="docs/design/readme/icons/id.png" width="20" align="right" />&nbsp; **توثيق الكابتن**
+رخصة القيادة، وترخيص المركبة، والتأمين، وشهادة عدم محكومية — بمراجعة بشرية.
+
+<img src="docs/design/readme/icons/star.png" width="20" align="right" />&nbsp; **تقييم متبادل**
+الطالب يقيّم الكابتن والعكس، والتقييم المنخفض يفتح مساراً إدارياً.
+
+<img src="docs/design/readme/icons/chart.png" width="20" align="right" />&nbsp; **لوحة تشغيل**
+مؤشّرات بأهدافها، وطابور «يحتاج إجراءً»، ومتوسّط المقاعد المشغولة كمؤشّر صحّة.
+
+<img src="docs/design/readme/icons/lock.png" width="20" align="right" />&nbsp; **فصل الواجبات والتدقيق**
+صلاحيات مفصولة (المشرف لا يشحن محفظة ولا يعتمد سحباً)، وسجلّ تدقيق لكل حركة حسّاسة.
+
+<img src="docs/design/readme/icons/globe.png" width="20" align="right" />&nbsp; **عربي أولاً · RTL أصيل**
+الاتجاه من اليمين ليس ترجمة لاحقة: الأرقام معزولة ثنائياً، والعملة لا تنقلب.
+
+<img src="docs/design/readme/icons/msg.png" width="20" align="right" />&nbsp; **دعم ونزاعات**
+محادثة داخل الرحلة، وشكاوى بمهل SLA، ومسار نزاع للرحلات المدفوعة.
+
+</td>
+</tr>
+</table>
+
+> **الوضوح واجب:** الشيفرة موجودة لكلّ ما سبق في الباكند، لكن المشروع **قبل الإطلاق**.
+> ما يعمل وما لا يعمل مفصَّل في [حالة المشروع](#حالة-المشروع--بصراحة) و[`docs/AUDIT.md`](docs/AUDIT.md).
+
+---
+
+## البنية التقنية
+
+```
+Rafeeq-JO
+├─ backend/                     Laravel 12 · PHP 8.4 · PostgreSQL + PostGIS · Redis
+│  ├─ Core/                     ما تشترك فيه الموديولات
+│  │  ├─ Audit/                 سجلّ التدقيق (AuditLogger)
+│  │  ├─ Permissions/           الأدوار والصلاحيات (HasRoles)
+│  │  ├─ Repositories/          BaseRepository
+│  │  ├─ Services/              BaseService
+│  │  ├─ Http/                  متحكّمات ووسائط واستجابات موحَّدة
+│  │  └─ Exceptions/            DomainException · BusinessRule · Authorization
+│  ├─ Infrastructure/           المتكاملات الخارجية خلف عقود
+│  │  ├─ Sms/                   HTTP · WhatsApp Cloud · Log · Fallback
+│  │  ├─ Push/                  FCM · Log
+│  │  ├─ Maps/                  المسافات والمسارات
+│  │  └─ Gpt/                   OpenAI · Null
+│  └─ Modules/                  33 موديولاً، كلٌّ منها Controllers · Services
+│     │                         Models · Requests · Resources · Routes · Migrations
+│     ├─ RideRequests/ Matching/     ◄── المنتج الأساسي: الطلب الفوري والمطابقة
+│     ├─ Trips/ Routes/ PickupPoints/
+│     ├─ Wallet/ Payments/ Payouts/ Subscriptions/ Coupons/
+│     ├─ Drivers/ Students/ Universities/ Areas/ Zones/ Addresses/
+│     ├─ Safety/ Disputes/ Complaints/ Support/ Ratings/
+│     └─ Auth/ Users/ Chat/ Notifications/ Reports/ Settings/ AI/ …
+│
+└─ frontend/                    مساحة عمل npm واحدة
+   ├─ student-app/              Expo 51 · React Native · تطبيق الطالب
+   ├─ driver-app/               Expo 51 · React Native · تطبيق الكابتن
+   ├─ admin-dashboard/          Next.js 14 · لوحة الإدارة
+   └─ packages/                 مشترك بين الثلاثة (توكنز التصميم، أنواع، عميل API)
 ```
 
-- **مصفوفة موحّدة (منطقة↔جامعة):** سعر ثابت متوقّع للطالب داخل منطقته.
-- **تسعير بالمسافة:** عند عدم توفّر سعر موحّد — عادل ومبني على GPS.
-- **العمولة وكل المفاتيح** قابلة للضبط من لوحة التحكم بلا نشر كود.
+**قواعد المعمارية:** الموديول لا يستورد من موديول آخر مباشرةً — يمرّ بـ`Core` أو بعقد.
+والمنطق في `Service` لا في `Controller`، والوصول للبيانات في `Repository`.
+كل متكامل خارجي خلف واجهة له بديل `Null`/`Log` للاختبار.
+التفصيل في [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ---
 
-## 🚀 التشغيل المحلي · Getting started
+## التشغيل المحلي
+
+**المتطلبات:** PHP 8.4 · Composer · Node 20 · PostgreSQL 15 مع PostGIS · Redis
 
 ```bash
-# 1) قواعد البيانات
-docker compose up -d
+git clone https://github.com/hamzatal/Rafeeq-JO.git
+cd Rafeeq-JO
+```
 
-# 2) الـ Backend  (Laravel 12 · PHP 8.4)
+### الباكند
+
+```bash
 cd backend
 cp .env.example .env
 composer install
 php artisan key:generate
-php artisan migrate --seed
+php artisan migrate --seed          # يزرع الأدوار والصلاحيات والجامعات
 php artisan serve
-#   الجودة: composer test  ·  composer stan  ·  ./vendor/bin/pint
+```
 
-# 3) الـ Frontend  (workspace واحد تحت frontend/)
+### الواجهات
+
+```bash
 cd frontend
-npm install
-npm run student   # تطبيق الطالب
-npm run driver    # تطبيق الكابتن
-npm run admin     # لوحة الإدارة
-#   التحقق: npm run typecheck --workspace=admin-dashboard
+npm ci                              # مساحة عمل واحدة للثلاثة
+
+npm run start --workspace=student-app
+npm run start --workspace=driver-app
+npm run dev   --workspace=admin-dashboard
+```
+
+### الفحوص — وهي نفسها التي يشغّلها CI
+
+```bash
+# الباكند
+cd backend
+php artisan test                                   # 222 اختباراً
+vendor/bin/pint --test                             # التنسيق
+php -d memory_limit=1G vendor/bin/phpstan analyse   # التحليل الساكن · level 5
+
+# الواجهات
+cd frontend
+npm run typecheck --workspace=student-app
+npm run typecheck --workspace=driver-app
+npm run typecheck --workspace=admin-dashboard
+npm run lint      --workspace=admin-dashboard
+```
+
+### إعادة توليد صور التصميم
+
+```bash
+cd docs/design/src
+npm i -D playwright && npx playwright install chromium
+node gen-student.mjs && node gen-driver.mjs && node gen-admin.mjs \
+  && node gen-money.mjs && node gen-extra.mjs && node shoot.mjs
+node gen-readme.mjs && node shoot-readme.mjs && node gen-icons.mjs
 ```
 
 ---
 
-## 🗂️ بنية المشروع · Project structure
+## حالة المشروع — بصراحة
 
-```
-Rafeeq-JO/
-├── backend/                 ⚙️  Laravel 12 modular monolith
-│   ├── Core/                    نواة مشتركة (Http · Audit · Support · Permissions)
-│   ├── Modules/                 وحدات المجال (Trips · Pricing · Wallet · Ads · …)
-│   ├── Infrastructure/          تكاملات خارجية (Gpt · Maps · Sms · Push)
-│   └── tests/                   194 اختبار (Feature + Unit + عقود التكامل)
-├── frontend/
-│   ├── student-app/         📱  Expo
-│   ├── driver-app/          🚕  Expo
-│   ├── admin-dashboard/     🖥️  Next.js
-│   └── packages/            🎨  shared (theme/i18n/types) + api-client
-└── docs/                    📚  توثيق موحّد (ROADMAP · AUDIT · PRICING · design)
-```
+**المشروع قبل الإطلاق.** الباكند مبنيّ بمعمارية سليمة، لكن خمس جولات تدقيق مستقلة
+كشفت مشاكل مالية وقانونية **مانعة للإطلاق**. لن نُطلق قبل إغلاقها، والتقرير كامل
+وبأخطائه الظاهرة في [`docs/AUDIT.md`](docs/AUDIT.md).
+
+| المحور | التقييم | ملاحظة |
+|---|---|---|
+| معمارية الباكند | 🟢 8.5 / 10 | modular نظيف · لا SQL injection · لا mass assignment |
+| سلامة دفتر المحفظة | 🟢 8 / 10 | `lockForUpdate` صحيح · idempotency · عكس غير هدّام |
+| نظافة الريبو | 🟢 7 / 10 | كانت 2 / 10 — أُصلحت |
+| فصل الواجبات المالية | 🟡 قيد الإصلاح | صُلح في PR #71 · باقي التصليب |
+| الدقة المالية في الرحلات | 🔴 3 / 10 | المال يتبخّر · احتساب مزدوج · انزياح 3 ساعات |
+| التصميم البصري | 🔴 3 / 10 | الهوية الجديدة مصمَّمة، وتنفيذها المراحل 6–10 |
+| الامتثال للمتاجر | 🔴 2 / 10 | 10 بنود مانعة للنشر |
+| الامتثال القانوني | 🔴 2 / 10 | تصريح الخصوصية يخالف الكود |
+| الاختبارات | 🟡 4 / 10 | 222 اختباراً لكن صفر تغطية، وSQLite يُبطل كل الأقفال |
+
+### التقدّم
+
+| المؤشّر | البداية | الآن | الهدف |
+|---|---|---|---|
+| CI على `main` | 🔴 أحمر | 🟢 **أخضر** | 🟢 |
+| الفرع الافتراضي | `foundation` | ✅ **`main`** | `main` |
+| فروع عن بُعد | 66 | ✅ **9** | ≤ 5 |
+| ملفات الوثائق | 20 | ✅ **5** | ≤ 6 |
+| أصول ميتة | 7.4 MB | ✅ **0** | 0 |
+| ألوان hex يدوية | 117 | 117 | **0** |
+
+### المراحل — 12 مرحلة إلى الإطلاق
+
+| # | المرحلة | المدّة | الحالة |
+|---|---|---|---|
+| 0 | الأساس · CI · تنظيف الريبو والوثائق | — | ✅ **مكتملة** |
+| 1 | إسعاف مالي وأمني | 7 أيام | 🔄 **جارية** |
+| 2 | الامتثال والقانون | 6 أيام | ⏳ |
+| 3 | الخصوصية ودفتر البيانات | 5 أيام | ⏳ |
+| 4 | الحذف — المزايا والشاشات الميتة | 5 أيام | ⏳ |
+| 5 | محرّك التسعير «المقعد الثابت» | 5 أيام | 🔒 محجوبة على 7 أرقام |
+| 6 | توكنز التصميم | 4 أيام | ⏳ |
+| 7 | مكتبة المكوّنات | 5 أيام | ⏳ |
+| 8 | تطبيق الطالب | 5 أيام | ⏳ |
+| 9 | تطبيق الكابتن | 5 أيام | ⏳ |
+| 10 | لوحة الإدارة | 5 أيام | ⏳ |
+| 11 | التصليب — تغطية · أحمال · أمان | 6 أيام | ⏳ |
+| 12 | الإطلاق الرسمي | 5 أيام | ⏳ |
+
+**≈ 63 يوم عمل ≈ 13 أسبوعاً.** الخطة كاملة بمعايير قبول لكل مهمة في [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ---
 
-## 📚 التوثيق · Documentation
+## الوثائق
 
-| # | الملف | الوصف |
-|---|------|-------|
-| [ROADMAP](docs/ROADMAP.md) | **خطة العمل التفصيلية** — 12 مرحلة، كل مهمة بمعيار قبول وتبعية وحجم. |
-| [AUDIT](docs/AUDIT.md) | **التدقيق الشامل** — 5 جولات، كل نتيجة بمسار ورقم سطر. |
-| [PRICING](docs/PRICING.md) | نموذج التسعير «المقعد الثابت» — محسوب بالأرقام. |
-| [design/SCREENS](docs/design/SCREENS.md) | **41 واجهة مصمّمة** بإطار موبايل حقيقي. |
-| [design/README](docs/design/README.md) | الهوية البصرية «مسار» — كل نسبة تباين محسوبة. |
-| [ARCHITECTURE](docs/ARCHITECTURE.md) | المعمارية + قاعدة البيانات + عقد التكامل. |
-| [OPERATIONS](docs/OPERATIONS.md) | التشغيل والنشر والبيئات. |
-| [legal/](docs/legal/) | ⚠️ تُعاد كتابتها في المرحلة 2 وتحتاج مراجعة قانونية أردنية. |
-
----
-
-## 🛣️ خطة التنفيذ · Roadmap
-
-| المرحلة | الوصف | الحالة |
-|:---:|---|:---:|
-| 0 | التأسيس والترتيب | ✅ 100% |
-| 1 | أساس تصميم Stitch | ✅ 100% |
-| 2 | إعادة بناء شاشات التطبيقات الثلاثة | ✅ 100% |
-| 3 | التسعير بالمسافة + الزون + العمولة | ✅ 100% |
-| 4 | الأمان (طبقة التطبيق) | ✅ 100% |
-| 5 | التكامل والصحّة (عقود حيّة) | ✅ 100% |
-| 6 | AI (GPT) + مزايا + إعلانات | ✅ 100% |
-| 7 | صلابة الإطلاق (نشر/قانوني) | ✅ 100% |
-
-> التفاصيل الحيّة خطوة بخطوة في [docs/ROADMAP.md](docs/ROADMAP.md).
+| الملف | ما فيه |
+|---|---|
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | **المصدر الوحيد للحقيقة.** 12 مرحلة · كل مهمة برقم وملفات ومعيار قبول وتبعية وحجم |
+| [`docs/AUDIT.md`](docs/AUDIT.md) | خمس جولات تدقيق مدموجة · 14 بنداً قاتلاً · والتصحيحات حيث أخطأ التحليل |
+| [`docs/PRICING.md`](docs/PRICING.md) | نموذج «المقعد الثابت» · نطاقات · اقتصاديات الكابتن · الأرقام المعلَّقة |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | المعمارية · حدود الموديولات · العقود · قواعد البيانات |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | التشغيل · النشر · البيئات · المراقبة · الطوارئ |
+| [`docs/design/README.md`](docs/design/README.md) | نظام التصميم · التوكنز · المكوّنات · كيف تُعاد الصور |
+| [`docs/design/SCREENS.md`](docs/design/SCREENS.md) | سرد 41 شاشة بحالاتها |
+| [`docs/legal/`](docs/legal/) | الخصوصية · الشروط · الاحتفاظ بالبيانات · المواد الممنوعة (عربي) |
 
 ---
 
-## 🤝 المساهمة · Contributing
+## أصول العمل
 
-- اصطلاح الكوميت (إلزامي): `type(scope): subject` بالإنجليزية. **رقم Issue هو المعرّف** — ترقيم RFQ توقّف عند RFQ‑366، والتفاصيل في [`docs/ROADMAP.md`](docs/ROADMAP.md).
-- قبل أي دمج: `composer test` + `composer stan` (backend) و `npm run typecheck` (frontend) — كلها خضراء.
+1. **فرع واحد `main`.** كل عمل في `feat/` · `fix/` · `chore/` · `docs/`، وينتهي بـPR ثم يُحذف فرعه.
+2. **CI أخضر إلزامي.** بلا استثناء، وبلا `--no-verify`.
+3. **رقم Issue هو المعرّف.** لا ترقيم `RFQ-###` جديد.
+4. **كل إصلاح مالي أو أمني يحتاج اختباراً** يفشل قبله وينجح بعده.
+5. **لا مرحلة تبدأ قبل إغلاق بوّابة سابقتها.**
+6. **الحذف قبل الإضافة.**
+7. **لا عمل خارج [`ROADMAP.md`](docs/ROADMAP.md).** غير الموجود فيها لا يُنفَّذ.
+
+---
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:006A65,100:002045&height=110&section=footer" width="100%" alt="footer" />
+<img src="docs/design/readme/icons/route.png" width="26" />
 
-**© رفيق Rafeeq — جميع الحقوق محفوظة · All rights reserved.**
+**رفيق** · منصّة النقل الجامعي المشترك في الأردن
+رخصة خاصّة — كل الحقوق محفوظة
 
 </div>
