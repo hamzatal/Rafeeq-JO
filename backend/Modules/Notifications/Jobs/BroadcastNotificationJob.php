@@ -54,13 +54,34 @@ class BroadcastNotificationJob implements ShouldQueue
         };
 
         $sent = 0;
-        $query->select(['id', 'type', 'status'])->chunkById(200, function ($users) use (&$sent, $notifications) {
+        $chunk = max(1, (int) config('rafeeq.broadcast_chunk', 200));
+
+        $query->select(['id', 'type', 'status'])->chunkById($chunk, function ($users) use (&$sent, $notifications) {
             $sent += $notifications->broadcast($users, $this->title, $this->body, $this->data);
         });
 
         Log::info('[Notifications] broadcast delivered', [
             'audience' => $this->audience,
             'sent' => $sent,
+        ]);
+    }
+
+    /**
+     * 3.10 — a broadcast that died is a broadcast someone believes went out.
+     *
+     * `tries = 3` on a job that is not idempotent means a retry can re-notify the
+     * chunks that already succeeded, so an operator has to know a failure happened
+     * before they press send again. Logged with the audience so the blast radius is
+     * visible; the title only, never the body.
+     */
+    public function failed(?\Throwable $e): void
+    {
+        Log::error('notifications.broadcast_failed', [
+            'audience' => $this->audience,
+            'recipients_named' => count($this->userIds),
+            'title' => $this->title,
+            'attempts' => $this->attempts(),
+            'error' => $e?->getMessage(),
         ]);
     }
 }

@@ -27,6 +27,7 @@ use Rafeeq\Shared\Enums\SubscriptionType;
 use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
+use Rafeeq\Shared\Support\BlindIndex;
 
 /**
  * Demo data for evaluating the platform end-to-end (students, captains,
@@ -91,9 +92,12 @@ class DemoSeeder extends Seeder
             $phone = '+96279'.str_pad((string) (100000 + $i), 7, '0', STR_PAD_LEFT);
             $isFemale = $i >= count($this->maleNames);
 
+            // `firstOrCreate(['phone' => ...])` would issue `where phone = ?`, which
+            // cannot match an encrypted column. Resolve through the blind index.
             $user = User::firstOrCreate(
-                ['phone' => $phone],
+                ['phone_hash' => BlindIndex::phone($phone)],
                 [
+                    'phone' => $phone,
                     'full_name' => $name,
                     'email' => 'student'.$i.'@demo.rafeeq.jo',
                     'password' => Hash::make('Rafeeq@2026'),
@@ -161,9 +165,12 @@ class DemoSeeder extends Seeder
         $drivers = [];
         foreach ($statuses as $i => $status) {
             $phone = '+96278'.str_pad((string) (200000 + $i), 7, '0', STR_PAD_LEFT);
+            // `firstOrCreate(['phone' => ...])` would issue `where phone = ?`, which
+            // cannot match an encrypted column. Resolve through the blind index.
             $user = User::firstOrCreate(
-                ['phone' => $phone],
+                ['phone_hash' => BlindIndex::phone($phone)],
                 [
+                    'phone' => $phone,
                     'full_name' => 'الكابتن '.$this->maleNames[$i % count($this->maleNames)],
                     'email' => 'driver'.$i.'@demo.rafeeq.jo',
                     'password' => Hash::make('Rafeeq@2026'),

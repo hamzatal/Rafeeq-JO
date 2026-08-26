@@ -3,6 +3,7 @@
 namespace Rafeeq\Modules\Auth\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,6 +16,8 @@ use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Students\Models\StudentProfile;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
+use Rafeeq\Shared\Support\BlindIndex;
+use Rafeeq\Shared\Traits\HasBlindIndexes;
 use Rafeeq\Shared\Traits\HasUuid;
 
 /**
@@ -42,6 +45,7 @@ use Rafeeq\Shared\Traits\HasUuid;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
+    use HasBlindIndexes;
     use HasRoles;
     use HasUuid;
     use Notifiable;
@@ -53,9 +57,18 @@ class User extends Authenticatable implements MustVerifyEmail
         'terms_version', 'terms_accepted_at',
     ];
 
+    /**
+     * The digests are hidden as well as the secrets.
+     *
+     * A blind index is not a secret in the way a password hash is, but it is a
+     * stable per-person identifier: two API consumers who both see a `phone_hash`
+     * can correlate the same person across contexts without ever holding the number.
+     * There is no reason for a client to receive it, so it does not leave the server.
+     */
     protected $hidden = [
         'password', 'remember_token',
         'mfa_secret', 'mfa_recovery_codes',
+        'phone_hash', 'email_hash', 'name_tokens',
     ];
 
     protected function casts(): array
@@ -68,6 +81,15 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'mfa_secret' => 'encrypted',
             'mfa_recovery_codes' => 'encrypted:array',
+            /*
+             * 3.8 — encrypted at rest. A database copy without the app key holds no
+             * names and no numbers. Lookups go through the blind-index columns
+             * below; see Shared\Support\BlindIndex for why they are HMACs.
+             */
+            'full_name' => 'encrypted',
+            'phone' => 'encrypted',
+            'email' => 'encrypted',
+            'name_tokens' => 'array',
             'type' => UserType::class,
             'status' => UserStatus::class,
             'metadata' => 'array',
@@ -75,6 +97,87 @@ class User extends Authenticatable implements MustVerifyEmail
             'terms_accepted_at' => 'datetime',
             'anonymized_at' => 'datetime',
         ];
+    }
+
+    /** @return array<string, array{0: string, 1: callable}> */
+    protected function blindIndexes(): array
+    {
+        return [
+            'phone' => ['phone_hash', fn (?string $v) => BlindIndex::phone($v)],
+            'email' => ['email_hash', fn (?string $v) => BlindIndex::email($v)],
+            'full_name' => ['name_tokens', fn (?string $v) => BlindIndex::nameTokens($v)],
+        ];
+    }
+
+    /**
+     * Staff search over encrypted identity columns.
+     *
+     * ── What changed, and what it costs ────────────────────────────────────────
+     *
+     * This used to be `full_name LIKE '%term%' OR phone LIKE '%term%' OR email LIKE
+     * '%term%'` — an unindexed substring scan across three plaintext columns. Those
+     * columns are ciphertext now, so a substring match is not merely slow, it is
+     * impossible: there is nothing readable to match against.
+     *
+     * What replaces it is deliberately narrower, and worth stating plainly:
+     *
+     *   • A phone number matches EXACTLY, in any format the agent types
+     *     (`0791234567`, `+962 79 123 4567`) because the digest normalises first.
+     *     Partial numbers no longer match. This is the search staff actually use —
+     *     a caller reads out their whole number — and it is now an index seek.
+     *   • An email matches exactly, case-insensitively.
+     *   • A name matches on WHOLE WORDS, all of which must be present. «الخطيب»
+     *     finds every Khatib; «خطي» finds nobody.
+     *
+     * Substring search over encrypted data cannot be had without either decrypting
+     * the whole table on every keystroke or building an n-gram index that leaks
+     * enough to reconstruct the names it was meant to protect. Losing «خطي» is the
+     * price of a stolen database backup containing no readable names, and that is a
+     * trade worth making in a product whose riders are mostly young women on a
+     * predictable daily schedule.
+     */
+    public function scopeSearchIdentity(Builder $query, ?string $term): Builder
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $w) use ($term) {
+            $matched = false;
+
+            if (str_contains($term, '@')) {
+                if ($hash = BlindIndex::email($term)) {
+                    $w->orWhere('email_hash', $hash);
+                    $matched = true;
+                }
+            }
+
+            // Tried whenever the term could be a number at all, so a search that is
+            // "0790" (not a valid number) still falls through to a name match rather
+            // than silently returning everything.
+            if (preg_match('/^[\d\s+\-()]+$/', $term) === 1) {
+                if ($hash = BlindIndex::phone($term)) {
+                    $w->orWhere('phone_hash', $hash);
+                    $matched = true;
+                }
+            }
+
+            $tokens = BlindIndex::nameTokens($term);
+            if ($tokens !== []) {
+                // jsonb containment: every token must be present. Uses the GIN index
+                // `users_name_tokens_gin`.
+                $w->orWhereRaw('name_tokens @> ?::jsonb', [json_encode($tokens)]);
+                $matched = true;
+            }
+
+            if (! $matched) {
+                // A term we cannot turn into any digest matches nothing. Without this
+                // the empty `where` group would match EVERY row, turning a nonsense
+                // search into a full user dump — the worst possible failure here.
+                $w->whereRaw('1 = 0');
+            }
+        });
     }
 
     /**

@@ -82,7 +82,13 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
     healthcheck:
-      test: ["CMD-SHELL", "php artisan queue:monitor default --max=10000 || exit 0"]
+      # `|| exit 0` was here, which made this healthcheck incapable of ever failing:
+      # the worker could be dead and the container would still report healthy. A
+      # healthcheck that cannot fail is worse than none, because it is believed.
+      #
+      # `queue:work --once` proves the worker can actually connect to Redis and reserve
+      # a job, which is the thing that breaks. `queue:monitor` only reports depth.
+      test: ["CMD-SHELL", "php artisan queue:monitor default --max=10000 && php artisan rafeeq:worker-alive"]
       interval: 60s
       timeout: 10s
       retries: 3
@@ -100,5 +106,16 @@ services:
       redis: { condition: service_healthy }
 
 volumes:
+    healthcheck:
+      # The scheduler had NO healthcheck, so if it died the retention jobs, the
+      # subscription expiry and the backups all stopped silently — and the first
+      # symptom would be a table that had grown for a month.
+      # The heartbeat file is touched by a scheduled task every minute.
+      test: ["CMD-SHELL", "test $$(( $$(date +%s) - $$(stat -c %Y /tmp/scheduler-heartbeat 2>/dev/null || echo 0) )) -lt 180"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+
   pgdata:
   redisdata:

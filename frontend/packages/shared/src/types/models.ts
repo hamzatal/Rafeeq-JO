@@ -682,20 +682,56 @@ export interface SavedAddress {
 export interface FinancialReportZone {
   zone_id: string | null;
   rides_count: number;
-  commission_fils: number;
   gross_fare_fils: number;
+  /** Commission booked on the tariff, including plan-covered seats. */
+  commission_fils: number;
+  captain_share_fils: number;
+  discount_fils: number;
+  /** Commission that actually arrived as cash (wallet + cash seats). */
+  ride_commission_fils: number;
 }
 
+/** Tariff legs for one funding source. */
+export interface FinancialReportFunding {
+  rides_count: number;
+  gross_fare_fils: number;
+  commission_fils: number;
+  captain_share_fils: number;
+  discount_fils: number;
+}
+
+/**
+ * Two groups of numbers that must not be added together.
+ *
+ * TARIFF VALUE — what the seats were worth. Closes exactly:
+ *   gross_fare_fils === commission_fils + captain_earnings_fils + discount_fils
+ *
+ * CASH — what the platform took in. `platform_revenue_fils` is the figure to
+ * display as revenue. `commission_fils` is NOT revenue: it includes commission
+ * booked on seats a subscription already paid for, and that money is counted in
+ * `subscription_revenue_fils`.
+ */
 export interface FinancialReport {
   period: { from: string; to: string };
   zone_id: string | null;
+
+  // Tariff value of every paid seat.
   rides_count: number;
   gross_fare_fils: number;
   commission_fils: number;
   captain_earnings_fils: number;
+  discount_fils: number;
+
+  // Cash.
+  ride_commission_fils: number;
+  subscription_revenue_fils: number;
+  subscription_funded_commission_fils: number;
+  platform_revenue_fils: number;
+
   payouts_paid_fils: number;
   topups_fils: number;
-  subscription_revenue_fils: number;
+
+  by_funding: Record<'wallet' | 'cash' | 'subscription', FinancialReportFunding>;
   by_zone: FinancialReportZone[];
 }
 
@@ -820,8 +856,13 @@ export interface AdminInsights {
     finance: {
       rides_count: number;
       gross_fare_fils: number;
-      commission_fils: number;
+      /** The revenue figure. Ride commission + plan sales, counted once. */
+      platform_revenue_fils: number;
+      ride_commission_fils: number;
+      /** Commission booked on the tariff. Not revenue — see FinancialReport. */
+      commission_booked_fils: number;
       captain_earnings_fils: number;
+      discount_fils: number;
       subscription_revenue_fils: number;
     };
     safety: { open_disputes: number; unresolved_risk_flags: number; pending_payments: number };

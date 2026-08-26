@@ -70,11 +70,24 @@ class AdminInsightsService
             'subscriptions' => [
                 'active' => (int) DB::table('subscriptions')->where('status', 'active')->count(),
             ],
+            /*
+             * `platform_revenue_fils` — not `commission_fils`.
+             *
+             * This block is fed verbatim into the GPT prompt and into the rule-based
+             * Arabic narrative, so whichever number sits here is the one an
+             * administrator is told they earned. `commission_fils` is the total
+             * commission BOOKED, which includes seats a subscription already paid
+             * for — quoting it as revenue counted the subscription dinar twice and
+             * overstated earnings by exactly the plan-covered rides.
+             */
             'finance' => [
                 'rides_count' => $report['rides_count'] ?? 0,
                 'gross_fare_fils' => $report['gross_fare_fils'] ?? 0,
-                'commission_fils' => $report['commission_fils'] ?? 0,
+                'platform_revenue_fils' => $report['platform_revenue_fils'] ?? 0,
+                'ride_commission_fils' => $report['ride_commission_fils'] ?? 0,
+                'commission_booked_fils' => $report['commission_fils'] ?? 0,
                 'captain_earnings_fils' => $report['captain_earnings_fils'] ?? 0,
+                'discount_fils' => $report['discount_fils'] ?? 0,
                 'subscription_revenue_fils' => $report['subscription_revenue_fils'] ?? 0,
             ],
             'safety' => [
@@ -153,15 +166,19 @@ class AdminInsightsService
         $completion = $trips['this_month'] > 0
             ? round(($trips['completed'] / max(1, $trips['this_month'])) * 100)
             : 0;
-        $commissionJod = round(($metrics['finance']['commission_fils'] ?? 0) / 1000);
+        // Platform revenue, not commission booked: the narrative said «إيراد عمولة»
+        // while quoting a figure that included commission on subscription seats,
+        // whose money was already counted as a plan sale.
+        $revenueJod = round(($metrics['finance']['platform_revenue_fils'] ?? 0) / 1000);
 
         $analysis = sprintf(
-            'هذا الشهر: %d مستخدم جديد، %d رحلة (نسبة إكمال ~%d%%)، وإيراد عمولة ~%d د.أ. '.
+            'هذا الشهر: %d مستخدم جديد، %d رحلة (نسبة إكمال ~%d%%)، وإيراد منصّة ~%d د.أ '.
+            '(عمولة رحلات + بيع اشتراكات، دون احتساب مزدوج). '.
             'يوجد %d كابتن بانتظار المراجعة، %d نزاع مفتوح، و%d علامة خطر غير محلولة، و%d دفعة معلّقة.',
             $metrics['users']['new_this_month'],
             $trips['this_month'],
             $completion,
-            $commissionJod,
+            $revenueJod,
             $metrics['drivers']['pending_review'],
             $metrics['safety']['open_disputes'],
             $metrics['safety']['unresolved_risk_flags'],

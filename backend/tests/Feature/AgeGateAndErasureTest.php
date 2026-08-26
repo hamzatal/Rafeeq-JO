@@ -19,6 +19,7 @@ use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
 use Rafeeq\Shared\Enums\WalletTxnType;
+use Rafeeq\Shared\Support\BlindIndex;
 use Tests\TestCase;
 
 /**
@@ -47,7 +48,7 @@ class AgeGateAndErasureTest extends TestCase
     {
         $this->register()->assertSuccessful();
 
-        $user = User::where('phone', '+962791234567')->firstOrFail();
+        $user = User::where('phone_hash', BlindIndex::phone('+962791234567'))->firstOrFail();
         $this->assertSame(20, $user->age());
     }
 
@@ -90,7 +91,7 @@ class AgeGateAndErasureTest extends TestCase
     {
         $this->register()->assertSuccessful();
 
-        $user = User::where('phone', '+962791234567')->firstOrFail();
+        $user = User::where('phone_hash', BlindIndex::phone('+962791234567'))->firstOrFail();
         $this->assertSame((string) config('rafeeq.terms.version'), $user->terms_version);
         $this->assertNotNull($user->terms_accepted_at);
         $this->assertTrue($user->hasAcceptedCurrentTerms());
@@ -99,7 +100,7 @@ class AgeGateAndErasureTest extends TestCase
     public function test_bumping_the_terms_version_invalidates_a_stored_acceptance(): void
     {
         $this->register()->assertSuccessful();
-        $user = User::where('phone', '+962791234567')->firstOrFail();
+        $user = User::where('phone_hash', BlindIndex::phone('+962791234567'))->firstOrFail();
 
         config(['rafeeq.terms.version' => '2027-01-01']);
 

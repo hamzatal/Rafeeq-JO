@@ -28,13 +28,7 @@ class StaffController extends Controller
             ->whereIn('type', [UserType::Support->value, UserType::Supervisor->value, UserType::Admin->value])
             ->latest();
 
-        if ($search = $request->query('search')) {
-            $query->where(function ($w) use ($search) {
-                $w->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
+        $query->searchIdentity($request->query('search'));
 
         return $this->ok(
             UserResource::collection($query->paginate((int) $request->query('per_page', 30)))
