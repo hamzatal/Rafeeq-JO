@@ -158,7 +158,7 @@ Rafeeq-JO/
 │   ├── driver-app/          🚕  Expo
 │   ├── admin-dashboard/     🖥️  Next.js
 │   └── packages/            🎨  shared (theme/i18n/types) + api-client
-└── docs/                    📚  توثيق مرقّم نظيف (00–12)
+└── docs/                    📚  توثيق موحّد (ROADMAP · AUDIT · PRICING · design)
 ```
 
 ---
@@ -167,15 +167,14 @@ Rafeeq-JO/
 
 | # | الملف | الوصف |
 |---|------|-------|
-| 00 | [الرؤية](docs/00-VISION.md) | فكرة المشروع ومزاياه (غير تقني). |
-| 01 | [الخطة الرئيسية](docs/01-MASTER-PLAN.md) | **مصدر التخطيط والحالة الوحيد.** |
-| 02 | [التسعير والمناطق](docs/02-PRICING-ZONES.md) | محرّك التسعير بالمسافة + العمولة. |
-| 03 | [نظام التصميم (Stitch)](docs/03-DESIGN-SYSTEM.md) | **الهوية الوحيدة المعتمدة.** |
-| 04 | [المزايا](docs/04-FEATURES.md) | كتالوج المزايا + الإعلانات + AI. |
-| 05–09 | [المعمارية](docs/05-ARCHITECTURE.md) · [قاعدة البيانات](docs/06-DATABASE.md) · [الأمان](docs/07-SECURITY.md) · [النشر](docs/08-DEPLOYMENT.md) · [العلامة](docs/09-BRAND-NAMING.md) | مراجع تقنية. |
-| 10 | [مطابقة شاشات Stitch](docs/10-STITCH-SCREENS.md) | خريطة كل شاشة مقابل التصميم. |
-| 11 | [اصطلاح الكوميت](docs/11-COMMIT-CONVENTION.md) | **الترقيم والصيغة الرسمية.** |
-| 12 | [عقد التكامل](docs/12-INTEGRATION-CONTRACT.md) | ضمان تطابق الفرونت↔الباك إند. |
+| [ROADMAP](docs/ROADMAP.md) | **خطة العمل التفصيلية** — 12 مرحلة، كل مهمة بمعيار قبول وتبعية وحجم. |
+| [AUDIT](docs/AUDIT.md) | **التدقيق الشامل** — 5 جولات، كل نتيجة بمسار ورقم سطر. |
+| [PRICING](docs/PRICING.md) | نموذج التسعير «المقعد الثابت» — محسوب بالأرقام. |
+| [design/SCREENS](docs/design/SCREENS.md) | **41 واجهة مصمّمة** بإطار موبايل حقيقي. |
+| [design/README](docs/design/README.md) | الهوية البصرية «مسار» — كل نسبة تباين محسوبة. |
+| [ARCHITECTURE](docs/ARCHITECTURE.md) | المعمارية + قاعدة البيانات + عقد التكامل. |
+| [OPERATIONS](docs/OPERATIONS.md) | التشغيل والنشر والبيئات. |
+| [legal/](docs/legal/) | ⚠️ تُعاد كتابتها في المرحلة 2 وتحتاج مراجعة قانونية أردنية. |
 
 ---
 
@@ -192,13 +191,13 @@ Rafeeq-JO/
 | 6 | AI (GPT) + مزايا + إعلانات | ✅ 100% |
 | 7 | صلابة الإطلاق (نشر/قانوني) | ✅ 100% |
 
-> التفاصيل الحيّة خطوة بخطوة في [docs/01-MASTER-PLAN.md](docs/01-MASTER-PLAN.md).
+> التفاصيل الحيّة خطوة بخطوة في [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ---
 
 ## 🤝 المساهمة · Contributing
 
-- اصطلاح الكوميت (إلزامي): [`docs/11-COMMIT-CONVENTION.md`](docs/11-COMMIT-CONVENTION.md) — صيغة `[RFQ-<n>] type(scope): summary` بترقيم تسلسلي صارم.
+- اصطلاح الكوميت (إلزامي): `type(scope): subject` بالإنجليزية. **رقم Issue هو المعرّف** — ترقيم RFQ توقّف عند RFQ‑366، والتفاصيل في [`docs/ROADMAP.md`](docs/ROADMAP.md).
 - قبل أي دمج: `composer test` + `composer stan` (backend) و `npm run typecheck` (frontend) — كلها خضراء.
 
 <div align="center">
