@@ -6,7 +6,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Auth\Models\User;
-use Rafeeq\Modules\Settings\Services\SettingService;
 use Rafeeq\Modules\Wallet\Models\WalletTransaction;
 use Rafeeq\Modules\Wallet\Resources\WalletResource;
 use Rafeeq\Modules\Wallet\Resources\WalletTransactionResource;
@@ -28,29 +27,6 @@ class WalletController extends Controller
         return $this->ok(
             WalletTransactionResource::collection($wallet->transactions()->paginate((int) $request->query('per_page', 30)))
         );
-    }
-
-    /** Returns CliQ transfer instructions for topping up (no credit until confirmed). */
-    public function topupInstructions(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'amount_fils' => ['required', 'integer', 'min:1000'], // >= 1 JOD
-        ]);
-
-        $reference = 'WALLET-'.strtoupper(substr($request->user()->id, 0, 6)).'-'.now()->format('ymdHis');
-
-        $cliq = app(SettingService::class)->cliq();
-
-        return $this->ok([
-            'method' => 'cliq',
-            'alias' => $cliq['alias'],
-            'beneficiary' => $cliq['beneficiary_name'],
-            'bank' => $cliq['bank_name'],
-            'amount_fils' => $validated['amount_fils'],
-            'amount_jod' => round($validated['amount_fils'] / 1000, 3),
-            'reference' => $reference,
-            'note' => 'حوّل المبلغ عبر CliQ ثم ارفع إشعار التحويل ليتم اعتماد الشحن.',
-        ], 'تعليمات الشحن عبر CliQ.');
     }
 
     /** Admin: confirm a CliQ top-up and credit the user's wallet. */

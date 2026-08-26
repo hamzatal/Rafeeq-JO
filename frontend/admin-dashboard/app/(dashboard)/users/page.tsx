@@ -99,7 +99,7 @@ export default function UsersPage() {
                     {canTopup(u) && (
                       <button
                         onClick={() => setTopupUser(u)}
-                        className="inline-flex items-center gap-1 text-cyan-deep hover:underline text-xs font-semibold"
+                        className="inline-flex items-center gap-1 text-primary-dark hover:underline text-xs font-semibold"
                       >
                         <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
                         {t('wallet.topup')}
@@ -201,7 +201,7 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
         </div>
 
         {balance !== null && (
-          <div className="mb-4 rounded-xl bg-background dark:bg-dsurface p-3 flex items-center justify-between">
+          <div className="mb-4 rounded-xl bg-background p-3 flex items-center justify-between">
             <span className="text-xs muted-text">{t('wallet.balance')}</span>
             <span className="font-extrabold surface-text">{formatFils(balance)}</span>
           </div>
@@ -238,7 +238,7 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
           {txns.length === 0 ? (
             <p className="text-xs muted-text py-3">{t('wallet.noTransactions')}</p>
           ) : (
-            <ul className="divide-y divide-line dark:divide-dline">
+            <ul className="divide-y divide-line">
               {txns.map((tx) => (
                 <li key={tx.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
                   <div className="min-w-0">

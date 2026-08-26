@@ -1,19 +1,17 @@
 import { create } from 'zustand';
 import { I18nManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { ColorScheme, Locale } from '@rafeeq/shared';
+import type { Locale } from '@rafeeq/shared';
 import { setApiLocale } from '../lib/api';
 
 const KEY = 'rafeeq_driver_prefs';
 
 interface PrefsState {
   locale: Locale;
-  scheme: ColorScheme;
   introSeen: boolean;
   hydrated: boolean;
   hydrate: () => Promise<void>;
   setLocale: (locale: Locale) => Promise<void>;
-  setScheme: (scheme: ColorScheme) => Promise<void>;
   setIntroSeen: () => Promise<void>;
 }
 
@@ -27,7 +25,6 @@ function applyRTL(locale: Locale) {
 
 export const usePrefs = create<PrefsState>((set, get) => ({
   locale: 'ar',
-  scheme: 'light', // default = Arabic + light for all apps (user can switch to dark)
   introSeen: false,
   hydrated: false,
 
@@ -36,7 +33,7 @@ export const usePrefs = create<PrefsState>((set, get) => ({
       const raw = await AsyncStorage.getItem(KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        set({ locale: p.locale ?? 'ar', scheme: p.scheme ?? 'light', introSeen: p.introSeen ?? false });
+        set({ locale: p.locale ?? 'ar', introSeen: p.introSeen ?? false });
       }
     } catch {
       /* ignore */
@@ -53,10 +50,6 @@ export const usePrefs = create<PrefsState>((set, get) => ({
     await persist(get);
   },
 
-  async setScheme(scheme) {
-    set({ scheme });
-    await persist(get);
-  },
 
   async setIntroSeen() {
     set({ introSeen: true });
@@ -66,6 +59,6 @@ export const usePrefs = create<PrefsState>((set, get) => ({
 
 /** Persist the current prefs snapshot. */
 async function persist(get: () => PrefsState) {
-  const { locale, scheme, introSeen } = get();
-  await AsyncStorage.setItem(KEY, JSON.stringify({ locale, scheme, introSeen }));
+  const { locale, introSeen } = get();
+  await AsyncStorage.setItem(KEY, JSON.stringify({ locale, introSeen }));
 }

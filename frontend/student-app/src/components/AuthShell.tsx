@@ -26,7 +26,7 @@ export function AuthShell({
 
   return (
     <View style={s.root}>
-      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
       {/* Soft ambient brand tints */}
       <View style={s.tintA} pointerEvents="none" />
       <View style={s.tintB} pointerEvents="none" />

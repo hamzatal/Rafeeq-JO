@@ -4,7 +4,7 @@
  */
 
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-line dark:bg-dline ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-line ${className}`} />;
 }
 
 /** Row of KPI cards (dashboard home / stats headers). */
@@ -26,13 +26,13 @@ export function StatCardsSkeleton({ count = 4 }: { count?: number }) {
 export function TableSkeleton({ rows = 8, cols = 4 }: { rows?: number; cols?: number }) {
   return (
     <div className="card p-0 overflow-hidden">
-      <div className="flex gap-4 p-3 bg-navy/5 dark:bg-white/5">
+      <div className="flex gap-4 p-3 bg-primary/5">
         {Array.from({ length: cols }).map((_, i) => (
           <Skeleton key={i} className="h-4 flex-1" />
         ))}
       </div>
       {Array.from({ length: rows }).map((_, r) => (
-        <div key={r} className="flex gap-4 p-3 border-t border-line dark:border-dline">
+        <div key={r} className="flex gap-4 p-3 border-t border-line">
           {Array.from({ length: cols }).map((_, c) => (
             <Skeleton key={c} className="h-4 flex-1" />
           ))}

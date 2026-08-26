@@ -75,7 +75,7 @@ export default function SubscriptionsPage() {
                   <td className="p-3 text-muted font-mono">{s.ends_at ? new Date(s.ends_at).toLocaleDateString('ar') : '—'}</td>
                   <td className="p-3 text-left">
                     {s.status === 'pending' && (
-                      <button disabled={busyId === s.id} onClick={() => activate(s)} className="text-cyan-deep text-sm hover:underline disabled:opacity-50">
+                      <button disabled={busyId === s.id} onClick={() => activate(s)} className="text-primary-dark text-sm hover:underline disabled:opacity-50">
                         {t('subscriptions.activate')}
                       </button>
                     )}

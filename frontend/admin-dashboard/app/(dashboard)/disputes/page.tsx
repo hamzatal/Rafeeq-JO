@@ -8,7 +8,7 @@ import { Skeleton } from '../../../src/components/Skeleton';
 
 const SEVERITY_CLASS: Record<string, string> = {
   low: 'bg-background text-muted',
-  medium: 'bg-gold/15 text-gold',
+  medium: 'bg-warning/15 text-warning',
   high: 'bg-orange-100 text-orange-700',
   critical: 'bg-red-100 text-danger',
 };

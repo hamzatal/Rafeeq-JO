@@ -428,31 +428,6 @@ export interface Complaint {
 
 
 // ── Extra services (Phase 4) ─────────────────────────────────────────
-export type ParcelStatus = 'created' | 'awaiting_pickup' | 'in_transit' | 'delivered' | 'cancelled';
-export type ParcelSize = 'small' | 'medium' | 'large';
-
-export interface Parcel {
-  id: string;
-  number: string;
-  receiver_name: string;
-  receiver_phone: string;
-  from_address: string | null;
-  to_address: string | null;
-  category: string;
-  size: ParcelSize;
-  size_label: string;
-  description: string | null;
-  fee_fils: number;
-  fee_jod: number;
-  status: ParcelStatus;
-  status_label: string;
-  picked_up_at: string | null;
-  delivered_at: string | null;
-  created_at: string | null;
-  pickup_code: string | null;
-  delivery_code: string | null;
-  events?: { type: string; at: string | null }[];
-}
 
 export interface RewardSummary {
   points: number;
@@ -494,18 +469,6 @@ export interface LostFoundItem {
 
 export type ExchangeType = 'book' | 'notes' | 'tool' | 'other';
 export type ExchangeStatus = 'available' | 'reserved' | 'closed';
-
-export interface ExchangeItem {
-  id: string;
-  owner_id: string;
-  type: ExchangeType;
-  title: string;
-  condition: 'new' | 'good' | 'fair';
-  description: string | null;
-  price_fils: number | null;
-  status: ExchangeStatus;
-  created_at: string | null;
-}
 
 
 

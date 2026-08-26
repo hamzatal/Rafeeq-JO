@@ -114,21 +114,6 @@ export function ErrorState({ title, message, retryLabel, onRetry }: { title: str
   );
 }
 
-/** ── Service tile (home grid) ──────────────────────────────────────── */
-export function ServiceTile({ icon, label, soon, onPress }: { icon: IconName; label: string; soon?: boolean; onPress?: () => void }) {
-  const t = useTheme();
-  const s = useMemo(() => makeStyles(t), [t]);
-  return (
-    <Pressable onPress={onPress} disabled={soon} style={({ pressed }) => [s.tile, pressed && !soon && s.pressed]}>
-      <View style={s.tileIcon}>
-        <Icon name={icon} size={24} color={t.colors.primary} />
-      </View>
-      <Text style={s.tileLabel} numberOfLines={1}>{label}</Text>
-      {soon ? <Text style={s.tileSoon}>قريباً</Text> : null}
-    </Pressable>
-  );
-}
-
 /** ── Stat / balance card ───────────────────────────────────────────── */
 export function StatCard({ label, value, icon, onPress }: { label: string; value: string; icon?: IconName; onPress?: () => void }) {
   const t = useTheme();
@@ -197,10 +182,6 @@ const makeStyles = (t: AppTheme) =>
     emptyTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'center' },
     emptyHint: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'center', marginTop: 4, maxWidth: 260 },
 
-    tile: { width: '23%', alignItems: 'center', marginBottom: t.spacing.base },
-    tileIcon: { width: 60, height: 60, borderRadius: t.radius.xl, backgroundColor: t.colors.card, alignItems: 'center', justifyContent: 'center', marginBottom: 7, ...t.shadow.sm },
-    tileLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text, textAlign: 'center' },
-    tileSoon: { fontFamily: t.fontFamily.regular, fontSize: 9, color: t.colors.muted },
 
     stat: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius['2xl'], padding: t.spacing.lg, ...t.shadow.md },
     statLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onPrimary, opacity: 0.85, textAlign: 'right' },

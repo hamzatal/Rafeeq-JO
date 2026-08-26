@@ -49,7 +49,7 @@ export default function ProfileSetup() {
 
   return (
     <View style={s.root}>
-      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
           <Text style={s.title}>{t('onboarding.setupTitle')}</Text>

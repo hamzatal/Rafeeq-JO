@@ -10,7 +10,7 @@ const jod = (fils: number) => `${(fils / 1000).toLocaleString('en-US', { maximum
 function Stat({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
     <div className="card flex items-center gap-4">
-      <div className="w-11 h-11 rounded-xl bg-cyan/15 text-cyan-deep flex items-center justify-center shrink-0">
+      <div className="w-11 h-11 rounded-xl bg-primary/15 text-primary-dark flex items-center justify-center shrink-0">
         <span className="material-symbols-outlined text-[22px]">{icon}</span>
       </div>
       <div className="min-w-0">
@@ -44,7 +44,7 @@ export default function InsightsPage() {
       <div className="flex flex-wrap justify-between items-end gap-3">
         <div>
           <h1 className="page-title flex items-center gap-2">
-            <span className="material-symbols-outlined text-cyan-deep">neurology</span>
+            <span className="material-symbols-outlined text-primary-dark">neurology</span>
             {t('nav.insights')}
           </h1>
           <p className="muted-text mt-1">{t('insights.subtitle')}</p>
@@ -72,9 +72,9 @@ export default function InsightsPage() {
           </div>
 
           {/* Narrative analysis */}
-          <div className="card border-r-4 border-cyan">
+          <div className="card border-r-4 border-primary">
             <h3 className="font-bold surface-text mb-2 flex items-center gap-2">
-              <span className="material-symbols-outlined text-cyan-deep text-[20px]">insights</span>
+              <span className="material-symbols-outlined text-primary-dark text-[20px]">insights</span>
               {t('insights.analysis')}
             </h3>
             <p className="surface-text leading-relaxed">{data.analysis}</p>

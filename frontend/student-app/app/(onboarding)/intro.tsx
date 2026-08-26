@@ -54,7 +54,7 @@ export default function Intro() {
 
   return (
     <View style={s.root}>
-      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
 
       {/* Skip pill (top, end-aligned) */}
       <SafeAreaView edges={['top']} style={s.skipSafe}>

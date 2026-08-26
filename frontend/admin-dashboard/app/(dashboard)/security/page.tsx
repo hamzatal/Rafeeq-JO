@@ -128,7 +128,7 @@ export default function SecurityPage() {
       )}
 
       {recovery && (
-        <div className="card border-2 border-gold">
+        <div className="card border-2 border-warning">
           <h2 className="font-bold surface-text mb-1">{t('security.recoveryTitle')}</h2>
           <p className="text-sm text-danger mb-3">
             {t('security.recoveryDesc')}

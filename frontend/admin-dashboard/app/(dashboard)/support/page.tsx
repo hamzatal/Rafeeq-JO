@@ -91,7 +91,7 @@ export default function SupportPage() {
                       {tk.ai_triage && (
                         <button
                           onClick={() => setExpanded(expanded === tk.id ? null : tk.id)}
-                          className="ms-2 align-middle badge bg-cyan/10 text-cyan-deep border border-cyan/30 text-[11px]"
+                          className="ms-2 align-middle badge bg-primary/10 text-primary-dark border border-primary/30 text-[11px]"
                           title="فرز الذكاء الاصطناعي"
                         >
                           ✨ AI {SENTIMENT[tk.ai_triage.sentiment] ?? tk.ai_triage.sentiment}
@@ -121,7 +121,7 @@ export default function SupportPage() {
                     </td>
                   </tr>
                   {expanded === tk.id && tk.ai_triage && (
-                    <tr key={tk.id + '-ai'} className="bg-cyan/5">
+                    <tr key={tk.id + '-ai'} className="bg-primary/5">
                       <td colSpan={6} className="p-4">
                         <div className="text-sm space-y-2">
                           <div className="flex flex-wrap gap-4 text-xs text-muted">

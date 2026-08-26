@@ -19,7 +19,6 @@ const DICT: Dict = {
   'shell.noNotifications': { ar: 'لا توجد إشعارات', en: 'No notifications' },
   'shell.markAllRead': { ar: 'تعليم الكل كمقروء', en: 'Mark all read' },
   'shell.language': { ar: 'اللغة', en: 'Language' },
-  'shell.theme': { ar: 'المظهر', en: 'Theme' },
 
   // Nav groups
   'nav.group.operations': { ar: 'العمليات', en: 'Operations' },

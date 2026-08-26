@@ -35,10 +35,8 @@ export default function AppLayout() {
       <Tabs.Screen name="addresses" options={{ href: null }} />
       <Tabs.Screen name="payments" options={{ href: null }} />
       <Tabs.Screen name="ride-request" options={{ href: null }} />
-      <Tabs.Screen name="parcels" options={{ href: null }} />
       <Tabs.Screen name="lost-found" options={{ href: null }} />
       <Tabs.Screen name="rewards" options={{ href: null }} />
-      <Tabs.Screen name="exchange" options={{ href: null }} />
       <Tabs.Screen name="support" options={{ href: null }} />
       <Tabs.Screen name="emergency" options={{ href: null }} />
     </Tabs>

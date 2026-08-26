@@ -19,7 +19,7 @@ export function LogoFull({ compact = false }: { compact?: boolean }) {
     <div className="flex items-center gap-3">
       <LogoMark size={compact ? 40 : 48} />
       <div className="leading-tight">
-        <div className={`font-extrabold tracking-tight text-cyan-soft ${compact ? 'text-lg' : 'text-2xl'}`}>
+        <div className={`font-extrabold tracking-tight text-brand-200 ${compact ? 'text-lg' : 'text-2xl'}`}>
           رفيق
         </div>
         <div className="text-[11px] text-white/55">النقل الجامعي الذكي</div>

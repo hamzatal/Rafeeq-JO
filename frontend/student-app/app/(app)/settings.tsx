@@ -35,8 +35,6 @@ export default function Settings() {
   const logout = useAuth((a) => a.logout);
   const locale = usePrefs((p) => p.locale);
   const setLocale = usePrefs((p) => p.setLocale);
-  const scheme = usePrefs((p) => p.scheme);
-  const setScheme = usePrefs((p) => p.setScheme);
 
   const initial = (user?.full_name ?? 'ر').charAt(0);
 
@@ -65,17 +63,25 @@ export default function Settings() {
         />
         <GeneralRow
           theme={theme}
-          icon={scheme === 'dark' ? 'moon' : 'sun'}
-          title={t('settings.theme')}
-          subtitle={scheme === 'dark' ? t('settings.dark') : t('settings.light')}
-          onPress={() => void setScheme(scheme === 'dark' ? 'light' : 'dark')}
-        />
-        <GeneralRow
-          theme={theme}
           icon="bell"
           title={t('settings.notifications')}
           subtitle={t('settings.notificationsDesc')}
           onPress={() => router.push('/(app)/notifications')}
+        />
+        {/*
+          Saved addresses. This screen existed, worked, and had no way in — it was
+          registered in the tab layout with `href: null` and nothing anywhere
+          navigated to it. The backend behind it is fully live, and phase 3 even
+          encrypted its `address_text` column at rest. So it was a finished feature
+          nobody could reach, which is a routing bug rather than dead code, and
+          deleting it would have thrown away working work.
+        */}
+        <GeneralRow
+          theme={theme}
+          icon="map-pin"
+          title={t('addresses.title')}
+          subtitle={t('addresses.subtitle')}
+          onPress={() => router.push('/(app)/addresses')}
         />
         <GeneralRow
           theme={theme}

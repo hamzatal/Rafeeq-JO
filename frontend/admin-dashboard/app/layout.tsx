@@ -4,7 +4,7 @@ import './globals.css';
 import { AuthProvider } from '../src/lib/auth';
 import { PrefsProvider } from '../src/lib/prefs';
 
-// Stitch design system — single font family: IBM Plex Sans Arabic.
+// Design system — single font family: IBM Plex Sans Arabic.
 const sansArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
   weight: ['400', '500', '600', '700'],

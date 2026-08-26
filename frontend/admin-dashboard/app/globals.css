@@ -7,10 +7,10 @@
 @tailwind utilities;
 
 html, body { padding: 0; margin: 0; }
-body { background: #F9F9FF; color: #111C2C; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { background: #F2F5F9; color: #0E1524; /* n50 / n900 — kit.css */ -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 * { box-sizing: border-box; }
 
-/* Modern, slim scrollbars (navy-tinted) */
+/* Modern, slim scrollbars (brand-tinted) */
 * { scrollbar-width: thin; scrollbar-color: rgba(0,32,69,0.35) transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
@@ -21,7 +21,7 @@ body { background: #F9F9FF; color: #111C2C; -webkit-font-smoothing: antialiased;
   background-clip: padding-box;
 }
 *::-webkit-scrollbar-thumb:hover { background: rgba(0,32,69,0.5); background-clip: padding-box; }
-/* Sidebar (light Stitch) scrollbar — subtle navy-tinted thumb */
+/* Sidebar (light) scrollbar — subtle brand-tinted thumb */
 aside ::-webkit-scrollbar-thumb,
 aside::-webkit-scrollbar-thumb { background: rgba(0,32,69,0.18); background-clip: padding-box; }
 aside ::-webkit-scrollbar-thumb:hover { background: rgba(0,106,101,0.7); background-clip: padding-box; }
@@ -41,25 +41,24 @@ aside { scrollbar-color: rgba(0,32,69,0.22) transparent; }
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 h-11 font-semibold text-sm transition disabled:opacity-50;
   }
   .btn-primary { @apply btn bg-primary text-white hover:bg-primary-light shadow-card; }
-  .btn-accent  { @apply btn bg-cyan text-white hover:bg-cyan-deep font-bold; }
-  .btn-outline { @apply btn border border-line bg-white text-navy hover:bg-background dark:border-dline dark:bg-dcard dark:text-dtext dark:hover:bg-dsurface; }
+  .btn-accent  { @apply btn bg-primary text-white hover:bg-primary-dark font-bold; }
+  .btn-outline { @apply btn border border-line bg-white text-ink hover:bg-background; }
   .btn-danger  { @apply btn bg-danger text-white hover:opacity-90; }
   .btn-success { @apply btn bg-success text-white hover:opacity-90; }
 
   /* Surfaces */
-  .card { @apply bg-surface border border-line rounded-xl p-5 shadow-card dark:bg-dcard dark:border-dline; }
-  .kpi-card { @apply relative overflow-hidden bg-surface border border-line rounded-xl p-5 shadow-card transition-transform duration-300 hover:-translate-y-1 dark:bg-dcard dark:border-dline; }
+  .card { @apply bg-surface border border-line rounded-xl p-5 shadow-card; }
+  .kpi-card { @apply relative overflow-hidden bg-surface border border-line rounded-xl p-5 shadow-card transition-transform duration-300 hover:-translate-y-1; }
 
   .input {
-    @apply w-full h-11 rounded-lg border border-line px-3 text-sm outline-none focus:border-cyan focus:ring-1 focus:ring-cyan
-           dark:bg-dsurface dark:border-dline dark:text-dtext;
+    @apply w-full h-11 rounded-lg border border-line px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary;
   }
 
   /* Typography */
-  .page-title { @apply text-3xl font-extrabold font-display text-navy dark:text-dtext tracking-tight; }
-  .stat-number { @apply font-display text-4xl font-extrabold tracking-tight text-navy dark:text-dtext; }
-  .surface-text { @apply text-navy dark:text-dtext; }
-  .muted-text { @apply text-muted dark:text-dmuted; }
+  .page-title { @apply text-3xl font-extrabold font-display text-ink tracking-tight; }
+  .stat-number { @apply font-display text-4xl font-extrabold tracking-tight text-ink; }
+  .surface-text { @apply text-ink; }
+  .muted-text { @apply text-muted; }
 
   /* Badges / status pills */
   .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
@@ -67,24 +66,23 @@ aside { scrollbar-color: rgba(0,32,69,0.22) transparent; }
   .pill-success { @apply pill bg-success/10 text-success border-success/20; }
   .pill-warning { @apply pill bg-warning/10 text-warning border-warning/20; }
   .pill-danger  { @apply pill bg-danger/10 text-danger border-danger/20; }
-  .pill-info    { @apply pill bg-cyan/15 text-cyan-deep border-cyan/30; }
+  .pill-info    { @apply pill bg-primary/15 text-primary-dark border-primary/30; }
   .pill-muted   { @apply pill bg-background text-muted border-line; }
 
-  /* Tables — light Stitch header (surface-container-low), zebra rows */
+  /* Tables — light header (surface-container-low), zebra rows */
   .data-table { @apply w-full text-sm text-right; }
-  .data-table thead { @apply bg-[#F0F3FF] border-b border-line; }
+  .data-table thead { @apply bg-brand-50 border-b border-line; }
   .data-table th { @apply py-3.5 px-4 font-semibold text-xs tracking-wider text-muted; }
-  .data-table tbody tr { @apply border-t border-line even:bg-background/60 hover:bg-cyan/5 transition-colors dark:border-dline; }
-  .data-table td { @apply py-3 px-4 text-ink dark:text-dtext; }
-  .table-head { @apply bg-[#F0F3FF] text-muted border-b border-line; }
-  .row-line { @apply border-t border-line dark:border-dline; }
+  .data-table tbody tr { @apply border-t border-line even:bg-background/60 hover:bg-primary/5 transition-colors; }
+  .data-table td { @apply py-3 px-4 text-ink; }
+  .table-head { @apply bg-brand-50 text-muted border-b border-line; }
+  .row-line { @apply border-t border-line; }
 
-  /* Sidebar nav items — light Stitch (_26): muted text, teal-container active */
+  /* Sidebar nav items — muted text, brand-tinted active state */
   .nav-item {
-    @apply flex items-center gap-3 mx-2 my-0.5 px-4 py-3 rounded-lg text-sm font-medium
-           text-muted hover:text-primary hover:bg-[#DEE8FF] transition-colors;
+    @apply flex items-center gap-3 mx-2 my-0.5 px-4 py-3 rounded-lg text-sm font-medium text-muted hover:text-primary hover:bg-brand-100 transition-colors;
   }
   .nav-item-active {
-    @apply text-teal-deep bg-teal-soft hover:bg-teal-soft hover:text-teal-deep font-bold;
+    @apply text-primary-dark bg-brand-100 hover:bg-brand-100 hover:text-primary-dark font-bold;
   }
 }

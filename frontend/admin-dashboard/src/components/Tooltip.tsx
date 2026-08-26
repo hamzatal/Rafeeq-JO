@@ -32,7 +32,7 @@ export function Tooltip({
       {children}
       <span
         role="tooltip"
-        className={`pointer-events-none absolute z-[90] ${POS[side]} w-max max-w-[240px] rounded-lg bg-navy-deep px-3 py-2 text-[11.5px] font-medium leading-snug text-white/95 shadow-lift ring-1 ring-white/10 opacity-0 translate-y-1 scale-95 transition-all duration-150 delay-200 group-hover/tt:opacity-100 group-hover/tt:translate-y-0 group-hover/tt:scale-100 text-center`}
+        className={`pointer-events-none absolute z-[90] ${POS[side]} w-max max-w-[240px] rounded-lg bg-primary-deep px-3 py-2 text-[11.5px] font-medium leading-snug text-white/95 shadow-lift ring-1 ring-white/10 opacity-0 translate-y-1 scale-95 transition-all duration-150 delay-200 group-hover/tt:opacity-100 group-hover/tt:translate-y-0 group-hover/tt:scale-100 text-center`}
       >
         {label}
       </span>

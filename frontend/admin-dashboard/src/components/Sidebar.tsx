@@ -118,7 +118,7 @@ export function Sidebar() {
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-[#F0F3FF] text-ink flex flex-col z-50 border-e border-line">
+    <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-brand-50 text-ink flex flex-col z-50 border-e border-line">
       {/* Brand */}
       <div className="px-5 py-5 flex items-center gap-3 border-b border-line">
         <LogoMark size={42} />
@@ -160,9 +160,9 @@ export function Sidebar() {
       <div className="p-3 border-t border-line">
         <Link
           href="/profile"
-          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[#DEE8FF] transition-colors"
+          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-brand-100 transition-colors"
         >
-          <div className="w-9 h-9 rounded-full bg-teal text-white flex items-center justify-center font-bold shrink-0">
+          <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold shrink-0">
             {user?.full_name?.charAt(0) ?? 'A'}
           </div>
           <div className="min-w-0">

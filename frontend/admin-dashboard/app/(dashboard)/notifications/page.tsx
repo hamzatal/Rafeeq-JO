@@ -64,7 +64,7 @@ export default function NotificationsPage() {
                 type="button"
                 key={a.value}
                 onClick={() => setAudience(a.value)}
-                className={`badge border px-3 py-1.5 ${audience === a.value ? 'bg-primary text-white border-primary' : 'bg-white text-muted border-line dark:bg-dcard dark:border-dline'}`}
+                className={`badge border px-3 py-1.5 ${audience === a.value ? 'bg-primary text-white border-primary' : 'bg-white text-muted border-line'}`}
               >
                 {t(a.labelKey)}{typeof a.count === 'number' ? ` (${a.count})` : ''}
               </button>

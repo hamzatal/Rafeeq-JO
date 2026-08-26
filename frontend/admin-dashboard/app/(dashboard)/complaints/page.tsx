@@ -8,7 +8,7 @@ import { Skeleton } from '../../../src/components/Skeleton';
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-4 py-1.5 border-b border-line dark:border-dline last:border-0">
+    <div className="flex justify-between gap-4 py-1.5 border-b border-line last:border-0">
       <span className="text-xs muted-text">{label}</span>
       <span className="text-sm surface-text font-medium text-left">{value}</span>
     </div>
@@ -141,15 +141,15 @@ export default function ComplaintsPage() {
                 </div>
                 <div className="mb-4">
                   <div className="text-xs muted-text mb-1">{t('complaints.description')}</div>
-                  <p className="text-sm surface-text bg-background dark:bg-dsurface rounded-lg p-3 whitespace-pre-wrap">{detail.description}</p>
+                  <p className="text-sm surface-text bg-background rounded-lg p-3 whitespace-pre-wrap">{detail.description}</p>
                 </div>
 
                 {/* AI triage panel */}
                 {detail.ai_report?.summary || detail.ai_report?.recommended_action ? (
-                  <div className="mb-4 rounded-lg border border-cyan/30 bg-cyan/5 p-3">
+                  <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-cyan-deep text-[18px]">smart_toy</span>
-                      <span className="text-sm font-bold text-cyan-deep">{t('complaints.aiTriage')}</span>
+                      <span className="material-symbols-outlined text-primary-dark text-[18px]">smart_toy</span>
+                      <span className="text-sm font-bold text-primary-dark">{t('complaints.aiTriage')}</span>
                       {typeof detail.ai_report?.confidence === 'number' && (
                         <span className="badge bg-white text-muted border border-line mr-auto">{detail.ai_report.confidence}%</span>
                       )}
@@ -162,7 +162,7 @@ export default function ComplaintsPage() {
                       </div>
                     ) : null}
                     {detail.ai_report?.key_points?.length ? (
-                      <ul className="mt-2 space-y-1 pr-4 list-disc marker:text-cyan">
+                      <ul className="mt-2 space-y-1 pr-4 list-disc marker:text-primary">
                         {detail.ai_report.key_points.map((p, i) => (<li key={i} className="text-xs surface-text">{p}</li>))}
                       </ul>
                     ) : null}
