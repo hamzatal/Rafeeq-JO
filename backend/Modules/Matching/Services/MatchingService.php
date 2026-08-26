@@ -3,6 +3,8 @@
 namespace Rafeeq\Modules\Matching\Services;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Core\Support\Geo;
@@ -32,49 +34,157 @@ class MatchingService extends BaseService
         private readonly PricingService $pricing,
     ) {}
 
-    /** Form pooled trips from all pending requests. Returns number of trips created. */
+    /**
+     * Safety valve on the per-corridor loop.
+     *
+     * The loop terminates because forming a trip moves its riders out of
+     * `Pending`. If a rider ever stayed pending — a bug, not an expectation — the
+     * loop would spin forever, so it is capped and the cap is logged. A matcher
+     * that quietly stops draining a corridor is a bad morning; a matcher that
+     * quietly spins is a dead one.
+     */
+    private const MAX_PASSES_PER_GROUP = 100;
+
+    /**
+     * Form pooled trips from pending requests, one corridor at a time.
+     *
+     * ── 3.12: why this is not a single `->get()` ────────────────────────────────
+     *
+     * It used to load EVERY pending ride request into one collection, then build
+     * two more full in-memory copies of it (`->where('is_express', …)` twice, then
+     * `->groupBy()` on each). Peak memory was roughly three times the queue, in
+     * hydrated Eloquent models. At the forty requests of a test that is invisible;
+     * at ten thousand — a normal 7:30am in a university city — it is the matcher
+     * dying at the exact moment it is needed, and every rider silently unmatched.
+     *
+     * The obvious fix, `chunkById`, is wrong here: chunking the flat queue splits
+     * riders who belong in the same car across chunk boundaries, so the engine
+     * would emit half-empty trips under load — a correctness bug that only appears
+     * at scale, which is the worst kind. `chunkById` also forces `ORDER BY id`,
+     * discarding the express-first and earliest-departure ordering.
+     *
+     * So the query is inverted. First ask which corridors have riders at all —
+     * one small row per (zone × university × direction), bounded by the map rather
+     * than by demand. Then drain each corridor in batches, where every rider
+     * loaded is a rider who could legitimately share that car. Grouping stops
+     * being an in-memory operation over the whole queue and becomes the query.
+     */
     public function formTrips(): int
     {
-        $pending = RideRequest::query()
-            ->where('status', RideRequestStatus::Pending->value)
-            ->whereNotNull('zone_id')
-            ->orderByDesc('is_express') // express first (priority)
-            ->orderBy('desired_time')
-            ->get();
-
+        $batch = max(self::SEAT_CAPACITY, (int) config('rafeeq.matching_batch_size', 500));
         $created = 0;
 
-        // Express requests get priority and are pooled only with other express
-        // riders in the same zone+university (a private single rider is allowed).
-        // Group key includes DIRECTION so home→university and university→home
-        // riders are pooled separately (enables return trips — no empty return).
-        $key = fn (RideRequest $r) => $r->zone_id.'|'.$r->university_id.'|'.$r->direction->value;
-
-        $express = $pending->where('is_express', true);
-        foreach ($express->groupBy($key) as $group) {
-            foreach ($group->chunk(self::SEAT_CAPACITY) as $chunk) {
-                $this->createPooledTrip($chunk->values(), true);
-                $created++;
-            }
-        }
-
-        // Scheduled requests pool normally; a chunk below min-fill still forms a
-        // trip but PricingService applies a (capped) surge to protect earnings.
-        $scheduled = $pending->where('is_express', false);
-        foreach ($scheduled->groupBy($key) as $group) {
-            foreach ($group->chunk(self::SEAT_CAPACITY) as $chunk) {
-                $this->createPooledTrip($chunk->values(), false);
-                $created++;
+        /*
+         * Express first, as its own pass — that IS the priority rule.
+         *
+         * Two explicit passes over a literal boolean rather than one query
+         * grouping on `is_express`: a boolean read back through PDO from Postgres
+         * may arrive as `true`, `1` or `'f'`, and `(bool) 'f'` is true. Priority
+         * ordering is not something to leave to a driver's type juggling.
+         */
+        foreach ([true, false] as $isExpress) {
+            foreach ($this->corridors($isExpress) as $corridor) {
+                $created += $this->drainCorridor($corridor, $isExpress, $batch);
             }
         }
 
         return $created;
     }
 
-    /** @param Collection<int, RideRequest> $requests */
-    private function createPooledTrip(Collection $requests, bool $isExpress): Trip
+    /**
+     * The distinct corridors with pending riders.
+     *
+     * A corridor is one (zone × university × direction) tuple. Express riders
+     * pool only with express riders, and DIRECTION is part of the key so
+     * home→university and university→home riders form separate cars — which is
+     * what makes a paid return trip possible instead of an empty one.
+     *
+     * @return Collection<int, \stdClass>
+     */
+    private function corridors(bool $isExpress): Collection
     {
-        return $this->transaction(function () use ($requests, $isExpress) {
+        return DB::table('ride_requests')
+            ->where('status', RideRequestStatus::Pending->value)
+            ->whereNotNull('zone_id')
+            ->where('is_express', $isExpress)
+            ->groupBy('zone_id', 'university_id', 'direction')
+            // Busiest corridors first: if a run is cut short by the pass cap or a
+            // deploy, the riders who benefit most from pooling are served first.
+            ->orderByRaw('COUNT(*) DESC')
+            ->select('zone_id', 'university_id', 'direction')
+            ->get();
+    }
+
+    /** Form cars out of one corridor until it holds no more pending riders. */
+    private function drainCorridor(object $corridor, bool $isExpress, int $batch): int
+    {
+        // Resolved once per corridor, not once per car. Every rider in a corridor
+        // shares a university by construction, so the old per-trip
+        // `University::find()` was 2,500 identical queries for 10,000 riders.
+        $university = $corridor->university_id ? University::find($corridor->university_id) : null;
+
+        $created = 0;
+
+        for ($pass = 0; $pass < self::MAX_PASSES_PER_GROUP; $pass++) {
+            $requests = RideRequest::query()
+                ->where('status', RideRequestStatus::Pending->value)
+                ->where('zone_id', $corridor->zone_id)
+                ->where('direction', $corridor->direction)
+                ->where('is_express', $isExpress)
+                /*
+                 * `ride_requests.university_id` is NOT NULL today, so the null branch
+                 * is unreachable — and it stays, because it is the difference between
+                 * a future migration relaxing that column being a non-event and being
+                 * a silent outage. `where('university_id', null)` compiles to
+                 * `= NULL`, which matches no row in SQL: the corridor query would
+                 * still report the corridor, `drainCorridor` would load nothing, and
+                 * those riders would sit pending forever with no error logged
+                 * anywhere. Two lines against a failure with no symptom.
+                 */
+                ->when(
+                    $corridor->university_id === null,
+                    fn ($q) => $q->whereNull('university_id'),
+                    fn ($q) => $q->where('university_id', $corridor->university_id),
+                )
+                ->orderBy('desired_time')
+                ->limit($batch)
+                ->get();
+
+            if ($requests->isEmpty()) {
+                return $created;
+            }
+
+            foreach ($requests->chunk(self::SEAT_CAPACITY) as $chunk) {
+                $this->createPooledTrip($chunk->values(), $isExpress, $university);
+                $created++;
+            }
+
+            // Fewer than a full batch means the corridor is drained; asking again
+            // would only cost a query that returns nothing.
+            if ($requests->count() < $batch) {
+                return $created;
+            }
+        }
+
+        Log::warning('matching.corridor_not_drained', [
+            'zone_id' => $corridor->zone_id,
+            'university_id' => $corridor->university_id,
+            'direction' => $corridor->direction,
+            'is_express' => $isExpress,
+            'passes' => self::MAX_PASSES_PER_GROUP,
+            'batch' => $batch,
+        ]);
+
+        return $created;
+    }
+
+    /**
+     * @param  Collection<int, RideRequest>  $requests
+     * @param  University|null  $university  Resolved by the caller once per corridor.
+     */
+    private function createPooledTrip(Collection $requests, bool $isExpress, ?University $university = null): Trip
+    {
+        return $this->transaction(function () use ($requests, $isExpress, $university) {
             $first = $requests->first();
             $riders = $requests->count();
 
@@ -82,7 +192,7 @@ class MatchingService extends BaseService
             // representative for the pooled group, who share zone + university).
             // Falls back to the flat base when coordinates are unavailable.
             $distanceKm = null;
-            $uni = $first->university_id ? University::find($first->university_id) : null;
+            $uni = $university ?? ($first->university_id ? University::find($first->university_id) : null);
             if ($uni && $uni->lat !== null && $uni->lng !== null && $first->pickup_lat !== null && $first->pickup_lng !== null) {
                 $distanceKm = Geo::haversineKm((float) $first->pickup_lat, (float) $first->pickup_lng, (float) $uni->lat, (float) $uni->lng);
             }

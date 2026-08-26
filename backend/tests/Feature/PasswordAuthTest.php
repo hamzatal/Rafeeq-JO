@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Shared\Support\BlindIndex;
 use Tests\TestCase;
 
 /**
@@ -35,7 +36,7 @@ class PasswordAuthTest extends TestCase
         ]);
 
         $res->assertCreated();
-        $user = User::where('phone', '+962790005551')->first();
+        $user = User::where('phone_hash', BlindIndex::phone('+962790005551'))->first();
         $this->assertNotNull($user);
         $this->assertNotNull($user->password);
         $this->assertTrue(Hash::check('Secret@2026', $user->password));

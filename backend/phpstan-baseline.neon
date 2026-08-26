@@ -351,7 +351,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Models\\RideRequest\:\:\$direction\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: Modules/Matching/Services/MatchingService.php
 
 		-

@@ -8,6 +8,7 @@ use Laravel\Sanctum\Sanctum;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
+use Rafeeq\Shared\Support\BlindIndex;
 use Tests\TestCase;
 
 class StaffManagementTest extends TestCase
@@ -57,7 +58,7 @@ class StaffManagementTest extends TestCase
         $res->assertCreated();
         $res->assertJsonPath('data.roles.0', 'admin');
 
-        $created = User::where('phone', '+962791234567')->first();
+        $created = User::where('phone_hash', BlindIndex::phone('+962791234567'))->first();
         $this->assertNotNull($created);
         $this->assertSame(UserType::Admin, $created->type);
         $this->assertNotNull($created->phone_verified_at, 'staff should be pre-verified to sign in');

@@ -116,19 +116,16 @@ class ComplaintService extends BaseService
         $this->alertSafetyTeam($complaint);
     }
 
+    /** Chunked staff fan-out — see NotificationService::alertStaff. */
     private function alertSafetyTeam(Complaint $complaint): void
     {
-        User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'supervisor']))
-            ->get()
-            ->each(function (User $staff) use ($complaint) {
-                $this->notifications->notify(
-                    $staff,
-                    NotificationType::SosTriggered,
-                    'شكوى حرجة جديدة',
-                    "بلاغ {$complaint->number} مصنّف حرج ويتطلب تحقيقاً فورياً.",
-                    ['complaint_id' => $complaint->id],
-                );
-            });
+        $this->notifications->alertStaff(
+            ['admin', 'supervisor'],
+            NotificationType::SosTriggered,
+            'شكوى حرجة جديدة',
+            "بلاغ {$complaint->number} مصنّف حرج ويتطلب تحقيقاً فورياً.",
+            ['complaint_id' => $complaint->id],
+        );
     }
 
     public function setStatus(Complaint $complaint, User $admin, ComplaintStatus $status, ?string $resolution = null): Complaint

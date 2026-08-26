@@ -24,6 +24,18 @@ class SavedAddress extends Model
     protected function casts(): array
     {
         return [
+            /*
+             * 3.8 — a rider's home address, written out in words. In a leaked dump it
+             * sat next to their name and mobile number, which together answer
+             * "where does this person live and how do I reach them".
+             *
+             * `label` (home/university/other) stays readable: it is an enum the UI
+             * groups on, and it identifies nobody. `lat`/`lng` stay too — they are
+             * used for geospatial matching, and coarsening them is a separate
+             * decision from encrypting them.
+             */
+            'title' => 'encrypted',
+            'address_text' => 'encrypted',
             'lat' => 'float',
             'lng' => 'float',
             'is_default' => 'boolean',

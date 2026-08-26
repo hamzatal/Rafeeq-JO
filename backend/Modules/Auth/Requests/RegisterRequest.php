@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Shared\Enums\UserType;
+use Rafeeq\Shared\Rules\UniquePii;
 use Rafeeq\Shared\Support\Phone;
 
 class RegisterRequest extends FormRequest
@@ -26,8 +27,9 @@ class RegisterRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'min:3', 'max:150'],
-            'phone' => ['required', 'string', 'regex:/^\+9627[789]\d{7}$/', 'unique:users,phone'],
-            'email' => ['nullable', 'email', 'max:150', 'unique:users,email'],
+            // `unique:users,phone` cannot work on an encrypted column — see UniquePii.
+            'phone' => ['required', 'string', 'regex:/^\+9627[789]\d{7}$/', new UniquePii(UniquePii::PHONE)],
+            'email' => ['nullable', 'email', 'max:150', new UniquePii(UniquePii::EMAIL)],
             // 18 is Jordan's age of majority. Under it a rider cannot form a binding
             // contract for the fares and fees this platform charges, and there is no
             // guardian-consent instrument — so it is a hard floor.

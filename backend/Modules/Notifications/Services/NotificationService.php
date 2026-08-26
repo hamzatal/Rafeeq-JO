@@ -2,7 +2,6 @@
 
 namespace Rafeeq\Modules\Notifications\Services;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Infrastructure\Push\Contracts\PushGateway;
@@ -94,10 +93,14 @@ class NotificationService extends BaseService
      * Admin broadcast: send the same notification to many users. Returns the
      * number actually recorded. Each send is best-effort (never throws).
      *
-     * @param  Collection<int, User>  $users
+     * Takes an already-bounded set. `BroadcastNotificationJob` is what owns the
+     * chunking, because it owns the query; this method must never be handed the
+     * result of a bare `User::all()`.
+     *
+     * @param  iterable<int, User>  $users
      * @param  array<string, mixed>  $data
      */
-    public function broadcast($users, string $title, string $body, array $data = []): int
+    public function broadcast(iterable $users, string $title, string $body, array $data = []): int
     {
         $count = 0;
         foreach ($users as $user) {
@@ -107,6 +110,47 @@ class NotificationService extends BaseService
         }
 
         return $count;
+    }
+
+    /**
+     * Notify every staff member holding one of the given roles, in chunks.
+     *
+     * ── 3.12: why this exists ──────────────────────────────────────────────────
+     *
+     * Three services had a private `alertSafetyTeam()` that was character-for-
+     * character the same shape — `User::whereHas('roles', …)->get()->each(…)` —
+     * loading every admin, supervisor and support agent as a full model, with
+     * every column, inline in the request that triggered it. For an SOS that
+     * request is a person pressing a panic button, and the notification type is
+     * critical, so each staff member also gets an SMS. The most latency-sensitive
+     * path in the product had the least bounded fan-out, three times over.
+     *
+     * `chunkById` is correct here where it was wrong for the matcher: staff are
+     * independent recipients, so splitting them across chunks changes nothing
+     * about the outcome. The column list is narrowed because delivery needs an id
+     * and a phone, not a profile.
+     *
+     * @param  list<string>  $roles
+     * @param  array<string, mixed>  $data
+     * @return int Staff actually notified.
+     */
+    public function alertStaff(array $roles, NotificationType $type, string $title, string $body, array $data = []): int
+    {
+        $chunk = max(1, (int) config('rafeeq.staff_alert_chunk', 100));
+        $sent = 0;
+
+        User::query()
+            ->whereHas('roles', fn ($q) => $q->whereIn('name', $roles))
+            ->select(['id', 'phone', 'type', 'status'])
+            ->chunkById($chunk, function ($staff) use (&$sent, $type, $title, $body, $data) {
+                foreach ($staff as $member) {
+                    if ($this->notify($member, $type, $title, $body, $data)) {
+                        $sent++;
+                    }
+                }
+            });
+
+        return $sent;
     }
 
     /** Register (upsert) a device token for push delivery. */

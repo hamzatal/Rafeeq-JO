@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\Users\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Rafeeq\Modules\Users\Services\StaffService;
+use Rafeeq\Shared\Rules\UniquePii;
 use Rafeeq\Shared\Support\Phone;
 
 class StoreStaffRequest extends FormRequest
@@ -25,8 +26,9 @@ class StoreStaffRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'min:3', 'max:150'],
-            'phone' => ['required', 'string', 'regex:/^\+9627[789]\d{7}$/', 'unique:users,phone'],
-            'email' => ['nullable', 'email', 'max:150', 'unique:users,email'],
+            // `unique:users,phone` cannot work on an encrypted column — see UniquePii.
+            'phone' => ['required', 'string', 'regex:/^\+9627[789]\d{7}$/', new UniquePii(UniquePii::PHONE)],
+            'email' => ['nullable', 'email', 'max:150', new UniquePii(UniquePii::EMAIL)],
             'password' => ['required', 'string', 'min:8', 'max:72'],
             'role' => ['required', Rule::in(StaffService::STAFF_ROLES)],
             'locale' => ['sometimes', Rule::in(['ar', 'en'])],

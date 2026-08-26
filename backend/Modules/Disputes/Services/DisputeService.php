@@ -236,18 +236,16 @@ class DisputeService extends BaseService
         }
     }
 
-    /** Notify staff who can act on safety/fraud cases. */
+    /** Notify staff who can act on safety/fraud cases. Chunked — see alertStaff. */
     private function alertSafetyTeam(Dispute $dispute): void
     {
-        User::whereHas('roles', fn ($q) => $q->whereIn('name', ['admin', 'supervisor']))
-            ->get()
-            ->each(fn (User $staff) => $this->notifications->notify(
-                $staff,
-                NotificationType::General,
-                'نزاع/تحقيق جديد',
-                'تم فتح حالة تحقيق جديدة في مركز النزاعات تتطلّب المراجعة.',
-                ['dispute_id' => $dispute->id, 'type' => $dispute->type],
-            ));
+        $this->notifications->alertStaff(
+            ['admin', 'supervisor'],
+            NotificationType::General,
+            'نزاع/تحقيق جديد',
+            'تم فتح حالة تحقيق جديدة في مركز النزاعات تتطلّب المراجعة.',
+            ['dispute_id' => $dispute->id, 'type' => $dispute->type],
+        );
     }
 
     /**

@@ -106,7 +106,7 @@ export default function InsightsPage() {
             <Stat label={t('insights.kpi.tripsCompleted')} value={String(data.metrics.trips.completed)} icon="task_alt" />
             <Stat label={t('insights.kpi.tripsCancelled')} value={String(data.metrics.trips.cancelled)} icon="cancel" />
             <Stat label={t('insights.kpi.activeSubs')} value={String(data.metrics.subscriptions.active)} icon="card_membership" />
-            <Stat label={t('insights.kpi.commission')} value={jod(data.metrics.finance.commission_fils)} icon="account_balance_wallet" />
+            <Stat label={t('insights.kpi.platformRevenue')} value={jod(data.metrics.finance.platform_revenue_fils)} icon="account_balance_wallet" />
             <Stat label={t('insights.kpi.grossFare')} value={jod(data.metrics.finance.gross_fare_fils)} icon="payments" />
             <Stat label={t('insights.kpi.driversPending')} value={String(data.metrics.drivers.pending_review)} icon="how_to_reg" />
             <Stat label={t('insights.kpi.openDisputes')} value={String(data.metrics.safety.open_disputes)} icon="gavel" />

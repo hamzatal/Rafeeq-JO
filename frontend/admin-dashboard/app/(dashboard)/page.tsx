@@ -99,7 +99,9 @@ export default function CommandCenter() {
     },
     {
       label: t('home.kpi.commission'),
-      value: jod(report?.commission_fils ?? 0),
+      // platform_revenue_fils, not commission_fils: the latter double-counts
+      // commission booked on subscription-covered seats.
+      value: jod(report?.platform_revenue_fils ?? 0),
       unit: 'JOD',
       icon: 'account_balance_wallet',
       trend: t('home.trend.netCommission'),
@@ -123,7 +125,7 @@ export default function CommandCenter() {
     },
   ];
 
-  const maxZone = Math.max(1, ...(report?.by_zone ?? []).map((z) => z.commission_fils));
+  const maxZone = Math.max(1, ...(report?.by_zone ?? []).map((z) => z.ride_commission_fils));
 
   return (
     <div className="space-y-6">
@@ -169,10 +171,10 @@ export default function CommandCenter() {
               <div className="flex items-end gap-3 h-[260px]">
                 {report!.by_zone.slice(0, 8).map((z, i) => (
                   <div key={z.zone_id ?? i} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
-                    <div className="text-[11px] font-mono text-muted">{jod(z.commission_fils)}</div>
+                    <div className="text-[11px] font-mono text-muted">{jod(z.ride_commission_fils)}</div>
                     <div
                       className="w-full rounded-t-md bg-gradient-to-t from-navy to-cyan-deep min-h-[6px] transition-all"
-                      style={{ height: `${(z.commission_fils / maxZone) * 100}%` }}
+                      style={{ height: `${(z.ride_commission_fils / maxZone) * 100}%` }}
                     />
                     <div className="text-[10px] text-muted truncate w-full text-center">
                       {z.zone_id ? z.zone_id.slice(0, 6) : t('home.general')}

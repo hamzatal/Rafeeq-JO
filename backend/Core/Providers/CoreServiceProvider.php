@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Console\SchemaDocCommand;
+use Rafeeq\Core\Console\WorkerAliveCommand;
+use Rafeeq\Core\Retention\PruneRetentionCommand;
+use Rafeeq\Core\Retention\RetentionReportCommand;
+use Rafeeq\Modules\Subscriptions\Console\ExpireSubscriptions;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -23,7 +27,13 @@ class CoreServiceProvider extends ServiceProvider
         $this->registerBroadcasting();
 
         if ($this->app->runningInConsole()) {
-            $this->commands([SchemaDocCommand::class]);
+            $this->commands([
+                SchemaDocCommand::class,
+                PruneRetentionCommand::class,
+                RetentionReportCommand::class,
+                WorkerAliveCommand::class,
+                ExpireSubscriptions::class,
+            ]);
         }
     }
 

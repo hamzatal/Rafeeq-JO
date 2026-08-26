@@ -20,13 +20,9 @@ class UsersAdminController extends Controller
         if ($status = $request->query('status')) {
             $query->where('status', $status);
         }
-        if ($search = $request->query('search')) {
-            $query->where(function ($w) use ($search) {
-                $w->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
+        // Exact phone/email via blind index, whole-word name via token index.
+        // See User::scopeSearchIdentity for what this can and cannot match now.
+        $query->searchIdentity($request->query('search'));
 
         return $this->ok(
             UserResource::collection($query->paginate((int) $request->query('per_page', 20)))

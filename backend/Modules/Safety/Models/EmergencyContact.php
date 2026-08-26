@@ -29,6 +29,15 @@ class EmergencyContact extends Model
     protected function casts(): array
     {
         return [
+            /*
+             * 3.8 — these people never signed up for anything. They were entered by
+             * a rider as someone to call in an emergency, which makes holding their
+             * name and number in the clear the least defensible storage in the
+             * system. Nothing searches them by name or number, only by owner, so
+             * they need no blind index.
+             */
+            'name' => 'encrypted',
+            'phone' => 'encrypted',
             'is_primary' => 'boolean',
             'notify_on_sos' => 'boolean',
         ];

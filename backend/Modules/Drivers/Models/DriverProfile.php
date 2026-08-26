@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Shared\Enums\DriverStatus;
+use Rafeeq\Shared\Support\BlindIndex;
+use Rafeeq\Shared\Traits\HasBlindIndexes;
 use Rafeeq\Shared\Traits\HasUuid;
 
 /**
@@ -20,6 +22,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  */
 class DriverProfile extends Model
 {
+    use HasBlindIndexes;
     use HasUuid;
 
     protected $fillable = [
@@ -29,7 +32,24 @@ class DriverProfile extends Model
         'reviewed_by', 'review_note', 'submitted_at',
     ];
 
-    protected $hidden = ['national_id'];
+    protected $hidden = ['national_id', 'national_id_hash'];
+
+    /**
+     * 3.8 — the national ID was already encrypted, which meant nobody could tell
+     * whether two captains had submitted the SAME one. That is the most basic
+     * duplicate-identity check a driver platform has, and randomised ciphertext made
+     * it impossible: a banned captain could re-apply with the same ID and a new phone.
+     *
+     * The digest carries a unique index, so now they cannot.
+     *
+     * @return array<string, array{0: string, 1: callable}>
+     */
+    protected function blindIndexes(): array
+    {
+        return [
+            'national_id' => ['national_id_hash', fn (?string $v) => BlindIndex::nationalId($v)],
+        ];
+    }
 
     protected function casts(): array
     {

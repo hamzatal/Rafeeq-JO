@@ -95,8 +95,42 @@ return [
     // ghost-trip flag.
     'ghost_watch_radius_meters' => (int) env('RAFEEQ_GHOST_WATCH_RADIUS_METERS', 250),
 
-    // ── Data retention ──────────────────────────────────────────────────────
-    // How many days to keep raw live-location points (trip_tracking) for
-    // finished trips before pruning them (keeps the table bounded).
-    'tracking_retention_days' => (int) env('RAFEEQ_TRACKING_RETENTION_DAYS', 30),
+    /*
+     * ── Data retention ──────────────────────────────────────────────────────
+     *
+     * Deliberately NOT configurable here. Every retention period lives in
+     * Rafeeq\Core\Retention\RetentionPolicy, next to the reason it is that number,
+     * because the privacy notice makes those durations a promise to the user.
+     *
+     * `RAFEEQ_TRACKING_RETENTION_DAYS` used to sit here and silently override the
+     * published 30-day window from an environment variable — a promise that can be
+     * changed without a code review, a test, or a document update is not a promise.
+     */
+
+    // ── Operations ──────────────────────────────────────────────────────────
+    // Failed jobs in the last 24h before `rafeeq:worker-alive --alert-on-failures`
+    // exits non-zero. Not zero: one transient FCM timeout is noise, and an alarm
+    // that cries every night is an alarm that gets muted.
+    'failed_jobs_alert_threshold' => (int) env('RAFEEQ_FAILED_JOBS_ALERT_THRESHOLD', 10),
+
+    /*
+     * ── Bounded work ────────────────────────────────────────────────────────
+     *
+     * Batch sizes for anything that walks a table which grows with usage. These
+     * exist because the matcher loaded EVERY pending ride request into memory and
+     * then made two more in-memory copies of it while grouping — fine at 40
+     * requests, fatal at 40,000, and the failure mode is the matcher dying at the
+     * busiest moment of the morning.
+     */
+
+    // Ride requests loaded per pooling group. A group is one
+    // (zone × university × direction × express) tuple, so this is the ceiling on
+    // riders considered for one corridor in one pass, not on the whole queue.
+    'matching_batch_size' => (int) env('RAFEEQ_MATCHING_BATCH_SIZE', 500),
+
+    // Staff loaded per chunk when fanning an alert out to the safety team.
+    'staff_alert_chunk' => (int) env('RAFEEQ_STAFF_ALERT_CHUNK', 100),
+
+    // Recipients loaded per chunk for an admin broadcast.
+    'broadcast_chunk' => (int) env('RAFEEQ_BROADCAST_CHUNK', 200),
 ];
