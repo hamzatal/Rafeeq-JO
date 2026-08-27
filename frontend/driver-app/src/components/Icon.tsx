@@ -1,38 +1,61 @@
-import { Feather } from '@expo/vector-icons';
 import { I18nManager } from 'react-native';
+import { ICON_SIZE, ICON_STROKE, shouldMirror } from '@rafeeq/tokens';
+/*
+ * A DEEP import, and the only one in the product.
+ *
+ * The registry holds `lucide-react-native` components, not values, so it is kept out
+ * of the `@rafeeq/tokens` barrel — re-exporting it there pulled `react-native` into
+ * the Next.js dashboard bundle and broke `next build` on Flow syntax inside
+ * `react-native/index.js`. The `src/` segment is deliberate: a real file path resolves
+ * under both classic Node resolution and an `exports`-aware bundler.
+ */
+import { ICON_REGISTRY, type IconName } from '@rafeeq/tokens/src/icon-registry';
 import { useTheme } from '../theme';
 
-/** App-wide icon set (Feather). Centralised so we can swap the set in one place. */
-export type IconName = keyof typeof Feather.glyphMap;
+export type { IconName };
 
 interface IconProps {
   name: IconName;
   size?: number;
   color?: string;
+  /** Override only for a deliberately heavier or lighter glyph. */
+  strokeWidth?: number;
 }
 
 /**
- * Directional glyphs that must be horizontally mirrored under RTL — Feather
- * icons don't auto-flip, so a "back" chevron would otherwise point the wrong
- * way in Arabic. We flip only these; symmetric icons are untouched.
+ * The app's icon. Lucide, mirrored under RTL.
+ *
+ * ── Why Lucide and not Feather ─────────────────────────────────────────────
+ *
+ * `docs/design/src/ui.mjs` — the renderer that produces every approved mockup —
+ * already drew LUCIDE paths, while both apps rendered Feather and the admin
+ * dashboard rendered Material Symbols ligatures. Three naming systems, and the
+ * design source agreed with none of the products: every mockup differed from the
+ * screen it depicted on every icon, invisibly, because a chevron reads as a
+ * chevron until you compare stroke weights side by side.
+ *
+ * Lucide began as a Feather fork, so most names carried over unchanged. The ones
+ * that did not are in `RENAMED`, and generating the registry against the INSTALLED
+ * package is what caught the two that mattered — `home` → `house` and
+ * `help-circle` → `circle-question-mark`. Each would have silently rendered
+ * nothing, which is worse than rendering the wrong glyph: the gap is the right
+ * size, so the layout still looks intentional.
+ *
+ * ── Names are checked at COMPILE time now ──────────────────────────────────
+ *
+ * `IconName` is the union of the icons in the generated registry, not the
+ * ~280-name Feather glyphMap. A typo is a type error rather than an empty square.
  */
-const RTL_MIRROR = new Set<string>([
-  'chevron-left', 'chevron-right', 'chevrons-left', 'chevrons-right',
-  'arrow-left', 'arrow-right',
-  'arrow-up-left', 'arrow-up-right', 'arrow-down-left', 'arrow-down-right',
-  'corner-up-left', 'corner-up-right', 'corner-down-left', 'corner-down-right',
-  'corner-left-up', 'corner-right-up', 'corner-left-down', 'corner-right-down',
-  'log-in', 'log-out', 'send',
-]);
-
-export function Icon({ name, size = 22, color }: IconProps) {
+export function Icon({ name, size = ICON_SIZE, color, strokeWidth = ICON_STROKE }: IconProps) {
   const theme = useTheme();
-  const mirror = I18nManager.isRTL && RTL_MIRROR.has(name);
+  const Glyph = ICON_REGISTRY[name];
+  const mirror = I18nManager.isRTL && shouldMirror(name);
+
   return (
-    <Feather
-      name={name}
+    <Glyph
       size={size}
       color={color ?? theme.colors.text}
+      strokeWidth={strokeWidth}
       style={mirror ? { transform: [{ scaleX: -1 }] } : undefined}
     />
   );

@@ -101,7 +101,7 @@ const makeStyles = (t: AppTheme) =>
       justifyContent: 'center',
       gap: 8,
       height: 54,
-      borderRadius: t.radius.lg,
+      borderRadius: t.radius.card,
       borderWidth: 2,
       borderColor: t.colors.primary,
       backgroundColor: 'transparent',

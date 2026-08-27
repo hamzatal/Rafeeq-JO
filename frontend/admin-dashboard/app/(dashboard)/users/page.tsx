@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { dinarsFromFils, formatFils } from '@rafeeq/shared';
+import { bareJod, formatJod } from '@rafeeq/shared';
 import type { User, WalletTransaction } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
+import { Icon } from '../../../src/components/Icon';
 
 const TYPES = [
   { value: '', labelAr: 'الكل', labelEn: 'All' },
@@ -48,7 +49,7 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('nav.users')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.users')}</h1>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {TYPES.map((tp) => (
@@ -101,7 +102,7 @@ export default function UsersPage() {
                         onClick={() => setTopupUser(u)}
                         className="inline-flex items-center gap-1 text-primary-dark hover:underline text-xs font-semibold"
                       >
-                        <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+                        <Icon name="wallet" size={16} />
                         {t('wallet.topup')}
                       </button>
                     )}
@@ -196,14 +197,14 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
             {t('wallet.topupFor')} — {user.full_name}
           </h2>
           <button type="button" onClick={onClose} className="text-muted hover:text-danger">
-            <span className="material-symbols-outlined">close</span>
+            <Icon name="x" />
           </button>
         </div>
 
         {balance !== null && (
           <div className="mb-4 rounded-xl bg-background p-3 flex items-center justify-between">
             <span className="text-xs muted-text">{t('wallet.balance')}</span>
-            <span className="font-extrabold surface-text">{formatFils(balance)}</span>
+            <span className="font-bold surface-text">{formatJod(balance)}</span>
           </div>
         )}
 
@@ -250,7 +251,7 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
                   <div className="flex items-center gap-3 shrink-0">
                     <span className={`font-bold ${tx.amount_fils >= 0 ? 'text-success' : 'text-danger'}`}>
                       {tx.amount_fils >= 0 ? '+' : ''}
-                      {dinarsFromFils(tx.amount_fils)}
+                      {bareJod(tx.amount_fils)}
                     </span>
                     {tx.reversed_at ? (
                       <span className="pill-muted">{t('wallet.reversedBadge')}</span>
@@ -260,7 +261,7 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
                         disabled={busyId === tx.id}
                         className="inline-flex items-center gap-1 text-danger hover:underline text-xs font-semibold disabled:opacity-50"
                       >
-                        <span className="material-symbols-outlined text-[16px]">undo</span>
+                        <Icon name="undo-2" size={16} />
                         {busyId === tx.id ? t('common.loading') : t('wallet.reverse')}
                       </button>
                     ) : null}

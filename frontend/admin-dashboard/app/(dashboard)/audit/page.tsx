@@ -6,6 +6,7 @@ import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { downloadBlob, stamp } from '../../../src/lib/download';
+import { Icon } from '../../../src/components/Icon';
 
 const short = (v: string | null, n = 8) => (v ? v.slice(0, n) : '—');
 
@@ -77,7 +78,7 @@ export default function AuditPage() {
         </div>
         <button onClick={load} className="btn-primary">{t('audit.filter')}</button>
         <button onClick={exportCsv} disabled={exporting} className="btn-outline inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[18px]">download</span>
+          <Icon name="download" size={18} />
           {exporting ? t('common.loading') : t('reports.exportCsv')}
         </button>
       </div>

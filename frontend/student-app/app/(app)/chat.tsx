@@ -149,7 +149,7 @@ const makeStyles = (t: AppTheme) =>
     bubbleRow: { marginBottom: t.spacing.sm, flexDirection: 'row' },
     mineRow: { justifyContent: 'flex-start' },
     theirsRow: { justifyContent: 'flex-end' },
-    bubble: { maxWidth: '80%', borderRadius: t.radius.lg, paddingHorizontal: t.spacing.md, paddingVertical: t.spacing.sm },
+    bubble: { maxWidth: '80%', borderRadius: t.radius.card, paddingHorizontal: t.spacing.md, paddingVertical: t.spacing.sm },
     mine: { backgroundColor: t.colors.primary, borderBottomLeftRadius: 4 },
     theirs: { backgroundColor: t.colors.card, borderWidth: 1, borderColor: t.colors.border, borderBottomRightRadius: 4 },
     bubbleText: { fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.text, textAlign: 'right' },
@@ -157,7 +157,7 @@ const makeStyles = (t: AppTheme) =>
     time: { fontFamily: t.fontFamily.regular, fontSize: 10, color: t.colors.textSecondary, textAlign: 'left', marginTop: 4 },
     timeMine: { color: t.colors.onPrimary, opacity: 0.8 },
     inputBar: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 8, padding: t.spacing.sm, borderTopWidth: 1, borderTopColor: t.colors.border, backgroundColor: t.colors.surface },
-    input: { flex: 1, maxHeight: 120, backgroundColor: t.colors.background, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, paddingHorizontal: t.spacing.md, paddingVertical: 10, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.text, textAlign: 'right' },
+    input: { flex: 1, maxHeight: 120, backgroundColor: t.colors.background, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.border, paddingHorizontal: t.spacing.md, paddingVertical: 10, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
     sendDisabled: { opacity: 0.5 },
   });

@@ -54,6 +54,6 @@ export default function Withdraw() {
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     header: { marginTop: t.spacing['2xl'], marginBottom: t.spacing.xl, gap: t.spacing.xs },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right' },
+    title: { fontFamily: t.fontFamily.bold, fontSize: 24, color: t.colors.text, textAlign: 'right' },
     hint: { fontFamily: t.fontFamily.regular, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right' },
   });

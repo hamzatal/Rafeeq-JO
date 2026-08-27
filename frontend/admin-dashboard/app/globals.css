@@ -1,6 +1,5 @@
-/* Material Symbols is loaded via a <link> in the root layout (with preconnect
-   and font-display: block) so the icon ligature text ("dashboard", "group"…)
-   never flashes before the font loads. */
+/* Icons are Lucide SVG components — see `src/components/Icon.tsx`. There is no icon
+   webfont to load, so no `<link>` in the root layout and no base rule here. */
 
 @tailwind base;
 @tailwind components;
@@ -11,34 +10,26 @@ body { background: #F2F5F9; color: #0E1524; /* n50 / n900 — kit.css */ -webkit
 * { box-sizing: border-box; }
 
 /* Modern, slim scrollbars (brand-tinted) */
-* { scrollbar-width: thin; scrollbar-color: rgba(0,32,69,0.35) transparent; }
+* { scrollbar-width: thin; scrollbar-color: rgba(18,47,107,0.35) transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb {
-  background: rgba(0,32,69,0.28);
+  background: rgba(18,47,107,0.28);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-*::-webkit-scrollbar-thumb:hover { background: rgba(0,32,69,0.5); background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(18,47,107,0.5); background-clip: padding-box; }
 /* Sidebar (light) scrollbar — subtle brand-tinted thumb */
 aside ::-webkit-scrollbar-thumb,
-aside::-webkit-scrollbar-thumb { background: rgba(0,32,69,0.18); background-clip: padding-box; }
-aside ::-webkit-scrollbar-thumb:hover { background: rgba(0,106,101,0.7); background-clip: padding-box; }
-aside { scrollbar-color: rgba(0,32,69,0.22) transparent; }
-
-/* Material Symbols base */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  font-size: 22px;
-  line-height: 1;
-}
-.material-symbols-outlined.icon-fill { font-variation-settings: 'FILL' 1; }
+aside::-webkit-scrollbar-thumb { background: rgba(18,47,107,0.18); background-clip: padding-box; }
+aside ::-webkit-scrollbar-thumb:hover { background: rgba(18,89,227,0.7); background-clip: padding-box; }
+aside { scrollbar-color: rgba(18,47,107,0.22) transparent; }
 
 @layer components {
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 h-11 font-semibold text-sm transition disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-control px-4 h-control font-semibold text-sm transition disabled:opacity-50;
   }
   .btn-primary { @apply btn bg-primary text-white hover:bg-primary-light shadow-card; }
   .btn-accent  { @apply btn bg-primary text-white hover:bg-primary-dark font-bold; }
@@ -47,16 +38,16 @@ aside { scrollbar-color: rgba(0,32,69,0.22) transparent; }
   .btn-success { @apply btn bg-success text-white hover:opacity-90; }
 
   /* Surfaces */
-  .card { @apply bg-surface border border-line rounded-xl p-5 shadow-card; }
-  .kpi-card { @apply relative overflow-hidden bg-surface border border-line rounded-xl p-5 shadow-card transition-transform duration-300 hover:-translate-y-1; }
+  .card { @apply bg-surface border border-line rounded-card p-5 shadow-card; }
+  .kpi-card { @apply relative overflow-hidden bg-surface border border-line rounded-card p-5 shadow-card transition-transform duration-300 hover:-translate-y-1; }
 
   .input {
-    @apply w-full h-11 rounded-lg border border-line px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary;
+    @apply w-full h-control rounded-control border border-line px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary;
   }
 
   /* Typography */
-  .page-title { @apply text-3xl font-extrabold font-display text-ink tracking-tight; }
-  .stat-number { @apply font-display text-4xl font-extrabold tracking-tight text-ink; }
+  .page-title { @apply text-3xl font-bold font-display text-ink tracking-tight; }
+  .stat-number { @apply font-display text-4xl font-bold tracking-tight text-ink; }
   .surface-text { @apply text-ink; }
   .muted-text { @apply text-muted; }
 

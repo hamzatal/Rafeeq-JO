@@ -28,7 +28,7 @@ export default function SafetyPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-1">{t('safety.title')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-1">{t('safety.title')}</h1>
       <p className="muted-text mb-4">{t('safety.subtitle')}</p>
 
       <div className="card p-0 overflow-hidden">

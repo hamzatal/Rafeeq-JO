@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatDinars } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { PaymentRequest } from '@rafeeq/shared';
 import { ENDPOINTS } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
@@ -77,7 +77,7 @@ export default function PaymentsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">المدفوعات</h1>
+      <h1 className="text-2xl font-bold surface-text mb-4">المدفوعات</h1>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {STATUSES.map((st) => (
@@ -120,7 +120,7 @@ export default function PaymentsPage() {
                   <tr key={p.id} className="row-line align-top">
                     <td className="p-3 font-medium surface-text">{p.number}</td>
                     <td className="p-3 text-muted">{p.purpose_label}</td>
-                    <td className="p-3 text-muted">{formatDinars(p.amount_jod)}</td>
+                    <td className="p-3 text-muted">{formatJod(p.amount_fils)}</td>
                     <td className="p-3 text-muted">{ai !== null ? `${ai}%` : '—'}</td>
                     <td className="p-3">
                       {flags.length === 0 ? (

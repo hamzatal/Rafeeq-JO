@@ -12,7 +12,9 @@
   "dependencies": {
     "@rafeeq/api-client": "*",
     "@rafeeq/shared": "*",
+    "@rafeeq/tokens": "*",
     "axios": "^1.7.0",
+    "lucide-react": "^1.34.0",
     "next": "14.2.35",
     "react": "18.2.0",
     "react-dom": "18.2.0"

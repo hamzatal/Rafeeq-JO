@@ -49,10 +49,10 @@ const makeStyles = (t: AppTheme) =>
     body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: t.spacing.md },
     mark: { width: 104, height: 104, borderRadius: 30, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm, borderWidth: 1, borderColor: t.colors.hairline, ...t.shadow.md },
     markLogo: { width: 72, height: 72 },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 44, color: t.colors.primary, letterSpacing: 0.5 },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 44, color: t.colors.primary, letterSpacing: 0.5 },
     tagline: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 26, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 300 },
     actions: { gap: t.spacing.md, paddingBottom: t.spacing.lg },
-    secondary: { height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.primary, backgroundColor: 'transparent' },
+    secondary: { height: 54, borderRadius: t.radius.card, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: t.colors.primary, backgroundColor: 'transparent' },
     secondaryText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     pressed: { opacity: 0.75 },
   });

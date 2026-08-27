@@ -5,7 +5,16 @@ import { fileURLToPath } from 'url';
 import { mark, markOnDark, mapGhost } from './ui.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO = resolve(HERE, '../Rafeeq-JO');
+/*
+ * Output paths are relative to THIS file, which lives at `docs/design/src`.
+ *
+ * They used to read `resolve(HERE, '../Rafeeq-JO/...')` — a path that only resolves
+ * when the script is COPIED next to a checkout, which is how it was originally run.
+ * Run from its committed location, as `docs/design/README.md` instructs, it silently
+ * created a phantom `docs/design/src/Rafeeq-JO/` tree and left the real mockups
+ * untouched — so a regeneration looked like it had succeeded and changed nothing.
+ */
+const REPO = resolve(HERE, '../../..');
 
 /**
  * Store and launcher assets, generated from the same mark as everything else so
@@ -116,9 +125,38 @@ for (const [app, cfg] of Object.entries(APPS)) {
   });
 }
 
-const browser = await chromium.launch({ args: ['--no-sandbox', '--font-render-hinting=none'] });
+/*
+ * `CHROMIUM_PATH` — for an environment where the browser is already on disk.
+ *
+ * Playwright pins an exact browser revision and refuses to launch anything else, so
+ * on a container that ships its own Chromium (or a CI image with the browsers baked
+ * in at a different revision) `chromium.launch()` fails with "Executable doesn't
+ * exist" and the only documented fix is a fresh download. Honouring an explicit path
+ * makes the design pipeline runnable there. Unset, behaviour is unchanged.
+ */
+const executablePath = process.env.CHROMIUM_PATH || undefined;
+const browser = await chromium.launch({ executablePath, args: ['--no-sandbox', '--font-render-hinting=none'] });
+/*
+ * A FLOOR on the viewport, with the capture clipped back down.
+ *
+ * Chromium will not screenshot a viewport smaller than about 50x50 — it does not
+ * error, it HANGS, and `screenshot()` fails on Playwright's timeout after reporting
+ * "fonts loaded". That made the 48x48 favicon the last asset in this run and the one
+ * that killed it, intermittently enough to look like flakiness rather than a floor.
+ * Measured on Chromium 1232 with this exact page: 48x48 times out at both scale
+ * factors, 96x96 captures in 12ms.
+ *
+ * So the page is laid out in a viewport at least this big and the shot is clipped to
+ * the asset's real box. The body is `margin:0` at the asset's exact size, so the box
+ * starts at the origin and the clip is a straight crop of the padding away.
+ */
+const VIEWPORT_FLOOR = 128;
+
 for (const s of shots) {
-  const ctx = await browser.newContext({ viewport: { width: s.w, height: s.h }, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({
+    viewport: { width: Math.max(s.w, VIEWPORT_FLOOR), height: Math.max(s.h, VIEWPORT_FLOOR) },
+    deviceScaleFactor: 1,
+  });
   const p = await ctx.newPage();
   const tmp = resolve(HERE, '_asset.html');
   writeFileSync(tmp, s.html);
@@ -129,7 +167,12 @@ for (const s of shots) {
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(400);
   const transparent = s.html.includes("background:transparent");
-  await p.screenshot({ path: s.out, omitBackground: transparent });
+
+  await p.screenshot({
+    path: s.out,
+    omitBackground: transparent,
+    clip: { x: 0, y: 0, width: s.w, height: s.h },
+  });
   console.log(`${s.out.replace(REPO + '/', '')}  ${s.w}x${s.h}${transparent ? '  (alpha)' : ''}`);
   await ctx.close();
 }

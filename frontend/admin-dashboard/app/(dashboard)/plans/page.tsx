@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { SubscriptionPlan, SubscriptionType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
@@ -57,7 +57,7 @@ export default function PlansPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('nav.plans')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.plans')}</h1>
 
       <div className="card mb-5">
         <h2 className="font-bold surface-text mb-3">{t('plans.add')}</h2>
@@ -99,7 +99,7 @@ export default function PlansPage() {
                 <tr key={p.id} className="row-line">
                   <td className="p-3 font-medium surface-text">{p.name}</td>
                   <td className="p-3 text-muted">{p.type_label}</td>
-                  <td className="p-3 text-muted">{formatFils(p.price_fils)}</td>
+                  <td className="p-3 text-muted">{formatJod(p.price_fils)}</td>
                   <td className="p-3 text-muted">{p.unlimited ? t('plans.unlimited') : p.rides_count}</td>
                   <td className="p-3 text-muted">{p.duration_days} {t('plans.daysUnit')}</td>
                   <td className="p-3">

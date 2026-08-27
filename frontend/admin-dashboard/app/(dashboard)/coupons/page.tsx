@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { Coupon, CouponScope, CouponType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
@@ -75,11 +75,11 @@ export default function CouponsPage() {
     if (confirm(`${t('coupons.deleteConfirm')} ${c.code}`)) api.admin.deleteCoupon(c.id).then(load);
   };
   const valueLabel = (c: Coupon) =>
-    c.type === 'percentage' ? `${c.value}%` : formatFils(c.value);
+    c.type === 'percentage' ? `${c.value}%` : formatJod(c.value);
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('coupons.title')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-4">{t('coupons.title')}</h1>
 
       <div className="card mb-5">
         <h2 className="font-bold surface-text mb-3">{t('coupons.create')}</h2>

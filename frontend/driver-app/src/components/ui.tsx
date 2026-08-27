@@ -140,28 +140,43 @@ export function ListRow({ icon, title, subtitle, trailing, onPress }: { icon?: I
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    card: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base, ...t.shadow.sm },
+  /*
+   * These four surfaces are `radius.card` in BOTH apps, deliberately.
+   *
+   * They are the same components — `Card`, `Stat`, `ListRow`, and the skeleton that
+   * stands in for a card — and before this they carried four different radii: the
+   * student's card was 28 and its list row 24, the captain's card was 24 and its row
+   * 16. Nobody chose that; each value was picked at the call site, and the two files
+   * were never opened side by side. kit.css says a card is 16, and the approved
+   * mockups draw 16, so 16 it is in both.
+   *
+   * `radius.sheet` (24) still appears on ~20 per-SCREEN surfaces that are not sheets.
+   * That is the remaining drift, recorded in AUDIT.md; phases 8 and 9 rewrite those
+   * screens against the mockups, so it is paid off there rather than as an unreviewed
+   * 8px change on twenty surfaces at once.
+   */
+    card: { backgroundColor: t.colors.card, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.base, ...t.shadow.sm },
     pressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
     sectionRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.lg, marginBottom: t.spacing.sm },
     section: { fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right' },
-    skelCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
+    skelCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
     skelIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.surfaceAlt },
     skelLine: { height: 12, borderRadius: 6, backgroundColor: t.colors.surfaceAlt },
     errorWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: t.spacing['3xl'] },
     errorIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: t.colors.dangerSoft, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.base },
     errorTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'center' },
     errorMsg: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'center', marginTop: 4, maxWidth: 280 },
-    retryBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, marginTop: t.spacing.base, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 9, paddingHorizontal: 18 },
+    retryBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, marginTop: t.spacing.base, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 9, paddingHorizontal: 18 },
     retryText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
     empty: { alignItems: 'center', justifyContent: 'center', paddingVertical: t.spacing['3xl'] },
     emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.base },
     emptyTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'center' },
     emptyHint: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'center', marginTop: 4, maxWidth: 260 },
-    stat: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, ...t.shadow.md },
+    stat: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.primary, borderRadius: t.radius.card, padding: t.spacing.lg, ...t.shadow.md },
     statLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.onPrimary, opacity: 0.85, textAlign: 'right' },
-    statValue: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.onPrimary, textAlign: 'right', marginTop: 2 },
+    statValue: { fontFamily: t.fontFamily.bold, fontSize: 26, color: t.colors.onPrimary, textAlign: 'right', marginTop: 2 },
     statIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.12)', alignItems: 'center', justifyContent: 'center' },
-    row: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.md, marginBottom: t.spacing.sm },
+    row: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.md, marginBottom: t.spacing.sm },
     rowIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     rowText: { flex: 1 },
     rowTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },

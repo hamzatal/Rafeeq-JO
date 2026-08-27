@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { useAuth } from '../../src/lib/auth';
 import { LogoMark } from '../../src/components/Logo';
+import { Icon } from '../../src/components/Icon';
 
 export default function LoginPage() {
   const { login, verifyMfa } = useAuth();
@@ -71,25 +72,25 @@ export default function LoginPage() {
           <div className="flex items-center gap-3">
             <LogoMark size={52} />
             <div>
-              <div className="text-2xl font-extrabold text-brand-200 leading-tight">رفيق</div>
+              <div className="text-2xl font-bold text-brand-200 leading-tight">رفيق</div>
               <div className="text-xs text-white/60">مركز قيادة المنصّة</div>
             </div>
           </div>
 
           <div className="space-y-6 max-w-md">
-            <h1 className="text-3xl font-extrabold leading-snug">
+            <h1 className="text-3xl font-bold leading-snug">
               منصّة النقل الذكي للطلاب في الأردن
             </h1>
             <ul className="space-y-4">
               {[
-                { icon: 'verified_user', title: 'أمان أولاً', desc: 'كشف احتيال بالذكاء الاصطناعي + مركز سلامة ونزاعات.' },
-                { icon: 'account_balance_wallet', title: 'محفظة ودفع CliQ', desc: 'شحن موثّق بالـ AI مع ضمان حقّ المستخدم.' },
-                { icon: 'insights', title: 'رؤى ذكية', desc: 'تحليلات لحظية ومراقبة العمليات والرحلات.' },
-                { icon: 'support_agent', title: 'دعم مُدار بالـ AI', desc: 'فرز التذاكر والشكاوى وتوجيهها تلقائياً.' },
+                { icon: 'shield-check', title: 'أمان أولاً', desc: 'كشف احتيال بالذكاء الاصطناعي + مركز سلامة ونزاعات.' },
+                { icon: 'wallet', title: 'محفظة ودفع CliQ', desc: 'شحن موثّق بالـ AI مع ضمان حقّ المستخدم.' },
+                { icon: 'chart-line', title: 'رؤى ذكية', desc: 'تحليلات لحظية ومراقبة العمليات والرحلات.' },
+                { icon: 'headset', title: 'دعم مُدار بالـ AI', desc: 'فرز التذاكر والشكاوى وتوجيهها تلقائياً.' },
               ].map((f) => (
                 <li key={f.icon} className="flex items-start gap-3">
                   <div className="mt-0.5 w-9 h-9 shrink-0 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-brand-200 text-[20px]">{f.icon}</span>
+                    <Icon name={f.icon} size={20} className="text-brand-200" />
                   </div>
                   <div>
                     <div className="font-bold text-white">{f.title}</div>
@@ -107,8 +108,8 @@ export default function LoginPage() {
         <div className="flex items-center justify-center p-6 sm:p-10">
           <div className="w-full max-w-md rounded-2xl bg-white/95 backdrop-blur shadow-lift p-7 sm:p-9">
             <div className="text-center mb-6">
-              <div className="lg:hidden text-3xl font-extrabold text-primary mb-1">رفيق</div>
-              <div className="text-xl font-extrabold text-ink">تسجيل دخول الموظفين</div>
+              <div className="lg:hidden text-3xl font-bold text-primary mb-1">رفيق</div>
+              <div className="text-xl font-bold text-ink">تسجيل دخول الموظفين</div>
               <div className="text-sm muted-text mt-1">لوحة الإدارة — مركز القيادة</div>
             </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { dinarsFromFils } from '@rafeeq/shared';
+import { bareJod } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -60,7 +60,7 @@ export default function Dashboard() {
     }
   }, [approved, restoreAvailability]);
 
-  const jod = (fils: number) => dinarsFromFils(fils);
+  const jod = (fils: number) => bareJod(fils);
 
   const onSubmit = async () => {
     setError(null);
@@ -209,9 +209,9 @@ const makeStyles = (t: AppTheme) =>
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
     headerBrand: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md },
     headerBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.95)', alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
     avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    avatarText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
 
     overlayTop: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, gap: 12 },
     statusCard: { backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: t.colors.border, gap: 14, ...t.shadow.md },
@@ -219,14 +219,14 @@ const makeStyles = (t: AppTheme) =>
     onlineRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md },
     onlineTitleRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
     dot: { width: 10, height: 10, borderRadius: 5 },
-    onlineTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.text, textAlign: 'right' },
+    onlineTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right' },
     onlineHint: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
 
     statsRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingTop: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.colors.hairline },
     stat: { flex: 1, alignItems: 'center', gap: 3 },
     statInline: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
-    statVal: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text },
+    statVal: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.text },
     statLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
     statDivider: { width: StyleSheet.hairlineWidth, height: 34, backgroundColor: t.colors.border },
 
@@ -239,6 +239,6 @@ const makeStyles = (t: AppTheme) =>
     offlineText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
 
     statusRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.md, marginBottom: t.spacing.md },
-    dashName: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text, textAlign: 'right', flex: 1 },
+    dashName: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.text, textAlign: 'right', flex: 1 },
     submit: { marginTop: t.spacing.lg },
   });

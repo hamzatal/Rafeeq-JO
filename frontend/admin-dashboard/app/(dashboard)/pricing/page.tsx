@@ -92,7 +92,7 @@ export default function PricingPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-1">{t('pricing.title')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-1">{t('pricing.title')}</h1>
       <p className="text-sm text-muted mb-1">{t('pricing.intro')}</p>
       <p className="text-xs text-muted mb-4">{t('pricing.filsHint')}</p>
 

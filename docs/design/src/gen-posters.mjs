@@ -23,7 +23,16 @@ import {
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const BUILD = resolve(HERE, 'build');
-const OUT = resolve(HERE, '../Rafeeq-JO/marketing/posts');
+/*
+ * Output paths are relative to THIS file, which lives at `docs/design/src`.
+ *
+ * They used to read `resolve(HERE, '../Rafeeq-JO/...')` — a path that only resolves
+ * when the script is COPIED next to a checkout, which is how it was originally run.
+ * Run from its committed location, as `docs/design/README.md` instructs, it silently
+ * created a phantom `docs/design/src/Rafeeq-JO/` tree and left the real mockups
+ * untouched — so a regeneration looked like it had succeeded and changed nothing.
+ */
+const OUT = resolve(HERE, '../../../marketing/posts');
 
 /* ── shared fragments ─────────────────────────────────────────────────────── */
 
@@ -995,10 +1004,20 @@ add('62-depot-vs-door', twoVehiclePost({
 rmSync(BUILD, { recursive: true, force: true });
 mkdirSync(BUILD, { recursive: true });
 mkdirSync(OUT, { recursive: true });
-cpSync(resolve(HERE, '../Rafeeq-JO/docs/design/src/fonts'), resolve(BUILD, 'fonts'), { recursive: true });
+cpSync(resolve(HERE, 'fonts'), resolve(BUILD, 'fonts'), { recursive: true });
 
+/*
+ * `CHROMIUM_PATH` — for an environment where the browser is already on disk.
+ *
+ * Playwright pins an exact browser revision and refuses to launch anything else, so
+ * on a container that ships its own Chromium (or a CI image with the browsers baked
+ * in at a different revision) `chromium.launch()` fails with "Executable doesn't
+ * exist" and the only documented fix is a fresh download. Honouring an explicit path
+ * makes the design pipeline runnable there. Unset, behaviour is unchanged.
+ */
+const executablePath = process.env.CHROMIUM_PATH || undefined;
 const browser = await chromium.launch({
-  executablePath: '/opt/playwright/chromium-1232/chrome-linux64/chrome',
+  executablePath,
   args: ['--no-sandbox', '--font-render-hinting=none'],
 });
 

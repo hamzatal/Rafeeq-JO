@@ -25,7 +25,7 @@ export function Logo({
 
   const wordmark = (
     <View style={variant === 'stacked' ? { alignItems: 'center' } : undefined}>
-      <Text style={{ fontFamily: t.fontFamily.extrabold, fontSize: size * 0.62, color: t.colors.primary, lineHeight: size * 0.74 }}>
+      <Text style={{ fontFamily: t.fontFamily.bold, fontSize: size * 0.62, color: t.colors.primary, lineHeight: size * 0.74 }}>
         رفيق
       </Text>
       {tagline ? (

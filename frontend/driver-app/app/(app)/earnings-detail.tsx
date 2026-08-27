@@ -1,16 +1,17 @@
 import { useCallback, useMemo, useState } from 'react';
-import { DINAR, dinarsFromFils, dinarsOf, formatFils } from '@rafeeq/shared';
+import { DINAR, bareJod, formatJod } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import type { EarningsSummary } from '@rafeeq/shared';
 import { Icon } from '../../src/components/Icon';
+import { Num } from '../../src/components/Num';
 import { EmptyState, ErrorState, SkeletonList } from '../../src/components/ui';
 import { useI18n } from '../../src/i18n';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { api } from '../../src/lib/api';
 
-const jod = (fils: number) => dinarsFromFils(fils);
+const jod = (fils: number) => bareJod(fils);
 
 type Tab = 'daily' | 'weekly';
 
@@ -107,7 +108,7 @@ export default function EarningsDetail() {
                 <View key={tot.key} style={[s.totalCard, tot.navy && s.totalCardNavy]}>
                   <Text style={[s.totalLabel, tot.navy && s.totalLabelOn]}>{t(tot.labelKey)}</Text>
                   <Text style={[s.totalValue, tot.navy && s.totalValueOn]}>
-                    {data ? jod(data.totals[tot.key]) : dinarsOf(0)} <Text style={s.cur}>{DINAR}</Text>
+                    {data ? jod(data.totals[tot.key]) : bareJod(0)} <Text style={s.cur}>{DINAR}</Text>
                   </Text>
                   <Text style={[s.totalTrips, tot.navy && s.totalLabelOn]}>
                     {data ? data.totals[tot.tripsKey] : 0} {t('driver.tripsShort')}
@@ -158,9 +159,9 @@ export default function EarningsDetail() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={s.rowLabel}>{tab === 'weekly' ? `${t('driver.weekOf')} ${b.label}` : b.label}</Text>
-                    <Text style={s.rowMeta}>{b.trips} {t('driver.tripsShort')}</Text>
+                    <Num style={s.rowMeta} value={b.trips} unit={t('driver.tripsShort')} />
                   </View>
-                  <Text style={s.rowValue}>{formatFils(b.earnings_fils)}</Text>
+                  <Text style={s.rowValue}>{formatJod(b.earnings_fils)}</Text>
                 </View>
               ))}
               </>
@@ -177,26 +178,26 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.primary },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
     grid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.md },
-    totalCard: { flexGrow: 1, flexBasis: '46%', backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, ...t.shadow.sm },
+    totalCard: { flexGrow: 1, flexBasis: '46%', backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, ...t.shadow.sm },
     totalCardNavy: { backgroundColor: t.colors.primary, borderColor: t.colors.primary },
     totalLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right' },
     totalLabelOn: { color: 'rgba(255,255,255,0.75)' },
-    totalValue: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.text, textAlign: 'right', marginTop: 4 },
+    totalValue: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.text, textAlign: 'right', marginTop: 4 },
     totalValueOn: { color: '#FFFFFF' },
     cur: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.textSecondary },
     totalTrips: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 2 },
 
-    tabs: { flexDirection: 'row-reverse', backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: 4, marginTop: t.spacing.lg, gap: 4 },
-    tab: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: t.radius.sm },
+    tabs: { flexDirection: 'row-reverse', backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.control, padding: 4, marginTop: t.spacing.lg, gap: 4 },
+    tab: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: t.radius.control },
     tabActive: { backgroundColor: t.colors.surface, ...t.shadow.sm },
     tabText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },
     tabTextActive: { fontFamily: t.fontFamily.bold, color: t.colors.primary },
 
-    chartCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginTop: t.spacing.md },
+    chartCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginTop: t.spacing.md },
     chart: { flexDirection: 'row-reverse', alignItems: 'flex-end', justifyContent: 'space-between', height: 170, paddingTop: t.spacing.sm },
     barCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: 4 },
     bar: { width: '58%', backgroundColor: t.colors.accent, borderRadius: 6 },
@@ -204,9 +205,9 @@ const makeStyles = (t: AppTheme) =>
     barValue: { fontFamily: t.fontFamily.medium, fontSize: 9, color: t.colors.textSecondary },
     barLabel: { fontFamily: t.fontFamily.regular, fontSize: 10, color: t.colors.muted, marginTop: 2 },
 
-    row: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginTop: t.spacing.sm },
+    row: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginTop: t.spacing.sm },
     rowIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.accent + '1A', alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     rowLabel: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
     rowMeta: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 2 },
-    rowValue: { fontFamily: t.fontFamily.extrabold, fontSize: 15, color: t.colors.accent },
+    rowValue: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.accent },
   });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useT } from '../lib/i18n';
+import { Icon } from './Icon';
 
 /**
  * "We could not load this" — distinct from "there is nothing here".
@@ -30,7 +31,7 @@ export function LoadError({ onRetry }: { onRetry: () => void }) {
       role="alert"
       aria-live="polite"
     >
-      <span className="material-symbols-outlined text-[32px] text-danger">cloud_off</span>
+      <Icon name="cloud-off" size={32} className="text-danger" />
       <p className="font-semibold surface-text">{t('common.loadFailed')}</p>
       <p className="text-sm text-muted max-w-sm">{t('common.loadFailedHint')}</p>
       <button type="button" onClick={onRetry} className="btn-outline mt-1">

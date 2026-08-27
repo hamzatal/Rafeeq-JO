@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bareJod,
   DINAR,
   dinarsFromFils,
-  formatDinars,
-  formatFils,
-  formatFilsSigned,
+  formatJod,
+  formatJodSigned,
   isolateDigits,
   parseDinarsToFils,
 } from './money';
@@ -45,36 +45,55 @@ describe('bidi isolation', () => {
   it('keeps the sign attached to the number', () => {
     // Without isolation a leading hyphen is bidi-neutral and can end up trailing:
     // "1.050-" instead of "-1.050".
-    expect(bare(formatFilsSigned(-1050))).toBe(`\u22121.050 ${DINAR}`);
-    expect(bare(formatFilsSigned(10000))).toBe(`+10.000 ${DINAR}`);
+    expect(bare(formatJodSigned(-1050))).toBe(`\u22121.050 ${DINAR}`);
+    expect(bare(formatJodSigned(10000))).toBe(`+10.000 ${DINAR}`);
   });
 
   it('uses a real minus sign rather than a hyphen', () => {
-    expect(formatFilsSigned(-1)).toContain('\u2212');
-    expect(formatFilsSigned(-1)).not.toContain('-');
+    expect(formatJodSigned(-1)).toContain('\u2212');
+    expect(formatJodSigned(-1)).not.toContain('-');
   });
 
   it('puts the currency after the isolate so RTL places it left of the number', () => {
     // The currency must sit OUTSIDE the isolate. Inside it, the whole run becomes
     // LTR and the number precedes the currency, which is backwards in Arabic.
-    const out = formatFils(1500);
+    const out = formatJod(1500);
     expect(out.indexOf('\u2069')).toBeLessThan(out.indexOf(DINAR));
   });
 });
 
 describe('formatting entry points', () => {
   it('formats fils', () => {
-    expect(bare(formatFils(1999))).toBe(`1.999 ${DINAR}`);
+    expect(bare(formatJod(1999))).toBe(`1.999 ${DINAR}`);
   });
 
-  it('formats decimal dinars from API *_jod fields', () => {
-    expect(bare(formatDinars(1.999))).toBe(`1.999 ${DINAR}`);
-    expect(bare(formatDinars(12.5))).toBe(`12.500 ${DINAR}`);
+  /*
+   * The decimal-dinar entry points are GONE, not deprecated.
+   *
+   * `formatDinars(1.999)` and `formatJod(1999)` printed the same string from
+   * arguments a thousand times apart, and nothing could tell a mistake from an
+   * intent. This asserts the surface is the three fils functions and nothing else,
+   * because an alias that still compiles is the old API with a comment on it.
+   */
+  it('formats a bare amount for when the unit is already in the label', () => {
+    expect(bare(bareJod(1999))).toBe('1.999');
+    expect(bareJod(1999)).not.toContain(DINAR);
+  });
+
+  it('has no decimal-dinar entry point left', async () => {
+    const money = await import('./money');
+
+    expect(Object.keys(money).sort()).toEqual([
+      'DINAR', 'DINAR_DECIMALS', 'FILS_PER_DINAR',
+      'bareJod', 'dinarsFromFils', 'formatJod', 'formatJodSigned',
+      'isolateDigits', 'parseDinarsToFils',
+    ]);
   });
 
   it('does not emit NaN for bad input', () => {
-    expect(bare(formatFils(Number.NaN))).toBe(`0.000 ${DINAR}`);
-    expect(bare(formatDinars(Number.POSITIVE_INFINITY))).toBe(`0.000 ${DINAR}`);
+    expect(bare(formatJod(Number.NaN))).toBe(`0.000 ${DINAR}`);
+    expect(bare(formatJod(Number.POSITIVE_INFINITY))).toBe(`0.000 ${DINAR}`);
+    expect(bare(formatJodSigned(Number.NaN))).toBe(`+0.000 ${DINAR}`);
   });
 
   it('exposes isolateDigits for ranges and counts, not just money', () => {

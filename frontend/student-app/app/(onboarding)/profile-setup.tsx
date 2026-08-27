@@ -93,7 +93,7 @@ const makeStyles = (t: AppTheme) =>
     root: { flex: 1, backgroundColor: t.colors.background },
     safe: { flex: 1, paddingHorizontal: t.spacing.lg },
     content: { paddingTop: t.spacing.xl, paddingBottom: t.spacing.lg },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right' },
+    title: { fontFamily: t.fontFamily.bold, fontSize: 26, color: t.colors.text, textAlign: 'right' },
     body: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'right', marginTop: 8, marginBottom: t.spacing.xl },
     label: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.md },
     chips: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.sm },

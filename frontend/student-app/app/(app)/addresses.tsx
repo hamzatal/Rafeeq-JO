@@ -138,7 +138,7 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right' },
+    h1: { fontFamily: t.fontFamily.bold, fontSize: 26, color: t.colors.text, textAlign: 'right' },
     sub: { fontFamily: t.fontFamily.regular, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.base },
     formTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm },
     relLabel: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginBottom: 6 },
@@ -153,7 +153,7 @@ const makeStyles = (t: AppTheme) =>
     name: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
     actions: { flexDirection: 'row-reverse', gap: 8, marginTop: t.spacing.sm },
-    actionBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: t.radius.md, backgroundColor: t.colors.primarySoft },
+    actionBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: t.radius.control, backgroundColor: t.colors.primarySoft },
     deleteBtn: { backgroundColor: `${t.colors.danger}1A` },
     actionText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.primary },
   });

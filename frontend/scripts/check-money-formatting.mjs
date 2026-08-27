@@ -35,19 +35,19 @@ const RULES = [
     id: 'two-decimals',
     re: /\.toFixed\(\s*2\s*\)/,
     why: 'a dinar is 1000 fils, so amounts need 3 decimals — toFixed(2) rounds and shows a different amount',
-    fix: 'use formatFils / formatDinars / dinarsFromFils from @rafeeq/shared',
+    fix: 'use formatJod(fils) from @rafeeq/shared',
   },
   {
     id: 'raw-currency',
     re: /د\.أ/,
     why: 'a hand-written currency symbol has no bidi isolation, so the number and symbol can reorder',
-    fix: 'use formatFils / formatDinars, or the DINAR constant, from @rafeeq/shared',
+    fix: 'use formatJod(fils), or the DINAR constant, from @rafeeq/shared',
   },
   {
     id: 'hand-rolled-fils',
     re: /\/\s*1000\s*\)\s*\.toFixed\(/,
     why: 'converting fils to dinars by hand bypasses the single formatter',
-    fix: 'use formatFils / dinarsFromFils from @rafeeq/shared',
+    fix: 'use formatJod(fils) or bareJod(fils) from @rafeeq/shared',
   },
 
   /*
@@ -71,27 +71,46 @@ const RULES = [
     id: 'fils-division',
     re: /\/\s*1000\b(?![\s\S]{0,40}from '@rafeeq\/shared')/,
     why: 'dividing by 1000 by hand converts fils to dinars outside the one formatter',
-    fix: 'use formatFils / dinarsFromFils from @rafeeq/shared',
+    fix: 'use formatJod(fils) or bareJod(fils) from @rafeeq/shared',
     // The formatter itself and the two places that legitimately scale a fils value
-    // before handing it to `dinarsOf` are allowed by ALLOW_LINE below.
+    // are allowed by ALLOW_LINE below.
   },
   {
     id: 'rounded-money',
     re: /maximumFractionDigits:\s*[012]\b/,
     why: 'a dinar has three decimals; rounding to fewer displays an amount that is not the stored one',
-    fix: 'use formatFils / formatDinars from @rafeeq/shared',
+    fix: 'use formatJod(fils) from @rafeeq/shared',
   },
   {
     id: 'raw-jod-field',
     re: /\{\s*[\w.?]*(amount|price|balance|available|fare|total)_jod\s*\}/i,
     why: 'a *_jod field interpolated straight into JSX prints "4.5" instead of "4.500", unisolated',
-    fix: 'pass the matching *_fils value through formatFils, or dinarsOf() the _jod value',
+    fix: 'read the matching *_fils field and pass it to formatJod — there is no decimal-dinar formatter any more',
   },
   {
     id: 'latin-currency',
     re: /['"`]\s*JOD\s+?['"`]|>\s*JOD\s*</,
     why: 'the currency reads «د.أ» in both locales; a hardcoded Latin "JOD" is unlocalised and inconsistent',
     fix: 'use the DINAR constant from @rafeeq/shared',
+  },
+
+  /*
+   * The DELETED names.
+   *
+   * `money.ts` used to export seven formatters split by input unit — four of them
+   * taking decimal dinars. They were deleted rather than deprecated, because
+   * `formatDinars(1.999)` and `formatJod(1999)` print the same string from arguments
+   * a thousand times apart, and no reviewer can tell a mistake from an intent.
+   *
+   * This rule exists because deletion alone does not hold: the API still returns the
+   * `*_jod` mirror, so the next screen that needs a decimal formatter will write one
+   * locally and call it the obvious thing. Naming the old names keeps the door shut.
+   */
+  {
+    id: 'decimal-dinar-formatter',
+    re: /\b(formatDinars|formatDinarsSigned|dinarsOf|formatFils|formatFilsSigned)\s*\(/,
+    why: 'these took decimal dinars or were aliases for the fils functions; the split input unit is what made the wrong pairing silent',
+    fix: 'read the *_fils field and use formatJod / formatJodSigned / bareJod',
   },
 ];
 

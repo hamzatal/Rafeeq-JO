@@ -86,8 +86,8 @@ export function Button({
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    base: { height: 54, borderRadius: t.radius.lg, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.lg },
-    md: { height: 46, borderRadius: t.radius.md },
+    base: { height: 54, borderRadius: t.radius.card, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.lg },
+    md: { height: 46, borderRadius: t.radius.control },
     row: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
     primary: { backgroundColor: t.colors.primary },
     accent: { backgroundColor: t.colors.accent },

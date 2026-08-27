@@ -62,7 +62,7 @@ export default function DriverReview() {
 
       <div className="card flex items-center justify-between">
         <div>
-          <div className="text-xl font-extrabold surface-text">{driver.user?.full_name}</div>
+          <div className="text-xl font-bold surface-text">{driver.user?.full_name}</div>
           <div className="text-sm muted-text">{driver.user?.phone}</div>
         </div>
         <DriverStatusBadge status={driver.status} />

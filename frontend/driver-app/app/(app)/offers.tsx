@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { dinarsFromFils, formatFils, formatFilsSigned } from '@rafeeq/shared';
+import { bareJod, formatJod, formatJodSigned } from '@rafeeq/shared';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -13,7 +13,7 @@ import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useTheme, type AppTheme } from '../../src/theme';
 
-const jod = (fils: number) => dinarsFromFils(fils);
+const jod = (fils: number) => bareJod(fils);
 
 export default function Offers() {
   const { t, locale } = useI18n();
@@ -85,16 +85,16 @@ export default function Offers() {
                 <View style={s.earnings}>
                   <View style={s.earnRow}>
                     <Text style={s.earnLabel}>{t('driver.farePerSeat')}</Text>
-                    <Text style={s.earnValue}>{formatFils(trip.pricing.fare_fils)}</Text>
+                    <Text style={s.earnValue}>{formatJod(trip.pricing.fare_fils)}</Text>
                   </View>
                   <View style={s.earnRow}>
                     <Text style={s.earnLabel}>{t('driver.platformCommission')}</Text>
-                    <Text style={[s.earnValue, s.earnMinus]}>{formatFilsSigned(-trip.pricing.commission_fils)}</Text>
+                    <Text style={[s.earnValue, s.earnMinus]}>{formatJodSigned(-trip.pricing.commission_fils)}</Text>
                   </View>
                   <View style={s.earnDivider} />
                   <View style={s.earnRow}>
                     <Text style={s.earnNetLabel}>{t('driver.yourNetEarnings')}</Text>
-                    <Text style={s.earnNetValue}>{formatFils(trip.pricing.expected_captain_earnings_fils)}</Text>
+                    <Text style={s.earnNetValue}>{formatJod(trip.pricing.expected_captain_earnings_fils)}</Text>
                   </View>
                 </View>
               )}
@@ -111,19 +111,19 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
+    h1: { fontFamily: t.fontFamily.bold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
     cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, flex: 1, textAlign: 'right' },
     seats: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
     seatsText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
-    earnings: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: t.spacing.md, marginTop: t.spacing.md, gap: t.spacing.xs },
+    earnings: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.control, padding: t.spacing.md, marginTop: t.spacing.md, gap: t.spacing.xs },
     earnRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
     earnLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
     earnValue: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text },
     earnMinus: { color: t.colors.textSecondary },
     earnDivider: { height: StyleSheet.hairlineWidth, backgroundColor: t.colors.hairline, marginVertical: 2 },
     earnNetLabel: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text },
-    earnNetValue: { fontFamily: t.fontFamily.extrabold, fontSize: 17, color: t.colors.accent },
+    earnNetValue: { fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.accent },
     btn: { marginTop: t.spacing.sm },
   });

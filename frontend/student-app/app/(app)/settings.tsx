@@ -186,15 +186,15 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 32, lineHeight: 40, color: t.colors.primary },
     avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    avatarText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
     section: { fontFamily: t.fontFamily.semibold, fontSize: 24, lineHeight: 32, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.md },
 
     // General rows
-    row: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.lg, marginBottom: t.spacing.md, ...t.shadow.sm },
+    row: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.surface, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.lg, marginBottom: t.spacing.md, ...t.shadow.sm },
     rowDanger: { backgroundColor: t.colors.dangerSoft, borderColor: t.colors.dangerSoft },
     rowLeft: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, flex: 1 },
     rowIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
@@ -204,14 +204,14 @@ const makeStyles = (t: AppTheme) =>
     rowSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
 
     // Support cards
-    supportCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, minHeight: 128, alignItems: 'center', justifyContent: 'center', gap: t.spacing.sm, marginBottom: t.spacing.md, ...t.shadow.sm },
+    supportCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.border, minHeight: 128, alignItems: 'center', justifyContent: 'center', gap: t.spacing.sm, marginBottom: t.spacing.md, ...t.shadow.sm },
     supportIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
     supportIconAccent: { backgroundColor: t.colors.accentSoft },
     supportIconPrimary: { backgroundColor: t.colors.surfaceHighest },
     supportLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text },
 
     // Lost & found (AI) — navy gradient-approx card with decorative blob
-    lostCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.primaryContainer, minHeight: 128, alignItems: 'center', justifyContent: 'center', gap: t.spacing.sm, marginBottom: t.spacing.md, overflow: 'hidden', ...t.shadow.md },
+    lostCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.primaryContainer, minHeight: 128, alignItems: 'center', justifyContent: 'center', gap: t.spacing.sm, marginBottom: t.spacing.md, overflow: 'hidden', ...t.shadow.md },
     lostBlob: { position: 'absolute', top: -16, right: -16, width: 64, height: 64, borderRadius: 32, backgroundColor: t.colors.accent, opacity: 0.2 },
     lostIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
     lostTitle: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.onPrimary },
@@ -220,7 +220,7 @@ const makeStyles = (t: AppTheme) =>
     // Legal
     legalSection: { marginTop: t.spacing.lg, paddingTop: t.spacing.base, borderTopWidth: 1, borderTopColor: t.colors.border },
     legalHeading: { fontFamily: t.fontFamily.regular, fontSize: 18, lineHeight: 28, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.sm },
-    legalRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 8, borderRadius: t.radius.md },
+    legalRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 8, borderRadius: t.radius.control },
     legalText: { fontFamily: t.fontFamily.regular, fontSize: 16, color: t.colors.text },
 
     // Logout

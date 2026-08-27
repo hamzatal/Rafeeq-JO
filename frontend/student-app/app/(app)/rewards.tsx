@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { formatFils, formatFilsSigned } from '@rafeeq/shared';
+import { formatJod, formatJodSigned } from '@rafeeq/shared';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { RewardRedemptionOption, RewardSummary } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
@@ -30,7 +30,7 @@ export default function Rewards() {
     setBusy(true);
     try {
       const r = await api.rewards.redeemToWallet(points);
-      setMsg({ text: `${t('rewards.redeemed')} ${formatFilsSigned(r.credited_fils)}`, ok: true });
+      setMsg({ text: `${t('rewards.redeemed')} ${formatJodSigned(r.credited_fils)}`, ok: true });
       load();
     } catch (e) {
       setMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('rewards.insufficient'), ok: false });
@@ -80,7 +80,7 @@ export default function Rewards() {
                   style={[s.opt, !affordable && s.optDisabled]}
                 >
                   <Text style={s.optPoints}>{o.points}</Text>
-                  <Text style={s.optReward}>{formatFils(o.credit_fils)}</Text>
+                  <Text style={s.optReward}>{formatJod(o.credit_fils)}</Text>
                 </Pressable>
               );
             })}
@@ -93,9 +93,9 @@ export default function Rewards() {
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 24, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
-    card: { backgroundColor: t.colors.primary, borderRadius: t.radius.lg, padding: t.spacing.xl, alignItems: 'center', marginBottom: t.spacing.lg },
-    pts: { fontFamily: t.fontFamily.extrabold, fontSize: 48, color: t.colors.onPrimary },
+    h1: { fontFamily: t.fontFamily.bold, fontSize: 24, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
+    card: { backgroundColor: t.colors.primary, borderRadius: t.radius.card, padding: t.spacing.xl, alignItems: 'center', marginBottom: t.spacing.lg },
+    pts: { fontFamily: t.fontFamily.bold, fontSize: 48, color: t.colors.onPrimary },
     ptsLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.onPrimary, opacity: 0.9 },
     tierPill: { marginTop: t.spacing.base, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: t.spacing.lg, paddingVertical: 6, borderRadius: 999 },
     tierText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onPrimary },
@@ -104,8 +104,8 @@ const makeStyles = (t: AppTheme) =>
     metaValue: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     section: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm },
     optsWrap: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.sm },
-    opt: { backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: t.spacing.base, paddingHorizontal: t.spacing.lg, alignItems: 'center', minWidth: 90 },
+    opt: { backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: t.spacing.base, paddingHorizontal: t.spacing.lg, alignItems: 'center', minWidth: 90 },
     optDisabled: { opacity: 0.4, borderColor: t.colors.border },
-    optPoints: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.primary },
+    optPoints: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary },
     optReward: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.textSecondary, marginTop: 2 },
   });

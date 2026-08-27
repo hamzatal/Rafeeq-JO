@@ -168,10 +168,10 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text },
+    title: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.text },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
     actions: { gap: t.spacing.md, marginBottom: t.spacing.base },
     codeInput: { textAlign: 'center', letterSpacing: 6, fontSize: 20, marginVertical: t.spacing.sm },
-    pax: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
+    pax: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', backgroundColor: t.colors.card, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.sm },
     paxId: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text },
   });

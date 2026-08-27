@@ -5,6 +5,7 @@ import type { User } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
+import { Icon } from '../../../src/components/Icon';
 
 type StaffRole = { name: string; label_ar: string; label_en: string };
 
@@ -50,9 +51,9 @@ export default function AdminsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-extrabold surface-text">{t('admins.title')}</h1>
+        <h1 className="text-2xl font-bold surface-text">{t('admins.title')}</h1>
         <button onClick={() => setCreating(true)} className="btn-primary">
-          <span className="material-symbols-outlined text-[18px]">person_add</span>
+          <Icon name="user-plus" size={18} />
           {t('admins.add')}
         </button>
       </div>
@@ -173,7 +174,7 @@ function StaffModal({
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold surface-text">{isEdit ? t('admins.edit') : t('admins.add')}</h2>
           <button type="button" onClick={onClose} className="text-muted hover:text-danger">
-            <span className="material-symbols-outlined">close</span>
+            <Icon name="x" />
           </button>
         </div>
         <div className="grid gap-4">

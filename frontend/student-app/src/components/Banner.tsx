@@ -30,6 +30,6 @@ export function Banner({ message, variant = 'error' }: BannerProps) {
 
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
-    box: { borderWidth: 1, borderRadius: t.radius.md, paddingVertical: t.spacing.sm, paddingHorizontal: t.spacing.base, marginBottom: t.spacing.base },
+    box: { borderWidth: 1, borderRadius: t.radius.control, paddingVertical: t.spacing.sm, paddingHorizontal: t.spacing.base, marginBottom: t.spacing.base },
     text: { fontFamily: t.fontFamily.medium, fontSize: 14, textAlign: 'right' },
   });

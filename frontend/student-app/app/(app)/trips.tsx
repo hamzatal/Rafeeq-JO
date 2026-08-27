@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -120,7 +120,7 @@ export default function Trips() {
   const fmtDate = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString(locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
   const fareJod = (p: TripPassenger) => {
     const fils = p.trip?.pricing?.fare_fils;
-    return fils != null ? formatFils(fils) : null;
+    return fils != null ? formatJod(fils) : null;
   };
 
   return (
@@ -323,9 +323,9 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 32, lineHeight: 40, color: t.colors.primary },
     avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    avatarText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     section: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
 
@@ -344,13 +344,13 @@ const makeStyles = (t: AppTheme) =>
     cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, flex: 1, textAlign: 'right' },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
 
-    codeBox: { backgroundColor: t.colors.primarySoft, borderRadius: t.radius.md, padding: t.spacing.sm, marginTop: t.spacing.sm, alignItems: 'center' },
+    codeBox: { backgroundColor: t.colors.primarySoft, borderRadius: t.radius.control, padding: t.spacing.sm, marginTop: t.spacing.sm, alignItems: 'center' },
     codeLabel: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.textSecondary },
-    code: { fontFamily: t.fontFamily.extrabold, fontSize: 28, letterSpacing: 6, color: t.colors.primary },
-    liveMap: { borderRadius: t.radius.md, overflow: 'hidden', marginTop: t.spacing.sm },
+    code: { fontFamily: t.fontFamily.bold, fontSize: 28, letterSpacing: 6, color: t.colors.primary },
+    liveMap: { borderRadius: t.radius.control, overflow: 'hidden', marginTop: t.spacing.sm },
 
     actionRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginTop: t.spacing.md },
-    ghostBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.md, paddingVertical: 9, paddingHorizontal: 14 },
+    ghostBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.control, paddingVertical: 9, paddingHorizontal: 14 },
     ghostText: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.primary },
 
     // History trip card (_17)
@@ -376,7 +376,7 @@ const makeStyles = (t: AppTheme) =>
     routeTime: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
     starsInline: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 12 },
-    rateBtn: { backgroundColor: t.colors.primary, borderRadius: t.radius.sm, paddingVertical: 6, paddingHorizontal: 12, marginRight: 6 },
+    rateBtn: { backgroundColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 6, paddingHorizontal: 12, marginRight: 6 },
     rateText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.onPrimary },
 
     cardActions: { flexDirection: 'row-reverse', gap: 8, paddingTop: 8 },
@@ -387,6 +387,6 @@ const makeStyles = (t: AppTheme) =>
 
     seats: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
     seatsText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary },
-    bookBtn: { marginTop: t.spacing.sm, backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 12, alignItems: 'center' },
+    bookBtn: { marginTop: t.spacing.sm, backgroundColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 12, alignItems: 'center' },
     bookText: { color: t.colors.onPrimary, fontFamily: t.fontFamily.bold, fontSize: 14 },
   });

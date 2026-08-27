@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DINAR, dinarsOf, formatDinars, formatFils } from '@rafeeq/shared';
+import { DINAR, bareJod, formatJod } from '@rafeeq/shared';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -25,7 +25,8 @@ export default function Checkout() {
   const params = useLocalSearchParams<{
     planId: string;
     name?: string;
-    price?: string;
+    /** Integer fils. Was `price` in decimal dinars — see the note below. */
+    priceFils?: string;
     includes?: string;
   }>();
 
@@ -34,16 +35,22 @@ export default function Checkout() {
   const [uploading, setUploading] = useState(false);
   const [payment, setPayment] = useState<PaymentRequest | null>(null);
   const [instructions, setInstructions] = useState<CliqInstructions | null>(null);
-  const [availableJod, setAvailableJod] = useState<number | null>(null);
+  const [availableFils, setAvailableFils] = useState<number | null>(null);
   const [heldFils, setHeldFils] = useState<number>(0);
   const [proofFile, setProofFile] = useState<{ uri: string } | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  const priceJod = Number(params.price ?? '0');
-  // Formatted here rather than interpolated raw: `params.price` arrives as a URL
-  // string, so `4.5` would print as "4.5" on the one screen where the student is
-  // deciding whether to pay. Money is always three decimals, always isolated.
-  const priceLabel = `${dinarsOf(priceJod)} ${DINAR}`;
+  /*
+   * FILS through the URL, not decimal dinars.
+   *
+   * This used to receive `price` as a decimal string ("4.5") and render it raw,
+   * which is how a plan priced at 4.500 د.أ appeared as "4.5" on the one screen
+   * where the student decides whether to pay. Fils is the unit the ledger, every
+   * backend column and every other screen uses; carrying a second unit across a
+   * navigation boundary is where the two drift.
+   */
+  const priceFils = Number(params.priceFils ?? '0');
+  const priceLabel = formatJod(priceFils);
 
   /*
    * Gated on AVAILABLE, not on the gross balance.
@@ -54,16 +61,16 @@ export default function Checkout() {
    * button enabled, tapped it, and got a bare rejection with no explanation of
    * where the missing dinar went.
    */
-  const canWallet = availableJod != null && availableJod >= priceJod && priceJod > 0;
+  const canWallet = availableFils != null && availableFils >= priceFils && priceFils > 0;
 
   useEffect(() => {
     api.wallet
       .show()
       .then((w) => {
-        setAvailableJod(w.available_jod);
+        setAvailableFils(w.available_fils);
         setHeldFils(w.held_fils);
       })
-      .catch(() => setAvailableJod(null));
+      .catch(() => setAvailableFils(null));
   }, []);
 
   // Pay directly from wallet balance → instant activation.
@@ -180,10 +187,10 @@ export default function Checkout() {
               <View style={{ flex: 1 }}>
                 <Text style={s.methodTitle}>{t('checkout.payFromWallet')}</Text>
                 <Text style={[s.methodSub, !canWallet && { color: theme.colors.danger }]}>
-                  {availableJod == null
+                  {availableFils == null
                     ? '—'
                     : canWallet
-                      ? `${t('checkout.walletBalance')}: ${formatDinars(availableJod)}`
+                      ? `${t('checkout.walletBalance')}: ${formatJod(availableFils)}`
                       : t('checkout.insufficient')}
                 </Text>
                 {/*
@@ -193,7 +200,7 @@ export default function Checkout() {
                 */}
                 {heldFils > 0 && (
                   <Text style={s.methodHeld}>
-                    {t('checkout.heldNote')}: {formatFils(heldFils)}
+                    {t('checkout.heldNote')}: {formatJod(heldFils)}
                   </Text>
                 )}
               </View>
@@ -236,7 +243,7 @@ export default function Checkout() {
                 <View>
                   <Text style={s.orderLabel}>{t('checkout.amountDue')}</Text>
                   <Text style={s.amountBig}>
-                    {dinarsOf(Number(instructions.amount_jod))} <Text style={s.amountCur}>{DINAR}</Text>
+                    {bareJod(instructions.amount_fils)} <Text style={s.amountCur}>{DINAR}</Text>
                   </Text>
                 </View>
                 {expiryText ? (
@@ -342,17 +349,17 @@ const makeStyles = (t: AppTheme) =>
     appbar: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
     appbarStart: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm },
     appbarBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    appbarTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 28, lineHeight: 36, color: t.colors.primary },
+    appbarTitle: { fontFamily: t.fontFamily.bold, fontSize: 28, lineHeight: 36, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
-    card: { backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.sm },
+    h1: { fontFamily: t.fontFamily.bold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
+    card: { backgroundColor: t.colors.card, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.lg, marginBottom: t.spacing.base, ...t.shadow.sm },
     cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm },
     cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: t.spacing.sm },
     totalRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.sm, paddingTop: t.spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.colors.border },
     totalLabel: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
-    totalValue: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.primary },
+    totalValue: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary },
     choose: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.sm },
-    method: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.md, ...t.shadow.sm },
+    method: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.card, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.border, padding: t.spacing.base, marginBottom: t.spacing.md, ...t.shadow.sm },
     methodOn: { borderColor: t.colors.primary },
     methodIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
     methodTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right' },
@@ -363,7 +370,7 @@ const makeStyles = (t: AppTheme) =>
     pressed: { opacity: 0.9 },
     doneWrap: { alignItems: 'center', paddingTop: t.spacing.xl, gap: t.spacing.sm },
     doneIcon: { width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm },
-    doneTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.text, textAlign: 'center' },
+    doneTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.text, textAlign: 'center' },
     doneBody: { fontFamily: t.fontFamily.regular, fontSize: 14, lineHeight: 22, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 320, marginBottom: t.spacing.base },
 
     // _10 order/instructions/proof
@@ -373,7 +380,7 @@ const makeStyles = (t: AppTheme) =>
     receiptIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     cardDivider: { height: StyleSheet.hairlineWidth, backgroundColor: t.colors.border, marginVertical: t.spacing.base },
     amountRow: { flexDirection: 'row-reverse', alignItems: 'flex-end', justifyContent: 'space-between' },
-    amountBig: { fontFamily: t.fontFamily.extrabold, fontSize: 40, lineHeight: 52, color: t.colors.primary, textAlign: 'right', marginTop: 2 },
+    amountBig: { fontFamily: t.fontFamily.bold, fontSize: 40, lineHeight: 52, color: t.colors.primary, textAlign: 'right', marginTop: 2 },
     amountCur: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     validityCol: { alignItems: 'flex-start' },
     validityRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 4 },
@@ -382,17 +389,17 @@ const makeStyles = (t: AppTheme) =>
 
     cardHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: t.spacing.sm },
     instrText: { fontFamily: t.fontFamily.regular, fontSize: 14, lineHeight: 22, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.md },
-    aliasBox: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', gap: t.spacing.md, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.md, padding: t.spacing.base },
+    aliasBox: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', gap: t.spacing.md, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.control, padding: t.spacing.base },
     aliasLabel: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right' },
-    aliasValue: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary, textAlign: 'right', marginTop: 2 },
+    aliasValue: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary, textAlign: 'right', marginTop: 2 },
     aliasCopy: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
 
-    upload: { borderWidth: 1.5, borderColor: t.colors.border, borderStyle: 'dashed', borderRadius: t.radius.md, paddingVertical: t.spacing.lg, alignItems: 'center', gap: 6, overflow: 'hidden', marginBottom: t.spacing.md },
+    upload: { borderWidth: 1.5, borderColor: t.colors.border, borderStyle: 'dashed', borderRadius: t.radius.control, paddingVertical: t.spacing.lg, alignItems: 'center', gap: 6, overflow: 'hidden', marginBottom: t.spacing.md },
     uploadIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
     uploadHint: { fontFamily: t.fontFamily.semibold, fontSize: 13, color: t.colors.text },
     uploadTypes: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted },
-    uploadPreview: { width: '100%', height: 150, borderRadius: t.radius.sm },
-    aiNote: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md, borderWidth: 1, borderColor: t.colors.accentSoft, borderRadius: t.radius.md, padding: t.spacing.md, backgroundColor: t.colors.surfaceAlt, overflow: 'hidden' },
+    uploadPreview: { width: '100%', height: 150, borderRadius: t.radius.control },
+    aiNote: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md, borderWidth: 1, borderColor: t.colors.accentSoft, borderRadius: t.radius.control, padding: t.spacing.md, backgroundColor: t.colors.surfaceAlt, overflow: 'hidden' },
     aiEdge: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 4, backgroundColor: t.colors.accent },
     aiIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
     aiTitle: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.text, textAlign: 'right' },
