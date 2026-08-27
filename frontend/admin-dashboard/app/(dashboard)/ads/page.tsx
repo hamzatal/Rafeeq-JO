@@ -121,11 +121,11 @@ export default function AdsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('ads.colTitle')}</th>
-                <th className="text-right p-3 font-medium">{t('ads.colPlacement')}</th>
-                <th className="text-right p-3 font-medium">{t('ads.colOrder')}</th>
-                <th className="text-right p-3 font-medium">{t('ads.colStatus')}</th>
-                <th className="text-right p-3 font-medium">{t('ads.colActions')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('ads.colTitle')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('ads.colPlacement')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('ads.colOrder')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('ads.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('ads.colActions')}</th>
               </tr>
             </thead>
             <tbody>

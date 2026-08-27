@@ -4,13 +4,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Subscription, SubscriptionPlan } from '@rafeeq/shared';
-import { EmptyState, SectionTitle, ErrorState } from '../../src/components/ui';
-import { Num } from '../../src/components/Num';
-import { ListSkeleton } from '../../src/components/kit';
-import { Icon } from '../../src/components/Icon';
+import { EmptyState, ErrorState, Icon, ListSkeleton, Num, SectionTitle, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Subscriptions() {
   const { t } = useI18n();
@@ -65,7 +61,7 @@ export default function Subscriptions() {
                 <View style={s.premiumTop}>
                   <View style={{ flex: 1 }}>
                     <View style={[s.activePill, !sub.usable && s.warnPill]}>
-                      <Icon name={sub.usable ? 'check-circle' : 'clock'} size={13} color={theme.colors.primary} />
+                      <Icon name={sub.usable ? 'circle-check' : 'clock'} size={13} color={theme.colors.primary} />
                       <Text style={s.activePillText}>{sub.status_label}</Text>
                     </View>
                     <Text style={s.premiumTitle} numberOfLines={1}>{sub.plan?.name ?? t('subscriptions.defaultName')}</Text>

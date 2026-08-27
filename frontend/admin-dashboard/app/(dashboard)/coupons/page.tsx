@@ -119,13 +119,13 @@ export default function CouponsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('coupons.colCode')}</th>
-                <th className="text-right p-3 font-medium">{t('coupons.colValue')}</th>
-                <th className="text-right p-3 font-medium">{t('coupons.colScope')}</th>
-                <th className="text-right p-3 font-medium">{t('coupons.colUsage')}</th>
-                <th className="text-right p-3 font-medium">{t('coupons.colExpiry')}</th>
-                <th className="text-right p-3 font-medium">{t('coupons.colStatus')}</th>
-                <th className="p-3"></th>
+                <th scope="col" className="text-right p-3 font-medium">{t('coupons.colCode')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('coupons.colValue')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('coupons.colScope')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('coupons.colUsage')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('coupons.colExpiry')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('coupons.colStatus')}</th>
+                <th scope="col" className="p-3"></th>
               </tr>
             </thead>
             <tbody>

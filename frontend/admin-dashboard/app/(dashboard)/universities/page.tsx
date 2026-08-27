@@ -70,11 +70,11 @@ export default function UniversitiesPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('universities.colName')}</th>
-                <th className="text-right p-3 font-medium">{t('universities.colCode')}</th>
-                <th className="text-right p-3 font-medium">{t('universities.colCity')}</th>
-                <th className="text-right p-3 font-medium">{t('universities.colStatus')}</th>
-                <th className="p-3"></th>
+                <th scope="col" className="text-right p-3 font-medium">{t('universities.colName')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('universities.colCode')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('universities.colCity')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('universities.colStatus')}</th>
+                <th scope="col" className="p-3"></th>
               </tr>
             </thead>
             <tbody>

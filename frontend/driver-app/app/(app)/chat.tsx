@@ -4,11 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { ChatMessage } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Banner } from '../../src/components/Banner';
-import { Icon } from '../../src/components/Icon';
+import { Banner, Icon, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const POLL_MS = 4000;
 
@@ -88,7 +86,7 @@ export default function Chat() {
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.header}>
-        <Pressable onPress={() => router.back()} style={s.backBtn}>
+        <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('a11y.back')} style={s.backBtn}>
           <Icon name="chevron-right" size={24} color={theme.colors.text} />
         </Pressable>
         <Text style={s.headerTitle} numberOfLines={1}>{params.title ?? t('chat.title')}</Text>
@@ -128,7 +126,7 @@ export default function Chat() {
             placeholderTextColor={theme.colors.muted}
             multiline
           />
-          <Pressable onPress={send} disabled={sending || !text.trim()} style={[s.sendBtn, (sending || !text.trim()) && s.sendDisabled]}>
+          <Pressable onPress={send} accessibilityRole="button" accessibilityLabel={t('a11y.send')} disabled={sending || !text.trim()} style={[s.sendBtn, (sending || !text.trim()) && s.sendDisabled]}>
             <Icon name="send" size={20} color={theme.colors.onPrimary} />
           </Pressable>
         </View>

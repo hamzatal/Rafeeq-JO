@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../lib/api';
-import { getCurrentLocation } from '../lib/permissions';
+import { getCurrentLocation } from '@rafeeq/ui';
 
 /**
  * Captain availability (Online/Offline).

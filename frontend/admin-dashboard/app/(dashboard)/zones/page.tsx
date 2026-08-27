@@ -142,13 +142,13 @@ export default function ZonesPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('zones.colZone')}</th>
-                <th className="text-right p-3 font-medium">{t('zones.colCity')}</th>
-                <th className="text-right p-3 font-medium">{t('zones.colCenter')}</th>
-                <th className="text-right p-3 font-medium">{t('zones.colRadius')}</th>
-                <th className="text-right p-3 font-medium">{t('zones.colGeofence')}</th>
-                <th className="text-right p-3 font-medium">{t('zones.colStatus')}</th>
-                <th className="text-right p-3 font-medium">{t('zones.colActions')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zones.colZone')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zones.colCity')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zones.colCenter')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zones.colRadius')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zones.colGeofence')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zones.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zones.colActions')}</th>
               </tr>
             </thead>
             <tbody>

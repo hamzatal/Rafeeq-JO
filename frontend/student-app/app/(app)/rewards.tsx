@@ -3,11 +3,9 @@ import { formatJod, formatJodSigned } from '@rafeeq/shared';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { RewardRedemptionOption, RewardSummary } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Screen } from '../../src/components/Screen';
-import { Banner } from '../../src/components/Banner';
+import { Banner, Screen, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Rewards() {
   const { t } = useI18n();

@@ -92,13 +92,13 @@ export default function RoutesPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('routes.colRoute')}</th>
-                <th className="text-right p-3 font-medium">{t('routes.colUniversity')}</th>
-                <th className="text-right p-3 font-medium">{t('routes.colPrice')}</th>
-                <th className="text-right p-3 font-medium">{t('routes.colCapacity')}</th>
-                <th className="text-right p-3 font-medium">{t('routes.colDeparture')}</th>
-                <th className="text-right p-3 font-medium">{t('routes.colStatus')}</th>
-                <th className="p-3"></th>
+                <th scope="col" className="text-right p-3 font-medium">{t('routes.colRoute')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('routes.colUniversity')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('routes.colPrice')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('routes.colCapacity')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('routes.colDeparture')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('routes.colStatus')}</th>
+                <th scope="col" className="p-3"></th>
               </tr>
             </thead>
             <tbody>

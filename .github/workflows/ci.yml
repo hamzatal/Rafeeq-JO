@@ -168,17 +168,22 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Typecheck shared packages + apps
-        run: |
-          npm run typecheck --workspace=packages/tokens
-          npm run typecheck --workspace=packages/shared
-          npm run typecheck --workspace=packages/api-client
-          npm run typecheck --workspace=student-app
-          npm run typecheck --workspace=driver-app
-          npm run typecheck --workspace=admin-dashboard
+      - name: Typecheck every workspace
+        run: npm run typecheck
 
-      - name: Lint admin dashboard
-        run: npm run lint --workspace=admin-dashboard
+      # Two configs: `next/core-web-vitals` for the dashboard, and a deliberately
+      # small one at the frontend root for the Expo apps and the shared packages.
+      #
+      # The root config did not exist before phase 7 — `npm run lint` there was
+      # `eslint . --ext .ts,.tsx` with nothing above it, so it exited with
+      # "couldn't find a configuration file". A script that had never run.
+      #
+      # `react-hooks/rules-of-hooks` found a real bug on its first execution:
+      # `LiveMap` called three hooks AFTER an early `return` for the web branch. It
+      # never crashed, because `Platform.OS` is constant per process, which is
+      # exactly why it survived review.
+      - name: Lint
+        run: npm run lint
 
       # ── Design gates ──────────────────────────────────────────────────────
       #
@@ -205,13 +210,33 @@ jobs:
       # where prices are SET. And a hand-written "د.أ" has no bidi isolation, so it
       # can reorder against its number. Both are unrepresentable outside
       # @rafeeq/shared now, and this gate keeps them that way.
-      - name: Design token gates
+      #
+      # `check:invariants` holds five HARD ZEROS that phase 7 established, and the
+      # difference from the budgets above is deliberate: these are at zero today, so
+      # asserting zero costs nothing and the first regression is caught by whoever
+      # causes it.
+      #
+      #   unlabelled-icon-button  28 pressables had an icon as their only child and
+      #                           no accessibilityLabel. That word appeared ZERO
+      #                           times in either app; the product was unusable
+      #                           without sight.
+      #   th-without-scope        156 admin table headers had no scope, so a
+      #                           9-column payouts table read as 9 unlabelled
+      #                           numbers per row.
+      #   layer-violation         admin-dashboard must never reach @rafeeq/ui or
+      #                           react-native, and packages must never import an
+      #                           app — that direction is what forced the two src/
+      #                           trees to be copies.
+      #   empty-without-error     seven screens rendered "there is nothing here"
+      #                           when the request had FAILED, including the wallet
+      #                           ledger and the emergency-contacts list.
+      #   duplicated-app-file     nine files were byte-identical across the two
+      #                           apps, 1,128 lines including a 510-line LiveMap.
+      - name: Design and structural gates
         run: npm run check
 
-      - name: Shared package tests
-        run: |
-          npm run test --workspace=packages/shared
-          npm run test --workspace=packages/tokens
+      - name: Frontend tests
+        run: npm run test
 
       # A typecheck does NOT catch a bundler failure. Re-exporting the generated
       # Lucide registry from the @rafeeq/tokens barrel typechecked cleanly on all

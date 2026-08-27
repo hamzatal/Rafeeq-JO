@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../src/store/auth';
 import { usePrefs } from '../src/store/prefs';
-import { BrandSplash } from '../src/components/BrandSplash';
+import { BrandSplash } from '@rafeeq/ui';
+import { useI18n } from '../src/i18n';
 
 /** Entry gate: splash → onboarding (first run) → auth-based routing. */
 export default function Index() {
+  const { t } = useI18n();
   const status = useAuth((s) => s.status);
   const introSeen = usePrefs((s) => s.introSeen);
   const [minTimePassed, setMinTimePassed] = useState(false);
@@ -15,10 +17,11 @@ export default function Index() {
     return () => clearTimeout(timer);
   }, []);
 
-  const booting = status === 'idle' || status === 'loading';
+  const booting = status === 'idle';
 
   if (booting || !minTimePassed) {
-    return <BrandSplash />;
+    /* Decision 15: light for the student, dark for the captain. */
+    return <BrandSplash tone="light" wordmark={t('common.appName')} slogan={t('brand.splashSlogan')} />;
   }
 
   // First run: show the intro + permission priming before auth.

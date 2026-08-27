@@ -6,10 +6,7 @@ import { useRouter } from 'expo-router';
 import type { University } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
-import { Input } from '../../src/components/Input';
-import { Button } from '../../src/components/Button';
-import { Chip, Skeleton } from '../../src/components/kit';
+import { Button, Chip, Input, Skeleton, useTheme, type AppTheme } from '@rafeeq/ui';
 
 export default function ProfileSetup() {
   const { t, locale } = useI18n();

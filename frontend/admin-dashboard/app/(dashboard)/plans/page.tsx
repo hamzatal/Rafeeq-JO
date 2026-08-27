@@ -85,13 +85,13 @@ export default function PlansPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('plans.colPlan')}</th>
-                <th className="text-right p-3 font-medium">{t('plans.colType')}</th>
-                <th className="text-right p-3 font-medium">{t('plans.colPrice')}</th>
-                <th className="text-right p-3 font-medium">{t('plans.colRides')}</th>
-                <th className="text-right p-3 font-medium">{t('plans.colDuration')}</th>
-                <th className="text-right p-3 font-medium">{t('plans.colStatus')}</th>
-                <th className="p-3"></th>
+                <th scope="col" className="text-right p-3 font-medium">{t('plans.colPlan')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('plans.colType')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('plans.colPrice')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('plans.colRides')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('plans.colDuration')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('plans.colStatus')}</th>
+                <th scope="col" className="p-3"></th>
               </tr>
             </thead>
             <tbody>

@@ -1,16 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { SupportTicket, TicketCategory } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Input } from '../../src/components/Input';
-import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, Badge } from '../../src/components/ui';
-import { Icon } from '../../src/components/Icon';
+import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, listLabels, statusFromError, useTheme, type AppTheme, type ListStatus } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const CATEGORIES: TicketCategory[] = ['subscription', 'trip', 'payment', 'technical', 'other'];
 
@@ -27,17 +22,25 @@ export default function Support() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  const load = async () => {
+  const [status, setStatus] = useState<ListStatus>({ kind: 'loading' });
+
+  /*
+   * This was `catch { /* silent *\/ }`, and the cost was concrete: a failed request
+   * left `items` empty, so the screen said «لا تذاكر» to a student who had opened one.
+   */
+  const load = useCallback(async () => {
+    setStatus({ kind: 'loading' });
     try {
       setItems(await api.support.mine());
-    } catch {
-      /* silent */
+      setStatus({ kind: 'ready' });
+    } catch (e) {
+      setStatus(statusFromError(e));
     }
-  };
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+  }, [load]);
 
   const submit = async () => {
     if (subject.trim().length < 3 || body.trim().length < 3) return;
@@ -62,7 +65,7 @@ export default function Support() {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Text style={s.h1}>{t('support.title')}</Text>
-          <Pressable onPress={() => setShowForm((v) => !v)} style={s.addBtn}>
+          <Pressable onPress={() => setShowForm((v) => !v)} accessibilityRole="button" accessibilityLabel={t('a11y.toggleForm')} style={s.addBtn}>
             <Icon name={showForm ? 'x' : 'plus'} size={18} color={theme.colors.onPrimary} />
           </Pressable>
         </View>
@@ -83,8 +86,10 @@ export default function Support() {
           </Card>
         )}
 
-        {items.length === 0 ? (
-          <EmptyState icon="help-circle" title={t('support.none')} />
+        {status.kind !== 'ready' ? (
+          <ListState status={status} onRetry={load} labels={listLabels(t)} />
+        ) : items.length === 0 ? (
+          <EmptyState icon="circle-question-mark" title={t('support.none')} />
         ) : (
           items.map((tk) => (
             <Card key={tk.id}>

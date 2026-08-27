@@ -5,18 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { DriverStatus, DriverPerformance } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Banner } from '../../src/components/Banner';
-import { Button } from '../../src/components/Button';
-import { Card, ListRow, SectionTitle, Badge } from '../../src/components/ui';
-import { Icon } from '../../src/components/Icon';
-import { Loader } from '../../src/components/Loader';
-import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
+import { Badge, Banner, Button, Card, getCurrentLocation, Icon, ListRow, LiveMap, Loader, SectionTitle, useTheme, type AppTheme, type MapPoint } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { useAvailability } from '../../src/store/availability';
 import { api } from '../../src/lib/api';
-import { getCurrentLocation } from '../../src/lib/permissions';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const statusMeta: Record<DriverStatus, { key: string; tone: 'warning' | 'primary' | 'success' | 'danger' }> = {
   pending: { key: 'driver.statusPending', tone: 'warning' },
@@ -93,9 +86,18 @@ export default function Dashboard() {
         <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
         <Text style={s.brand}>رفيق</Text>
       </View>
-      <Pressable hitSlop={8} style={s.headerBtn}>
+      {/*
+        A View, not a Pressable.
+
+        This was a `<Pressable>` with NO `onPress` — five of them across the captain
+        app. A screen reader announced "button" and activating it did nothing, and a
+        sighted user tapped a bell that never opened anything, because the captain app
+        has no notifications screen to open. Phase 9 either adds that screen or drops
+        the bell; until then it is chrome and says so.
+      */}
+      <View style={s.headerBtn}>
         <Icon name="bell" size={24} color={theme.colors.primary} />
-      </Pressable>
+      </View>
     </View>
   );
 

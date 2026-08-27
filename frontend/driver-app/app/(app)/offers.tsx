@@ -5,13 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Trip } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, SkeletonList, ErrorState } from '../../src/components/ui';
-import { Icon } from '../../src/components/Icon';
+import { Banner, Button, Card, EmptyState, ErrorState, Icon, SkeletonList, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const jod = (fils: number) => bareJod(fils);
 

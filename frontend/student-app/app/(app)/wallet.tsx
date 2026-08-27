@@ -5,16 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { CliqInstructions, PaymentRequest, Wallet, WalletTransaction } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Card, EmptyState, Badge } from '../../src/components/ui';
-import { Skeleton } from '../../src/components/kit';
-import { Icon, type IconName } from '../../src/components/Icon';
-import { useToast } from '../../src/components/Feedback';
+import { Badge, Button, Card, EmptyState, Icon, ListState, Skeleton, listLabels, statusFromError, useTheme, useToast, type AppTheme, type IconName, type ListStatus } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
 import { pickProof } from '../../src/lib/proof';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 /** Map a wallet transaction type to a Stitch icon + tone. */
 function txnVisual(type: string, positive: boolean): { icon: IconName; tint: 'danger' | 'success' | 'primary' } {
@@ -36,6 +31,9 @@ export default function WalletScreen() {
   const [txns, setTxns] = useState<WalletTransaction[]>([]);
   const [payments, setPayments] = useState<PaymentRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  /* The wallet LEDGER. «لا معاملات» on a failed fetch is the worst version of this
+     bug: it tells someone their money moved nowhere. */
+  const [status, setStatus] = useState<ListStatus>({ kind: 'loading' });
   const [amount, setAmount] = useState('');
   const [creating, setCreating] = useState(false);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
@@ -51,8 +49,9 @@ export default function WalletScreen() {
       setWallet(w);
       setTxns(tx);
       setPayments(pays);
-    } catch {
-      /* surfaced on actions */
+      setStatus({ kind: 'ready' });
+    } catch (e) {
+      setStatus(statusFromError(e));
     } finally {
       setLoading(false);
     }
@@ -113,7 +112,7 @@ export default function WalletScreen() {
           <Text style={s.avatarText}>{initial}</Text>
         </Pressable>
         <Text style={s.brand}>رفيق</Text>
-        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={s.headerBtn}>
+        <Pressable onPress={() => router.push('/(app)/notifications')} accessibilityRole="button" accessibilityLabel={t('a11y.notifications')} hitSlop={8} style={s.headerBtn}>
           <Icon name="bell" size={22} color={theme.colors.primary} />
         </Pressable>
       </View>
@@ -142,7 +141,7 @@ export default function WalletScreen() {
               {t('wallet.heldNote')}: {formatJod(wallet.held_fils)}
             </Text>
           )}
-          <Button title={t('wallet.topupCta')} icon="plus-circle" onPress={createTopup} loading={creating} style={{ marginTop: theme.spacing.base }} />
+          <Button title={t('wallet.topupCta')} icon="circle-plus" onPress={createTopup} loading={creating} style={{ marginTop: theme.spacing.base }} />
         </View>
 
         {/* Guided top-up OR CliQ request card */}
@@ -160,13 +159,13 @@ export default function WalletScreen() {
           <View style={s.cliqCard}>
             <View style={s.cliqHead}>
               <View style={s.cliqIcon}>
-                <Icon name="grid" size={22} color={theme.colors.accent} />
+                <Icon name="grid-3x3" size={22} color={theme.colors.accent} />
               </View>
               <View>
                 <Text style={s.cliqTitle}>{t('wallet.cliqTitle')}</Text>
                 <Pressable hitSlop={6} style={s.cliqLinkRow}>
                   <Text style={s.cliqLink}>{t('wallet.cliqHowTo')}</Text>
-                  <Icon name="help-circle" size={13} color={theme.colors.accent} />
+                  <Icon name="circle-question-mark" size={13} color={theme.colors.accent} />
                 </Pressable>
               </View>
             </View>
@@ -219,6 +218,8 @@ export default function WalletScreen() {
               <Skeleton key={i} width="100%" height={68} radius={theme.radius.card} />
             ))}
           </View>
+        ) : status.kind !== 'ready' ? (
+          <ListState status={status} onRetry={load} labels={listLabels(t)} />
         ) : txns.length === 0 ? (
           <EmptyState icon="credit-card" title={t('wallet.noTransactions')} />
         ) : (
@@ -270,7 +271,7 @@ function TopupGuide({
     <View style={s.cliqCard}>
       <View style={s.guideHead}>
         <Text style={s.guideTitle}>{t('wallet.newTopup')}</Text>
-        <Pressable onPress={onDismiss} hitSlop={8}>
+        <Pressable onPress={onDismiss} accessibilityRole="button" accessibilityLabel={t('a11y.close')} hitSlop={8}>
           <Icon name="x" size={18} color={theme.colors.muted} />
         </Pressable>
       </View>

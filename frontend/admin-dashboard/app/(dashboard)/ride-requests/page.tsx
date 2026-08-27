@@ -62,10 +62,10 @@ export default function RideRequestsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('rideRequests.colZone')}</th>
-                <th className="text-right p-3 font-medium">{t('rideRequests.colType')}</th>
-                <th className="text-right p-3 font-medium">{t('rideRequests.colLocation')}</th>
-                <th className="text-right p-3 font-medium">{t('rideRequests.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('rideRequests.colZone')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('rideRequests.colType')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('rideRequests.colLocation')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('rideRequests.colStatus')}</th>
               </tr>
             </thead>
             <tbody>

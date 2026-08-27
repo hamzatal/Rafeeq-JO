@@ -116,11 +116,11 @@ export default function ZonePricesPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('zonePrices.colZone')}</th>
-                <th className="text-right p-3 font-medium">{t('zonePrices.colUniversity')}</th>
-                <th className="text-right p-3 font-medium">{t('zonePrices.colFare')}</th>
-                <th className="text-right p-3 font-medium">{t('zonePrices.colStatus')}</th>
-                <th className="text-right p-3 font-medium">{t('zonePrices.colActions')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zonePrices.colZone')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zonePrices.colUniversity')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zonePrices.colFare')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zonePrices.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('zonePrices.colActions')}</th>
               </tr>
             </thead>
             <tbody>

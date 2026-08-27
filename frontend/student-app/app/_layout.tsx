@@ -10,14 +10,27 @@ import {
   IBMPlexSansArabic_600SemiBold,
   IBMPlexSansArabic_700Bold,
 } from '@expo-google-fonts/ibm-plex-sans-arabic';
-import { I18nProvider } from '../src/i18n';
-import { ErrorBoundary } from '../src/components/ErrorBoundary';
-import { FeedbackProvider } from '../src/components/Feedback';
+import { t as translate } from '@rafeeq/shared';
+import { I18nProvider, useI18n } from '../src/i18n';
+import { api } from '../src/lib/api';
+import { ErrorBoundary, FeedbackProvider, loadAppConfig, useApiProblemToasts } from '@rafeeq/ui';
 import { useAuth } from '../src/store/auth';
 import { usePrefs } from '../src/store/prefs';
-import { loadAppConfig } from '../src/lib/appConfig';
 
 SplashScreen.preventAutoHideAsync();
+
+/**
+ * Routes 403 and 5xx into the toast surface.
+ *
+ * A component rather than a call in `RootLayout`, because the hook needs to be
+ * below `FeedbackProvider` in the tree and `RootLayout` is what renders it.
+ */
+function ApiProblems() {
+  const { t } = useI18n();
+  useApiProblemToasts({ forbidden: t('common.forbidden'), server: t('common.serverError') });
+
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -30,11 +43,12 @@ export default function RootLayout() {
   const bootstrap = useAuth((s) => s.bootstrap);
   const hydrate = usePrefs((s) => s.hydrate);
   const hydrated = usePrefs((s) => s.hydrated);
+  const locale = usePrefs((s) => s.locale);
 
   useEffect(() => {
     void hydrate();
-    // Load public runtime config (maps key, flags). Non-blocking + safe.
-    void loadAppConfig();
+    /* Public runtime config (the maps key). Non-blocking, never throws. */
+    void loadAppConfig(api);
   }, [hydrate]);
 
   useEffect(() => {
@@ -49,10 +63,26 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ErrorBoundary>
+      {/*
+        Resolved strings, not a `t` function.
+
+        `ErrorBoundary` renders exactly when something in the tree threw, and the
+        provider chain is a candidate for what threw — so it must not read copy
+        through context. The locale is taken from the persisted prefs, which are
+        hydrated by the time this renders.
+      */}
+      <ErrorBoundary
+        labels={{
+          title: translate(locale, 'common.crashTitle'),
+          body: translate(locale, 'common.crashBody'),
+          retry: translate(locale, 'common.retry'),
+        }}
+      >
         <I18nProvider>
           <FeedbackProvider>
             <StatusBar style="dark" />
+            {/* Must sit UNDER FeedbackProvider — it needs the toast surface. */}
+            <ApiProblems />
             <Slot />
           </FeedbackProvider>
         </I18nProvider>

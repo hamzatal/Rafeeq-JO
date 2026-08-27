@@ -4,8 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AiMessage } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
-import { Icon } from '../../src/components/Icon';
+import { Icon, useTheme, type AppTheme } from '@rafeeq/ui';
 
 /** Small pulsing teal dot — signals the AI is online / thinking (Stitch). */
 function PulseDot({ color, size = 8 }: { color: string; size?: number }) {
@@ -101,7 +100,7 @@ export default function Assistant() {
 
       {aiActive === false ? (
         <View style={s.degradedBanner}>
-          <Icon name="alert-triangle" size={15} color={theme.colors.warning} />
+          <Icon name="triangle-alert" size={15} color={theme.colors.warning} />
           <Text style={s.degradedBannerText}>{t('assistant.degradedHint')}</Text>
         </View>
       ) : null}
@@ -147,7 +146,7 @@ export default function Assistant() {
             placeholderTextColor={theme.colors.muted}
             multiline
           />
-          <Pressable onPress={() => sendText(input.trim())} disabled={sending} style={s.sendBtn}>
+          <Pressable onPress={() => sendText(input.trim())} accessibilityRole="button" accessibilityLabel={t('a11y.send')} disabled={sending} style={s.sendBtn}>
             <Icon name="send" size={20} color={theme.colors.onPrimary} />
           </Pressable>
         </View>

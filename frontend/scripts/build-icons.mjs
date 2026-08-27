@@ -34,42 +34,17 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(ROOT, 'packages/tokens/src/icon-registry.ts');
 const CHECK = process.argv.includes('--check');
 
-/** Feather / MaterialIcons kebab name → Lucide kebab name, where they differ. */
-const MAP = {
-  // Lucide renamed these three too. Each was found by generating against the
-  // installed package rather than trusting the Feather name.
-  filter: 'funnel',
-  'more-vertical': 'ellipsis-vertical',
-  unlock: 'lock-open',
-
-  'account-balance-wallet': 'wallet',
-  'airport-shuttle': 'bus',
-  'arrow-forward': 'arrow-right',
-  'alert-circle': 'circle-alert',
-  'alert-triangle': 'triangle-alert',
-  'bar-chart-2': 'chart-column',
-  'check-circle': 'circle-check',
-  'directions-car': 'car',
-  'edit-2': 'pencil',
-  grid: 'grid-3x3',
-  'help-circle': 'circle-question-mark',
-  home: 'house',
-  'info-outline': 'info',
-  loader: 'loader-circle',
-  'local-taxi': 'car-taxi-front',
-  'my-location': 'locate-fixed',
-  notifications: 'bell',
-  person: 'user',
-  place: 'map-pin',
-  'plus-circle': 'circle-plus',
-  schedule: 'clock',
-  school: 'graduation-cap',
-  sliders: 'sliders-horizontal',
-  stars: 'sparkles',
-  'swap-vert': 'arrow-up-down',
-  'upload-cloud': 'cloud-upload',
-  'x-circle': 'circle-x',
-};
+/*
+ * There is no name map here either.
+ *
+ * It held 30 Feather/Material → Lucide translations. Phase 7 rewrote the 17 call
+ * sites that still used a legacy name, so every literal in the workspace is already
+ * the canonical Lucide name and the map resolved to the identity for all of them.
+ *
+ * Keeping it would mean two spellings stay legal, and the second one always comes
+ * back — a new screen copies an old line. The check below is what makes the absence
+ * safe: a name Lucide does not export fails the build with the name printed.
+ */
 
 /**
  * Names chosen at RUNTIME, which a static scan cannot see.
@@ -87,8 +62,8 @@ const EXTRA = [
   'arrow-up-right', 'arrow-down-left', 'arrow-up-left', 'arrow-down-right',
   'chevron-up', 'chevron-down',
   'circle-alert', 'triangle-alert', 'circle-check', 'circle-x',
-  'wifi-off', 'cloud-off', 'inbox', 'lock', 'unlock', 'eye', 'eye-off',
-  'more-vertical', 'filter', 'calendar', 'percent', 'award', 'trending-up',
+  'wifi-off', 'cloud-off', 'inbox', 'lock', 'lock-open', 'eye', 'eye-off',
+  'ellipsis-vertical', 'funnel', 'calendar', 'percent', 'award', 'trending-up',
 ];
 
 const SKIP_DIRS = new Set(['node_modules', '.expo', 'dist', 'build', '.next', 'android', 'ios']);
@@ -104,7 +79,15 @@ function walk(dir, out = []) {
   return out;
 }
 
-/** Every icon name referenced anywhere in the two Expo apps. */
+/**
+ * Every icon name referenced by the Expo apps OR by the shared component package.
+ *
+ * `packages/ui` was added in phase 7: the components moved out of the two apps, and
+ * with them the `<Icon name="…">` literals and the `IconName` defaults
+ * (`EmptyState`'s `'inbox'`, `ListState`'s `'wifi-off'`). Scanning only the apps
+ * silently dropped those names from the generated registry, which is a compile error
+ * in the package rather than a blank icon — but only because the registry is typed.
+ */
 function usedNames() {
   const found = new Set(EXTRA);
   const patterns = [
@@ -117,7 +100,7 @@ function usedNames() {
     /(?:icon|glyph)\s*[:=]\s*'([a-z0-9-]+)'/g,
   ];
 
-  for (const app of ['student-app', 'driver-app']) {
+  for (const app of ['student-app', 'driver-app', 'packages/ui']) {
     for (const file of walk(resolve(ROOT, app))) {
       const body = readFileSync(file, 'utf8');
       for (const re of patterns) {
@@ -156,22 +139,7 @@ const available = exportsOf('node_modules/lucide-react-native/dist/types/icons.d
    So the names are checked HERE, statically, against the installed package.
    ─────────────────────────────────────────────────────────────────────────── */
 
-/** Pull a `Record<string, string>` literal out of the tokens source. */
-function tsMap(source, constName) {
-  const start = source.indexOf(`export const ${constName}`);
-  if (start === -1) throw new Error(`build-icons: ${constName} not found in icon.ts`);
-  const open = source.indexOf('{', start);
-  const close = source.indexOf('\n};', open);
-  const body = source.slice(open, close);
-  const out = {};
-  for (const m of body.matchAll(/^ {2}'?([a-z0-9_-]+)'?:\s*'([a-z0-9-]+)',$/gm)) out[m[1]] = m[2];
-
-  return out;
-}
-
 function checkAdminNames() {
-  const iconTs = readFileSync(resolve(ROOT, 'packages/tokens/src/icon.ts'), 'utf8');
-  const renamed = tsMap(iconTs, 'RENAMED');
   const web = exportsOf('node_modules/lucide-react/dist/lucide-react.d.ts');
 
   /*
@@ -201,8 +169,7 @@ function checkAdminNames() {
 
   const bad = [];
   for (const [name, file] of used) {
-    const lucide = renamed[name] ?? name;
-    if (!web.has(pascal(lucide))) bad.push([name, lucide, file]);
+    if (!web.has(pascal(name))) bad.push([name, name, file]);
   }
 
   if (bad.length > 0) {
@@ -238,9 +205,9 @@ checkAdminNames();
 const rows = [];
 const missing = [];
 for (const name of usedNames()) {
-  const component = pascal(MAP[name] ?? name);
+  const component = pascal(name);
   if (available.has(component)) rows.push([name, component]);
-  else missing.push([name, MAP[name] ?? name, component]);
+  else missing.push([name, name, component]);
 }
 
 if (missing.length > 0) {

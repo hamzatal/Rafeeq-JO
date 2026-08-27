@@ -122,11 +122,11 @@ export default function DisputesPage() {
             <table className="w-full text-sm">
               <thead className="table-head">
                 <tr>
-                  <th className="text-right p-3 font-medium">{t('disputes.colAccount')}</th>
-                  <th className="text-right p-3 font-medium">{t('disputes.colType')}</th>
-                  <th className="text-right p-3 font-medium">{t('disputes.colSeverity')}</th>
-                  <th className="text-right p-3 font-medium">{t('disputes.colRisk')}</th>
-                  <th className="text-right p-3 font-medium">{t('disputes.colStatus')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('disputes.colAccount')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('disputes.colType')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('disputes.colSeverity')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('disputes.colRisk')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('disputes.colStatus')}</th>
                 </tr>
               </thead>
               <tbody>

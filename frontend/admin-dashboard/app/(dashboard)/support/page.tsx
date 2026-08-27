@@ -79,12 +79,12 @@ export default function SupportPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">الرقم</th>
-                <th className="text-right p-3 font-medium">الموضوع</th>
-                <th className="text-right p-3 font-medium">الفئة</th>
-                <th className="text-right p-3 font-medium">المستوى</th>
-                <th className="text-right p-3 font-medium">الحالة</th>
-                <th className="text-right p-3 font-medium">إجراءات</th>
+                <th scope="col" className="text-right p-3 font-medium">الرقم</th>
+                <th scope="col" className="text-right p-3 font-medium">الموضوع</th>
+                <th scope="col" className="text-right p-3 font-medium">الفئة</th>
+                <th scope="col" className="text-right p-3 font-medium">المستوى</th>
+                <th scope="col" className="text-right p-3 font-medium">الحالة</th>
+                <th scope="col" className="text-right p-3 font-medium">إجراءات</th>
               </tr>
             </thead>
             <tbody>

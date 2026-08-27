@@ -62,7 +62,7 @@ export type { AppTheme, RnColors } from './rn';
 
 /* ── icons ────────────────────────────────────────────────────────────────── */
 export {
-  ICON_SIZE, ICON_STROKE, lucideName, RENAMED, RTL_MIRRORED, shouldMirror,
+  ICON_SIZE, ICON_STROKE, lucideName, RTL_MIRRORED, shouldMirror,
 } from './icon';
 /* `ICON_REGISTRY` / `IconName` live at `@rafeeq/tokens/src/icon-registry` — see above. */
 

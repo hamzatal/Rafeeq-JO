@@ -17,7 +17,9 @@
    before it is zero is a gate someone disables. When phase 9 finishes, the budgets
    are zero and the ratchet becomes the assertion the roadmap wanted.
 
-   Every budget below is the measured count at the end of phase 6. Lowering one is
+   Every budget below is the measured count at the end of the phase that last moved
+   it — phase 6 for most, phase 7 for the three that extracting `packages/ui` paid
+   down. Lowering one is
    always allowed — the script tells you the new number to commit.
 
    Usage: node scripts/check-design-tokens.mjs
@@ -142,7 +144,7 @@ const gates = [];
   }
   gates.push({
     id: 'raw-hex',
-    budget: 74,
+    budget: 29,
     count: hits.length,
     hits,
     why: 'a hex in a screen is a colour that cannot be changed from one place',
@@ -169,7 +171,7 @@ const gates = [];
   }
   gates.push({
     id: 'raw-font-size',
-    budget: 428,
+    budget: 350,
     count: hits.length,
     hits,
     why: 'a pixel literal is a type decision made in isolation — 21 different sizes across two apps',
@@ -197,7 +199,7 @@ const gates = [];
   }
   gates.push({
     id: 'physical-direction',
-    budget: 10,
+    budget: 9,
     count: hits.length,
     hits,
     why: 'a physical direction is correct in only one of the two directions this product ships',

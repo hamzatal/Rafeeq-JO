@@ -3,15 +3,11 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { LostFoundItem, LostFoundStatus, LostFoundType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Input } from '../../src/components/Input';
-import { Banner } from '../../src/components/Banner';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { Banner, Button, Icon, Input, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useAuth } from '../../src/store/auth';
 import { pickProof } from '../../src/lib/proof';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const STATUS: Record<LostFoundStatus, { key: string; tone: 'accent' | 'muted' | 'primary' }> = {
   matched: { key: 'lostFound.statusMatched', tone: 'accent' },

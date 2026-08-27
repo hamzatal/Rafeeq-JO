@@ -40,10 +40,10 @@ export default function SafetyPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('safety.colAccount')}</th>
-                <th className="text-right p-3 font-medium">{t('safety.colScore')}</th>
-                <th className="text-right p-3 font-medium">{t('safety.colLevel')}</th>
-                <th className="text-right p-3 font-medium">{t('safety.colFactors')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('safety.colAccount')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('safety.colScore')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('safety.colLevel')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('safety.colFactors')}</th>
               </tr>
             </thead>
             <tbody>

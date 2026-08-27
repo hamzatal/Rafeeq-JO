@@ -99,12 +99,12 @@ export default function WithdrawalsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('withdrawals.colCaptain')}</th>
-                <th className="text-right p-3 font-medium">{t('withdrawals.colAmount')}</th>
-                <th className="text-right p-3 font-medium">{t('withdrawals.colDestination')}</th>
-                <th className="text-right p-3 font-medium">{t('withdrawals.colStatus')}</th>
-                <th className="text-right p-3 font-medium">{t('withdrawals.colDate')}</th>
-                <th className="text-right p-3 font-medium">{t('withdrawals.colActions')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('withdrawals.colCaptain')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('withdrawals.colAmount')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('withdrawals.colDestination')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('withdrawals.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('withdrawals.colDate')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('withdrawals.colActions')}</th>
               </tr>
             </thead>
             <tbody>

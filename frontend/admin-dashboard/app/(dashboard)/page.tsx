@@ -247,10 +247,10 @@ export default function CommandCenter() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>{t('home.account')}</th>
-                  <th>{t('home.type')}</th>
-                  <th>{t('home.severity')}</th>
-                  <th>{t('home.riskScore')}</th>
+                  <th scope="col">{t('home.account')}</th>
+                  <th scope="col">{t('home.type')}</th>
+                  <th scope="col">{t('home.severity')}</th>
+                  <th scope="col">{t('home.riskScore')}</th>
                 </tr>
               </thead>
               <tbody>

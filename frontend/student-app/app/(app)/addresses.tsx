@@ -3,17 +3,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { SavedAddress } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Banner } from '../../src/components/Banner';
-import { Input } from '../../src/components/Input';
-import { Button } from '../../src/components/Button';
-import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, SectionTitle, listLabels, statusFromError, useTheme, type AppTheme, type IconName, type ListStatus } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const LABELS = ['home', 'university', 'work', 'other'] as const;
-const LABEL_ICON: Record<string, IconName> = { home: 'home', university: 'book', work: 'briefcase', other: 'map-pin' };
+const LABEL_ICON: Record<string, IconName> = { home: 'house', university: 'book', work: 'briefcase', other: 'map-pin' };
 
 export default function Addresses() {
   const { t } = useI18n();
@@ -23,19 +18,32 @@ export default function Addresses() {
   const [list, setList] = useState<SavedAddress[]>([]);
   const [label, setLabel] = useState<string>('home');
   const [text, setText] = useState('');
-  const [loading, setLoading] = useState(true);
+  /*
+   * `status` replaced a bare `loading` boolean here.
+   *
+   * The old pair — `loading` plus an implicit "not loading means we have data" —
+   * is exactly what left no room for failure: there were two states for three
+   * outcomes, so the third one borrowed the empty state.
+   */
+  const [status, setStatus] = useState<ListStatus>({ kind: 'loading' });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const labelText = (l: string) =>
     ({ home: t('addresses.home'), university: t('addresses.university'), work: t('addresses.work'), other: t('addresses.other') }[l] ?? l);
 
+  /*
+   * There was no `catch` at all — only `finally`. So a rejected promise cleared the
+   * loading flag and the screen fell through to «لا عناوين محفوظة», then the
+   * unhandled rejection went to the console nobody is reading.
+   */
   const load = useCallback(async () => {
-    setLoading(true);
+    setStatus({ kind: 'loading' });
     try {
       setList(await api.addresses.list());
-    } finally {
-      setLoading(false);
+      setStatus({ kind: 'ready' });
+    } catch (e) {
+      setStatus(statusFromError(e));
     }
   }, []);
 
@@ -97,8 +105,8 @@ export default function Addresses() {
         </Card>
 
         <SectionTitle title={t('addresses.title')} />
-        {loading ? (
-          <Text style={s.meta}>{t('common.loading')}</Text>
+        {status.kind !== 'ready' ? (
+          <ListState status={status} onRetry={load} labels={listLabels(t)} />
         ) : list.length === 0 ? (
           <EmptyState icon="map-pin" title={t('addresses.none')} />
         ) : (

@@ -4,15 +4,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import type { PayoutRequest, Wallet, WalletTransaction } from '@rafeeq/shared';
-import { EmptyState, SkeletonList, ErrorState } from '../../src/components/ui';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { EmptyState, ErrorState, Icon, SkeletonList, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 function txnVisual(type: string, positive: boolean): { icon: IconName; navy: boolean } {
-  if (type.includes('payout') || type.includes('withdraw')) return { icon: 'home', navy: true };
+  if (type.includes('payout') || type.includes('withdraw')) return { icon: 'house', navy: true };
   if (type.includes('trip') || type.includes('ride') || type.includes('earn')) return { icon: 'navigation', navy: false };
   return { icon: positive ? 'arrow-down-left' : 'arrow-up-right', navy: !positive };
 }
@@ -72,9 +70,18 @@ export default function Earnings() {
           <Text style={s.avatarText}>{initial}</Text>
         </View>
         <Text style={s.brand}>{t('driver.wallet')}</Text>
-        <Pressable hitSlop={8} style={s.headerBtn}>
+        {/*
+          A View, not a Pressable.
+        
+          This was a `<Pressable>` with NO `onPress` — five of them across the captain app.
+          A screen reader announced "button" and activating it did nothing, and a sighted
+          user tapped a bell that never opened anything, because the captain app has no
+          notifications screen to open. Phase 9 either adds that screen or drops the bell;
+          until then it is chrome and says so.
+        */}
+        <View style={s.headerBtn}>
           <Icon name="bell" size={24} color={theme.colors.primary} />
-        </Pressable>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -98,7 +105,7 @@ export default function Earnings() {
             </Text>
           )}
           <Pressable onPress={() => router.push('/(app)/withdraw')} style={({ pressed }) => [s.withdrawBtn, pressed && { opacity: 0.9 }]}>
-            <Icon name="home" size={18} color={theme.colors.onAccent} />
+            <Icon name="house" size={18} color={theme.colors.onAccent} />
             <Text style={s.withdrawText}>{t('driver.withdrawBalance')}</Text>
           </Pressable>
         </View>
@@ -112,13 +119,13 @@ export default function Earnings() {
             <Text style={s.cliqTitle}>{t('driver.cliqPaymentInfo')}</Text>
             <Text style={s.cliqSub}>{t('driver.cliqAliasLabel')}: {alias}</Text>
           </View>
-          <Icon name="edit-2" size={18} color={theme.colors.primary} />
+          <Icon name="pencil" size={18} color={theme.colors.primary} />
         </Pressable>
 
         {/* Earnings details (daily/weekly breakdown) */}
         <Pressable onPress={() => router.push('/(app)/earnings-detail')} style={({ pressed }) => [s.detailsLink, pressed && { opacity: 0.9 }]}>
           <View style={s.detailsIcon}>
-            <Icon name="bar-chart-2" size={20} color={theme.colors.accent} />
+            <Icon name="chart-column" size={20} color={theme.colors.accent} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={s.cliqTitle}>{t('driver.earningsDetails')}</Text>

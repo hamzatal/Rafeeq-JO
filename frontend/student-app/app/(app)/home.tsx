@@ -8,11 +8,7 @@ import type { RewardSummary } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { getCurrentLocation, watchLocation } from '../../src/lib/permissions';
-import { useTheme, type AppTheme } from '../../src/theme';
-import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
-import { Icon, type IconName } from '../../src/components/Icon';
-import { PressableScale } from '../../src/components/kit';
+import { getCurrentLocation, Icon, LiveMap, PressableScale, useTheme, watchLocation, type AppTheme, type IconName, type MapPoint } from '@rafeeq/ui';
 import { SmartSuggestions } from '../../src/components/SmartSuggestions';
 
 /**
@@ -132,7 +128,7 @@ export default function Home() {
             <Text style={s.greetSub}>{t(`home.${greetingKey()}`)}</Text>
           </View>
         </View>
-        <Pressable onPress={() => router.push('/(app)/notifications')} style={s.bellBtn} hitSlop={6}>
+        <Pressable onPress={() => router.push('/(app)/notifications')} accessibilityRole="button" accessibilityLabel={t('a11y.notifications')} style={s.bellBtn} hitSlop={6}>
           <Icon name="bell" size={22} color={theme.colors.primary} />
           {unread > 0 && <View style={s.bellDot} />}
         </Pressable>
@@ -167,8 +163,8 @@ export default function Home() {
             <Text style={s.searchText}>{t('home.searchDestination')}</Text>
           </PressableScale>
           <View style={s.quickRow}>
-            <QuickAction theme={theme} icon="home" label={t('home.labelHome')} onPress={() => router.push('/(app)/ride-request')} />
-            <QuickAction theme={theme} icon="school" label={t('home.labelUniversity')} onPress={() => router.push('/(app)/ride-request')} />
+            <QuickAction theme={theme} icon="house" label={t('home.labelHome')} onPress={() => router.push('/(app)/ride-request')} />
+            <QuickAction theme={theme} icon="graduation-cap" label={t('home.labelUniversity')} onPress={() => router.push('/(app)/ride-request')} />
           </View>
         </View>
       </Animated.View>
@@ -176,7 +172,7 @@ export default function Home() {
   );
 }
 
-function QuickAction({ theme, icon, label, onPress }: { theme: AppTheme; icon: 'home' | 'school'; label: string; onPress: () => void }) {
+function QuickAction({ theme, icon, label, onPress }: { theme: AppTheme; icon: IconName; label: string; onPress: () => void }) {
   const s = useMemo(() => makeStyles(theme), [theme]);
   return (
     <PressableScale onPress={onPress} style={s.quickTile} scaleTo={0.95}>

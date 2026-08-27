@@ -82,11 +82,11 @@ export default function UsersPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-start p-3 font-medium">{t('profile.fullName')}</th>
-                <th className="text-start p-3 font-medium">{t('profile.phone')}</th>
-                <th className="text-start p-3 font-medium">{locale === 'ar' ? 'النوع' : 'Type'}</th>
-                <th className="text-start p-3 font-medium">{locale === 'ar' ? 'الحالة' : 'Status'}</th>
-                <th className="text-start p-3 font-medium"></th>
+                <th scope="col" className="text-start p-3 font-medium">{t('profile.fullName')}</th>
+                <th scope="col" className="text-start p-3 font-medium">{t('profile.phone')}</th>
+                <th scope="col" className="text-start p-3 font-medium">{locale === 'ar' ? 'النوع' : 'Type'}</th>
+                <th scope="col" className="text-start p-3 font-medium">{locale === 'ar' ? 'الحالة' : 'Status'}</th>
+                <th scope="col" className="text-start p-3 font-medium"></th>
               </tr>
             </thead>
             <tbody>

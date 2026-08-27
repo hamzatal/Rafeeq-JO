@@ -3,15 +3,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { normalizeJordanPhone, validators } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Input } from '../../src/components/Input';
-import { Button } from '../../src/components/Button';
-import { Banner } from '../../src/components/Banner';
-import { AuthShell } from '../../src/components/AuthShell';
-import { Icon } from '../../src/components/Icon';
+import { AuthShell, Banner, Button, Icon, Input, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Login() {
   const { t } = useI18n();
