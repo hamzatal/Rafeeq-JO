@@ -58,7 +58,6 @@ docs/
 | [`privacy-ar.md`](legal/privacy-ar.md) | سياسة الخصوصية — **مكتوبة من الكود**، وكل معالج فرعي مُفصَح |
 | [`terms-ar.md`](legal/terms-ar.md) | الشروط — بإصدار مُخزَّن، وجدول إلغاء واسترداد |
 | [`data-retention-ar.md`](legal/data-retention-ar.md) | مدد الاحتفاظ بكل نوع بيان |
-| [`prohibited-items-ar.md`](legal/prohibited-items-ar.md) | المواد الممنوعة في المركبة |
 
 ---
 
