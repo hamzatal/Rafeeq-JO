@@ -9,6 +9,7 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Modules\Payouts\Models\PayoutRequest;
+use Rafeeq\Modules\Wallet\Models\Wallet;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\NotificationType;
 use Rafeeq\Shared\Enums\WalletTxnType;
@@ -38,9 +39,27 @@ class PayoutService extends BaseService
         }
 
         return $this->transaction(function () use ($captain, $amountFils, $destination, $note) {
-            $wallet = $this->wallets->forUser($captain);
+            /*
+             * The balance is read UNDER A LOCK, not through `availableBalance()`.
+             *
+             * `availableBalance()` does a plain `Wallet::find()`, so this was a
+             * check-then-act across two concurrent withdrawal requests: both read the
+             * same available figure, both passed, and both debited. `apply()` refuses
+             * to take `balance_fils` below zero, which contains the damage in the
+             * common case — but it checks BALANCE, not AVAILABLE. A captain with funds
+             * held against an active trip could therefore withdraw into the held
+             * amount and leave `available` negative, which is money the platform had
+             * already promised to a rider's fare.
+             *
+             * Locking the row here makes the second request wait, re-read, and fail
+             * honestly. `throttle:sensitive` narrows this window; it does not close it,
+             * and a rate limit is not a correctness mechanism.
+             */
+            $wallet = Wallet::whereKey($this->wallets->forUser($captain)->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            if ($this->wallets->availableBalance($wallet) < $amountFils) {
+            if ($wallet->availableFils() < $amountFils) {
                 throw new BusinessRuleException('رصيد الأرباح غير كافٍ للسحب.', 'INSUFFICIENT_EARNINGS');
             }
 

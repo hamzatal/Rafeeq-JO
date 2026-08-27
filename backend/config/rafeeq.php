@@ -51,26 +51,23 @@ return [
     // bounded here rather than trusted to the operator.
     'admin_credit_max_fils' => (int) env('RAFEEQ_ADMIN_CREDIT_MAX_FILS', 50000),
 
-    // Platform commission percentage taken from each ride fare.
-    'commission_percent' => (int) env('RAFEEQ_COMMISSION_PERCENT', 15),
-
-    // Default per-seat fare for pooled (door-to-door) rides, in fils.
-    // Used as a fallback when no GPS distance is available.
-
-    // ── Distance-based pricing (Phase 3) — money in fils ────────────────────
-    // Opening fare ("meter drop") added to every distance-priced ride.
-    // Per-kilometre rate (GPS/Haversine distance pickup → destination).
-    // Per-minute rate (estimated from distance / avg speed unless provided).
-    // Hard floor: no distance-priced ride is ever charged below this.
-    // Night tariff multiplier applied from `night_start_hour` onward.
-    // Average urban speed (km/h) used to estimate trip minutes from distance.
-
-    // Express surcharge in fils.
-
-    // Empty-seat economics: minimum riders before a pooled trip is "full enough".
-    'min_fill_riders' => (int) env('RAFEEQ_MIN_FILL_RIDERS', 3),
-
-    // Fair cap on dynamic surge applied to under-filled pooled trips.
+    /*
+     * ── What used to be here ─────────────────────────────────────────────────
+     *
+     * Nine keys describing a distance-and-duration meter — opening fare, per-km,
+     * per-minute, minimum fare, average speed, night multiplier, night start hour,
+     * max surge — were deleted in phase 5, and their COMMENTS were left behind
+     * dangling above no keys at all. That reads, to the next person, like a block of
+     * settings that failed to load.
+     *
+     * The pricing keys now live in one block further down, under «التعرفة». There is
+     * no per-km rate because the fare is a lookup in the (zone × university) matrix,
+     * and no surge or night multiplier because both charge above the approved tariff.
+     *
+     * `min_fill_riders` was ALSO declared here, duplicating the one below. PHP keeps
+     * the last of two identical keys silently, so this one was dead — and editing its
+     * default would have changed nothing, which is the kind of bug that costs an hour.
+     */
 
     // ── GPS anti-fraud thresholds ───────────────────────────────────────────
     // Max distance (m) allowed between the captain and a rider's pickup at the
@@ -114,6 +111,12 @@ return [
      *     car. The captain is protected by the guarantee below instead.
      */
 
+    // Platform commission taken from each seat fare. The captain keeps the rest,
+    // and `PricingService::splitCommission` floors the commission so the rounding
+    // remainder falls on the platform's side rather than the captain's. This is
+    // also what funds the guarantee below.
+    'commission_percent' => (int) env('RAFEEQ_COMMISSION_PERCENT', 15),
+
     // Priority surcharge for an express (urgent) request. NOT surge: it is a
     // published fee for a different product, chosen by the rider up front.
     'express_fee_fils' => (int) env('RAFEEQ_EXPRESS_FEE_FILS', 1500),
@@ -135,12 +138,33 @@ return [
     'captain_guarantee_daily_cap' => (int) env('RAFEEQ_CAPTAIN_GUARANTEE_DAILY_CAP', 2),
 
     /*
-     * ── Aggregation window (phase 5.2 — not yet wired into MatchingService) ──
-     * A full car dispatches immediately regardless; these only bound how long an
-     * under-filled one waits.
+     * ── Aggregation window ───────────────────────────────────────────────────
+     * Read by Matching\Data\PeakWindows, which MatchingService::readyToDispatch
+     * consults. A full car dispatches immediately regardless, and so does a car
+     * whose departure is due; these only bound how long an under-filled one waits
+     * for company.
      */
     'match_window_peak_minutes' => (int) env('RAFEEQ_MATCH_WINDOW_PEAK_MIN', 8),
     'match_window_offpeak_minutes' => (int) env('RAFEEQ_MATCH_WINDOW_OFFPEAK_MIN', 18),
+
+    /*
+     * ── Timeouts for states that were never closing ──────────────────────────
+     *
+     * Both read by `rafeeq:expire-stale`.
+     *
+     * `trip_accept_grace_minutes` — how long past its departure a pooled trip waits
+     * for a captain before it is cancelled and its riders released. Nothing used to
+     * close these at all, so an unaccepted trip held its riders' wallet balances
+     * frozen indefinitely. Fifteen minutes is short on purpose: past that the rider
+     * has already made another plan, and holding their money is the real harm.
+     *
+     * `ride_request_expiry_grace_minutes` — how long past its desired time a request
+     * survives. Deliberately longer than the trip grace, so a rider returned to the
+     * pool by a cancelled trip gets at least one more matcher cycle. Expiring a
+     * request that could still have been served is worse than expiring it late.
+     */
+    'trip_accept_grace_minutes' => (int) env('RAFEEQ_TRIP_ACCEPT_GRACE_MIN', 15),
+    'ride_request_expiry_grace_minutes' => (int) env('RAFEEQ_RIDE_REQUEST_EXPIRY_GRACE_MIN', 45),
 
     // ── Operations ──────────────────────────────────────────────────────────
     // Failed jobs in the last 24h before `rafeeq:worker-alive --alert-on-failures`

@@ -37,7 +37,15 @@ Route::prefix('v1/trips')->middleware(['auth:sanctum', 'role:student'])->group(f
     Route::post('passengers/{passenger}/cancel', [StudentTripController::class, 'cancelBooking']);
 });
 
-// ── Admin: /api/v1/admin/trips (read-only monitor) ──────────────────
-Route::prefix('v1/admin/trips')->middleware(['auth:sanctum', 'role:admin,supervisor'])->group(function () {
+/*
+ * ── Admin: /api/v1/admin/trips (read-only monitor) ──────────────────
+ *
+ * `permission:trips.view`, not `role:admin,supervisor`. This lists every rider's
+ * pickup coordinates and travel history, which is the same class of PII that
+ * `admin/users` already correctly gates on `permission:users.view`. The permission
+ * exists and was already granted to support and supervisor; this route just was not
+ * using it.
+ */
+Route::prefix('v1/admin/trips')->middleware(['auth:sanctum', 'permission:trips.view'])->group(function () {
     Route::get('/', [AdminTripController::class, 'index']);
 });

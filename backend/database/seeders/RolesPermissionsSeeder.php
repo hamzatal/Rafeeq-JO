@@ -59,6 +59,25 @@ class RolesPermissionsSeeder extends Seeder
             // silently barred from live trip channels.
             'trips.view' => ['متابعة الرحلات', 'View trips'],
         ],
+        /*
+         * Safety. The one admin surface that had NO permission at all.
+         *
+         * `admin/safety/*` was gated on `role:admin,supervisor` alone, while every
+         * comparable surface had already been moved to a permission — disputes to
+         * `users.manage`, zone prices to `settings.manage`, payments to
+         * `payments.approve`. It was simply missed by that pass, and what it exposes
+         * is the most sensitive data in the system: GPS-fraud findings, cancellation
+         * patterns, and live SOS incidents naming a rider and their location.
+         *
+         * Split into read and act for the same reason `users.view` is split from
+         * `users.view_pii`: reading a safety queue and CLOSING an open SOS are
+         * different powers, and an incident marked resolved by mistake is a person
+         * nobody is looking for any more.
+         */
+        'safety' => [
+            'safety.view' => ['عرض مركز السلامة', 'View safety centre'],
+            'safety.resolve' => ['إغلاق بلاغات السلامة', 'Resolve safety incidents'],
+        ],
         'platform' => [
             'settings.manage' => ['إدارة الإعدادات', 'Manage settings'],
             'audit.view' => ['عرض سجل التدقيق', 'View audit logs'],
@@ -106,6 +125,9 @@ class RolesPermissionsSeeder extends Seeder
             'trips.view',
             'analytics.view',
             'coupons.manage',
+            // Supervisors ARE the safety team — they need the queue and the ability
+            // to close an incident, or the rota has to escalate every SOS to an admin.
+            'safety.view', 'safety.resolve',
         ]);
 
         // Admin: all permissions (also bypasses checks as superuser).

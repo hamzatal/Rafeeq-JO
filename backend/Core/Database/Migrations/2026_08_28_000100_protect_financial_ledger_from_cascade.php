@@ -71,24 +71,26 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Deliberately NOT a rollback to `ON DELETE CASCADE`.
+     *
+     * This migration exists because thirty foreign keys cascaded from `users` and
+     * seven of them were financial, so one `forceDelete()` erased a person's entire
+     * ledger with no error. A faithful `down()` would restore that — it would take a
+     * routine `migrate:rollback`, run by an operator who wanted to undo the migration
+     * AFTER it, and quietly re-arm the single most destructive footgun in the schema.
+     *
+     * Reversibility is a property worth having right up to the point where the thing
+     * being reversed is data loss. `RESTRICT` is left in place, and the reason is
+     * stated rather than silently omitted so the next reader knows this is a decision
+     * and not an oversight.
+     *
+     * If a cascade is genuinely wanted, it has to be written as a new migration by
+     * someone who has read this paragraph.
+     */
     public function down(): void
     {
-        if (DB::getDriverName() !== 'pgsql') {
-            return;
-        }
-
-        foreach ($this->ledgerKeys() as [$table, $column]) {
-            if (! Schema::hasTable($table)) {
-                continue;
-            }
-            foreach ($this->constraintNames($table, $column) as $name) {
-                DB::statement("ALTER TABLE {$table} DROP CONSTRAINT {$name}");
-            }
-            DB::statement(
-                "ALTER TABLE {$table} ADD CONSTRAINT {$table}_{$column}_foreign "
-                ."FOREIGN KEY ({$column}) REFERENCES users(id) ON DELETE CASCADE"
-            );
-        }
+        // Intentionally empty. See the note above.
     }
 
     /**

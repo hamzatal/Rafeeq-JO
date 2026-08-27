@@ -1,3 +1,4 @@
+import { dinarsOf } from '@rafeeq/shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -103,7 +104,7 @@ export default function Subscriptions() {
                 <View style={s.planHead}>
                   <Text style={s.planName} numberOfLines={1}>{p.name}</Text>
                   <View style={s.priceChip}>
-                    <Text style={s.priceVal}>{p.price_jod}</Text>
+                    <Text style={s.priceVal}>{dinarsOf(p.price_jod)}</Text>
                     <Text style={s.priceCur}>{t('subscriptions.currency')}</Text>
                   </View>
                 </View>

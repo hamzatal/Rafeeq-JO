@@ -76,11 +76,43 @@ class SeededEnvironmentCanSellASeatTest extends TestCase
         $this->assertGreaterThan(0, $zones, 'No active zones were seeded.');
         $this->assertGreaterThan(0, $universities, 'No active university has coordinates.');
 
+        // Every pair is PRICED — the tariff data is complete and reviewable.
         $this->assertSame(
             $zones * $universities,
-            ZoneUniversityPrice::where('is_active', true)->count(),
+            ZoneUniversityPrice::count(),
             'Every (active zone × locatable university) pair must carry an approved price.',
         );
+    }
+
+    /**
+     * Priced is not the same as OPEN, and the difference is the launch strategy.
+     *
+     * Pooling needs three riders on one corridor in one window, so density beats
+     * coverage at launch: the pilot cohort spread across 24 corridors never fills a
+     * car, and the same cohort concentrated on four does. So wave 1 is Yarmouk and the
+     * zones inside 3 km, and the other twenty corridors are priced but inactive.
+     *
+     * Asserted as a RANGE rather than an exact count, because opening a corridor is
+     * meant to be an ordinary admin action — this test should not have to be edited
+     * every time operations opens Aydoun.
+     */
+    public function test_only_a_dense_subset_of_corridors_is_open_at_launch(): void
+    {
+        $priced = ZoneUniversityPrice::count();
+        $open = ZoneUniversityPrice::where('is_active', true)->count();
+
+        $this->assertGreaterThan(0, $open, 'Something must be open, or the app cannot sell a seat.');
+        $this->assertLessThan($priced, $open, 'Launching every priced corridor at once defeats pooling.');
+
+        // Every open corridor is short: the sharpest version of the pitch, and the
+        // one where a car actually fills.
+        foreach (ZoneUniversityPrice::where('is_active', true)->get() as $row) {
+            $this->assertLessThanOrEqual(
+                7.0,
+                (float) $row->distance_km,
+                'A launch corridor should be a short, dense run — long ones come later.',
+            );
+        }
     }
 
     /** Every seeded row is a real published band, not an improvised number. */
@@ -109,11 +141,11 @@ class SeededEnvironmentCanSellASeatTest extends TestCase
         }
     }
 
-    /** The end-to-end claim: a student in a seeded zone gets a real quote. */
+    /** The end-to-end claim: a student on an OPEN corridor gets a real quote. */
     public function test_a_student_in_a_seeded_zone_receives_a_priced_quote(): void
     {
-        $zone = Zone::where('is_active', true)->firstOrFail();
-        $priced = ZoneUniversityPrice::where('zone_id', $zone->id)->firstOrFail();
+        $priced = ZoneUniversityPrice::where('is_active', true)->firstOrFail();
+        $zone = Zone::findOrFail($priced->zone_id);
 
         Sanctum::actingAs($this->student());
 
@@ -136,8 +168,8 @@ class SeededEnvironmentCanSellASeatTest extends TestCase
     /** And can then actually request the ride, not merely be quoted for it. */
     public function test_a_student_in_a_seeded_zone_can_request_a_ride(): void
     {
-        $zone = Zone::where('is_active', true)->firstOrFail();
-        $priced = ZoneUniversityPrice::where('zone_id', $zone->id)->firstOrFail();
+        $priced = ZoneUniversityPrice::where('is_active', true)->firstOrFail();
+        $zone = Zone::findOrFail($priced->zone_id);
 
         Sanctum::actingAs($this->student());
 

@@ -86,7 +86,7 @@ class WalletService extends BaseService
 
             // A manual credit is the one place balance appears without a bank
             // transfer behind it, so who did it and why is recorded explicitly.
-            $this->audit->log('wallet.admin_credit', $actor, auditable: $locked, changes: [
+            $this->audit->logOrFail('wallet.admin_credit', $actor, auditable: $locked, changes: [
                 'amount_fils' => abs($amountFils),
                 'reason' => $reason,
                 'reference' => $reference,
@@ -129,7 +129,7 @@ class WalletService extends BaseService
             $reversal->forceFill(['reversal_of' => $orig->id])->save();
             $orig->forceFill(['reversed_at' => now()])->save();
 
-            $this->audit->log('wallet.reverse', auditable: $orig, changes: [
+            $this->audit->logOrFail('wallet.reverse', auditable: $orig, changes: [
                 'reversed_amount' => $orig->amount_fils,
                 'reversal_txn' => $reversal->id,
                 'reason' => $reason,

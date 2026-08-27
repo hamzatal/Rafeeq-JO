@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { DINAR, dinarsOf, formatDinarsSigned } from '@rafeeq/shared';
+import { DINAR, dinarsOf, formatDinarsSigned, formatFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -49,8 +49,17 @@ export default function Earnings() {
     }
   }, []);
 
+  /*
+   * `useFocusEffect` ALONE. It already fires on mount.
+   *
+   * There was a `useEffect(() => { void load(); }, [load])` next to this, so both ran
+   * on mount and the screen issued six requests instead of three every time the
+   * captain opened the wallet tab. Worse than the waste: two overlapping
+   * `Promise.all`s wrote to the same three setters with no staleness guard, so the
+   * later-RESOLVING response won regardless of which was fired first — a slow first
+   * response could overwrite a fresh second one.
+   */
   useFocusEffect(useCallback(() => { void load(); }, [load]));
-  useEffect(() => { void load(); }, [load]);
 
   const alias = payouts.find((p) => p.destination)?.destination ?? user?.phone ?? '—';
   const initial = (user?.full_name ?? 'ر').charAt(0);
@@ -73,9 +82,21 @@ export default function Earnings() {
         <View style={s.balanceCard}>
           <View style={s.glow} />
           <Text style={s.balanceLabel}>{t('driver.availableBalance')}</Text>
+          {/*
+            `available_jod`, not `balance_jod`. The label says «الرصيد المتاح» and
+            it was rendering the GROSS balance — so a captain with reserved funds
+            was shown a number they could not withdraw, right above a withdraw
+            button that would then refuse it.
+          */}
           <Text style={s.balanceValue}>
-            {wallet ? dinarsOf(wallet.balance_jod) : dinarsOf(0)} <Text style={s.balanceCur}>{DINAR}</Text>
+            {wallet ? dinarsOf(wallet.available_jod) : dinarsOf(0)} <Text style={s.balanceCur}>{DINAR}</Text>
           </Text>
+          {/* Debt is what makes available differ from gross for a captain, so name it. */}
+          {wallet && wallet.held_fils > 0 && (
+            <Text style={s.balanceHeld}>
+              {t('driver.heldNote')}: {formatFils(wallet.held_fils)}
+            </Text>
+          )}
           <Pressable onPress={() => router.push('/(app)/withdraw')} style={({ pressed }) => [s.withdrawBtn, pressed && { opacity: 0.9 }]}>
             <Icon name="home" size={18} color={theme.colors.onAccent} />
             <Text style={s.withdrawText}>{t('driver.withdrawBalance')}</Text>
@@ -155,6 +176,7 @@ const makeStyles = (t: AppTheme) =>
     balanceLabel: { fontFamily: t.fontFamily.regular, fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center' },
     balanceValue: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: '#FFFFFF', textAlign: 'center', marginTop: 4 },
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 18, color: 'rgba(255,255,255,0.85)' },
+    balanceHeld: { fontFamily: t.fontFamily.regular, fontSize: 12, color: 'rgba(255,255,255,0.62)', textAlign: 'center', marginTop: 6 },
     withdrawBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.accent, borderRadius: t.radius.md, height: 52, marginTop: t.spacing.base },
     withdrawText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onAccent },
 

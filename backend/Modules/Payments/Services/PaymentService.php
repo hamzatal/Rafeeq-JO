@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Payments\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Rafeeq\Core\Audit\AuditLogger;
@@ -157,8 +158,19 @@ class PaymentService extends BaseService
         $imageHash = null;
         try {
             $imageHash = hash('sha256', (string) file_get_contents($proof->getRealPath()));
-        } catch (\Throwable) {
-            // hashing is best-effort; absence just means we skip the image-dedup check
+        } catch (\Throwable $e) {
+            /*
+             * Hashing is best-effort and must not block a legitimate payment — but
+             * the absence of a hash silently disables the duplicate-screenshot check,
+             * which is a FRAUD CONTROL. Swallowing it unlogged meant the control could
+             * be off for a whole payment and nobody would know, so the skip is now
+             * recorded. Reviewers of this payment need to know the check did not run.
+             */
+            Log::warning('payment.proof_hash_failed', [
+                'payment_request_id' => $request->id,
+                'consequence' => 'duplicate-image fraud check skipped for this proof',
+                'error' => $e->getMessage(),
+            ]);
         }
 
         $payment = $request->payments()->create([

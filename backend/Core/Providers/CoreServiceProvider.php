@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Rafeeq\Core\Audit\AuditLogger;
+use Rafeeq\Core\Console\ExpireStaleCommand;
+use Rafeeq\Core\Console\FundTreasuryCommand;
 use Rafeeq\Core\Console\SchemaDocCommand;
 use Rafeeq\Core\Console\WorkerAliveCommand;
 use Rafeeq\Core\Retention\PruneRetentionCommand;
@@ -33,6 +35,8 @@ class CoreServiceProvider extends ServiceProvider
                 RetentionReportCommand::class,
                 WorkerAliveCommand::class,
                 ExpireSubscriptions::class,
+                ExpireStaleCommand::class,
+                FundTreasuryCommand::class,
             ]);
         }
     }

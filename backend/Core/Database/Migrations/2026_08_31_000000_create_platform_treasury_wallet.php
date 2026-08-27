@@ -115,6 +115,30 @@ return new class extends Migration
             );
         }
 
+        /*
+         * Ordering matters here, and the obvious order is wrong.
+         *
+         * Deleting the treasury row first and then running `SET NOT NULL` means that
+         * if ANY other row has a null `user_id` — a database restored from a dump
+         * taken before the CHECK existed, say — the ALTER fails after the treasury has
+         * already been deleted. That leaves a half-rolled-back schema with the revenue
+         * row gone: the worst of both outcomes.
+         *
+         * So the precondition is asserted BEFORE anything is destroyed.
+         */
+        $orphans = (int) DB::table('wallets')
+            ->whereNull('user_id')
+            ->where('kind', '!=', 'platform')
+            ->count();
+
+        if ($orphans > 0) {
+            throw new RuntimeException(
+                "Refusing to roll back: {$orphans} wallet(s) have no owner and are not the treasury. "
+                .'Assign or remove them first, or ALTER COLUMN user_id SET NOT NULL will fail '
+                .'after the treasury row has already been deleted.'
+            );
+        }
+
         DB::table('wallets')->where('kind', 'platform')->delete();
 
         DB::statement('DROP INDEX IF EXISTS wallets_single_platform');

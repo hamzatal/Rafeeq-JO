@@ -27,11 +27,27 @@ Route::prefix('v1/driver')->middleware(['auth:sanctum', 'role:driver'])->group(f
     Route::post('location', [DriverLocationController::class, 'store']);
 });
 
-// Admin safety center
-Route::prefix('v1/admin/safety')->middleware(['auth:sanctum', 'role:admin,supervisor'])->group(function () {
+/*
+ * Admin safety centre — gated on a PERMISSION, not on a role.
+ *
+ * This whole group was `role:admin,supervisor` with no permission anywhere, and it was
+ * the last admin surface like that. Every comparable one had already been moved:
+ * disputes to `users.manage`, zone prices to `settings.manage`, payments to
+ * `payments.approve`. This group was missed, and it exposes the most sensitive data in
+ * the product — GPS-fraud findings, cancellation patterns, and open SOS incidents
+ * naming a rider and their live location.
+ *
+ * Read is separated from resolve for the same reason `users.view` is separated from
+ * `users.view_pii`. Closing an SOS is not a read: an incident marked resolved by
+ * mistake is a person nobody is looking for any more.
+ */
+Route::prefix('v1/admin/safety')->middleware(['auth:sanctum', 'permission:safety.view'])->group(function () {
     Route::get('risk-flags', [SafetyAdminController::class, 'riskFlags']);
-    Route::post('risk-flags/{riskFlag}/resolve', [SafetyAdminController::class, 'resolveFlag']);
     Route::get('cancellations', [SafetyAdminController::class, 'cancellations']);
     Route::get('sos', [SosController::class, 'index']);
-    Route::post('sos/{incident}/resolve', [SosController::class, 'resolve']);
+
+    Route::middleware('permission:safety.resolve')->group(function () {
+        Route::post('risk-flags/{riskFlag}/resolve', [SafetyAdminController::class, 'resolveFlag']);
+        Route::post('sos/{incident}/resolve', [SosController::class, 'resolve']);
+    });
 });

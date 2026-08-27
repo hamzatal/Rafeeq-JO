@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { CliqSettings } from '@rafeeq/api-client';
+import { formatFils } from '@rafeeq/shared';
 import type { PaymentRequest } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
@@ -117,7 +118,7 @@ export default function CliqPage() {
                 <tr key={p.id} className="row-line">
                   <td className="p-3 font-mono text-xs surface-text">{p.number}</td>
                   <td className="p-3 text-muted">{p.user?.name ?? '—'}</td>
-                  <td className="p-3 text-muted">{p.amount_jod} {p.currency}</td>
+                  <td className="p-3 text-muted tabular-nums">{formatFils(p.amount_fils)}</td>
                   <td className="p-3 text-muted">{p.status_label}</td>
                 </tr>
               ))}

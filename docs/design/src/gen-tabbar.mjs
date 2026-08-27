@@ -55,7 +55,7 @@ out('r-tabbar.html', `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta chars
       </div>`).join('')}
     </div>
     <div style="font:400 12.5px/21px 'IBM Plex Sans Arabic';color:var(--n600);margin-top:16px">
-      <b>وتغيّرت أيقونتان:</b> الكوكبِت كان <code>chart</code> — ومخطّط أعمدة ليس كوكبِتاً، فصار
+      <b>وتغيّرت أيقونتان:</b> شاشة «يومي» كانت <code>chart</code> — ومخطّط أعمدة ليس يوم عمل، فصارت
       <code>gauge</code> (عدّاد). و<code>user</code> كان رأسه مقتطعاً أعلى المربّع فصار مُتَمَركزاً.
       و<b>لمس كل تبويب 97×64</b> — أوسع من الحدّ الأدنى 44 بمرّتين.
     </div>

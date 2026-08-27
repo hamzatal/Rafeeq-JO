@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DINAR, dinarsOf, formatDinars } from '@rafeeq/shared';
+import { DINAR, dinarsOf, formatDinars, formatFils } from '@rafeeq/shared';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -34,16 +34,36 @@ export default function Checkout() {
   const [uploading, setUploading] = useState(false);
   const [payment, setPayment] = useState<PaymentRequest | null>(null);
   const [instructions, setInstructions] = useState<CliqInstructions | null>(null);
-  const [balanceJod, setBalanceJod] = useState<number | null>(null);
+  const [availableJod, setAvailableJod] = useState<number | null>(null);
+  const [heldFils, setHeldFils] = useState<number>(0);
   const [proofFile, setProofFile] = useState<{ uri: string } | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const priceJod = Number(params.price ?? '0');
-  const priceLabel = `${params.price ?? '—'} ${t('subscriptions.currency')}`;
-  const canWallet = balanceJod != null && balanceJod >= priceJod && priceJod > 0;
+  // Formatted here rather than interpolated raw: `params.price` arrives as a URL
+  // string, so `4.5` would print as "4.5" on the one screen where the student is
+  // deciding whether to pay. Money is always three decimals, always isolated.
+  const priceLabel = `${dinarsOf(priceJod)} ${DINAR}`;
+
+  /*
+   * Gated on AVAILABLE, not on the gross balance.
+   *
+   * This read `w.balance_jod` and compared that. The backend checks every spend
+   * against `availableFils()` (balance − held), so a student with a hold against a
+   * booked trip — which is the normal state, not an edge case — saw the wallet
+   * button enabled, tapped it, and got a bare rejection with no explanation of
+   * where the missing dinar went.
+   */
+  const canWallet = availableJod != null && availableJod >= priceJod && priceJod > 0;
 
   useEffect(() => {
-    api.wallet.show().then((w) => setBalanceJod(w.balance_jod)).catch(() => setBalanceJod(null));
+    api.wallet
+      .show()
+      .then((w) => {
+        setAvailableJod(w.available_jod);
+        setHeldFils(w.held_fils);
+      })
+      .catch(() => setAvailableJod(null));
   }, []);
 
   // Pay directly from wallet balance → instant activation.
@@ -160,12 +180,22 @@ export default function Checkout() {
               <View style={{ flex: 1 }}>
                 <Text style={s.methodTitle}>{t('checkout.payFromWallet')}</Text>
                 <Text style={[s.methodSub, !canWallet && { color: theme.colors.danger }]}>
-                  {balanceJod == null
+                  {availableJod == null
                     ? '—'
                     : canWallet
-                      ? `${t('checkout.walletBalance')}: ${formatDinars(balanceJod)}`
+                      ? `${t('checkout.walletBalance')}: ${formatDinars(availableJod)}`
                       : t('checkout.insufficient')}
                 </Text>
+                {/*
+                  When funds are reserved, SAY SO. Without this the student reads
+                  "insufficient balance" while their wallet screen shows enough
+                  money, and the only explanation is a support ticket.
+                */}
+                {heldFils > 0 && (
+                  <Text style={s.methodHeld}>
+                    {t('checkout.heldNote')}: {formatFils(heldFils)}
+                  </Text>
+                )}
               </View>
               {busy === 'wallet' ? <Icon name="loader" size={20} color={theme.colors.primary} /> : <Icon name="chevron-left" size={20} color={theme.colors.muted} />}
             </Pressable>
@@ -327,6 +357,7 @@ const makeStyles = (t: AppTheme) =>
     methodIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
     methodTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right' },
     methodSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
+    methodHeld: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 3 },
     hint: { fontFamily: t.fontFamily.regular, fontSize: 13, lineHeight: 20, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.sm },
     cta: { marginTop: t.spacing.sm },
     pressed: { opacity: 0.9 },

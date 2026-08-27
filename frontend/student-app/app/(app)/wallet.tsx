@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { dinarsOf, formatDinars, formatDinarsSigned } from '@rafeeq/shared';
+import { DINAR, dinarsOf, formatDinars, formatDinarsSigned, formatFils } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -127,8 +127,19 @@ export default function WalletScreen() {
             <Skeleton width={170} height={44} radius={10} style={{ alignSelf: 'center', marginVertical: 6 }} />
           ) : (
             <Text style={s.balanceValue}>
-              <Text style={s.balanceCur}>JOD </Text>
-              {wallet ? dinarsOf(wallet.balance_jod) : dinarsOf(0)}
+              {/* `DINAR` («د.أ»), not a hardcoded Latin "JOD" — every other screen
+                  in both apps uses the constant, and this one was the outlier. */}
+              <Text style={s.balanceCur}>{DINAR} </Text>
+              {wallet ? dinarsOf(wallet.available_jod) : dinarsOf(0)}
+            </Text>
+          )}
+          {/*
+            A hold is why the number above can be lower than the sum of top-ups.
+            Left unexplained it reads as money going missing.
+          */}
+          {!loading && wallet && wallet.held_fils > 0 && (
+            <Text style={s.balanceHeld}>
+              {t('wallet.heldNote')}: {formatFils(wallet.held_fils)}
             </Text>
           )}
           <Button title={t('wallet.topupCta')} icon="plus-circle" onPress={createTopup} loading={creating} style={{ marginTop: theme.spacing.base }} />
@@ -160,7 +171,7 @@ export default function WalletScreen() {
               </View>
             </View>
             <View style={s.amountRow}>
-              <Text style={s.amountCur}>JOD</Text>
+              <Text style={s.amountCur}>{DINAR}</Text>
               <TextInput
                 value={amount}
                 onChangeText={setAmount}
@@ -268,7 +279,7 @@ function TopupGuide({
       <View style={s.cliqBox}>
         <Row label={t('wallet.alias')} value={ins.alias ?? '—'} s={s} />
         <Row label={t('wallet.beneficiary')} value={ins.beneficiary ?? '—'} s={s} />
-        <Row label={t('wallet.amount')} value={`${ins.amount_jod} ${t('subscriptions.currency')}`} s={s} />
+        <Row label={t('wallet.amount')} value={`${dinarsOf(ins.amount_jod)} ${DINAR}`} s={s} />
         <Row label={t('wallet.reference')} value={ins.reference} s={s} />
       </View>
       <StepRow n={3} label={t('wallet.uploadStep')} s={s} theme={theme} />
@@ -312,6 +323,7 @@ const makeStyles = (t: AppTheme) =>
     balanceLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
     balanceValue: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: t.colors.primary, marginTop: 4 },
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.primary },
+    balanceHeld: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, marginTop: 6 },
 
     cliqCard: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.xl, padding: t.spacing.lg, marginTop: t.spacing.md },
     cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', gap: t.spacing.sm, marginBottom: t.spacing.base },

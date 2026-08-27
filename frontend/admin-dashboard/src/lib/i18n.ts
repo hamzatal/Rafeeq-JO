@@ -143,6 +143,12 @@ const DICT: Dict = {
   'common.cancel': { ar: 'إلغاء', en: 'Cancel' },
   'common.save': { ar: 'حفظ', en: 'Save' },
   'common.error': { ar: 'حدث خطأ، حاول مجدداً.', en: 'Something went wrong, try again.' },
+  'common.loadFailed': { ar: 'تعذّر تحميل البيانات', en: 'Could not load this data' },
+  'common.loadFailedHint': {
+    ar: 'الجدول فاضي لأنّ الطلب فشل، لا لأنّه ما في بيانات. تحقّق من الاتصال وأعِد المحاولة.',
+    en: 'This is empty because the request failed, not because there is nothing here. Check the connection and retry.',
+  },
+  'common.retry': { ar: 'إعادة المحاولة', en: 'Retry' },
   'common.loading': { ar: 'جارٍ التحميل...', en: 'Loading...' },
   'common.viewAll': { ar: 'عرض الكل', en: 'View all' },
   'common.none': { ar: 'لا يوجد', en: 'None' },

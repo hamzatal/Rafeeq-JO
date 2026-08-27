@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, Fragment } from 'react';
 import type { SupportTicket } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 
 const SENTIMENT: Record<string, string> = {
   positive: '🙂 إيجابي',
@@ -23,14 +24,17 @@ export default function SupportPage() {
   const [items, setItems] = useState<SupportTicket[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
+    setLoadError(false);
     api.support
       .adminList({ status: status || undefined })
       .then(setItems)
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, [status]);
 
@@ -65,7 +69,9 @@ export default function SupportPage() {
       </div>
 
       <div className="card p-0 overflow-hidden">
-        {loading ? (
+        {loadError ? (
+          <LoadError onRetry={() => load()} />
+        ) : loading ? (
           <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">لا توجد تذاكر</div>
