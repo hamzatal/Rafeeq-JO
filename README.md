@@ -16,7 +16,7 @@
 ![PHPStan](https://img.shields.io/badge/PHPStan-level%205-1259E3?style=flat-square)
 ![Stage](https://img.shields.io/badge/stage-pre--launch%20·%20phase%204%20of%2012%20done-B45309?style=flat-square)
 ![Security](https://img.shields.io/badge/PII-encrypted%20at%20rest-0E7A5F?style=flat-square)
-![Marketing](https://img.shields.io/badge/marketing-52%20posts%20ready-1259E3?style=flat-square)
+![Marketing](https://img.shields.io/badge/marketing-58%20posts%20ready-1259E3?style=flat-square)
 ![License](https://img.shields.io/badge/license-proprietary-39415A?style=flat-square)
 
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel&logoColor=white)
@@ -700,15 +700,15 @@ node gen-readme.mjs && node shoot-readme.mjs && node gen-icons.mjs
 
 ---
 
-## 📣 التسويق — ٥٢ منشوراً جاهزاً
+## 📣 التسويق — ٥٨ منشوراً جاهزاً
 
 <div align="center">
 <img src="marketing/posts/01-seat-price.png" width="31%" />
 <img src="marketing/posts/19-four-seats.png" width="31%" />
-<img src="marketing/posts/03-vs-taxi.png" width="31%" />
+<img src="marketing/posts/53-irbid.png" width="31%" />
 </div>
 
-**[`marketing/`](marketing/)** فيه ٥٢ صورة + ٥٢ نصّاً جاهزاً للنشر — كل صورة معها ملفّ
+**[`marketing/`](marketing/)** فيه ٥٨ صورة + ٥٨ نصّاً جاهزاً للنشر — كل صورة معها ملفّ
 `.txt` بنفس الاسم يحمل الكابشن والهاشتاقات.
 
 ولها **لغة بصرية خاصّة، مستقلّة تماماً عن واجهة التطبيق**. النسخة الأولى كانت مبنية على
@@ -723,11 +723,11 @@ node gen-readme.mjs && node shoot-readme.mjs && node gen-icons.mjs
 | مقياس طباعي واحد | **الطباعة كصورة** — أرقام ٢١٠–٤٠٠px مقصوصة بالحدّ |
 | زخرفة | **«الخَطّ»** — منحنى الطريق ينتهي بالنقطة العنبرية · هندسة العلامة مكبَّرة |
 
-**٩ نماذج · ٣ مقاسات** (٣٥ × ٤:٥ للفيد · ١٣ × ٩:١٦ للستوري · ٤ × ١:١).
+**١٢ نموذجاً · ٣ مقاسات** (٤١ × ٤:٥ للفيد · ١٣ × ٩:١٦ للستوري · ٤ × ١:١) — منها ثلاثة نماذج تحمل **إربد نفسها**: أسطح المدينة بخزّانات الماء، والسيّارة بمقاعدها الأربعة، وقوس بوّابة الجامعة.
 والتفصيل الكامل مع الفهرس: **[`marketing/README.md`](marketing/README.md)**
 
 ```bash
-cd docs/design/src && node gen-posters.mjs     # يعيد توليد الـ٥٢ كاملة
+cd docs/design/src && node gen-posters.mjs     # يعيد توليد الـ٥٨ كاملة
 ```
 
 > **كل رقم في هذه المنشورات حقيقي** ومصدره [`docs/product/PRICING.md`](docs/product/PRICING.md) —
