@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\Trips\Services;
 
+use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
@@ -64,7 +65,25 @@ class RideBillingService extends BaseService
                     $discount = (int) $res['discount_fils'];
                     $couponToRedeem = $res['coupon'];
                 }
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
+                /*
+                 * An invalid or expired coupon must never block the ride — that part is
+                 * right, and it is why this catch is broad. What was wrong is that it
+                 * was silent: a coupon the student BELIEVES they applied is dropped,
+                 * they are charged full price, and there is no record anywhere of the
+                 * reason. That arrives as "the discount didn't work" with nothing to
+                 * investigate.
+                 *
+                 * `CouponService::validate()` throws for both real rejections (expired,
+                 * already used, wrong scope) and genuine faults, so this is logged at
+                 * info rather than warning; the point is that the code is recoverable.
+                 */
+                Log::info('ride.coupon_not_applied', [
+                    'trip_id' => $trip->id,
+                    'passenger_id' => $passenger->id,
+                    'coupon_code' => $passenger->coupon_code,
+                    'reason' => $e->getMessage(),
+                ]);
                 $discount = 0;
             }
         }

@@ -89,7 +89,29 @@ class AssistantService extends BaseService
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
         }
 
-        // Cost governance: soft monthly per-user token cap.
+        /*
+         * Cost governance: the per-user monthly cap AND the platform-wide one.
+         *
+         * The platform ceiling (`services.openai.max_monthly_tokens`) existed in config
+         * and was read by nothing, so aggregate spend was unbounded — a per-user cap
+         * times an unbounded number of users is not a ceiling.
+         *
+         * The platform case is logged at error level and the user case is not, because
+         * they are different events. One student exhausting their allowance is normal
+         * product behaviour; the platform exhausting its month is a finance incident
+         * that silently disables the assistant for EVERY user, and nobody would know
+         * why from the app.
+         */
+        if (! $this->usage->withinPlatformBudget()) {
+            Log::error('ai.platform_budget_exhausted', [
+                'used_tokens' => $this->usage->tokensUsedPlatformThisMonth(),
+                'cap_tokens' => $this->usage->platformMonthlyCap(),
+                'consequence' => 'the assistant is disabled for every user until the month rolls over',
+            ]);
+
+            return ['content' => $this->budgetReached(), 'ai' => false, 'tokens' => 0];
+        }
+
         if (! $this->usage->withinBudget($user->id)) {
             return ['content' => $this->budgetReached(), 'ai' => false, 'tokens' => 0];
         }

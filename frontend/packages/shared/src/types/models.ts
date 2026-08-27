@@ -198,10 +198,42 @@ export interface TripLocation {
 
 
 // ── Wallet & Payments (Phase 3) ──────────────────────────────────────
+/**
+ * A wallet, with the distinction that decides whether a payment can go through.
+ *
+ * ── Why `available_*` is not the same as `balance_*` ──────────────────────────
+ *
+ * `balance_fils` is what the wallet holds. `held_fils` is what is reserved against
+ * an active trip — a pre-authorisation, not a debit. The backend enforces EVERY
+ * spend against `available_fils` (= balance − held), in `Wallet::availableFils()`
+ * and `WalletService::apply()`.
+ *
+ * This type used to declare only `balance_fils`/`balance_jod`, so the three screens
+ * that show or gate on a wallet all read the gross figure and the reserved amount
+ * was invisible:
+ *
+ *   • checkout enabled "pay from wallet" when the GROSS balance covered the price,
+ *     and the backend then rejected the payment — the common case, because a booked
+ *     trip is exactly when a hold exists
+ *   • the student wallet screen showed money that could not be spent
+ *   • the captain earnings screen showed the gross balance under a label that
+ *     literally reads «الرصيد المتاح» — available balance
+ *
+ * The fields were being sent by `WalletResource` the whole time. Nothing was
+ * broken server-side; the client simply could not see the number that mattered.
+ * Prefer `available_*` for anything the user can act on, and show `held_fils`
+ * whenever it is non-zero so a missing dinar is explained rather than mysterious.
+ */
 export interface Wallet {
   id: string;
+  /** Everything the wallet holds, including funds reserved against a trip. */
   balance_fils: number;
   balance_jod: number;
+  /** Reserved against active trips. Not spendable, not yet debited. */
+  held_fils: number;
+  /** balance − held. THIS is what a spend is checked against. */
+  available_fils: number;
+  available_jod: number;
   currency: string;
 }
 

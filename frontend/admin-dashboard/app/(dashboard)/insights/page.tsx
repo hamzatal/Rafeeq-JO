@@ -1,11 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { formatFils } from '@rafeeq/shared';
 import type { AdminInsights } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 
-const jod = (fils: number) => `${(fils / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+/*
+ * Money goes through the shared formatter. It used to be:
+ *   const jod = (fils) => `${(fils / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+ * which dropped ALL THREE decimals off the platform's own revenue — 1,234,999 fils
+ * rendered as "1,235", a full dinar high — and produced a bare Latin numeral with no
+ * bidi isolation inside an RTL page, so the digits could reorder against the label.
+ *
+ * It slipped past `check:money` because that gate only looked for `.toFixed(2)` and a
+ * hand-written «د.أ». A rule for it has been added.
+ */
+const jod = (fils: number) => formatFils(fils);
 
 function Stat({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (

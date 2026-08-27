@@ -49,7 +49,82 @@ const RULES = [
     why: 'converting fils to dinars by hand bypasses the single formatter',
     fix: 'use formatFils / dinarsFromFils from @rafeeq/shared',
   },
+
+  /*
+   * ── The three rules below were added after the gate missed real bugs ────────
+   *
+   * The gate above catches `.toFixed(2)` and a hand-written «د.أ». Both admin
+   * dashboards had shipped this instead:
+   *
+   *   const jod = (fils) => `${(fils / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+   *
+   * which drops ALL THREE decimals from the platform's own revenue figure — so
+   * 1,234,999 fils displayed as "1,235", a full dinar high — and produces a bare
+   * numeral with no bidi isolation inside an RTL page. It used neither `toFixed`
+   * nor «د.أ», so it passed. Four other screens interpolated a `*_jod` field
+   * straight into JSX, printing "4.5" where a dinar is always three decimals.
+   *
+   * A gate that only catches the mistakes you already made is a gate that has
+   * stopped working.
+   */
+  {
+    id: 'fils-division',
+    re: /\/\s*1000\b(?![\s\S]{0,40}from '@rafeeq\/shared')/,
+    why: 'dividing by 1000 by hand converts fils to dinars outside the one formatter',
+    fix: 'use formatFils / dinarsFromFils from @rafeeq/shared',
+    // The formatter itself and the two places that legitimately scale a fils value
+    // before handing it to `dinarsOf` are allowed by ALLOW_LINE below.
+  },
+  {
+    id: 'rounded-money',
+    re: /maximumFractionDigits:\s*[012]\b/,
+    why: 'a dinar has three decimals; rounding to fewer displays an amount that is not the stored one',
+    fix: 'use formatFils / formatDinars from @rafeeq/shared',
+  },
+  {
+    id: 'raw-jod-field',
+    re: /\{\s*[\w.?]*(amount|price|balance|available|fare|total)_jod\s*\}/i,
+    why: 'a *_jod field interpolated straight into JSX prints "4.5" instead of "4.500", unisolated',
+    fix: 'pass the matching *_fils value through formatFils, or dinarsOf() the _jod value',
+  },
+  {
+    id: 'latin-currency',
+    re: /['"`]\s*JOD\s+?['"`]|>\s*JOD\s*</,
+    why: 'the currency reads «د.أ» in both locales; a hardcoded Latin "JOD" is unlocalised and inconsistent',
+    fix: 'use the DINAR constant from @rafeeq/shared',
+  },
 ];
+
+/**
+ * Lines that may keep a raw `/ 1000`.
+ *
+ * Narrow and explicit rather than a whole-file exemption: each is a fils value being
+ * scaled for a formatter that takes dinars, which is the one legitimate reason to
+ * write the division at a call site.
+ */
+const ALLOW_LINE = [
+  /dinarsFromFils/, // the shared helper's own name
+
+  /*
+   * A form INPUT bound to a `*_jod` value.
+   *
+   * An editable field must hold the raw number the operator is typing — formatting
+   * it to three decimals on every keystroke makes it impossible to type "4.5",
+   * because the value becomes "4.500" before the second digit arrives. Display is
+   * formatted; input is not. The `value=` prefix is what distinguishes them.
+   */
+  /value=\{[^}]*_jod\}/,
+];
+
+/**
+ * A comment cannot render, so it cannot mis-display money.
+ *
+ * The rules above are deliberately blunt regexes, which means an explanatory
+ * comment that NAMES the mistake — "not a hardcoded «د.أ»" — trips the very rule it
+ * is documenting. Skipping comment lines keeps the gate honest without forcing the
+ * comments to talk around their own subject.
+ */
+const COMMENT = /^\s*(\/\/|\/\*|\*|\{\/\*)/;
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
@@ -68,7 +143,12 @@ for (const file of walk(ROOT)) {
 
   const lines = readFileSync(file, 'utf8').split('\n');
   lines.forEach((line, i) => {
-    if (/^\s*(\/\/|\*|\/\*)/.test(line)) return; // comments may describe the defect
+    // Comments may describe the defect. `COMMENT` also covers a JSX `{/* … */}`
+    // block, which the previous pattern missed — so a JSX comment explaining why a
+    // hardcoded «د.أ» is wrong was itself reported as a hardcoded «د.أ».
+    if (COMMENT.test(line)) return;
+    if (ALLOW_LINE.some((a) => a.test(line))) return;
+
     for (const rule of RULES) {
       if (rule.re.test(line)) hits.push({ rel, line: i + 1, rule, text: line.trim().slice(0, 100) });
     }

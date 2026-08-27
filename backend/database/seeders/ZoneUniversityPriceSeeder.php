@@ -48,6 +48,42 @@ use Rafeeq\Modules\Zones\Models\ZoneUniversityPrice;
  */
 class ZoneUniversityPriceSeeder extends Seeder
 {
+    /**
+     * Wave 1 — the corridors that OPEN at launch.
+     *
+     * ── Why not all 24 ────────────────────────────────────────────────────────
+     *
+     * The product is POOLING, and pooling needs three riders on the same corridor in
+     * the same window. That makes density, not coverage, the thing to optimise at
+     * launch. Two hundred pilot students spread across 24 corridors is eight per
+     * corridor per day — which never fills a car, so every trip dispatches
+     * under-filled and the guarantee pays out on all of them. The same students
+     * concentrated on four corridors actually pool.
+     *
+     * So wave 1 is **Yarmouk only, and only the zones inside 3 km** (bands A–B):
+     *
+     *   • Yarmouk has around 35,000 students and sits near the Irbid city centre, so
+     *     it is where the demand already is.
+     *   • Bands A–B are 1.000–1.250 a seat against a 3–4 JOD direct taxi. That is the
+     *     sharpest version of the pitch, and the first cohort should hear the sharpest
+     *     version.
+     *   • JUST is deliberately held back. It is roughly 15 km out toward Ar-Ramtha, so
+     *     it lands in bands E–F at 2.000–2.250 a seat, a captain completes far fewer
+     *     trips an hour, and an under-filled long run is the most expensive trip the
+     *     platform can subsidise. It is the right second step, not the right first one.
+     *
+     * Every pair is still PRICED — the tariff data is complete and reviewable — but the
+     * corridors outside wave 1 are seeded INACTIVE. So the coverage refusal is truthful
+     * ("we have not opened this yet") rather than accidental, and opening a corridor is
+     * one flag in the admin screen instead of a deploy.
+     *
+     * @var list<string> zone `name_en` values
+     */
+    private const WAVE_ONE_ZONES = ['Downtown', 'East District', 'South District', 'Al-Nuzha'];
+
+    /** @var list<string> university `code` values */
+    private const WAVE_ONE_UNIVERSITIES = ['YU'];
+
     public function run(): void
     {
         $zones = Zone::where('is_active', true)->get();
@@ -62,6 +98,7 @@ class ZoneUniversityPriceSeeder extends Seeder
 
         $created = 0;
         $skipped = 0;
+        $opened = 0;
 
         foreach ($zones as $zone) {
             foreach ($universities as $uni) {
@@ -84,6 +121,10 @@ class ZoneUniversityPriceSeeder extends Seeder
 
                 $band = Tariff::bandForKm($km);
 
+                // Priced either way; OPEN only in wave 1. See WAVE_ONE_ZONES.
+                $inWaveOne = in_array($zone->name_en, self::WAVE_ONE_ZONES, true)
+                    && in_array($uni->code, self::WAVE_ONE_UNIVERSITIES, true);
+
                 ZoneUniversityPrice::create([
                     'zone_id' => $zone->id,
                     'university_id' => $uni->id,
@@ -92,18 +133,24 @@ class ZoneUniversityPriceSeeder extends Seeder
                     'solo_fare_fils' => Tariff::soloFils($band),
                     'tariff_version' => Tariff::VERSION,
                     'distance_km' => round($km, 2),
-                    'is_active' => true,
+                    'is_active' => $inWaveOne,
                 ]);
 
                 $created++;
+                if ($inWaveOne) {
+                    $opened++;
+                }
             }
         }
 
         $this->command?->info(sprintf(
-            'Fare matrix: %d corridors priced from distance (tariff %s), %d left untouched.',
+            'Fare matrix: %d corridors priced from distance (tariff %s), %d left untouched. %d OPEN at launch (wave 1: %s × %s).',
             $created,
             Tariff::VERSION,
             $skipped,
+            $opened,
+            implode(', ', self::WAVE_ONE_UNIVERSITIES),
+            implode(' · ', self::WAVE_ONE_ZONES),
         ));
 
         if ($created === 0 && $skipped === 0) {

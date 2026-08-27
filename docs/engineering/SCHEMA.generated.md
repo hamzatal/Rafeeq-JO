@@ -1,10 +1,10 @@
 # مرجع قاعدة البيانات (مُولَّد آلياً) — Auto-Generated DB Reference
 
 > ⚠️ **لا تُعدّل هذا الملف يدوياً.** يُولَّد عبر `php artisan db:schema-doc`.
-> للتوثيق الموصوف بالمجالات: `docs/DATABASE_SCHEMA.md`.
+> للتوثيق الموصوف بالمجالات: `docs/engineering/DATABASE.md`.
 
-- المُولّد من: **pgsql** · التاريخ: 2026-08-26
-- المجموع: **68** جدول (59 نطاق + 9 نظام)
+- المُولّد من: **pgsql** · التاريخ: 2026-08-27
+- المجموع: **65** جدول (56 نطاق + 9 نظام)
 
 ---
 
@@ -166,7 +166,7 @@
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
 
-**Foreign keys:** `against_user_id` → `users(id)` · `handled_by` → `users(id)` · `reporter_id` → `users(id)`
+**Foreign keys:** `against_user_id` → `users(id)` · `handled_by` → `users(id)` · `reporter_id` → `users(id)` · `trip_id` → `trips(id)`
 
 **Indexes:** `against_user_id` · `number` (unique) · `status,severity`
 
@@ -212,6 +212,8 @@
 | `updated_at` | timestamp | ✓ |  |
 | `deleted_at` | timestamp | ✓ |  |
 
+**Foreign keys:** `plan_id` → `subscription_plans(id)` · `university_id` → `universities(id)`
+
 **Indexes:** `code` (unique) · `expires_at` · `is_active,scope`
 
 ### `device_tokens`
@@ -251,7 +253,7 @@
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
 
-**Foreign keys:** `assigned_to` → `users(id)` · `opened_by` → `users(id)` · `resolved_by` → `users(id)` · `subject_user_id` → `users(id)`
+**Foreign keys:** `assigned_to` → `users(id)` · `opened_by` → `users(id)` · `resolved_by` → `users(id)` · `subject_user_id` → `users(id)` · `trip_id` → `trips(id)`
 
 **Indexes:** `status` · `subject_user_id,status` · `trip_id`
 
@@ -308,10 +310,11 @@
 | `submitted_at` | timestamp | ✓ |  |
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
+| `national_id_hash` | bpchar | ✓ |  |
 
 **Foreign keys:** `reviewed_by` → `users(id)` · `user_id` → `users(id)`
 
-**Indexes:** `status` · `user_id` (unique)
+**Indexes:** `national_id_hash` (unique) · `status` · `user_id` (unique)
 
 ### `emergency_contacts`
 
@@ -319,8 +322,8 @@
 |---|---|---|---|
 | `id` | uuid | — |  |
 | `user_id` | uuid | — |  |
-| `name` | varchar | — |  |
-| `phone` | varchar | — |  |
+| `name` | text | — |  |
+| `phone` | text | — |  |
 | `relation` | varchar | ✓ |  |
 | `is_primary` | bool | — | false |
 | `notify_on_sos` | bool | — | true |
@@ -330,27 +333,6 @@
 **Foreign keys:** `user_id` → `users(id)`
 
 **Indexes:** `user_id,is_primary`
-
-### `exchange_items`
-
-| العمود | النوع | Nullable | افتراضي |
-|---|---|---|---|
-| `id` | uuid | — |  |
-| `owner_id` | uuid | — |  |
-| `type` | varchar | — | 'book'::character varying |
-| `title` | varchar | — |  |
-| `condition` | varchar | — | 'good'::character varying |
-| `description` | text | ✓ |  |
-| `images` | json | ✓ |  |
-| `price_fils` | int8 | ✓ |  |
-| `status` | varchar | — | 'available'::character varying |
-| `reserved_by` | uuid | ✓ |  |
-| `created_at` | timestamp | ✓ |  |
-| `updated_at` | timestamp | ✓ |  |
-
-**Foreign keys:** `owner_id` → `users(id)` · `reserved_by` → `users(id)`
-
-**Indexes:** `owner_id` · `type,status`
 
 ### `ghost_trip_watches`
 
@@ -387,7 +369,7 @@
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
 
-**Foreign keys:** `reporter_id` → `users(id)`
+**Foreign keys:** `reporter_id` → `users(id)` · `trip_id` → `trips(id)`
 
 **Indexes:** `reporter_id` · `type,status`
 
@@ -430,55 +412,6 @@
 
 **Indexes:** `expires_at` · `identifier` · `identifier,purpose`
 
-### `parcel_events`
-
-| العمود | النوع | Nullable | افتراضي |
-|---|---|---|---|
-| `id` | uuid | — |  |
-| `parcel_id` | uuid | — |  |
-| `type` | varchar | — |  |
-| `actor_id` | uuid | ✓ |  |
-| `lat` | numeric | ✓ |  |
-| `lng` | numeric | ✓ |  |
-| `note` | text | ✓ |  |
-| `at` | timestamp | — |  |
-| `created_at` | timestamp | ✓ |  |
-| `updated_at` | timestamp | ✓ |  |
-
-**Foreign keys:** `actor_id` → `users(id)` · `parcel_id` → `parcels(id)`
-
-**Indexes:** `parcel_id`
-
-### `parcels`
-
-| العمود | النوع | Nullable | افتراضي |
-|---|---|---|---|
-| `id` | uuid | — |  |
-| `number` | varchar | — |  |
-| `sender_id` | uuid | — |  |
-| `courier_id` | uuid | ✓ |  |
-| `receiver_name` | varchar | — |  |
-| `receiver_phone` | varchar | — |  |
-| `from_point_id` | uuid | ✓ |  |
-| `to_point_id` | uuid | ✓ |  |
-| `from_address` | varchar | ✓ |  |
-| `to_address` | varchar | ✓ |  |
-| `category` | varchar | — | 'general'::character varying |
-| `size` | varchar | — | 'small'::character varying |
-| `description` | text | ✓ |  |
-| `fee_fils` | int8 | — | '0'::bigint |
-| `status` | varchar | — | 'created'::character varying |
-| `pickup_code` | varchar | — |  |
-| `delivery_code` | varchar | — |  |
-| `picked_up_at` | timestamp | ✓ |  |
-| `delivered_at` | timestamp | ✓ |  |
-| `created_at` | timestamp | ✓ |  |
-| `updated_at` | timestamp | ✓ |  |
-
-**Foreign keys:** `courier_id` → `driver_profiles(id)` · `from_point_id` → `pickup_points(id)` · `sender_id` → `users(id)` · `to_point_id` → `pickup_points(id)`
-
-**Indexes:** `courier_id,status` · `number` (unique) · `sender_id,status`
-
 ### `payment_requests`
 
 | العمود | النوع | Nullable | افتراضي |
@@ -502,7 +435,7 @@
 | `coupon_id` | uuid | ✓ |  |
 | `discount_fils` | int4 | — | 0 |
 
-**Foreign keys:** `approved_by` → `users(id)` · `user_id` → `users(id)`
+**Foreign keys:** `approved_by` → `users(id)` · `coupon_id` → `coupons(id)` · `user_id` → `users(id)`
 
 **Indexes:** `number` (unique) · `payable_type,payable_id` · `status` · `user_id,status`
 
@@ -692,6 +625,7 @@
 | `updated_at` | timestamp | ✓ |  |
 | `coupon_code` | varchar | ✓ |  |
 | `direction` | varchar | — | 'to_university'::character varying |
+| `payment_method` | varchar | — | 'wallet'::character varying |
 
 **Foreign keys:** `student_id` → `users(id)` · `subscription_id` → `subscriptions(id)` · `trip_id` → `trips(id)` · `university_id` → `universities(id)` · `zone_id` → `zones(id)`
 
@@ -784,8 +718,8 @@
 | `id` | uuid | — |  |
 | `user_id` | uuid | — |  |
 | `label` | varchar | — | 'other'::character varying |
-| `title` | varchar | ✓ |  |
-| `address_text` | varchar | — |  |
+| `title` | text | ✓ |  |
+| `address_text` | text | — |  |
 | `lat` | float8 | ✓ |  |
 | `lng` | float8 | ✓ |  |
 | `is_default` | bool | — | false |
@@ -844,7 +778,7 @@
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
 
-**Foreign keys:** `user_id` → `users(id)`
+**Foreign keys:** `default_pickup_point_id` → `pickup_points(id)` · `university_id` → `universities(id)` · `user_id` → `users(id)`
 
 **Indexes:** `default_pickup_point_id` · `university_id` · `user_id` (unique)
 
@@ -887,7 +821,7 @@
 
 **Foreign keys:** `plan_id` → `subscription_plans(id)` · `route_id` → `routes(id)` · `student_id` → `users(id)`
 
-**Indexes:** `plan_id` · `route_id` · `status` · `student_id,status`
+**Indexes:** `plan_id` · `route_id` · `status,ends_at` · `status` · `student_id,status`
 
 ### `support_tickets`
 
@@ -953,10 +887,12 @@
 | `updated_at` | timestamp | ✓ |  |
 | `coupon_code` | varchar | ✓ |  |
 | `coupon_discount_fils` | int4 | ✓ |  |
+| `payment_method` | varchar | — | 'wallet'::character varying |
+| `cash_collected_at` | timestamp | ✓ |  |
 
 **Foreign keys:** `pickup_point_id` → `pickup_points(id)` · `student_id` → `users(id)` · `subscription_id` → `subscriptions(id)` · `trip_id` → `trips(id)`
 
-**Indexes:** `paid_at` · `student_id` · `subscription_id` · `trip_id,student_id` (unique)
+**Indexes:** `paid_at` · `payment_method,paid_at` · `student_id` · `subscription_id` · `trip_id,student_id` (unique)
 
 ### `trip_tracking`
 
@@ -998,7 +934,7 @@
 | `surge_multiplier` | numeric | — | '1'::numeric |
 | `direction` | varchar | — | 'to_university'::character varying |
 
-**Foreign keys:** `driver_id` → `driver_profiles(id)` · `route_id` → `routes(id)` · `university_id` → `universities(id)` · `vehicle_id` → `vehicles(id)`
+**Foreign keys:** `driver_id` → `driver_profiles(id)` · `route_id` → `routes(id)` · `university_id` → `universities(id)` · `vehicle_id` → `vehicles(id)` · `zone_id` → `zones(id)`
 
 **Indexes:** `driver_id` · `route_id` · `scheduled_at` · `status` · `university_id,status,scheduled_at` · `zone_id`
 
@@ -1027,10 +963,10 @@
 | العمود | النوع | Nullable | افتراضي |
 |---|---|---|---|
 | `id` | uuid | — |  |
-| `full_name` | varchar | — |  |
-| `phone` | varchar | — |  |
+| `full_name` | text | — |  |
+| `phone` | text | — |  |
 | `phone_verified_at` | timestamp | ✓ |  |
-| `email` | varchar | ✓ |  |
+| `email` | text | ✓ |  |
 | `email_verified_at` | timestamp | ✓ |  |
 | `password` | varchar | ✓ |  |
 | `type` | varchar | — | 'student'::character varying |
@@ -1050,8 +986,11 @@
 | `terms_version` | varchar | ✓ |  |
 | `terms_accepted_at` | timestamp | ✓ |  |
 | `anonymized_at` | timestamp | ✓ |  |
+| `phone_hash` | bpchar | ✓ |  |
+| `email_hash` | bpchar | ✓ |  |
+| `name_tokens` | jsonb | ✓ |  |
 
-**Indexes:** `anonymized_at` · `email` (unique) · `phone` (unique) · `status` · `type`
+**Indexes:** `anonymized_at` · `email_hash` (unique) · `name_tokens` · `phone_hash` (unique) · `status` · `type`
 
 ### `vehicles`
 
@@ -1118,16 +1057,18 @@
 | العمود | النوع | Nullable | افتراضي |
 |---|---|---|---|
 | `id` | uuid | — |  |
-| `user_id` | uuid | — |  |
+| `user_id` | uuid | ✓ |  |
 | `balance_fils` | int8 | — | '0'::bigint |
 | `currency` | varchar | — | 'JOD'::character varying |
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
 | `held_fils` | int8 | — | '0'::bigint |
+| `debt_fils` | int8 | — | '0'::bigint |
+| `kind` | varchar | — | 'user'::character varying |
 
 **Foreign keys:** `user_id` → `users(id)`
 
-**Indexes:** `user_id` (unique)
+**Indexes:** `debt_fils` · `kind` · `kind` (unique) · `user_id` (unique)
 
 ### `zone_university_prices`
 
@@ -1140,6 +1081,10 @@
 | `is_active` | bool | — | true |
 | `created_at` | timestamp | ✓ |  |
 | `updated_at` | timestamp | ✓ |  |
+| `band` | bpchar | ✓ |  |
+| `solo_fare_fils` | int4 | ✓ |  |
+| `tariff_version` | varchar | ✓ |  |
+| `distance_km` | numeric | ✓ |  |
 
 **Foreign keys:** `university_id` → `universities(id)` · `zone_id` → `zones(id)`
 

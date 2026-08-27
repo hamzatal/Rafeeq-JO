@@ -7,8 +7,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
+use Rafeeq\Core\Permissions\Models\Permission;
+use Rafeeq\Core\Permissions\Models\Role;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\LostFound\Models\LostFoundItem;
+use Rafeeq\Modules\Safety\Models\SosIncident;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Zones\Models\Zone;
 use Rafeeq\Shared\Enums\UserStatus;
@@ -331,5 +334,110 @@ class AuthorizationBoundaryTest extends TestCase
 
         Sanctum::actingAs($owner);
         $this->getJson("/api/v1/lost-found/{$item->id}/candidates")->assertOk();
+    }
+    /* ────────── the four surfaces that were gated on a ROLE alone ────────── */
+
+    /**
+     * The safety centre had NO permission at all.
+     *
+     * `admin/safety/*` was `role:admin,supervisor` while every comparable surface had
+     * already been moved to a permission — disputes to `users.manage`, zone prices to
+     * `settings.manage`, payments to `payments.approve`. It was simply missed, and it
+     * exposes the most sensitive data in the product: GPS-fraud findings, cancellation
+     * patterns, and open SOS incidents naming a rider and their live location.
+     *
+     * Support is the role that proves the gate: it holds `trips.view` and
+     * `complaints.view` but must not hold `safety.view`.
+     */
+    public function test_support_cannot_read_the_safety_centre(): void
+    {
+        Sanctum::actingAs($this->userWithRole('support', UserType::Support));
+
+        $this->getJson('/api/v1/admin/safety/risk-flags')->assertForbidden();
+        $this->getJson('/api/v1/admin/safety/sos')->assertForbidden();
+        $this->getJson('/api/v1/admin/safety/cancellations')->assertForbidden();
+    }
+
+    /** Supervisors ARE the safety team, so the rota does not escalate every SOS. */
+    public function test_supervisor_can_read_the_safety_centre(): void
+    {
+        Sanctum::actingAs($this->userWithRole('supervisor', UserType::Support));
+
+        $this->getJson('/api/v1/admin/safety/risk-flags')->assertOk();
+        $this->getJson('/api/v1/admin/safety/sos')->assertOk();
+    }
+
+    /**
+     * Reading a safety queue and CLOSING an open SOS are different powers — the same
+     * split as `users.view` versus `users.view_pii`. An incident resolved by mistake
+     * is a person nobody is looking for any more.
+     */
+    public function test_resolving_a_safety_incident_needs_its_own_permission(): void
+    {
+        $role = Role::where('name', 'supervisor')->firstOrFail();
+        $view = Permission::where('name', 'safety.view')->firstOrFail();
+        // A staff member holding read but not resolve — the shape a future
+        // "safety analyst" role would take.
+        $role->permissions()->sync([$view->id]);
+
+        Sanctum::actingAs($this->userWithRole('supervisor', UserType::Support));
+
+        // A REAL incident: route-model binding resolves before the inner permission
+        // group, so a made-up id would 404 and prove nothing about authorisation.
+        $incident = SosIncident::create([
+            'user_id' => $this->student()->id,
+            'lat' => 32.55, 'lng' => 35.85, 'status' => 'open',
+        ]);
+
+        $this->getJson('/api/v1/admin/safety/sos')->assertOk();
+        $this->postJson("/api/v1/admin/safety/sos/{$incident->id}/resolve")->assertForbidden();
+    }
+
+    /**
+     * Running the matcher CREATES TRIPS AND SETS THEIR FARES, so it belongs with the
+     * power to set prices. On `role:admin,supervisor` a supervisor deliberately barred
+     * from the pricing screen could still mint priced, money-bearing rows by hand.
+     */
+    public function test_supervisor_cannot_run_the_matcher(): void
+    {
+        Sanctum::actingAs($this->userWithRole('supervisor', UserType::Support));
+
+        $this->postJson('/api/v1/admin/matching/run')->assertForbidden();
+    }
+
+    /**
+     * The admin trip and ride-request lists carry every rider's pickup coordinates
+     * and travel history — the same class of PII that `admin/users` already gates on
+     * `permission:users.view`. Support legitimately holds `trips.view`, so this
+     * asserts the permission is CHECKED, not that support is excluded.
+     */
+    public function test_the_rider_location_lists_require_trips_view(): void
+    {
+        $role = Role::where('name', 'support')->firstOrFail();
+        $role->permissions()->detach(Permission::where('name', 'trips.view')->firstOrFail()->id);
+
+        Sanctum::actingAs($this->userWithRole('support', UserType::Support));
+
+        $this->getJson('/api/v1/admin/trips')->assertForbidden();
+        $this->getJson('/api/v1/admin/ride-requests')->assertForbidden();
+    }
+
+    /**
+     * An APPROVAL permission was being used as a READ permission: `payments.approve`
+     * gated the whole wallet ledger, so anyone who could approve one CliQ transfer
+     * could read every user's transaction history. `payments.view` is the consistent
+     * choice — it is what the payout queue next door already reads with.
+     */
+    public function test_reading_the_wallet_ledger_needs_payments_view_not_approve(): void
+    {
+        $role = Role::where('name', 'supervisor')->firstOrFail();
+        // Keep approve, drop view: under the old gate this combination could read.
+        $role->permissions()->detach(Permission::where('name', 'payments.view')->firstOrFail()->id);
+
+        $staff = $this->userWithRole('supervisor', UserType::Support);
+        Sanctum::actingAs($staff);
+
+        $this->getJson('/api/v1/admin/wallets/transactions?user_id='.$this->student()->id)
+            ->assertForbidden();
     }
 }

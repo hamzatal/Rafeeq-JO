@@ -82,6 +82,24 @@ class SubscriptionService extends BaseService
         $price = (int) $subscription->plan->price_fils;
 
         return $this->transaction(function () use ($student, $subscription, $price) {
+            /*
+             * Lock the SUBSCRIPTION row, not just the wallet.
+             *
+             * The status checks above happen outside the transaction, so two concurrent
+             * `pay-wallet` calls on the same pending subscription both saw `Pending`,
+             * both debited the plan price, and the student paid twice for one month.
+             * Re-reading under the lock and re-checking is what makes the early return
+             * for an already-active subscription actually idempotent instead of merely
+             * usually-correct.
+             */
+            $locked = Subscription::whereKey($subscription->id)->lockForUpdate()->firstOrFail();
+            if ($locked->status === SubscriptionStatus::Active) {
+                return $locked->load('plan');
+            }
+            if ($locked->status !== SubscriptionStatus::Pending) {
+                throw new BusinessRuleException('لا يمكن دفع هذا الاشتراك.', 'SUBSCRIPTION_NOT_PAYABLE');
+            }
+
             $wallet = $this->wallets->forUser($student);
             $this->wallets->debit(
                 $wallet,
@@ -91,7 +109,7 @@ class SubscriptionService extends BaseService
                 $subscription->id,
             );
 
-            $activated = $this->activate($subscription);
+            $activated = $this->activate($locked);
             $this->audit->log('subscription.paid_wallet', $student, auditable: $activated, changes: ['amount_fils' => $price]);
 
             return $activated;

@@ -12,8 +12,12 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::post('ride-requests/{rideRequest}/cancel', [RideRequestController::class, 'cancel']);
     });
 
-    // Admin / ops
-    Route::middleware('role:admin,supervisor')->group(function () {
+    /*
+     * Admin / ops. `permission:trips.view` rather than a bare role: this lists every
+     * rider's pickup coordinates and where they are going, exactly like
+     * `admin/trips`, and the same permission governs both.
+     */
+    Route::middleware('permission:trips.view')->group(function () {
         Route::get('admin/ride-requests', [RideRequestController::class, 'index']);
     });
 });

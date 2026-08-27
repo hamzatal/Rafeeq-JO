@@ -6,6 +6,7 @@ import type { PayoutRequest } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
+import { LoadError } from '../../../src/components/LoadError';
 
 const jod = (fils: number) => formatFils(fils);
 
@@ -13,14 +14,17 @@ export default function WithdrawalsPage() {
   const { t } = useT();
   const [items, setItems] = useState<PayoutRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('pending');
 
   const load = useCallback(() => {
     setLoading(true);
+    setLoadError(false);
     api.payouts
       .adminQueue()
       .then(setItems)
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -85,7 +89,9 @@ export default function WithdrawalsPage() {
       </div>
 
       <div className="card p-0 overflow-hidden">
-        {loading ? (
+        {loadError ? (
+          <LoadError onRetry={() => load()} />
+        ) : loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : filtered.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('withdrawals.none')}</div>

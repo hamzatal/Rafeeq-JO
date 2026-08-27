@@ -14,7 +14,7 @@ const onlineSwitch = (on = true) => `
     <span style="font:700 16px 'IBM Plex Sans Arabic';color:${on ? '#fff' : 'var(--n700)'}">${on ? 'متصل — تستقبل الطلبات' : 'غير متصل'}</span>
     <span style="font:400 11px 'IBM Plex Sans Arabic';color:${on ? 'rgba(255,255,255,.85)' : 'var(--n600)'}">${on ? 'اضغط لإيقاف الاستقبال' : 'اضغط لبدء استقبال الرحلات'}</span></div></div>`;
 
-c.push(cell('25', 'الكوكبِت — متصل', 'مفتاح بعرض الشاشة · رقم بطل واحد · اليوم Switch صغير في بطاقة', `
+c.push(cell('25', 'يومي — متصل', 'مفتاح بعرض الشاشة · رقم بطل واحد · اليوم Switch صغير في بطاقة', `
 ${statusBar()}
 <div class="nav-h"><div class="av" style="width:38px;height:38px;font-size:16px">م</div>
   <div class="col" style="gap:0"><span class="t-caption" style="color:var(--n500)">لوحة الكابتن</span>
@@ -48,7 +48,7 @@ ${statusBar()}
     ${row({ icon: 'id', title: 'مركبتي ووثائقي', trail: pill('مكتملة', 'ok', 'ok') })}</div>
 </div>${tabBar(0, 'driver')}`));
 
-c.push(cell('26', 'الكوكبِت — غير معتمد', 'حالة الانتظار صريحة وتقول ما ينقص بالضبط', `
+c.push(cell('26', 'يومي — غير معتمد', 'حالة الانتظار صريحة وتقول ما ينقص بالضبط', `
 ${statusBar()}
 <div class="nav-h"><div class="av" style="width:38px;height:38px;font-size:16px;background:var(--n400)">س</div>
   <div class="col" style="gap:0"><span class="t-caption" style="color:var(--n500)">لوحة الكابتن</span>

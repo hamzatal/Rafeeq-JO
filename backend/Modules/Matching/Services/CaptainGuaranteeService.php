@@ -138,6 +138,19 @@ class CaptainGuaranteeService extends BaseService
          * this guarantee twice, silently, and the second payment would look like
          * an ordinary earning. The (reference, type) pair is the guard.
          */
+        /*
+         * The idempotency check and the payment must not be separable.
+         *
+         * `alreadyPaid()` followed by two `credit()` calls is a check-then-act: two
+         * settlements for the same trip — a retried job, or a trip ended twice by two
+         * requests — both read "not yet paid" and both pay. So the trip row is locked
+         * first, which serialises every settlement of the SAME trip while leaving
+         * different trips fully concurrent. The daily-cap read below is then also
+         * consistent, because a captain's second qualifying trip cannot interleave
+         * with their first.
+         */
+        Trip::whereKey($tripId)->lockForUpdate()->first();
+
         if ($this->alreadyPaid($tripId)) {
             return 0;
         }

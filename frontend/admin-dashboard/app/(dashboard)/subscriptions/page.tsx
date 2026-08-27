@@ -5,6 +5,7 @@ import type { Subscription } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
+import { LoadError } from '../../../src/components/LoadError';
 
 const STATUSES = ['', 'pending', 'active', 'expired', 'cancelled'];
 
@@ -13,13 +14,16 @@ export default function SubscriptionsPage() {
   const [items, setItems] = useState<Subscription[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
+    setLoadError(false);
     api.admin
       .listSubscriptions(status ? { status, per_page: 50 } : { per_page: 50 })
       .then((r) => setItems(r.items))
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, [status]);
 
@@ -47,7 +51,9 @@ export default function SubscriptionsPage() {
       </div>
 
       <div className="card p-0 overflow-hidden">
-        {loading ? (
+        {loadError ? (
+          <LoadError onRetry={() => load()} />
+        ) : loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('subscriptions.none')}</div>

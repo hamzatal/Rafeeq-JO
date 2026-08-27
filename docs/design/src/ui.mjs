@@ -79,7 +79,7 @@ export function navBar(title, { back = true, action = '' } = {}) {
 }
 export const TABS = {
   student: [['home', 'الرئيسية'], ['car', 'رحلاتي'], ['wallet', 'المحفظة'], ['user', 'حسابي']],
-  driver:  [['gauge', 'الكوكبِت'], ['car', 'رحلاتي'], ['cash', 'أرباحي'], ['user', 'حسابي']],
+  driver:  [['gauge', 'يومي'], ['car', 'رحلاتي'], ['cash', 'أرباحي'], ['user', 'حسابي']],
 };
 
 /** variant: 'a' hairline+tint (old) · 'b' soft shadow + tinted capsule

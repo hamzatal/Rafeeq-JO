@@ -39,6 +39,23 @@ Schedule::command('rafeeq:prune-retention')
 Schedule::command('rafeeq:expire-subscriptions')->dailyAt('00:05')->onOneServer();
 
 /*
+ * The same argument, for the three states nothing else was closing.
+ *
+ * A pooled trip that no captain accepted stayed `pending_driver` FOREVER, with its
+ * riders' wallet holds still active — money frozen and an app stuck on "waiting for a
+ * captain" with no timeout anywhere. A ride request past its departure was re-pooled
+ * by every matcher run. A CliQ payment request past its TTL stayed approvable, even
+ * though the TTL was configured and `isExpired()` already computed the answer.
+ *
+ * Every ten minutes rather than daily: the first of the three strands a rider and
+ * freezes their balance, so a once-a-night sweep would be a night too late.
+ */
+Schedule::command('rafeeq:expire-stale')
+    ->everyTenMinutes()
+    ->onOneServer()
+    ->withoutOverlapping();
+
+/*
  * Heartbeat for the scheduler's own healthcheck.
  *
  * The scheduler container had NO healthcheck, so if it died the retention jobs, the

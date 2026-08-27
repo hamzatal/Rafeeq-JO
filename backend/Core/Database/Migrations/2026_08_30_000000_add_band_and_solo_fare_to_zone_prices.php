@@ -115,8 +115,22 @@ return new class extends Migration
         DB::statement('ALTER TABLE zone_university_prices
             DROP CONSTRAINT IF EXISTS chk_zone_university_prices_solo_fare_fils_non_negative');
 
+        /*
+         * Dropped one at a time behind the same guard `up()` adds them behind.
+         *
+         * `up()` is careful — every column is wrapped in `if (! hasColumn(...))` — and
+         * `down()` dropped all four unconditionally in a single `dropColumn([...])`.
+         * So in exactly the situation the guarded `up()` was written for, where a
+         * column already existed and was skipped, the rollback aborted on the first
+         * one it could not find. An asymmetric guard is worse than no guard: it makes
+         * `up()` look defensive while leaving the reverse path brittle.
+         */
         Schema::table('zone_university_prices', function (Blueprint $t) {
-            $t->dropColumn(['band', 'solo_fare_fils', 'tariff_version', 'distance_km']);
+            foreach (['band', 'solo_fare_fils', 'tariff_version', 'distance_km'] as $column) {
+                if (Schema::hasColumn('zone_university_prices', $column)) {
+                    $t->dropColumn($column);
+                }
+            }
         });
     }
 };

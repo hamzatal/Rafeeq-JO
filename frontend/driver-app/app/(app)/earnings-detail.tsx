@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import type { EarningsSummary } from '@rafeeq/shared';
 import { Icon } from '../../src/components/Icon';
-import { EmptyState } from '../../src/components/ui';
+import { EmptyState, ErrorState, SkeletonList } from '../../src/components/ui';
 import { useI18n } from '../../src/i18n';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { api } from '../../src/lib/api';
@@ -22,12 +22,27 @@ export default function EarningsDetail() {
 
   const [data, setData] = useState<EarningsSummary | null>(null);
   const [tab, setTab] = useState<Tab>('daily');
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
+  /*
+   * The catch used to be `{ /* silent *\/ }` with no loading and no error state.
+   *
+   * On any network failure `data` stayed null and the screen rendered ٠.٠٠٠ for
+   * today, this week, this month and all time — so a captain whose connection
+   * dropped was shown that they had earned NOTHING, indistinguishable from a real
+   * zero. That is the worst possible failure mode for an earnings screen: it does
+   * not look broken, it looks like bad news.
+   */
   const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       setData(await api.payouts.earningsSummary());
     } catch {
-      /* silent */
+      setLoadError(true);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -70,25 +85,41 @@ export default function EarningsDetail() {
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Totals grid */}
-        <View style={s.grid}>
-          {totals.map((tot) => (
-            <View key={tot.key} style={[s.totalCard, tot.navy && s.totalCardNavy]}>
-              <Text style={[s.totalLabel, tot.navy && s.totalLabelOn]}>{t(tot.labelKey)}</Text>
-              <Text style={[s.totalValue, tot.navy && s.totalValueOn]}>
-                {data ? jod(data.totals[tot.key]) : dinarsOf(0)} <Text style={s.cur}>{DINAR}</Text>
-              </Text>
-              <Text style={[s.totalTrips, tot.navy && s.totalLabelOn]}>
-                {data ? data.totals[tot.tripsKey] : 0} {t('driver.tripsShort')}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {!hasAny ? (
-          <EmptyState icon="navigation" title={t('driver.noEarningsYet')} />
+        {/*
+          A failure must NOT fall through to the totals grid. Rendering ٠.٠٠٠ for
+          every bucket tells a captain they earned nothing today, which is a
+          different and much worse statement than "we could not load this".
+        */}
+        {loadError ? (
+          <ErrorState
+            title={t('common.error')}
+            message={t('common.loadFailed')}
+            retryLabel={t('common.retry')}
+            onRetry={() => void load()}
+          />
+        ) : loading ? (
+          <SkeletonList rows={4} />
         ) : (
           <>
+            {/* Totals grid */}
+            <View style={s.grid}>
+              {totals.map((tot) => (
+                <View key={tot.key} style={[s.totalCard, tot.navy && s.totalCardNavy]}>
+                  <Text style={[s.totalLabel, tot.navy && s.totalLabelOn]}>{t(tot.labelKey)}</Text>
+                  <Text style={[s.totalValue, tot.navy && s.totalValueOn]}>
+                    {data ? jod(data.totals[tot.key]) : dinarsOf(0)} <Text style={s.cur}>{DINAR}</Text>
+                  </Text>
+                  <Text style={[s.totalTrips, tot.navy && s.totalLabelOn]}>
+                    {data ? data.totals[tot.tripsKey] : 0} {t('driver.tripsShort')}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            {!hasAny ? (
+              <EmptyState icon="navigation" title={t('driver.noEarningsYet')} />
+            ) : (
+              <>
             {/* Tabs */}
             <View style={s.tabs}>
               {(['daily', 'weekly'] as Tab[]).map((tb) => (
@@ -132,6 +163,8 @@ export default function EarningsDetail() {
                   <Text style={s.rowValue}>{formatFils(b.earnings_fils)}</Text>
                 </View>
               ))}
+              </>
+            )}
           </>
         )}
       </ScrollView>
