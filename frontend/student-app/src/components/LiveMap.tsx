@@ -470,7 +470,7 @@ function buildLeafletHtml(
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     mapWrap: {
-      borderRadius: t.radius.lg,
+      borderRadius: t.radius.card,
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: t.colors.border,
@@ -491,7 +491,7 @@ const makeStyles = (t: AppTheme) =>
       alignItems: 'center',
       gap: 5,
       backgroundColor: t.colors.primary,
-      borderRadius: t.radius.md,
+      borderRadius: t.radius.control,
       paddingVertical: 5,
       paddingHorizontal: 10,
       opacity: 0.92,

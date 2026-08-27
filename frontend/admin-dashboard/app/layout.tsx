@@ -27,16 +27,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" className={`${sansArabic.variable} ${mono.variable}`}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* display=block → the icon glyph area stays blank until the font loads,
-            instead of showing raw ligature text ("dashboard", "group"…). */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
-        />
-      </head>
+      {/*
+        No `<head>` block, and no third-party stylesheet.
+
+        This used to load Material Symbols Outlined from `fonts.googleapis.com` with
+        two preconnects. Three things were wrong with it beyond the icon set itself:
+        a render-blocking request to a third party on every page load; `display=block`
+        which deliberately holds the glyph area blank, so a slow network showed empty
+        squares where the navigation icons belong; and a variable-axis subset request
+        that no build step verified against the ligature names actually used.
+
+        Lucide ships the icons as inline SVG in the bundle. Nothing to fetch, nothing
+        to flash, and a name that does not exist is caught by `check:icons`.
+      */}
       <body className={sansArabic.className}>
         <PrefsProvider>
           <AuthProvider>{children}</AuthProvider>

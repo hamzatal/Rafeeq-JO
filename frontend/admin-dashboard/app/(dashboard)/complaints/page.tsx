@@ -6,6 +6,7 @@ import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { LoadError } from '../../../src/components/LoadError';
+import { Icon } from '../../../src/components/Icon';
 
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
@@ -70,7 +71,7 @@ export default function ComplaintsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('nav.complaints')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.complaints')}</h1>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {['', 'critical', 'high', 'medium', 'low'].map((sv) => (
@@ -134,7 +135,7 @@ export default function ComplaintsPage() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bold surface-text">{t('complaints.details')} — {detail.number}</h2>
                   <button type="button" onClick={() => setDetail(null)} className="text-muted hover:text-danger">
-                    <span className="material-symbols-outlined">close</span>
+                    <Icon name="x" />
                   </button>
                 </div>
                 <div className="mb-4">
@@ -154,7 +155,7 @@ export default function ComplaintsPage() {
                 {detail.ai_report?.summary || detail.ai_report?.recommended_action ? (
                   <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-primary-dark text-[18px]">smart_toy</span>
+                      <Icon name="bot" size={18} className="text-primary-dark" />
                       <span className="text-sm font-bold text-primary-dark">{t('complaints.aiTriage')}</span>
                       {typeof detail.ai_report?.confidence === 'number' && (
                         <span className="badge bg-white text-muted border border-line mr-auto">{detail.ai_report.confidence}%</span>

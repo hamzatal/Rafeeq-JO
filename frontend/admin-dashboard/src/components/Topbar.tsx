@@ -7,33 +7,34 @@ import { usePrefs } from '../lib/prefs';
 import { useT } from '../lib/i18n';
 import { Tooltip } from './Tooltip';
 import { api } from '../lib/api';
+import { Icon } from './Icon';
 
 /** Searchable destinations for the global command-palette search. */
 type Target = { href: string; ar: string; en: string; icon: string; kw?: string };
 const TARGETS: Target[] = [
-  { href: '/', ar: 'مركز القيادة', en: 'Dashboard', icon: 'dashboard', kw: 'home overview رئيسية' },
-  { href: '/insights', ar: 'الرؤى الذكية', en: 'AI Insights', icon: 'neurology', kw: 'ai analytics تحليلات' },
-  { href: '/ride-requests', ar: 'طلبات الرحلات', en: 'Ride Requests', icon: 'near_me' },
+  { href: '/', ar: 'مركز القيادة', en: 'Dashboard', icon: 'layout-dashboard', kw: 'home overview رئيسية' },
+  { href: '/insights', ar: 'الرؤى الذكية', en: 'AI Insights', icon: 'brain', kw: 'ai analytics تحليلات' },
+  { href: '/ride-requests', ar: 'طلبات الرحلات', en: 'Ride Requests', icon: 'navigation' },
   { href: '/zones', ar: 'المناطق', en: 'Zones', icon: 'map' },
-  { href: '/universities', ar: 'الجامعات', en: 'Universities', icon: 'school' },
+  { href: '/universities', ar: 'الجامعات', en: 'Universities', icon: 'graduation-cap' },
   { href: '/routes', ar: 'المسارات', en: 'Routes', icon: 'route' },
-  { href: '/plans', ar: 'خطط الاشتراك', en: 'Plans', icon: 'card_membership' },
-  { href: '/subscriptions', ar: 'الاشتراكات', en: 'Subscriptions', icon: 'subscriptions' },
-  { href: '/trips', ar: 'الرحلات', en: 'Trips', icon: 'directions_car' },
-  { href: '/drivers', ar: 'الكباتن', en: 'Captains', icon: 'sports_motorsports', kw: 'drivers سائق' },
-  { href: '/users', ar: 'المستخدمون', en: 'Users', icon: 'group', kw: 'students طلاب wallet محفظة' },
-  { href: '/payments', ar: 'المدفوعات', en: 'Payments', icon: 'payments', kw: 'cliq شحن fraud احتيال' },
-  { href: '/coupons', ar: 'الكوبونات', en: 'Coupons', icon: 'sell', kw: 'discount خصم' },
-  { href: '/withdrawals', ar: 'سحوبات الكباتن', en: 'Withdrawals', icon: 'account_balance_wallet', kw: 'payout' },
-  { href: '/reports', ar: 'التقارير المالية', en: 'Reports', icon: 'monitoring' },
-  { href: '/cliq', ar: 'إعدادات CliQ', en: 'CliQ Settings', icon: 'account_balance', kw: 'alias' },
+  { href: '/plans', ar: 'خطط الاشتراك', en: 'Plans', icon: 'clipboard-list' },
+  { href: '/subscriptions', ar: 'الاشتراكات', en: 'Subscriptions', icon: 'repeat' },
+  { href: '/trips', ar: 'الرحلات', en: 'Trips', icon: 'car' },
+  { href: '/drivers', ar: 'الكباتن', en: 'Captains', icon: 'car-front', kw: 'drivers سائق' },
+  { href: '/users', ar: 'المستخدمون', en: 'Users', icon: 'users', kw: 'students طلاب wallet محفظة' },
+  { href: '/payments', ar: 'المدفوعات', en: 'Payments', icon: 'banknote', kw: 'cliq شحن fraud احتيال' },
+  { href: '/coupons', ar: 'الكوبونات', en: 'Coupons', icon: 'ticket-percent', kw: 'discount خصم' },
+  { href: '/withdrawals', ar: 'سحوبات الكباتن', en: 'Withdrawals', icon: 'wallet', kw: 'payout' },
+  { href: '/reports', ar: 'التقارير المالية', en: 'Reports', icon: 'activity' },
+  { href: '/cliq', ar: 'إعدادات CliQ', en: 'CliQ Settings', icon: 'landmark', kw: 'alias' },
   { href: '/safety', ar: 'مركز الأمان', en: 'Safety', icon: 'shield', kw: 'sos risk مخاطر' },
   { href: '/disputes', ar: 'النزاعات', en: 'Disputes', icon: 'gavel' },
-  { href: '/support', ar: 'الدعم', en: 'Support', icon: 'support_agent', kw: 'tickets تذاكر' },
-  { href: '/complaints', ar: 'الشكاوى', en: 'Complaints', icon: 'report' },
+  { href: '/support', ar: 'الدعم', en: 'Support', icon: 'headset', kw: 'tickets تذاكر' },
+  { href: '/complaints', ar: 'الشكاوى', en: 'Complaints', icon: 'flag' },
   { href: '/security', ar: 'الأمان (MFA)', en: 'Security', icon: 'lock' },
-  { href: '/admins', ar: 'فريق الإدارة', en: 'Admin Team', icon: 'admin_panel_settings' },
-  { href: '/profile', ar: 'ملفي الشخصي', en: 'My Profile', icon: 'account_circle' },
+  { href: '/admins', ar: 'فريق الإدارة', en: 'Admin Team', icon: 'user-cog' },
+  { href: '/profile', ar: 'ملفي الشخصي', en: 'My Profile', icon: 'circle-user' },
 ];
 
 export function Topbar() {
@@ -83,8 +84,8 @@ export function Topbar() {
     const q = query.trim();
     if (!q) return [] as { label: string; href: string; icon: string }[];
     return [
-      { label: `بحث عن مستخدم: "${q}"`, href: `/users?q=${encodeURIComponent(q)}`, icon: 'person_search' },
-      { label: `بحث عن كابتن: "${q}"`, href: `/drivers?q=${encodeURIComponent(q)}`, icon: 'sports_motorsports' },
+      { label: `بحث عن مستخدم: "${q}"`, href: `/users?q=${encodeURIComponent(q)}`, icon: 'user-search' },
+      { label: `بحث عن كابتن: "${q}"`, href: `/drivers?q=${encodeURIComponent(q)}`, icon: 'car-front' },
     ];
   }, [query]);
 
@@ -128,7 +129,7 @@ export function Topbar() {
       <div className="relative w-96 max-w-[48vw] hidden sm:block" ref={searchRef}>
         <form onSubmit={submitSearch}>
           <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-line bg-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-            <span className="material-symbols-outlined text-muted text-[20px] leading-none shrink-0">search</span>
+            <Icon name="search" size={20} className="text-muted shrink-0" />
             <input
               value={query}
               onChange={(e) => {
@@ -153,7 +154,7 @@ export function Topbar() {
                     onClick={() => go(r.href)}
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background text-start"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-primary-dark">{r.icon}</span>
+                    <Icon name={r.icon} size={18} className="text-primary-dark" />
                     <span className="surface-text">{locale === 'ar' ? r.ar : r.en}</span>
                   </button>
                 ))}
@@ -167,7 +168,7 @@ export function Topbar() {
                   onClick={() => go(a.href)}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background text-start"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-muted">{a.icon}</span>
+                  <Icon name={a.icon} size={18} className="text-muted" />
                   <span className="surface-text">{a.label}</span>
                 </button>
               ))}
@@ -184,7 +185,7 @@ export function Topbar() {
               onClick={togglePanel}
               className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted hover:bg-background transition-colors"
             >
-              <span className="material-symbols-outlined">notifications</span>
+              <Icon name="bell" />
               {unread > 0 && (
                 <span className="absolute top-1 end-1 min-w-[18px] h-[18px] px-1 rounded-full bg-danger text-white text-[10px] font-bold flex items-center justify-center">
                   {unread > 99 ? '99+' : unread}

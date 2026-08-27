@@ -170,7 +170,9 @@ jobs:
 
       - name: Typecheck shared packages + apps
         run: |
+          npm run typecheck --workspace=packages/tokens
           npm run typecheck --workspace=packages/shared
+          npm run typecheck --workspace=packages/api-client
           npm run typecheck --workspace=student-app
           npm run typecheck --workspace=driver-app
           npm run typecheck --workspace=admin-dashboard
@@ -178,12 +180,43 @@ jobs:
       - name: Lint admin dashboard
         run: npm run lint --workspace=admin-dashboard
 
-      # A dinar is 1000 fils. `toFixed(2)` rounds and displays an amount that is not
-      # the stored one — 1999 fils became "2.00" on the pages where prices are SET.
-      # And a hand-written "د.أ" has no bidi isolation, so it can reorder against
-      # the number. Both are now unrepresentable outside @rafeeq/shared.
-      - name: Money formatting gate
-        run: npm run check:money
+      # ── Design gates ──────────────────────────────────────────────────────
+      #
+      # `check:tokens` regenerates docs/design/src/kit.css and the admin Tailwind
+      # config from packages/tokens and fails on any difference. Before this, the
+      # brand hexes existed in FOUR hand-maintained copies and three of them had
+      # drifted — including a retired navy/teal palette still rendering on both
+      # apps' splash screens. Nothing compared them, so nothing caught it.
+      #
+      # `check:icons` resolves every icon name against the INSTALLED Lucide and
+      # fails on one it does not export. Lucide renames glyphs between versions
+      # (`home` → `house`, `history` → `rotate-ccw-clock`) and an unresolved name
+      # renders nothing — a gap the right size, so the layout still looks
+      # deliberate and the missing icon survives review.
+      #
+      # `check:design` is a set of RATCHETS, not zeroes. Two gates are hard zeros
+      # (the retired palette, the fictional `extrabold` weight); the rest hold a
+      # budget that may only decrease, because phases 8–9 rewrite the screens that
+      # still carry raw font sizes. A gate asserted at zero before it is zero gets
+      # commented out by the next person in a hurry.
+      #
+      # `check:money` — a dinar is 1000 fils. `toFixed(2)` rounds and displays an
+      # amount that is not the stored one; 1999 fils became "2.00" on the pages
+      # where prices are SET. And a hand-written "د.أ" has no bidi isolation, so it
+      # can reorder against its number. Both are unrepresentable outside
+      # @rafeeq/shared now, and this gate keeps them that way.
+      - name: Design token gates
+        run: npm run check
 
       - name: Shared package tests
-        run: npm run test --workspace=packages/shared
+        run: |
+          npm run test --workspace=packages/shared
+          npm run test --workspace=packages/tokens
+
+      # A typecheck does NOT catch a bundler failure. Re-exporting the generated
+      # Lucide registry from the @rafeeq/tokens barrel typechecked cleanly on all
+      # six workspaces and still broke `next build`, because it dragged
+      # `react-native` into the dashboard bundle and webpack hit Flow syntax inside
+      # `react-native/index.js`. Only a real build finds that class of defect.
+      - name: Build admin dashboard
+        run: npm run build --workspace=admin-dashboard

@@ -13,10 +13,16 @@
     "student": "npm run start --workspace=student-app",
     "driver": "npm run start --workspace=driver-app",
     "admin": "npm run dev --workspace=admin-dashboard",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "npm run lint --workspace=admin-dashboard",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
-    "test": "npm run test --workspace=packages/shared",
-    "check:money": "node scripts/check-money-formatting.mjs"
+    "test": "npm run test --workspace=packages/shared && npm run test --workspace=packages/tokens",
+    "check:money": "node scripts/check-money-formatting.mjs",
+    "build:tokens": "node scripts/build-tokens.mjs",
+    "check:tokens": "node scripts/build-tokens.mjs --check",
+    "build:icons": "node scripts/build-icons.mjs",
+    "check:icons": "node scripts/build-icons.mjs --check",
+    "check:design": "node scripts/check-design-tokens.mjs",
+    "check": "npm run check:tokens && npm run check:icons && npm run check:design && npm run check:money"
   },
   "engines": {
     "node": ">=20"

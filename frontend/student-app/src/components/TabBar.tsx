@@ -86,7 +86,7 @@ const makeStyles = (t: AppTheme) =>
     iconWrap: {
       width: 52,
       height: 32,
-      borderRadius: t.radius.full,
+      borderRadius: t.radius.pill,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -124,5 +124,5 @@ const makeStyles = (t: AppTheme) =>
       borderWidth: 2,
       borderColor: t.colors.surface,
     },
-    badgeText: { fontFamily: t.fontFamily.extrabold, fontSize: 10, color: '#FFFFFF' },
+    badgeText: { fontFamily: t.fontFamily.bold, fontSize: 10, color: '#FFFFFF' },
   });

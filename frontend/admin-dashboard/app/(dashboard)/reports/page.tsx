@@ -1,14 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { FinancialReport } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { downloadBlob, stamp } from '../../../src/lib/download';
+import { Icon } from '../../../src/components/Icon';
 
-const jod = (fils: number) => formatFils(fils);
+const jod = (fils: number) => formatJod(fils);
 
 const today = () => new Date().toISOString().slice(0, 10);
 const monthStart = () => {
@@ -20,7 +21,7 @@ function StatCard({ label, value, hint }: { label: string; value: string; hint?:
   return (
     <div className="card">
       <div className="muted-text text-sm">{label}</div>
-      <div className="text-2xl font-extrabold surface-text mt-1">{value}</div>
+      <div className="text-2xl font-bold surface-text mt-1">{value}</div>
       {hint && <div className="text-xs text-muted mt-1">{hint}</div>}
     </div>
   );
@@ -76,7 +77,7 @@ export default function ReportsPage() {
         </div>
         <button onClick={load} className="btn-primary">{t('reports.show')}</button>
         <button onClick={exportCsv} disabled={exporting} className="btn-outline inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[18px]">download</span>
+          <Icon name="download" size={18} />
           {exporting ? t('common.loading') : t('reports.exportCsv')}
         </button>
       </div>
@@ -140,9 +141,7 @@ export default function ReportsPage() {
                     : 'border-danger/30 bg-red-50 text-danger'
                 }`}
               >
-                <span className="material-symbols-rounded text-[18px]">
-                  {balances ? 'check_circle' : 'error'}
-                </span>
+                <Icon name={balances ? 'circle-check' : 'circle-alert'} size={18} />
                 <span className="font-mono">{t('reports.identity')}</span>
                 <span className="font-medium">
                   {balances ? t('reports.identityOk') : t('reports.identityBad')}

@@ -1,0 +1,23 @@
+{
+  "name": "@rafeeq/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The single source of every design value: colour, type, space, elevation.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./src/icon-registry": "./src/icon-registry.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "lucide-react-native": "^1.34.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.4.5",
+    "vitest": "^2.1.9"
+  }
+}

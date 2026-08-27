@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { DINAR, dinarsOf, formatDinarsSigned, formatFils } from '@rafeeq/shared';
+import { DINAR, bareJod, formatJodSigned, formatJod } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -89,12 +89,12 @@ export default function Earnings() {
             button that would then refuse it.
           */}
           <Text style={s.balanceValue}>
-            {wallet ? dinarsOf(wallet.available_jod) : dinarsOf(0)} <Text style={s.balanceCur}>{DINAR}</Text>
+            {wallet ? bareJod(wallet.available_fils) : bareJod(0)} <Text style={s.balanceCur}>{DINAR}</Text>
           </Text>
           {/* Debt is what makes available differ from gross for a captain, so name it. */}
           {wallet && wallet.held_fils > 0 && (
             <Text style={s.balanceHeld}>
-              {t('driver.heldNote')}: {formatFils(wallet.held_fils)}
+              {t('driver.heldNote')}: {formatJod(wallet.held_fils)}
             </Text>
           )}
           <Pressable onPress={() => router.push('/(app)/withdraw')} style={({ pressed }) => [s.withdrawBtn, pressed && { opacity: 0.9 }]}>
@@ -150,7 +150,7 @@ export default function Earnings() {
                   {tx.created_at && <Text style={s.meta}>{new Date(tx.created_at).toLocaleString(locale)}</Text>}
                 </View>
                 <Text style={[s.txnAmount, { color: positive ? theme.colors.accent : theme.colors.text }]}>
-                  {formatDinarsSigned(positive ? Math.abs(tx.amount_jod) : -Math.abs(tx.amount_jod))}
+                  {formatJodSigned(tx.amount_fils)}
                 </Text>
               </View>
             );
@@ -166,32 +166,32 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
     avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    avatarText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
-    balanceCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.xl, padding: t.spacing.lg, overflow: 'hidden', ...t.shadow.md },
+    balanceCard: { backgroundColor: t.colors.primary, borderRadius: t.radius.sheet, padding: t.spacing.lg, overflow: 'hidden', ...t.shadow.md },
     glow: { position: 'absolute', top: -40, left: -30, width: 150, height: 150, borderRadius: 75, backgroundColor: t.colors.accent, opacity: 0.12 },
     balanceLabel: { fontFamily: t.fontFamily.regular, fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center' },
-    balanceValue: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: '#FFFFFF', textAlign: 'center', marginTop: 4 },
+    balanceValue: { fontFamily: t.fontFamily.bold, fontSize: 40, color: '#FFFFFF', textAlign: 'center', marginTop: 4 },
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 18, color: 'rgba(255,255,255,0.85)' },
     balanceHeld: { fontFamily: t.fontFamily.regular, fontSize: 12, color: 'rgba(255,255,255,0.62)', textAlign: 'center', marginTop: 6 },
-    withdrawBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.accent, borderRadius: t.radius.md, height: 52, marginTop: t.spacing.base },
+    withdrawBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.accent, borderRadius: t.radius.control, height: 52, marginTop: t.spacing.base },
     withdrawText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onAccent },
 
-    cliqCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
-    detailsLink: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
-    detailsIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
+    cliqCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
+    detailsLink: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.base, marginTop: t.spacing.md, ...t.shadow.sm },
+    detailsIcon: { width: 44, height: 44, borderRadius: t.radius.control, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
     cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     cliqSub: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
-    cliqIcon: { width: 44, height: 44, borderRadius: t.radius.md, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    cliqIcon: { width: 44, height: 44, borderRadius: t.radius.control, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
 
     section: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary, textAlign: 'right', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
-    txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginBottom: t.spacing.sm },
+    txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginBottom: t.spacing.sm },
     txnIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     txnBody: { flex: 1 },
     txnType: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
-    txnAmount: { fontFamily: t.fontFamily.extrabold, fontSize: 15 },
+    txnAmount: { fontFamily: t.fontFamily.bold, fontSize: 15 },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 2 },
   });

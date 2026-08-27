@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { brand } from '@rafeeq/tokens';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { text, type RewardSummary } from '@rafeeq/shared';
+import { legacyText as text } from '@rafeeq/tokens';
+import type { RewardSummary } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
 import { getCurrentLocation, watchLocation } from '../../src/lib/permissions';
 import { useTheme, type AppTheme } from '../../src/theme';
 import { LiveMap, type MapPoint } from '../../src/components/LiveMap';
+import { Icon, type IconName } from '../../src/components/Icon';
 import { PressableScale } from '../../src/components/kit';
 import { SmartSuggestions } from '../../src/components/SmartSuggestions';
 
@@ -109,7 +111,7 @@ export default function Home() {
         <View>
           <Animated.View style={[s.carPulse, { transform: [{ scale: pulseScale }], opacity: pulseOpacity }]} />
           <View style={s.carDisc}>
-            <MaterialIcons name="directions-car" size={30} color={theme.colors.primary} />
+            <Icon name="car" size={30} color={theme.colors.primary} />
           </View>
         </View>
         <View style={s.etaBadge}>
@@ -131,7 +133,7 @@ export default function Home() {
           </View>
         </View>
         <Pressable onPress={() => router.push('/(app)/notifications')} style={s.bellBtn} hitSlop={6}>
-          <MaterialIcons name="notifications" size={22} color={theme.colors.primary} />
+          <Icon name="bell" size={22} color={theme.colors.primary} />
           {unread > 0 && <View style={s.bellDot} />}
         </Pressable>
       </SafeAreaView>
@@ -148,10 +150,10 @@ export default function Home() {
           <View style={s.headerRow}>
             <Pressable onPress={() => snapTo(!collapsed)} hitSlop={8} style={s.titleRow}>
               <Text style={s.sheetTitle}>{t('home.whereTo')}</Text>
-              <MaterialIcons name={collapsed ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={22} color={theme.colors.muted} />
+              <Icon name={collapsed ? 'chevron-up' : 'chevron-down'} size={22} color={theme.colors.muted} />
             </Pressable>
             <PressableScale onPress={() => router.push('/(app)/rewards')} style={s.pointsChip} scaleTo={0.94}>
-              <MaterialIcons name="stars" size={16} color={theme.colors.accent} />
+              <Icon name="sparkles" size={16} color={theme.colors.accent} />
               <Text style={s.pointsChipText}>{rewards ? rewards.points.toLocaleString('en-US') : '—'}</Text>
             </PressableScale>
           </View>
@@ -161,7 +163,7 @@ export default function Home() {
         <View style={s.sheetBody}>
           <SmartSuggestions />
           <PressableScale onPress={() => router.push('/(app)/ride-request')} style={s.searchBtn} scaleTo={0.98}>
-            <MaterialIcons name="search" size={24} color={theme.colors.accent} />
+            <Icon name="search" size={24} color={theme.colors.accent} />
             <Text style={s.searchText}>{t('home.searchDestination')}</Text>
           </PressableScale>
           <View style={s.quickRow}>
@@ -179,7 +181,7 @@ function QuickAction({ theme, icon, label, onPress }: { theme: AppTheme; icon: '
   return (
     <PressableScale onPress={onPress} style={s.quickTile} scaleTo={0.95}>
       <View style={s.quickIcon}>
-        <MaterialIcons name={icon} size={22} color={theme.colors.primary} />
+        <Icon name={icon} size={22} color={theme.colors.primary} />
       </View>
       <Text style={s.quickLabel}>{label}</Text>
     </PressableScale>
@@ -198,7 +200,7 @@ const makeStyles = (t: AppTheme) =>
     carDisc: {
       width: 64, height: 64, borderRadius: 32, backgroundColor: '#FFFFFF',
       alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#FFFFFF',
-      shadowColor: '#002045', shadowOpacity: 0.15, shadowRadius: 25, shadowOffset: { width: 0, height: 10 }, elevation: 8,
+      shadowColor: brand[900], shadowOpacity: 0.15, shadowRadius: 25, shadowOffset: { width: 0, height: 10 }, elevation: 8,
     },
     etaBadge: { marginTop: 8, backgroundColor: t.colors.primary, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 9999 },
     etaText: { ...text.caption, color: t.colors.onPrimary },
@@ -219,7 +221,7 @@ const makeStyles = (t: AppTheme) =>
       position: 'absolute', left: 0, right: 0, bottom: 92,
       backgroundColor: 'rgba(255,255,255,0.98)', borderTopLeftRadius: 24, borderTopRightRadius: 24,
       paddingHorizontal: 20, paddingBottom: 20,
-      shadowColor: '#002045', shadowOpacity: 0.12, shadowRadius: 24, shadowOffset: { width: 0, height: -8 }, elevation: 16,
+      shadowColor: brand[900], shadowOpacity: 0.12, shadowRadius: 24, shadowOffset: { width: 0, height: -8 }, elevation: 16,
     },
     sheetHeader: { paddingTop: 10, paddingBottom: 8 },
     handle: { alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: t.colors.surfaceHighest, marginBottom: 12 },

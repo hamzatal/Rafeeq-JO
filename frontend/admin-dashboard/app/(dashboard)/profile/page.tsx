@@ -72,7 +72,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-1">{t('profile.title')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-1">{t('profile.title')}</h1>
       <p className="text-sm text-muted mb-6">{user?.phone}</p>
 
       <div className="grid gap-6 xl:grid-cols-2 items-start">

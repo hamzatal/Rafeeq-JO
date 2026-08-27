@@ -60,7 +60,7 @@ const makeStyles = (t: AppTheme) =>
 
     card: {
       backgroundColor: t.colors.surface,
-      borderRadius: t.radius.xl,
+      borderRadius: t.radius.sheet,
       borderWidth: 1,
       borderColor: t.colors.hairline,
       paddingHorizontal: t.spacing.lg,
@@ -69,10 +69,10 @@ const makeStyles = (t: AppTheme) =>
     },
 
     brandRow: { alignItems: 'center', marginBottom: t.spacing.base },
-    mark: { width: 64, height: 64, borderRadius: t.radius.lg, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    mark: { width: 64, height: 64, borderRadius: t.radius.card, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     markLogo: { width: 44, height: 44 },
 
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 28, color: t.colors.primary, textAlign: 'center', lineHeight: 38 },
+    title: { fontFamily: t.fontFamily.bold, fontSize: 28, color: t.colors.primary, textAlign: 'center', lineHeight: 38 },
     subtitle: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'center', marginTop: 8 },
 
     form: { marginTop: t.spacing.xl },

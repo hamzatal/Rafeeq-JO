@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { dinarsFromFils } from '@rafeeq/shared';
+import { bareJod } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -104,7 +104,7 @@ export default function DriverTrips() {
           trips.map((tr) => {
             const completed = tr.status === 'completed';
             const time = tr.scheduled_at ? new Date(tr.scheduled_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '';
-            const fareJod = tr.pricing?.fare_fils != null ? dinarsFromFils(tr.pricing.fare_fils) : null;
+            const fareJod = tr.pricing?.fare_fils != null ? bareJod(tr.pricing.fare_fils) : null;
             return (
               <Pressable key={tr.id} onPress={() => router.push(`/(app)/trip/${tr.id}` as never)} style={({ pressed }) => [s.tripCard, pressed && { opacity: 0.9 }]}>
                 <View style={s.tripMain}>
@@ -145,9 +145,9 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, backgroundColor: t.colors.surface, ...t.shadow.sm },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 24, lineHeight: 32, color: t.colors.primary },
     avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: t.colors.border },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    avatarText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
     h1: { fontFamily: t.fontFamily.semibold, fontSize: 24, lineHeight: 32, color: t.colors.primary, textAlign: 'right', marginBottom: t.spacing.base },
 
@@ -160,15 +160,15 @@ const makeStyles = (t: AppTheme) =>
     tripStatus: { fontFamily: t.fontFamily.regular, fontSize: 12 },
     tripPax: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted },
     tripFareCol: { alignItems: 'flex-start', minWidth: 44 },
-    tripFare: { fontFamily: t.fontFamily.extrabold, fontSize: 24, lineHeight: 30, color: t.colors.primary },
+    tripFare: { fontFamily: t.fontFamily.bold, fontSize: 24, lineHeight: 30, color: t.colors.primary },
     tripFareCur: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, textAlign: 'left' },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 4 },
     chips: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginTop: 8 },
-    chip: { borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.full, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: t.colors.surface },
+    chip: { borderWidth: 1, borderColor: t.colors.border, borderRadius: t.radius.pill, paddingVertical: 6, paddingHorizontal: 14, backgroundColor: t.colors.surface },
     chipActive: { backgroundColor: t.colors.primary, borderColor: t.colors.primary },
     chipText: { fontFamily: t.fontFamily.medium, color: t.colors.text, fontSize: 13 },
     chipTextActive: { color: t.colors.onPrimary },
     times: { flexDirection: 'row-reverse', gap: 10, marginTop: t.spacing.md },
-    timeBtn: { flex: 1, backgroundColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10, alignItems: 'center' },
+    timeBtn: { flex: 1, backgroundColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 10, alignItems: 'center' },
     timeText: { color: t.colors.onPrimary, fontFamily: t.fontFamily.bold, fontSize: 13 },
   });

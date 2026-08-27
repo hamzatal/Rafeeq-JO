@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors, fontFamily } from '@rafeeq/tokens';
 
 interface Props {
   children: React.ReactNode;
@@ -52,11 +53,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
 // Self-contained brand constants (must render even if the theme provider is
 // the thing that failed) — Stitch design system (navy + teal, light-mode only).
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F9F9FF', alignItems: 'center', justifyContent: 'center', padding: 28 },
-  badge: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(0,32,69,0.08)', borderWidth: 2, borderColor: '#002045', alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
-  badgeText: { fontSize: 36, fontWeight: '800', color: '#002045' },
-  title: { fontSize: 20, fontWeight: '800', color: '#111C2C', textAlign: 'center', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: '#43474E', textAlign: 'center', lineHeight: 22, marginBottom: 24, maxWidth: 320 },
-  btn: { backgroundColor: '#002045', paddingHorizontal: 28, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  btnText: { fontSize: 15, fontWeight: '800', color: '#FFFFFF' },
+  root: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', padding: 28 },
+  badge: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.primarySoft, borderWidth: 2, borderColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+  badgeText: { fontSize: 36, fontFamily: fontFamily.bold, color: colors.primary },
+  title: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.text, textAlign: 'center', marginBottom: 8 },
+  subtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, marginBottom: 24, maxWidth: 320 },
+  btn: { backgroundColor: colors.primary, paddingHorizontal: 28, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  btnText: { fontSize: 15, fontFamily: fontFamily.bold, color: colors.onPrimary },
 });

@@ -1,7 +1,7 @@
 import { Redirect, Tabs } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../../src/store/auth';
 import { useI18n } from '../../src/i18n';
+import { Icon, type IconName } from '../../src/components/Icon';
 import { TabBar } from '../../src/components/TabBar';
 
 export default function AppLayout() {
@@ -12,8 +12,15 @@ export default function AppLayout() {
     return <Redirect href="/(auth)/welcome" />;
   }
 
-  const tab = (name: keyof typeof Feather.glyphMap) =>
-    ({ color, size }: { color: string; size: number }) => <Feather name={name} size={size} color={color} />;
+  /*
+   * Through the shared `Icon`, not Feather directly.
+   *
+   * This imported `Feather` straight from `@expo/vector-icons`, so the five tab
+   * glyphs came from a DIFFERENT icon set than every other glyph in the app — and
+   * got none of the RTL mirroring the wrapper applies.
+   */
+  const tab = (name: IconName) =>
+    ({ color, size }: { color: string; size: number }) => <Icon name={name} size={size} color={color} />;
 
   return (
     <Tabs

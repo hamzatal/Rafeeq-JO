@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { FinancialReport, Dispute } from '@rafeeq/shared';
 import { api } from '../../src/lib/api';
 import { useAuth } from '../../src/lib/auth';
 import { useT } from '../../src/lib/i18n';
 import { Skeleton, StatCardsSkeleton } from '../../src/components/Skeleton';
+import { Icon } from '../../src/components/Icon';
 
 /*
  * Money goes through the shared formatter. It used to be:
@@ -19,7 +20,7 @@ import { Skeleton, StatCardsSkeleton } from '../../src/components/Skeleton';
  * It slipped past `check:money` because that gate only looked for `.toFixed(2)` and a
  * hand-written «د.أ». A rule for it has been added.
  */
-const jod = (fils: number) => formatFils(fils);
+const jod = (fils: number) => formatJod(fils);
 const monthStart = () => {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
@@ -46,7 +47,7 @@ function KpiCard({ k }: { k: Kpi }) {
             k.danger ? 'bg-danger/10 text-danger' : 'bg-brand-100 text-primary'
           }`}
         >
-          <span className="material-symbols-outlined text-[22px]">{k.icon}</span>
+          <Icon name={k.icon} size={22} />
         </div>
         {/* Trend pill (left) */}
         {k.trend && (
@@ -55,7 +56,7 @@ function KpiCard({ k }: { k: Kpi }) {
               k.danger ? 'bg-danger/10 text-danger' : 'bg-brand-100/40 text-primary-dark'
             }`}
           >
-            <span className="material-symbols-outlined text-[14px]">{k.danger ? 'priority_high' : 'trending_up'}</span>
+            <Icon name={k.danger ? 'triangle-alert' : 'trending-up'} size={14} />
             {k.trend}
           </span>
         )}
@@ -104,7 +105,7 @@ export default function CommandCenter() {
     {
       label: t('home.kpi.rides'),
       value: (report?.rides_count ?? 0).toLocaleString('en-US'),
-      icon: 'directions_car',
+      icon: 'car',
       trend: t('home.trend.sinceMonth'),
       bar: 0.75,
     },
@@ -114,7 +115,7 @@ export default function CommandCenter() {
       // commission booked on subscription-covered seats.
       value: jod(report?.platform_revenue_fils ?? 0),
       unit: 'JOD',
-      icon: 'account_balance_wallet',
+      icon: 'wallet',
       trend: t('home.trend.netCommission'),
       bar: 0.8,
     },
@@ -122,14 +123,14 @@ export default function CommandCenter() {
       label: t('home.kpi.gross'),
       value: jod(report?.gross_fare_fils ?? 0),
       unit: 'JOD',
-      icon: 'payments',
+      icon: 'banknote',
       trend: t('home.trend.grossValue'),
       bar: 0.6,
     },
     {
       label: t('home.kpi.disputes'),
       value: String(criticalOpen),
-      icon: 'warning',
+      icon: 'triangle-alert',
       trend: criticalOpen > 0 ? t('home.trend.needsReview') : t('home.trend.none'),
       bar: criticalOpen > 0 ? 0.3 : 0.05,
       danger: criticalOpen > 0,
@@ -166,7 +167,7 @@ export default function CommandCenter() {
         <div className="lg:col-span-2 card p-0 overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-line flex justify-between items-center">
             <h3 className="font-bold text-ink flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary-dark text-[20px]">monitoring</span>
+              <Icon name="activity" size={20} className="text-primary-dark" />
               {t('home.commissionByZone')}
             </h3>
             <Link href="/reports" className="text-sm text-primary-dark hover:underline">
@@ -203,10 +204,10 @@ export default function CommandCenter() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: '/disputes', label: t('nav.disputes'), icon: 'gavel' },
-              { href: '/withdrawals', label: t('nav.withdrawals'), icon: 'account_balance_wallet' },
-              { href: '/drivers', label: t('nav.drivers'), icon: 'sports_motorsports' },
+              { href: '/withdrawals', label: t('nav.withdrawals'), icon: 'wallet' },
+              { href: '/drivers', label: t('nav.drivers'), icon: 'car-front' },
               { href: '/zones', label: t('nav.zones'), icon: 'map' },
-              { href: '/reports', label: t('nav.reports'), icon: 'monitoring' },
+              { href: '/reports', label: t('nav.reports'), icon: 'activity' },
               { href: '/safety', label: t('nav.safety'), icon: 'shield' },
             ].map((q) => (
               <Link
@@ -214,7 +215,7 @@ export default function CommandCenter() {
                 href={q.href}
                 className="flex flex-col items-center justify-center gap-2 rounded-xl border border-line bg-background hover:bg-primary/5 hover:border-primary/40 transition-colors py-4"
               >
-                <span className="material-symbols-outlined text-primary-dark">{q.icon}</span>
+                <Icon name={q.icon} className="text-primary-dark" />
                 <span className="text-xs font-semibold surface-text">{q.label}</span>
               </Link>
             ))}
@@ -226,7 +227,7 @@ export default function CommandCenter() {
       <div className="card p-0 overflow-hidden">
         <div className="px-5 py-4 border-b border-line flex justify-between items-center">
           <h3 className="font-bold text-ink flex items-center gap-2">
-            <span className="material-symbols-outlined text-danger text-[20px]">gavel</span>
+            <Icon name="gavel" size={20} className="text-danger" />
             {t('home.recentDisputes')}
           </h3>
           <Link href="/disputes" className="text-sm text-primary-dark hover:underline">

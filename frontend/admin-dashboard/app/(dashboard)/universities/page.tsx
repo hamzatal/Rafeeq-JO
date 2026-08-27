@@ -49,7 +49,7 @@ export default function UniversitiesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('nav.universities')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.universities')}</h1>
 
       <div className="card mb-5">
         <h2 className="font-bold surface-text mb-3">{t('universities.add')}</h2>

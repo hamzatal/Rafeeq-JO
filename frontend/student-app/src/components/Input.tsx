@@ -35,7 +35,7 @@ const makeStyles = (t: AppTheme) =>
       height: 54,
       borderWidth: 1,
       borderColor: t.colors.border,
-      borderRadius: t.radius.lg,
+      borderRadius: t.radius.card,
       paddingHorizontal: t.spacing.base,
       fontFamily: t.fontFamily.medium,
       fontSize: 16,

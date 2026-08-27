@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { DINAR, dinarsOf, formatDinars, formatDinarsSigned, formatFils } from '@rafeeq/shared';
+import { DINAR, bareJod, formatJod, formatJodSigned } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -130,7 +130,7 @@ export default function WalletScreen() {
               {/* `DINAR` («د.أ»), not a hardcoded Latin "JOD" — every other screen
                   in both apps uses the constant, and this one was the outlier. */}
               <Text style={s.balanceCur}>{DINAR} </Text>
-              {wallet ? dinarsOf(wallet.available_jod) : dinarsOf(0)}
+              {wallet ? bareJod(wallet.available_fils) : bareJod(0)}
             </Text>
           )}
           {/*
@@ -139,7 +139,7 @@ export default function WalletScreen() {
           */}
           {!loading && wallet && wallet.held_fils > 0 && (
             <Text style={s.balanceHeld}>
-              {t('wallet.heldNote')}: {formatFils(wallet.held_fils)}
+              {t('wallet.heldNote')}: {formatJod(wallet.held_fils)}
             </Text>
           )}
           <Button title={t('wallet.topupCta')} icon="plus-circle" onPress={createTopup} loading={creating} style={{ marginTop: theme.spacing.base }} />
@@ -197,7 +197,7 @@ export default function WalletScreen() {
                 <Text style={s.payNumber}>{p.purpose_label}</Text>
                 <Badge label={p.status === 'pending' ? t('wallet.awaitingProof') : t('wallet.underReview')} tone={payTone(p.status)} />
               </View>
-              <Text style={s.meta}>{formatDinars(p.amount_jod)} · {p.number}</Text>
+              <Text style={s.meta}>{formatJod(p.amount_fils)} · {p.number}</Text>
               {p.reject_reason ? <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text> : null}
               <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
                 <Icon name="upload" size={16} color={theme.colors.primary} />
@@ -216,7 +216,7 @@ export default function WalletScreen() {
         {loading ? (
           <View style={{ gap: theme.spacing.sm }}>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} width="100%" height={68} radius={theme.radius.lg} />
+              <Skeleton key={i} width="100%" height={68} radius={theme.radius.card} />
             ))}
           </View>
         ) : txns.length === 0 ? (
@@ -236,7 +236,7 @@ export default function WalletScreen() {
                   {tx.created_at && <Text style={s.meta}>{new Date(tx.created_at).toLocaleString(locale)}</Text>}
                 </View>
                 <Text style={[s.txnAmount, { color: positive ? theme.colors.success : theme.colors.danger }]}>
-                  {formatDinarsSigned(positive ? Math.abs(tx.amount_jod) : -Math.abs(tx.amount_jod))}
+                  {formatJodSigned(tx.amount_fils)}
                 </Text>
               </View>
             );
@@ -274,12 +274,12 @@ function TopupGuide({
           <Icon name="x" size={18} color={theme.colors.muted} />
         </Pressable>
       </View>
-      <StepRow n={1} done label={formatDinars(data.request.amount_jod)} s={s} theme={theme} />
+      <StepRow n={1} done label={formatJod(data.request.amount_fils)} s={s} theme={theme} />
       <StepRow n={2} label={t('wallet.transferStep')} s={s} theme={theme} />
       <View style={s.cliqBox}>
         <Row label={t('wallet.alias')} value={ins.alias ?? '—'} s={s} />
         <Row label={t('wallet.beneficiary')} value={ins.beneficiary ?? '—'} s={s} />
-        <Row label={t('wallet.amount')} value={`${dinarsOf(ins.amount_jod)} ${DINAR}`} s={s} />
+        <Row label={t('wallet.amount')} value={formatJod(ins.amount_fils)} s={s} />
         <Row label={t('wallet.reference')} value={ins.reference} s={s} />
       </View>
       <StepRow n={3} label={t('wallet.uploadStep')} s={s} theme={theme} />
@@ -313,37 +313,37 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, backgroundColor: t.colors.background },
     header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.extrabold, fontSize: 22, color: t.colors.primary },
+    brand: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.primary },
     avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    avatarText: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.onPrimary },
+    avatarText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onPrimary },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
-    balanceCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.surfaceHighest, padding: t.spacing.lg, alignItems: 'center', overflow: 'hidden', ...t.shadow.md },
+    balanceCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.surfaceHighest, padding: t.spacing.lg, alignItems: 'center', overflow: 'hidden', ...t.shadow.md },
     balanceBlob: { position: 'absolute', top: -64, right: -64, width: 128, height: 128, borderRadius: 64, backgroundColor: t.colors.onPrimaryMuted, opacity: 0.2 },
     balanceLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
-    balanceValue: { fontFamily: t.fontFamily.extrabold, fontSize: 40, color: t.colors.primary, marginTop: 4 },
+    balanceValue: { fontFamily: t.fontFamily.bold, fontSize: 40, color: t.colors.primary, marginTop: 4 },
     balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.primary },
     balanceHeld: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, marginTop: 6 },
 
-    cliqCard: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.xl, padding: t.spacing.lg, marginTop: t.spacing.md },
+    cliqCard: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.sheet, padding: t.spacing.lg, marginTop: t.spacing.md },
     cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', gap: t.spacing.sm, marginBottom: t.spacing.base },
     cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary, textAlign: 'right' },
     cliqLinkRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 2 },
     cliqLink: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.accent, textAlign: 'right' },
     cliqIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.accentBright, alignItems: 'center', justifyContent: 'center' },
-    amountRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderRadius: t.radius.md, borderWidth: 1, borderColor: t.colors.hairline, paddingHorizontal: t.spacing.base, height: 54, marginBottom: t.spacing.md },
+    amountRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderRadius: t.radius.control, borderWidth: 1, borderColor: t.colors.hairline, paddingHorizontal: t.spacing.base, height: 54, marginBottom: t.spacing.md },
     amountInput: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text },
     amountCur: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.textSecondary },
-    cliqBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, height: 54, borderRadius: t.radius.md, borderWidth: 2, borderColor: t.colors.primary, backgroundColor: 'transparent' },
+    cliqBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, height: 54, borderRadius: t.radius.control, borderWidth: 2, borderColor: t.colors.primary, backgroundColor: 'transparent' },
     cliqBtnText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.primary },
 
     guideHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm },
-    guideTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    guideTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     stepRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginTop: t.spacing.sm },
     stepDot: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
-    stepNum: { fontFamily: t.fontFamily.extrabold, fontSize: 12, color: t.colors.accent },
+    stepNum: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.accent },
     stepLabel: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
-    cliqBox: { backgroundColor: t.colors.surface, borderRadius: t.radius.md, padding: t.spacing.md, marginVertical: t.spacing.sm, marginRight: 32 },
+    cliqBox: { backgroundColor: t.colors.surface, borderRadius: t.radius.control, padding: t.spacing.md, marginVertical: t.spacing.sm, marginRight: 32 },
 
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
     rowLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
@@ -352,14 +352,14 @@ const makeStyles = (t: AppTheme) =>
     sectionTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
     viewAll: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.accent },
     txnHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
-    txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginBottom: t.spacing.sm },
+    txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginBottom: t.spacing.sm },
     txnIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
     txnBody: { flex: 1 },
     txnType: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
-    txnAmount: { fontFamily: t.fontFamily.extrabold, fontSize: 15 },
+    txnAmount: { fontFamily: t.fontFamily.bold, fontSize: 15 },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 2 },
     payHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
     payNumber: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
-    uploadBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10 },
+    uploadBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 10 },
     uploadText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
   });

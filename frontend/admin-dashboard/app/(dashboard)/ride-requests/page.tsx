@@ -44,7 +44,7 @@ export default function RideRequestsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-extrabold surface-text">{t('nav.rideRequests')}</h1>
+        <h1 className="text-2xl font-bold surface-text">{t('nav.rideRequests')}</h1>
         <Tooltip label={t('rideRequests.matchingHint')} side="start">
           <button onClick={runMatching} disabled={matching} className="btn-primary px-4 py-2 text-sm">
             {matching ? '...' : t('rideRequests.runMatching')}

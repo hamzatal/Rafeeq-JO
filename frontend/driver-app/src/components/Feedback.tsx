@@ -206,7 +206,7 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     toast: {
       backgroundColor: t.colors.elevated,
-      borderRadius: t.radius.lg,
+      borderRadius: t.radius.card,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: t.colors.border,
       shadowColor: '#000',
@@ -224,10 +224,10 @@ const makeStyles = (t: AppTheme) =>
       width: '100%',
       maxWidth: 400,
       backgroundColor: t.colors.elevated,
-      borderRadius: t.radius.xl,
+      borderRadius: t.radius.sheet,
       padding: t.spacing.lg,
     },
-    dialogTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 19, color: t.colors.text, textAlign: 'right' },
+    dialogTitle: { fontFamily: t.fontFamily.bold, fontSize: 19, color: t.colors.text, textAlign: 'right' },
     dialogMessage: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'right', marginTop: 8 },
     dialogActions: { marginTop: t.spacing.lg, gap: t.spacing.sm },
   });

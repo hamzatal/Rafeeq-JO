@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { Route, University } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
@@ -63,7 +63,7 @@ export default function RoutesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-4">{t('nav.routes')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.routes')}</h1>
 
       <div className="card mb-5">
         <h2 className="font-bold surface-text mb-3">{t('routes.add')}</h2>
@@ -106,7 +106,7 @@ export default function RoutesPage() {
                 <tr key={r.id} className="row-line">
                   <td className="p-3 font-medium surface-text">{r.name}</td>
                   <td className="p-3 text-muted">{uniName(r.university_id)}</td>
-                  <td className="p-3 text-muted">{formatFils(r.price_fils)}</td>
+                  <td className="p-3 text-muted">{formatJod(r.price_fils)}</td>
                   <td className="p-3 text-muted">{r.capacity}</td>
                   <td className="p-3 text-muted font-mono">{r.departure_time ?? '—'}</td>
                   <td className="p-3">

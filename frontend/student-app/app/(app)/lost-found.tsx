@@ -198,13 +198,13 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'right' },
+    h1: { fontFamily: t.fontFamily.bold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'right' },
     subtitle: { fontFamily: t.fontFamily.regular, fontSize: 16, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'right', marginTop: 8, marginBottom: t.spacing.lg },
 
-    card: { backgroundColor: t.colors.surface, borderRadius: t.radius.xl, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.lg, marginBottom: t.spacing.lg, ...t.shadow.sm },
+    card: { backgroundColor: t.colors.surface, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.lg, marginBottom: t.spacing.lg, ...t.shadow.sm },
 
-    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, padding: 4, marginBottom: t.spacing.base },
-    segBtn: { flex: 1, paddingVertical: 10, borderRadius: t.radius.sm, alignItems: 'center' },
+    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.control, padding: 4, marginBottom: t.spacing.base },
+    segBtn: { flex: 1, paddingVertical: 10, borderRadius: t.radius.control, alignItems: 'center' },
     segBtnOn: { backgroundColor: t.colors.primary },
     segText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
     segTextOn: { fontFamily: t.fontFamily.bold, color: t.colors.onPrimary },
@@ -212,27 +212,27 @@ const makeStyles = (t: AppTheme) =>
     textarea: { height: 90, textAlignVertical: 'top', paddingTop: 12 },
 
     uploadCaption: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.textSecondary, textAlign: 'center', marginTop: t.spacing.sm, marginBottom: t.spacing.sm },
-    upload: { borderWidth: 1.5, borderColor: t.colors.border, borderStyle: 'dashed', borderRadius: t.radius.md, paddingVertical: t.spacing.lg, alignItems: 'center', gap: 6, overflow: 'hidden' },
-    uploadIcon: { width: 48, height: 48, borderRadius: t.radius.md, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+    upload: { borderWidth: 1.5, borderColor: t.colors.border, borderStyle: 'dashed', borderRadius: t.radius.control, paddingVertical: t.spacing.lg, alignItems: 'center', gap: 6, overflow: 'hidden' },
+    uploadIcon: { width: 48, height: 48, borderRadius: t.radius.control, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
     uploadHint: { fontFamily: t.fontFamily.semibold, fontSize: 13, color: t.colors.text },
     uploadTypes: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted },
-    uploadPreview: { width: '100%', height: 140, borderRadius: t.radius.sm },
+    uploadPreview: { width: '100%', height: 140, borderRadius: t.radius.control },
 
     reportsHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.base },
     sectionTitle: { fontFamily: t.fontFamily.semibold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
-    countBadge: { backgroundColor: t.colors.primary, borderRadius: t.radius.full, paddingHorizontal: 10, paddingVertical: 3 },
+    countBadge: { backgroundColor: t.colors.primary, borderRadius: t.radius.pill, paddingHorizontal: 10, paddingVertical: 3 },
     countText: { fontFamily: t.fontFamily.bold, fontSize: 11, color: t.colors.onPrimary },
     none: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.muted, textAlign: 'center', paddingVertical: t.spacing.base },
 
-    reportRow: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md, padding: t.spacing.sm, borderRadius: t.radius.md },
-    reportIcon: { width: 48, height: 48, borderRadius: t.radius.md, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center' },
+    reportRow: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: t.spacing.md, padding: t.spacing.sm, borderRadius: t.radius.control },
+    reportIcon: { width: 48, height: 48, borderRadius: t.radius.control, backgroundColor: t.colors.surfaceHighest, alignItems: 'center', justifyContent: 'center' },
     reportInfo: { flex: 1 },
     reportTitle: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
     reportTime: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
-    statusPill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: t.radius.full },
+    statusPill: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: t.radius.pill },
     statusDot: { width: 6, height: 6, borderRadius: 3 },
     statusText: { fontFamily: t.fontFamily.semibold, fontSize: 11 },
 
-    viewAll: { marginTop: t.spacing.base, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10, alignItems: 'center' },
+    viewAll: { marginTop: t.spacing.base, borderWidth: 1, borderColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 10, alignItems: 'center' },
     viewAllText: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.primary },
   });

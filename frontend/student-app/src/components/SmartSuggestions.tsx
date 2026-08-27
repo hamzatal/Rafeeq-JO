@@ -65,7 +65,7 @@ const makeStyles = (t: AppTheme) =>
     sparkle: { width: 20, height: 20, borderRadius: 10, backgroundColor: t.colors.accent + '1A', alignItems: 'center', justifyContent: 'center' },
     headline: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
     row: { flexDirection: 'row-reverse', gap: t.spacing.sm, paddingHorizontal: 2 },
-    chip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.colors.hairline, paddingVertical: 8, paddingHorizontal: 12, ...t.shadow.sm },
+    chip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, paddingVertical: 8, paddingHorizontal: 12, ...t.shadow.sm },
     chipIcon: { width: 30, height: 30, borderRadius: 15, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
     chipText: { maxWidth: 150 },
     chipTitle: { fontFamily: t.fontFamily.bold, fontSize: 13, color: t.colors.text, textAlign: 'right' },

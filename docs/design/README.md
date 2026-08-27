@@ -20,10 +20,32 @@
 | 9 | [`identity/09-before-after.png`](identity/09-before-after.png) | **قبل/بعد** — نفس المحتوى بالحرف، والفروقات بالأرقام |
 
 **المصادر في [`src/`](src/)** — HTML+CSS حقيقي وسكربت التصوير. أي تعديل على الهوية يُعاد توليده بـ:
+
 ```bash
-cd docs/design/src && npm i -D playwright && npx playwright install chromium && node shoot.mjs
+cd docs/design/src
+npm i -D playwright && npx playwright install chromium
+
+# ١) المولّدات تكتب HTML بجانبها (مُستثنى من git)
+for g in gen-student gen-driver gen-admin gen-extra gen-money gen-tabbar gen-store gen-android gen-readme; do node $g.mjs; done
+
+# ٢) التصوير
+node shoot.mjs           # → docs/design/v2
+node shoot-readme.mjs    # → docs/design/readme
+node gen-icons.mjs       # → docs/design/readme/icons
+node gen-app-assets.mjs  # → أصول التطبيقين
+node gen-posters.mjs     # → marketing/posts (الملصقات الـ٦٢)
 ```
+
 يعني الهوية **ليست صوراً ميتة** — هي كود قابل للتشغيل والتحقّق.
+
+> **الألوان والأقطار والمسافات في [`src/kit.css`](src/kit.css) مولَّدة**، لا تُحرَّر بيد.
+> مصدرها `frontend/packages/tokens`، والكتلة بين `@generated:tokens:start` و`:end` يكتبها
+> `cd frontend && npm run build:tokens`. بوابة `check:tokens` في CI تُعيد التوليد وتفشل على
+> أي فرق — لأنّ نفس القيمة كانت مكتوبة بيد في أربعة أماكن وثلاثة منها انحرفت.
+
+> **على بيئة يوجد فيها Chromium مسبقاً** (حاوية، أو صورة CI بالمتصفّحات مسبقة التنزيل):
+> `CHROMIUM_PATH=/path/to/chrome node shoot.mjs`. Playwright يثبّت إصداراً محدّداً ويرفض
+> تشغيل غيره، فبلا هذا المتغيّر يفشل بـ«Executable doesn't exist» ويطلب تنزيلاً جديداً.
 
 ---
 

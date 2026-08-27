@@ -79,3 +79,12 @@ backend/database/*.sqlite
 *.zip
 stitch_*/
 stitch-ref/
+
+# ───────── Design mockups: intermediate HTML ─────────
+# `docs/design/src/gen-*.mjs` writes HTML next to itself, then `shoot.mjs` screenshots
+# it into `docs/design/v2` and `docs/design/readme`. The PNGs are the reviewed artefact
+# and are committed; the HTML is a build step. It only started landing in the repo once
+# the generators' output paths were fixed to resolve from their committed location —
+# before that they wrote into a phantom `src/Rafeeq-JO/` tree instead.
+docs/design/src/*.html
+docs/design/src/_mkt-index.json

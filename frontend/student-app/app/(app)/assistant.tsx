@@ -163,7 +163,7 @@ const makeStyles = (t: AppTheme) =>
     header: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md },
     botIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
     onlineRing: { position: 'absolute', bottom: -2, left: -2, width: 16, height: 16, borderRadius: 8, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center' },
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
+    title: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
     onlineRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, marginTop: 2 },
     online: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.accent },
     // Gradient-like accent bar under the header (navy → teal) via layered views.
@@ -173,7 +173,7 @@ const makeStyles = (t: AppTheme) =>
     degradedBannerText: { flex: 1, fontFamily: t.fontFamily.regular, fontSize: 12, lineHeight: 18, color: t.colors.text },
 
     messages: { padding: t.spacing.lg, gap: t.spacing.sm, flexGrow: 1 },
-    bubble: { maxWidth: '85%', borderRadius: t.radius.lg, paddingHorizontal: t.spacing.base, paddingVertical: t.spacing.md },
+    bubble: { maxWidth: '85%', borderRadius: t.radius.card, paddingHorizontal: t.spacing.base, paddingVertical: t.spacing.md },
     // User = light gray (dark text); AI = navy (white text) — per Stitch DESIGN.
     userBubble: { alignSelf: 'flex-start', backgroundColor: t.colors.surfaceAlt, borderBottomLeftRadius: 4 },
     botBubble: { alignSelf: 'flex-end', backgroundColor: t.colors.primary, borderBottomRightRadius: 4 },
@@ -186,10 +186,10 @@ const makeStyles = (t: AppTheme) =>
     welcomeIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
     welcomeText: { fontFamily: t.fontFamily.regular, fontSize: 15, lineHeight: 24, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 300 },
     suggestions: { gap: t.spacing.sm, marginTop: t.spacing.sm, alignSelf: 'stretch' },
-    suggestChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.hairline, borderRadius: t.radius.md, paddingHorizontal: t.spacing.base, paddingVertical: 12 },
+    suggestChip: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.hairline, borderRadius: t.radius.control, paddingHorizontal: t.spacing.base, paddingVertical: 12 },
     suggestText: { flex: 1, fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.primary, textAlign: 'right' },
 
     inputRow: { flexDirection: 'row-reverse', alignItems: 'flex-end', gap: 8, padding: t.spacing.base, borderTopWidth: 1, borderTopColor: t.colors.hairline, backgroundColor: t.colors.surface },
-    input: { flex: 1, maxHeight: 110, minHeight: 48, backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.md, paddingHorizontal: t.spacing.base, paddingTop: 13, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.text, textAlign: 'right' },
+    input: { flex: 1, maxHeight: 110, minHeight: 48, backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.control, paddingHorizontal: t.spacing.base, paddingTop: 13, fontFamily: t.fontFamily.regular, fontSize: 15, color: t.colors.text, textAlign: 'right' },
     sendBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
   });

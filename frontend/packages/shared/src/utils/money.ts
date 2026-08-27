@@ -53,20 +53,43 @@ export function dinarsFromFils(fils: number): string {
   return isolateDigits((safe / FILS_PER_DINAR).toFixed(DINAR_DECIMALS));
 }
 
-/** A decimal dinar value (an API `*_jod` field) to a bare, bidi-safe string. */
-export function dinarsOf(dinars: number): string {
-  const safe = Number.isFinite(dinars) ? dinars : 0;
-  return isolateDigits(safe.toFixed(DINAR_DECIMALS));
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE THREE. There is nothing else, and nothing deprecated.
 
-/** Fils to a full amount. 1999 → "1.999 د.أ" */
-export function formatFils(fils: number): string {
+   ── Why seven functions became three ───────────────────────────────────────
+
+   This module exported `formatFils`, `formatDinars`, `formatFilsSigned`,
+   `formatDinarsSigned`, `dinarsFromFils`, `dinarsOf` and `DINAR` — seven ways to
+   render money, split down the middle by INPUT UNIT: half took integer fils, half
+   took the decimal `*_jod` mirror the API also returns.
+
+   Every one of them was individually correct. The set was the problem: at each
+   call site a developer had to pick both a formatter and a unit, and the wrong
+   pairing is silent. `formatFils(w.balance_jod)` renders 4.500 dinars as
+   "0.004 د.أ" and nothing complains. That is not a hypothetical — the wallet-type
+   bug fixed in the previous phase was exactly this shape, a screen reading the
+   field that was available rather than the field that was correct.
+
+   So there is now ONE input unit: integer fils, which is what the ledger stores,
+   what every backend column holds, and the only representation that cannot lose a
+   third decimal place. The `*_jod` fields on API responses are a display
+   convenience the client no longer reads.
+
+   The four decimal-dinar functions were briefly kept as `@deprecated` aliases so the
+   rename could land separately from the call sites. They are GONE: all 27 call sites
+   moved in the same change, and a deprecated alias that still compiles is just the
+   old API with a comment on it — the next new screen picks whichever name it finds
+   first, and the unit confusion comes back. `check:money` enforces the absence.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Fils to a full amount. 1999 → "1.999 د.أ". THE function for showing money. */
+export function formatJod(fils: number): string {
   return `${dinarsFromFils(fils)} ${DINAR}`;
 }
 
-/** A decimal dinar value to a full amount. Use for API `*_jod` fields. */
-export function formatDinars(dinars: number): string {
-  return `${dinarsOf(dinars)} ${DINAR}`;
+/** Fils to bare bidi-safe digits, no currency — for when the unit is in a label. */
+export function bareJod(fils: number): string {
+  return dinarsFromFils(fils);
 }
 
 /**
@@ -77,7 +100,7 @@ export function formatDinars(dinars: number): string {
  * isolate is a bidi-neutral character and can end up on the wrong side of the
  * number; the real minus sign is unambiguous and reads better at small sizes.
  */
-export function formatFilsSigned(fils: number): string {
+export function formatJodSigned(fils: number): string {
   const safe = Number.isFinite(fils) ? fils : 0;
   const sign = safe < 0 ? '\u2212' : '+';
   const digits = (Math.abs(safe) / FILS_PER_DINAR).toFixed(DINAR_DECIMALS);
@@ -110,12 +133,4 @@ export function parseDinarsToFils(input: string): number | null {
 
   // Round rather than truncate: 1.9994 dinars is 1999 fils, not 1999.4.
   return Math.round(dinars * FILS_PER_DINAR);
-}
-
-
-/** As `formatFilsSigned`, for API `*_jod` fields that are already decimal dinars. */
-export function formatDinarsSigned(dinars: number): string {
-  const safe = Number.isFinite(dinars) ? dinars : 0;
-  const sign = safe < 0 ? '\u2212' : '+';
-  return `${isolateDigits(sign + Math.abs(safe).toFixed(DINAR_DECIMALS))} ${DINAR}`;
 }

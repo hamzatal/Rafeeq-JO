@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { text, type RideDirection, type RideType, type University } from '@rafeeq/shared';
+import { legacyText as text } from '@rafeeq/tokens';
+import type { RideDirection, RideType, University } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { LiveMap } from '../../src/components/LiveMap';
+import { Icon, type IconName } from '../../src/components/Icon';
+import { Num } from '../../src/components/Num';
 import { PressableScale } from '../../src/components/kit';
 import { useToast } from '../../src/components/Feedback';
 import { useI18n } from '../../src/i18n';
@@ -21,7 +23,7 @@ interface RideClass {
   type: RideType;
   capacity: number;
   eta: number;
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: IconName;
   featured?: boolean;
 }
 const CLASSES: RideClass[] = [
@@ -161,7 +163,7 @@ export default function RideRequestScreen() {
     ...(hasDest ? [{ lat: uni!.lat!, lng: uni!.lng!, kind: 'destination' as const, label: uniName }] : []),
   ];
   const route = hasPickup && hasDest ? [{ lat: lat!, lng: lng! }, { lat: uni!.lat!, lng: uni!.lng! }] : undefined;
-  const fmt = (fils: number | null) => (fils == null ? '—' : formatFils(fils));
+  const fmt = (fils: number | null) => (fils == null ? '—' : formatJod(fils));
   const dirLabel = direction === 'to_university' ? t('rideRequest.toUniversity') : t('rideRequest.fromUniversity');
 
   return (
@@ -170,7 +172,7 @@ export default function RideRequestScreen() {
       <SafeAreaView edges={['top']} style={s.headerSafe}>
         <View style={s.header}>
           <Pressable onPress={() => router.back()} hitSlop={8} style={s.backBtn}>
-            <MaterialIcons name="arrow-forward" size={24} color={theme.colors.textSecondary} />
+            <Icon name="arrow-right" size={24} color={theme.colors.textSecondary} />
           </Pressable>
           <Text style={s.brand}>رفيق</Text>
           <View style={s.backBtn} />
@@ -190,10 +192,10 @@ export default function RideRequestScreen() {
           }}
         />
         <Pressable onPress={() => setDirection((d) => (d === 'to_university' ? 'from_university' : 'to_university'))} style={[s.mapFab, { right: 16 }]} hitSlop={8}>
-          <MaterialIcons name="swap-vert" size={20} color={theme.colors.primary} />
+          <Icon name="arrow-up-down" size={20} color={theme.colors.primary} />
         </Pressable>
         <Pressable onPress={useMyLocation} style={[s.mapFab, { right: 68 }]} hitSlop={8}>
-          <MaterialIcons name="my-location" size={20} color={theme.colors.accent} />
+          <Icon name="locate-fixed" size={20} color={theme.colors.accent} />
         </Pressable>
       </View>
 
@@ -210,7 +212,7 @@ export default function RideRequestScreen() {
           */}
           {covered === false && (
             <View style={s.notice}>
-              <MaterialIcons name="info-outline" size={18} color={theme.colors.accent} />
+              <Icon name="info" size={18} color={theme.colors.accent} />
               <Text style={s.noticeText}>{t('rideRequest.notCovered')}</Text>
             </View>
           )}
@@ -222,22 +224,22 @@ export default function RideRequestScreen() {
               return (
                 <PressableScale key={c.key} scaleTo={0.98} onPress={() => setSelectedClass(c.key)} style={[s.carCard, on && s.carCardOn]}>
                   <View style={[s.carIcon, on ? s.carIconOn : s.carIconOff]}>
-                    <MaterialIcons name={c.icon} size={30} color={iconColor} />
+                    <Icon name={c.icon} size={30} color={iconColor} />
                   </View>
                   <View style={s.carDetails}>
                     <View style={s.carTop}>
                       <View style={s.carNameRow}>
                         <Text style={s.carName}>{t(c.labelKey)}</Text>
-                        {c.featured && <MaterialIcons name="star" size={16} color={theme.colors.accent} />}
+                        {c.featured && <Icon name="star" size={16} color={theme.colors.accent} />}
                       </View>
                       <Text style={[s.carPrice, on && { color: theme.colors.primary }]}>{fmt(fares[c.key])}</Text>
                     </View>
                     <View style={s.carMeta}>
-                      <MaterialIcons name="schedule" size={16} color={theme.colors.textSecondary} />
-                      <Text style={s.metaText}>{c.eta} {t('rideRequest.minutes')}</Text>
+                      <Icon name="clock" size={16} color={theme.colors.textSecondary} />
+                      <Num style={s.metaText} value={c.eta} unit={t('rideRequest.minutes')} />
                       <View style={s.metaDot} />
-                      <MaterialIcons name="person" size={16} color={theme.colors.textSecondary} />
-                      <Text style={s.metaText}>{c.capacity} {t('rideRequest.seats')}</Text>
+                      <Icon name="user" size={16} color={theme.colors.textSecondary} />
+                      <Num style={s.metaText} value={c.capacity} unit={t('rideRequest.seats')} />
                     </View>
                   </View>
                   <View style={[s.ring, on && s.ringOn]}>{on && <View style={s.ringDot} />}</View>
@@ -258,7 +260,7 @@ export default function RideRequestScreen() {
         <View style={s.footer}>
           <PressableScale onPress={submit} scaleTo={0.97} style={[s.confirm, busy && { opacity: 0.7 }]}>
             <Text style={s.confirmText}>{busy ? t('common.loading') : t('rideRequest.confirmRide')}</Text>
-            <MaterialIcons name="arrow-forward" size={20} color={theme.colors.onPrimary} />
+            <Icon name="arrow-right" size={20} color={theme.colors.onPrimary} />
           </PressableScale>
         </View>
       </View>
@@ -266,20 +268,20 @@ export default function RideRequestScreen() {
   );
 }
 
-function SelectorRow({ theme, icon, label, sub, onPress }: { theme: AppTheme; icon: keyof typeof MaterialIcons.glyphMap; label: string; sub: string; onPress: () => void }) {
+function SelectorRow({ theme, icon, label, sub, onPress }: { theme: AppTheme; icon: IconName; label: string; sub: string; onPress: () => void }) {
   const s = useMemo(() => makeStyles(theme), [theme]);
   return (
     <Pressable onPress={onPress} style={s.selRow}>
       <View style={s.selLeft}>
         <View style={s.selIcon}>
-          <MaterialIcons name={icon} size={20} color={theme.colors.onPrimary} />
+          <Icon name={icon} size={20} color={theme.colors.onPrimary} />
         </View>
         <View>
           <Text style={s.selRowLabel}>{label}</Text>
           <Text style={s.selRowSub}>{sub}</Text>
         </View>
       </View>
-      <MaterialIcons name="chevron-left" size={22} color={theme.colors.border} />
+      <Icon name="chevron-left" size={22} color={theme.colors.border} />
     </Pressable>
   );
 }

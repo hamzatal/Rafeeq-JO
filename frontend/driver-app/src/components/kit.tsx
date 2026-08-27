@@ -219,20 +219,20 @@ const makeStyles = (t: AppTheme) =>
     chipText: { fontFamily: t.fontFamily.semibold, fontSize: 13, color: t.colors.textSecondary },
     chipTextOn: { color: t.colors.onPrimary },
 
-    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.hairline, borderRadius: t.radius.lg, padding: 4, gap: 4 },
-    segmentItem: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: t.radius.md },
+    segment: { flexDirection: 'row-reverse', backgroundColor: t.colors.hairline, borderRadius: t.radius.card, padding: 4, gap: 4 },
+    segmentItem: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: t.radius.control },
     segmentItemOn: { backgroundColor: t.colors.surface, ...t.shadow.sm },
     segmentText: { fontFamily: t.fontFamily.semibold, fontSize: 13, color: t.colors.textSecondary },
     segmentTextOn: { color: t.colors.text },
 
-    stepper: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.hairline, borderRadius: t.radius.lg, padding: 4, gap: 4 },
-    stepBtn: { width: 40, height: 40, borderRadius: t.radius.md, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
-    stepValue: { minWidth: 36, textAlign: 'center', fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text },
+    stepper: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.hairline, borderRadius: t.radius.card, padding: 4, gap: 4 },
+    stepBtn: { width: 40, height: 40, borderRadius: t.radius.control, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', ...t.shadow.sm },
+    stepValue: { minWidth: 36, textAlign: 'center', fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.text },
 
     kv: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 },
     kvLabel: { fontFamily: t.fontFamily.regular, fontSize: 14, color: t.colors.textSecondary, textAlign: 'right' },
     kvValue: { fontFamily: t.fontFamily.semibold, fontSize: 14, color: t.colors.text, textAlign: 'left' },
-    kvValueStrong: { fontFamily: t.fontFamily.extrabold, fontSize: 16, color: t.colors.primary },
+    kvValueStrong: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
 
     sheetBackdrop: { ...StyleSheet.absoluteFillObject },
     sheet: {
@@ -249,5 +249,5 @@ const makeStyles = (t: AppTheme) =>
       ...t.shadow.md,
     },
     grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: t.colors.border, marginBottom: t.spacing.md },
-    sheetTitle: { fontFamily: t.fontFamily.extrabold, fontSize: 18, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.md },
+    sheetTitle: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.md },
   });

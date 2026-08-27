@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import { brand } from '@rafeeq/tokens';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useI18n } from '../../src/i18n';
@@ -111,7 +112,7 @@ const makeStyles = (t: AppTheme) =>
       paddingTop: 32,
       paddingBottom: 8,
       alignItems: 'center',
-      shadowColor: '#002045',
+      shadowColor: brand[900],
       shadowOffset: { width: 0, height: -15 },
       shadowOpacity: 0.06,
       shadowRadius: 40,
@@ -121,7 +122,7 @@ const makeStyles = (t: AppTheme) =>
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.surfaceHighest },
     dotActive: { backgroundColor: t.colors.primary, width: 32 },
 
-    title: { fontFamily: t.fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'center', marginBottom: 16 },
+    title: { fontFamily: t.fontFamily.bold, fontSize: 32, lineHeight: 40, color: t.colors.primary, textAlign: 'center', marginBottom: 16 },
     text: { fontFamily: t.fontFamily.regular, fontSize: 18, lineHeight: 28, color: t.colors.textSecondary, textAlign: 'center', maxWidth: 300, alignSelf: 'center', marginBottom: 40 },
 
     cta: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: t.colors.primary, borderRadius: 16, paddingVertical: 16, paddingHorizontal: 24, alignSelf: 'stretch' },

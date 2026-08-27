@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { AdminInsights } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
+import { Icon } from '../../../src/components/Icon';
 
 /*
  * Money goes through the shared formatter. It used to be:
@@ -16,17 +17,17 @@ import { useT } from '../../../src/lib/i18n';
  * It slipped past `check:money` because that gate only looked for `.toFixed(2)` and a
  * hand-written «د.أ». A rule for it has been added.
  */
-const jod = (fils: number) => formatFils(fils);
+const jod = (fils: number) => formatJod(fils);
 
 function Stat({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
     <div className="card flex items-center gap-4">
       <div className="w-11 h-11 rounded-xl bg-primary/15 text-primary-dark flex items-center justify-center shrink-0">
-        <span className="material-symbols-outlined text-[22px]">{icon}</span>
+        <Icon name={icon} size={22} />
       </div>
       <div className="min-w-0">
         <div className="text-xs font-bold uppercase tracking-wider muted-text truncate">{label}</div>
-        <div className="text-xl font-extrabold surface-text">{value}</div>
+        <div className="text-xl font-bold surface-text">{value}</div>
       </div>
     </div>
   );
@@ -55,13 +56,13 @@ export default function InsightsPage() {
       <div className="flex flex-wrap justify-between items-end gap-3">
         <div>
           <h1 className="page-title flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary-dark">neurology</span>
+            <Icon name="brain" className="text-primary-dark" />
             {t('nav.insights')}
           </h1>
           <p className="muted-text mt-1">{t('insights.subtitle')}</p>
         </div>
         <button onClick={load} className="btn-primary flex items-center gap-2" disabled={loading}>
-          <span className="material-symbols-outlined text-[18px]">refresh</span>
+          <Icon name="refresh-cw" size={18} />
           {t('insights.refresh')}
         </button>
       </div>
@@ -85,7 +86,7 @@ export default function InsightsPage() {
           {/* Narrative analysis */}
           <div className="card border-r-4 border-primary">
             <h3 className="font-bold surface-text mb-2 flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary-dark text-[20px]">insights</span>
+              <Icon name="chart-line" size={20} className="text-primary-dark" />
               {t('insights.analysis')}
             </h3>
             <p className="surface-text leading-relaxed">{data.analysis}</p>
@@ -95,13 +96,13 @@ export default function InsightsPage() {
           {data.recommendations.length > 0 && (
             <div className="card">
               <h3 className="font-bold surface-text mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-success text-[20px]">recommend</span>
+                <Icon name="thumbs-up" size={20} className="text-success" />
                 {t('insights.recommendations')}
               </h3>
               <ul className="space-y-2">
                 {data.recommendations.map((r, i) => (
                   <li key={i} className="flex items-start gap-2 surface-text">
-                    <span className="material-symbols-outlined text-success text-[18px] mt-0.5">check_circle</span>
+                    <Icon name="circle-check" size={18} className="text-success mt-0.5" />
                     <span>{r}</span>
                   </li>
                 ))}
@@ -111,12 +112,12 @@ export default function InsightsPage() {
 
           {/* KPI grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            <Stat label={t('insights.kpi.newUsers')} value={String(data.metrics.users.new_this_month)} icon="person_add" />
-            <Stat label={t('insights.kpi.totalUsers')} value={String(data.metrics.users.total)} icon="group" />
-            <Stat label={t('insights.kpi.tripsThisMonth')} value={String(data.metrics.trips.this_month)} icon="directions_car" />
-            <Stat label={t('insights.kpi.tripsCompleted')} value={String(data.metrics.trips.completed)} icon="task_alt" />
-            <Stat label={t('insights.kpi.tripsCancelled')} value={String(data.metrics.trips.cancelled)} icon="cancel" />
-            <Stat label={t('insights.kpi.activeSubs')} value={String(data.metrics.subscriptions.active)} icon="card_membership" />
+            <Stat label={t('insights.kpi.newUsers')} value={String(data.metrics.users.new_this_month)} icon="user-plus" />
+            <Stat label={t('insights.kpi.totalUsers')} value={String(data.metrics.users.total)} icon="users" />
+            <Stat label={t('insights.kpi.tripsThisMonth')} value={String(data.metrics.trips.this_month)} icon="car" />
+            <Stat label={t('insights.kpi.tripsCompleted')} value={String(data.metrics.trips.completed)} icon="circle-check" />
+            <Stat label={t('insights.kpi.tripsCancelled')} value={String(data.metrics.trips.cancelled)} icon="circle-x" />
+            <Stat label={t('insights.kpi.activeSubs')} value={String(data.metrics.subscriptions.active)} icon="clipboard-list" />
             {/*
               An unavailable figure shows as «—», not as 0. A zero here would be
               indistinguishable from a month with no business, which is exactly how
@@ -125,22 +126,22 @@ export default function InsightsPage() {
             <Stat
               label={t('insights.kpi.platformRevenue')}
               value={data.metrics.finance_available ? jod(data.metrics.finance.platform_revenue_fils) : '—'}
-              icon="account_balance_wallet"
+              icon="wallet"
             />
             <Stat
               label={t('insights.kpi.grossFare')}
               value={data.metrics.finance_available ? jod(data.metrics.finance.gross_fare_fils) : '—'}
-              icon="payments"
+              icon="banknote"
             />
-            <Stat label={t('insights.kpi.driversPending')} value={String(data.metrics.drivers.pending_review)} icon="how_to_reg" />
+            <Stat label={t('insights.kpi.driversPending')} value={String(data.metrics.drivers.pending_review)} icon="user-check" />
             <Stat label={t('insights.kpi.openDisputes')} value={String(data.metrics.safety.open_disputes)} icon="gavel" />
-            <Stat label={t('insights.kpi.openRiskFlags')} value={String(data.metrics.safety.unresolved_risk_flags)} icon="warning" />
-            <Stat label={t('insights.kpi.pendingPayments')} value={String(data.metrics.safety.pending_payments)} icon="hourglass_top" />
+            <Stat label={t('insights.kpi.openRiskFlags')} value={String(data.metrics.safety.unresolved_risk_flags)} icon="triangle-alert" />
+            <Stat label={t('insights.kpi.pendingPayments')} value={String(data.metrics.safety.pending_payments)} icon="hourglass" />
           </div>
 
           {!data.metrics.finance_available && (
             <div className="rounded-lg border border-danger/30 bg-red-50 px-4 py-3 text-sm text-danger flex items-center gap-2">
-              <span className="material-symbols-rounded text-[18px]">error</span>
+              <Icon name="circle-alert" size={18} />
               {t('insights.financeUnavailable')}
             </div>
           )}

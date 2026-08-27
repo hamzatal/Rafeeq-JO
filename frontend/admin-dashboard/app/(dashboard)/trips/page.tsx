@@ -33,7 +33,7 @@ export default function TripsPage() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 className="text-2xl font-extrabold surface-text">{t('nav.trips')}</h1>
+        <h1 className="text-2xl font-bold surface-text">{t('nav.trips')}</h1>
         <select className="input max-w-[200px]" value={status} onChange={(e) => setStatus(e.target.value)}>
           {STATUSES.map((s) => (
             <option key={s} value={s}>{t(`trips.status.${s || 'all'}`)}</option>

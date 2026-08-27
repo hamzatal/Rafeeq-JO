@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
-import { palette, fontFamily } from '@rafeeq/shared';
+import { brand, fontFamily, neutral } from '@rafeeq/tokens';
 
 /**
  * Branded launch — pixel-faithful to Stitch `_1`: a deep navy canvas with a
@@ -65,15 +65,28 @@ export function BrandSplash() {
   );
 }
 
-const ACCENT = palette.accentBright;
+/*
+ * The splash was still the RETIRED identity.
+ *
+ * `palette` in the old `shared/src/theme/colors.ts` was the navy/teal brand that
+ * phase 4 deleted — `navy #002045` and `accentBright #4EDBD2`. That file was left
+ * behind, and these two lines were its only remaining consumers. So both apps
+ * OPENED on the dead brand and then transitioned into the live one, and nobody
+ * caught it because the splash is the one screen you stop looking at.
+ *
+ * `brand[800]` is the deep brand tone the live palette uses for layered chrome;
+ * `brand[200]` is `accentBright` in the semantic map.
+ */
+const FIELD = brand[800];
+const ACCENT = brand[200];
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.navy },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: FIELD },
   glow: { position: 'absolute', width: 360, height: 360, borderRadius: 180, backgroundColor: ACCENT, opacity: 0.4 },
   emblem: { width: 96, height: 96, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
   logoImg: { width: 56, height: 56 },
-  word: { fontFamily: fontFamily.extrabold, fontSize: 32, lineHeight: 40, color: '#FFFFFF', textAlign: 'center', letterSpacing: 1 },
-  tag: { fontFamily: fontFamily.regular, fontSize: 18, lineHeight: 28, color: '#ADC7F7', marginTop: 12, textAlign: 'center' },
+  word: { fontFamily: fontFamily.bold, fontSize: 32, lineHeight: 40, color: neutral[0], textAlign: 'center', letterSpacing: 1 },
+  tag: { fontFamily: fontFamily.regular, fontSize: 18, lineHeight: 28, color: brand[200], marginTop: 12, textAlign: 'center' },
   dots: { flexDirection: 'row', gap: 8, marginTop: 40 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: ACCENT },
 });

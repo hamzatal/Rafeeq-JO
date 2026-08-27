@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { formatDinars } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -149,7 +149,7 @@ export default function Payments() {
                 <Text style={s.cardTitle}>{p.number}</Text>
                 <Badge label={p.status_label} tone={tone(p.status)} />
               </View>
-              <Text style={s.meta}>{p.purpose_label} · {formatDinars(p.amount_jod)}</Text>
+              <Text style={s.meta}>{p.purpose_label} · {formatJod(p.amount_fils)}</Text>
               {p.created_at && <Text style={s.meta}>{new Date(p.created_at).toLocaleString(locale)}</Text>}
               {p.reject_reason && <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text>}
               {canUpload(p.status) && (
@@ -174,7 +174,7 @@ const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    h1: { fontFamily: t.fontFamily.extrabold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
+    h1: { fontFamily: t.fontFamily.bold, fontSize: 26, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.base },
     cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: t.spacing.xs },
     cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text },
     row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
@@ -182,7 +182,7 @@ const makeStyles = (t: AppTheme) =>
     rowValue: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.text, textAlign: 'right', marginBottom: 2 },
     note: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, textAlign: 'right', marginTop: t.spacing.xs },
     meta: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
-    uploadBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.md, paddingVertical: 10 },
+    uploadBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 10 },
     uploadText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
     invoiceBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.xs, paddingVertical: 8 },
     invoiceText: { fontFamily: t.fontFamily.medium, fontSize: 13, color: t.colors.muted },

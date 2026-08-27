@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { CliqSettings } from '@rafeeq/api-client';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { PaymentRequest } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
@@ -58,7 +58,7 @@ export default function CliqPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold surface-text mb-1">{t('cliq.title')}</h1>
+      <h1 className="text-2xl font-bold surface-text mb-1">{t('cliq.title')}</h1>
       <p className="text-sm text-muted mb-6">{t('cliq.intro')}</p>
 
       <form onSubmit={save} className="card mb-6">
@@ -118,7 +118,7 @@ export default function CliqPage() {
                 <tr key={p.id} className="row-line">
                   <td className="p-3 font-mono text-xs surface-text">{p.number}</td>
                   <td className="p-3 text-muted">{p.user?.name ?? '—'}</td>
-                  <td className="p-3 text-muted tabular-nums">{formatFils(p.amount_fils)}</td>
+                  <td className="p-3 text-muted tabular-nums">{formatJod(p.amount_fils)}</td>
                   <td className="p-3 text-muted">{p.status_label}</td>
                 </tr>
               ))}

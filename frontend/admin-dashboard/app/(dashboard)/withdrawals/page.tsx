@@ -1,14 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { formatFils } from '@rafeeq/shared';
+import { formatJod } from '@rafeeq/shared';
 import type { PayoutRequest } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { LoadError } from '../../../src/components/LoadError';
 
-const jod = (fils: number) => formatFils(fils);
+const jod = (fils: number) => formatJod(fils);
 
 export default function WithdrawalsPage() {
   const { t } = useT();
