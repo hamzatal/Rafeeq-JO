@@ -51,17 +51,46 @@ class LostFoundController extends Controller
 
     public function candidates(Request $request, LostFoundItem $item, LostFoundMatchService $matcher): JsonResponse
     {
+        // Ownership was never checked here, and every call spends money on a model
+        // request. Asking "what might match MY report" is the only legitimate use.
+        $this->assertOwnerOrStaff($request, $item);
+
         // Keyword candidates from the opposite pool, semantically re-ranked by AI.
         return $this->ok($matcher->rank($item, $this->service->candidates($item)));
     }
 
     public function resolve(Request $request, LostFoundItem $item): JsonResponse
     {
-        if ($item->reporter_id !== $request->user()->id && ! $request->user()->hasAnyRole(['admin', 'supervisor', 'support'])) {
+        $this->assertOwnerOrStaff($request, $item);
+
+        /*
+         * `matched_with` used to be read straight off the wire with NO validation —
+         * no uuid, no `exists`, no type or status check — and then used as a primary
+         * key in an `update()`. Any authenticated user could file one throwaway item
+         * and flip an arbitrary stranger's open report to `matched`, closing it and
+         * pointing it at their own item.
+         *
+         * Validating existence is not enough on its own: the row also has to be a
+         * genuine counterpart, which the service verifies. Both halves are needed —
+         * this stops a non-existent id, the service stops a valid id that has no
+         * business being matched.
+         */
+        $data = $request->validate([
+            'matched_with' => ['nullable', 'uuid', 'exists:lost_found_items,id'],
+        ]);
+
+        return $this->ok(
+            $this->service->resolve($item, $request->user(), $data['matched_with'] ?? null),
+            'تم تحديث البلاغ.',
+        );
+    }
+
+    /** The reporter, or staff acting on their behalf. */
+    private function assertOwnerOrStaff(Request $request, LostFoundItem $item): void
+    {
+        if ($item->reporter_id !== $request->user()->id
+            && ! $request->user()->hasAnyRole(['admin', 'supervisor', 'support'])) {
             throw new AuthorizationException('هذا البلاغ لا يخصّك.');
         }
-        $matchedWith = $request->input('matched_with');
-
-        return $this->ok($this->service->resolve($item, $request->user(), $matchedWith), 'تم تحديث البلاغ.');
     }
 }

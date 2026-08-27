@@ -15,7 +15,10 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::patch('notifications/preferences', [NotificationController::class, 'updatePreferences']);
 
     // Device tokens (push)
-    Route::post('notifications/devices', [NotificationController::class, 'registerDevice']);
+    // Throttled: this endpoint rebinds a push token to the caller, so an
+    // unthrottled version is a takeover primitive you can brute-force.
+    Route::post('notifications/devices', [NotificationController::class, 'registerDevice'])
+        ->middleware('throttle:sensitive');
     Route::delete('notifications/devices', [NotificationController::class, 'unregisterDevice']);
 });
 

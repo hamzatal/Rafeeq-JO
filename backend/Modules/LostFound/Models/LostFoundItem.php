@@ -11,13 +11,18 @@ use Rafeeq\Shared\Traits\HasUuid;
 /**
  * @property string $id
  * @property string $reporter_id
- * @property string $type
+ * @property string $type lost | found
+ * @property string $category
  * @property string $title
  * @property string|null $description
  * @property string|null $location
- * @property string $status
+ * @property string|null $trip_id
+ * @property array<int, string>|null $images
+ * @property string $status open | matched | resolved
+ * @property string|null $matched_with
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read User|null $reporter
  */
 class LostFoundItem extends Model
 {

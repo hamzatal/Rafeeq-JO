@@ -9,7 +9,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     // Admin confirms a CliQ top-up and credits the wallet (idempotent by reference)
     Route::post('admin/wallets/credit', [WalletController::class, 'adminCredit'])
-        ->middleware('permission:wallet.credit');
+        ->middleware(['permission:wallet.credit', 'throttle:sensitive']);
 
     // Admin lists a user's recent wallet transactions (to review / reverse)
     Route::get('admin/wallets/transactions', [WalletController::class, 'adminTransactions'])
@@ -17,5 +17,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     // Admin reverses a manual top-up / adjustment entered by mistake
     Route::post('admin/wallets/reverse', [WalletController::class, 'adminReverse'])
-        ->middleware('permission:wallet.reverse');
+        ->middleware(['permission:wallet.reverse', 'throttle:sensitive']);
 });

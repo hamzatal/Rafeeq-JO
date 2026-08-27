@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Infrastructure\Providers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Rafeeq\Infrastructure\Gpt\Contracts\GptClient;
 use Rafeeq\Infrastructure\Gpt\NullGptClient;
@@ -57,18 +58,59 @@ class InfrastructureServiceProvider extends ServiceProvider
             return $primary;
         });
 
-        // GPT client: real provider when a key is set, safe null fallback otherwise.
+        /*
+         * GPT client: real provider when a key is set, null fallback otherwise.
+         *
+         * The fallback is correct — an AI outage must not take the product down —
+         * but it used to be SILENT, and that is a different problem. With no key
+         * every "AI" surface degrades to fixed text: the assistant answers one
+         * canned paragraph, CliQ receipt verification becomes fully manual, and the
+         * admin briefing drops to rule-based prose. Shipping that without anyone
+         * noticing is how a feature gets advertised and never delivered.
+         *
+         * It is not fatal (unlike the `log` SMS driver, which would swallow the OTPs
+         * that gate registration), so this logs rather than throws — but it logs at
+         * ERROR in production, where "the assistant is off" is never intentional.
+         */
         $this->app->singleton(GptClient::class, function () {
-            return ! empty(config('services.openai.key'))
-                ? new OpenAiGptClient
-                : new NullGptClient;
+            if (empty(config('services.openai.key'))) {
+                if (app()->environment('production')) {
+                    Log::error('infrastructure.gpt_disabled', [
+                        'consequence' => 'assistant returns canned text; payment-proof verification is manual only',
+                        'fix' => 'set OPENAI_API_KEY',
+                    ]);
+                }
+
+                return new NullGptClient;
+            }
+
+            return new OpenAiGptClient;
         });
 
-        // Push gateway: FCM when Firebase is configured, log fallback otherwise.
+        /*
+         * Push gateway: FCM when Firebase is configured, log fallback otherwise.
+         *
+         * `LogPushGateway` writes the notification to the log and drops it. Both
+         * mobile apps register a device token on every login, so with Firebase
+         * unset the product looks like it has push and delivers none of it —
+         * including trip and safety alerts. Critical notifications do fall back to
+         * SMS, which is why this is not fatal, but nothing said a word about it.
+         */
         $this->app->singleton(PushGateway::class, function () {
             $gateway = new FcmPushGateway;
 
-            return $gateway->isEnabled() ? $gateway : new LogPushGateway;
+            if (! $gateway->isEnabled()) {
+                if (app()->environment('production')) {
+                    Log::error('infrastructure.push_disabled', [
+                        'consequence' => 'every push notification is logged and discarded',
+                        'fix' => 'set FIREBASE_PROJECT_ID and FIREBASE_CREDENTIALS',
+                    ]);
+                }
+
+                return new LogPushGateway;
+            }
+
+            return $gateway;
         });
 
         // Maps service: Google when a key is set, safe haversine fallback otherwise.

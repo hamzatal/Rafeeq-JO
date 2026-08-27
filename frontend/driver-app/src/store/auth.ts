@@ -26,7 +26,6 @@ interface AuthState {
   register: (payload: RegisterPayload) => Promise<string | null>;
   verifyOtp: (payload: VerifyOtpPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
-  /** DEV ONLY: enter the app with a mock approved-captain session (no backend). */
   refreshDriver: () => Promise<void>;
   logout: () => Promise<void>;
 }

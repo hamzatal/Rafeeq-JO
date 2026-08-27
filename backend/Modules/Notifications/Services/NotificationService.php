@@ -3,6 +3,7 @@
 namespace Rafeeq\Modules\Notifications\Services;
 
 use Illuminate\Support\Facades\Log;
+use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Infrastructure\Push\Contracts\PushGateway;
 use Rafeeq\Infrastructure\Sms\Contracts\SmsGateway;
@@ -32,6 +33,7 @@ class NotificationService extends BaseService
     public function __construct(
         private readonly PushGateway $push,
         private readonly SmsGateway $sms,
+        private readonly AuditLogger $audit,
     ) {}
 
     /**
@@ -153,13 +155,49 @@ class NotificationService extends BaseService
         return $sent;
     }
 
-    /** Register (upsert) a device token for push delivery. */
+    /**
+     * Register (upsert) a device token for push delivery.
+     *
+     * ── Why the ownership change is audited ────────────────────────────────────
+     *
+     * The upsert keys on the TOKEN alone, and that is correct: an FCM token belongs
+     * to an app install, so when a second person signs in on the same handset the
+     * token legitimately moves to them. Keying on (token, user) instead would leave
+     * the old row behind and push every notification to whoever used the phone first.
+     *
+     * But the same behaviour is an attack: anyone who obtains a victim's token can
+     * POST it here and silently take over their push channel — the victim stops
+     * receiving trip and safety alerts, and the thief's notifications land on the
+     * victim's screen. `unregisterDevice` below is scoped by `user_id`, which shows
+     * the asymmetry was never intended.
+     *
+     * It cannot be forbidden without breaking the shared-handset case, so instead it
+     * is made VISIBLE: a token changing hands is an audited event. A takeover now
+     * leaves a trail that names both accounts, and the endpoint is rate limited.
+     */
     public function registerDevice(User $user, string $token, string $platform = 'android'): DeviceToken
     {
-        return DeviceToken::updateOrCreate(
+        $previousOwner = DeviceToken::where('token', $token)->value('user_id');
+
+        $device = DeviceToken::updateOrCreate(
             ['token' => $token],
             ['user_id' => $user->id, 'platform' => $platform, 'last_used_at' => now()],
         );
+
+        if ($previousOwner !== null && $previousOwner !== $user->id) {
+            Log::warning('notifications.device_token_reassigned', [
+                'from_user' => $previousOwner,
+                'to_user' => $user->id,
+                'platform' => $platform,
+            ]);
+
+            $this->audit->log('notification.device_reassigned', $user, auditable: $device, changes: [
+                'from_user' => $previousOwner,
+                'to_user' => $user->id,
+            ]);
+        }
+
+        return $device;
     }
 
     public function unregisterDevice(User $user, string $token): void

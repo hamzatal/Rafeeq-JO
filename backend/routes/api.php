@@ -76,7 +76,18 @@ Route::prefix('v1')->group(function () {
             'maps' => [
                 'provider' => config('services.maps.provider', 'google'),
                 'key' => (string) config('services.maps.google_client_key', ''),
-                'mapbox_token' => (string) config('services.maps.mapbox_token', ''),
+                /*
+                 * Mapbox PUBLIC tokens (`pk.`) are designed to be shipped in a client
+                 * and are restricted by URL. SECRET tokens (`sk.`) can create tokens
+                 * and read account data, and one pasted into the wrong variable would
+                 * have been handed to every anonymous caller by this endpoint. The
+                 * prefix check means a misconfiguration costs a broken map, not an
+                 * account takeover — the same reasoning that removed the Google server
+                 * key from this response.
+                 */
+                'mapbox_token' => str_starts_with((string) config('services.maps.mapbox_token', ''), 'pk.')
+                    ? (string) config('services.maps.mapbox_token')
+                    : '',
                 'default_center' => ['lat' => 32.5556, 'lng' => 35.85], // Irbid
             ],
             'features' => [
