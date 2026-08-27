@@ -59,9 +59,23 @@ class ExpireStaleCommand extends Command
 
     protected $description = 'Cancel trips no captain accepted, and expire stale ride and payment requests.';
 
-    public function __construct(private readonly TripService $trips)
+    /**
+     * `TripService` is resolved in `handle()`, NOT injected into the constructor.
+     *
+     * Registered console commands are instantiated when Artisan starts — including
+     * during `php artisan package:discover`, which Composer runs as a post-autoload
+     * hook BEFORE `.env` exists. At that moment `APP_ENV` defaults to `production`,
+     * and constructor-injecting `TripService` drags in `NotificationService` and then
+     * `SmsGateway`, whose provider deliberately throws when the `log` driver is used
+     * outside local/testing.
+     *
+     * So a heavy constructor on a console command turns a correct safety guard into a
+     * failed `composer install`. The dependency is only needed when the command
+     * actually runs, so that is where it is resolved.
+     */
+    private function trips(): TripService
     {
-        parent::__construct();
+        return app(TripService::class);
     }
 
     public function handle(): int
@@ -110,7 +124,7 @@ class ExpireStaleCommand extends Command
         // so a paging cursor over a shrinking set would skip records.
         foreach ($query->get() as $trip) {
             try {
-                $this->trips->cancel($trip, actor: null, role: 'system', reason: 'no_captain_accepted');
+                $this->trips()->cancel($trip, actor: null, role: 'system', reason: 'no_captain_accepted');
                 $closed++;
             } catch (\Throwable $e) {
                 // One trip that refuses to cancel — a fare already captured, say —

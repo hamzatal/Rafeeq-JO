@@ -46,9 +46,13 @@ class FundTreasuryCommand extends Command
 
     protected $description = 'Credit the platform treasury with opening capital, idempotently by reference.';
 
-    public function __construct(private readonly WalletService $wallets)
+    /**
+     * Resolved in `handle()` for the same reason as `ExpireStaleCommand` — a console
+     * command's constructor runs during `package:discover`, before `.env` exists.
+     */
+    private function wallets(): WalletService
     {
-        parent::__construct();
+        return app(WalletService::class);
     }
 
     public function handle(): int
@@ -70,7 +74,7 @@ class FundTreasuryCommand extends Command
         }
 
         $fils = (int) round($dinars * 1000);
-        $treasury = $this->wallets->platform();
+        $treasury = $this->wallets()->platform();
 
         if (! $this->option('force') && ! $this->confirm(
             sprintf('Credit the treasury with %s JOD (%d fils), reference [%s]?', number_format($dinars, 3), $fils, $reference)
@@ -84,7 +88,7 @@ class FundTreasuryCommand extends Command
         // `logOrFail`, so a float that cannot be recorded is a float that does not
         // happen. Re-running the same reference returns the original transaction.
         $before = (int) $treasury->fresh()->balance_fils;
-        $txn = $this->wallets->adminTopup(
+        $txn = $this->wallets()->adminTopup(
             $treasury,
             $fils,
             reference: $reference,
