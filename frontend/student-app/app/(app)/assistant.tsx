@@ -31,6 +31,8 @@ export default function Assistant() {
 
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [conversationId, setConversationId] = useState<string | undefined>();
+  /** null = not asked yet, false = the last reply was the non-AI fallback. */
+  const [aiActive, setAiActive] = useState<boolean | null>(null);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -48,6 +50,17 @@ export default function Assistant() {
       const reply = await api.assistant.send(text, conversationId);
       setConversationId(reply.conversation_id);
       setMessages((m) => [...m, reply.message]);
+      /*
+       * The backend has always returned `ai: false` when the model is unavailable
+       * — no API key, a budget cap, or an outage — and nothing on this screen read
+       * it. So the app presented a fixed fallback paragraph inside a chat bubble
+       * with a live pulse dot next to the word "assistant", which reads as an
+       * answer rather than an apology.
+       *
+       * Showing it means a user who gets the canned reply can tell it apart from
+       * a real one, instead of concluding the assistant is stupid.
+       */
+      setAiActive(reply.ai);
     } catch {
       setMessages((m) => [...m, { id: `err-${Date.now()}`, conversation_id: '', role: 'assistant', content: t('common.error'), created_at: null }]);
     } finally {
@@ -69,13 +82,29 @@ export default function Assistant() {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={s.title}>{t('assistant.title')}</Text>
-          <View style={s.onlineRow}>
-            <PulseDot color={theme.colors.accent} size={6} />
-            <Text style={s.online}>{t('assistant.online')}</Text>
-          </View>
+          {/*
+            A pulsing dot next to the word "online" is a claim. It used to render
+            unconditionally, including while the model was unreachable and every
+            answer was the fixed fallback paragraph.
+          */}
+          {aiActive === false ? (
+            <Text style={s.degraded}>{t('assistant.degraded')}</Text>
+          ) : (
+            <View style={s.onlineRow}>
+              <PulseDot color={theme.colors.accent} size={6} />
+              <Text style={s.online}>{t('assistant.online')}</Text>
+            </View>
+          )}
         </View>
       </View>
       <View style={s.gradientBar} />
+
+      {aiActive === false ? (
+        <View style={s.degradedBanner}>
+          <Icon name="alert-triangle" size={15} color={theme.colors.warning} />
+          <Text style={s.degradedBannerText}>{t('assistant.degradedHint')}</Text>
+        </View>
+      ) : null}
 
       <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView ref={scrollRef} contentContainerStyle={s.messages} showsVerticalScrollIndicator={false}>
@@ -139,6 +168,9 @@ const makeStyles = (t: AppTheme) =>
     online: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.accent },
     // Gradient-like accent bar under the header (navy → teal) via layered views.
     gradientBar: { height: 2, backgroundColor: t.colors.accent, opacity: 0.5 },
+    degraded: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.warning, marginTop: 2 },
+    degradedBanner: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.warningSoft, paddingHorizontal: t.spacing.base, paddingVertical: 10 },
+    degradedBannerText: { flex: 1, fontFamily: t.fontFamily.regular, fontSize: 12, lineHeight: 18, color: t.colors.text },
 
     messages: { padding: t.spacing.lg, gap: t.spacing.sm, flexGrow: 1 },
     bubble: { maxWidth: '85%', borderRadius: t.radius.lg, paddingHorizontal: t.spacing.base, paddingVertical: t.spacing.md },

@@ -45,13 +45,27 @@ class AdminInsightsService
     {
         $monthStart = Carbon::now()->startOfMonth();
         $now = Carbon::now();
+        /*
+         * ── Why a failed report is not zero ────────────────────────────────────
+         *
+         * This used to be `Safely::value(..., default: [])` followed by `?? 0` on
+         * every finance field. If the financial query threw, the admin briefing
+         * rendered 0 JOD revenue, 0 rides, 0 captain earnings — visually identical
+         * to a month in which the business did nothing. The warning went to the log
+         * and the screen told a confident lie.
+         *
+         * A number nobody could compute is not a number. `finance_available` says
+         * which of the two happened, and the dashboard shows an error instead of a
+         * zero.
+         */
         $report = Safely::value(
             fn () => $this->reports->summary($monthStart->toDateString(), $now->toDateString()),
-            default: [],
+            default: null,
             context: 'insights.report',
         );
 
         return [
+            'finance_available' => $report !== null,
             'users' => [
                 'total' => (int) DB::table('users')->whereNull('deleted_at')->count(),
                 'students' => (int) DB::table('users')->where('type', 'student')->count(),
@@ -169,16 +183,19 @@ class AdminInsightsService
         // Platform revenue, not commission booked: the narrative said «إيراد عمولة»
         // while quoting a figure that included commission on subscription seats,
         // whose money was already counted as a plan sale.
+        $financeOk = ($metrics['finance_available'] ?? false) === true;
         $revenueJod = round(($metrics['finance']['platform_revenue_fils'] ?? 0) / 1000);
 
         $analysis = sprintf(
-            'هذا الشهر: %d مستخدم جديد، %d رحلة (نسبة إكمال ~%d%%)، وإيراد منصّة ~%d د.أ '.
-            '(عمولة رحلات + بيع اشتراكات، دون احتساب مزدوج). '.
+            'هذا الشهر: %d مستخدم جديد، %d رحلة (نسبة إكمال ~%d%%)، و%s. '.
             'يوجد %d كابتن بانتظار المراجعة، %d نزاع مفتوح، و%d علامة خطر غير محلولة، و%d دفعة معلّقة.',
             $metrics['users']['new_this_month'],
             $trips['this_month'],
             $completion,
-            $revenueJod,
+            // Never state a revenue figure the query could not produce.
+            $financeOk
+                ? sprintf('إيراد منصّة ~%d د.أ (عمولة رحلات + بيع اشتراكات، دون احتساب مزدوج)', $revenueJod)
+                : '**تعذّر حساب الإيراد — راجع السجلّات، ولا تقرأ صفراً هنا كأنّه صفر حقيقي**',
             $metrics['drivers']['pending_review'],
             $metrics['safety']['open_disputes'],
             $metrics['safety']['unresolved_risk_flags'],

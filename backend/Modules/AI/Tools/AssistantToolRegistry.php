@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\AI\Tools;
 
+use Illuminate\Support\Facades\Log;
 use Rafeeq\Modules\Auth\Models\User;
 
 /**
@@ -66,6 +67,18 @@ class AssistantToolRegistry
         try {
             return $this->tools[$name]->run($user, $args);
         } catch (\Throwable $e) {
+            /*
+             * Logged, because these tools WRITE. `create_support_ticket` and
+             * `file_lost_item` both insert rows, so a silent failure here is a
+             * student who was told "your ticket is open" about a ticket that does
+             * not exist — and nobody in operations ever finds out.
+             */
+            Log::error('assistant.tool_failed', [
+                'tool' => $name,
+                'user' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return ['ok' => false, 'error' => 'tool execution failed'];
         }
     }

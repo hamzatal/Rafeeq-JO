@@ -337,12 +337,6 @@ parameters:
 			path: Modules/Drivers/Services/VehicleService.php
 
 		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\LostFound\\Models\\LostFoundItem\:\:\$category\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/LostFound/Services/LostFoundService.php
-
-		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Models\\RideRequest\:\:\$coupon_code\.$#'
 			identifier: property.notFound
 			count: 1

@@ -308,6 +308,7 @@ const DICT: Dict = {
   'insights.kpi.tripsCompleted': { ar: 'رحلات مكتملة', en: 'Completed trips' },
   'insights.kpi.tripsCancelled': { ar: 'رحلات ملغاة', en: 'Cancelled trips' },
   'insights.kpi.activeSubs': { ar: 'اشتراكات فعّالة', en: 'Active subscriptions' },
+  'insights.financeUnavailable': { ar: 'تعذّر حساب الأرقام المالية لهذه الفترة — الأصفار أعلاه ليست أصفاراً حقيقية. راجع السجلّات.', en: 'The financial figures could not be computed for this period — the values above are unavailable, not zero. Check the logs.' },
   'insights.kpi.platformRevenue': { ar: 'إيراد المنصّة (د.أ)', en: 'Platform revenue (JOD)' },
   'insights.kpi.grossFare': { ar: 'إجمالي الأجور (د.أ)', en: 'Total fares (JOD)' },
   'insights.kpi.driversPending': { ar: 'كباتن بانتظار المراجعة', en: 'Captains awaiting review' },

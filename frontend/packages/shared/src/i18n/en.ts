@@ -572,6 +572,8 @@ export const en: Translations = {
     empty: 'Ask Rafeeq Assistant about subscriptions, rides, your wallet and more.',
     aiOff: 'AI assistant is off — replies are guidance only.',
     online: 'Online',
+    degraded: 'Simplified replies for now',
+    degradedHint: 'The smart assistant is unavailable, so these are canned replies rather than answers written for your question. For anything urgent, contact support.',
     thinking: 'Thinking',
     suggest1: 'How do I request a ride?',
     suggest2: 'What are the subscription plans?',

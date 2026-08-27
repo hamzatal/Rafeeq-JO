@@ -19,7 +19,6 @@ interface AuthState {
   register: (payload: RegisterPayload) => Promise<string | null>;
   verifyOtp: (payload: VerifyOtpPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
-  /** DEV ONLY: enter the app with a mock session to preview the UI without a backend. */
   logout: () => Promise<void>;
 }
 

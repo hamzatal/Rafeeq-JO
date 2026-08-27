@@ -812,6 +812,12 @@ export interface AdminInsights {
   generated_at: string;
   ai_enabled: boolean;
   metrics: {
+    /**
+     * False when the financial query FAILED. The finance figures below are then
+     * meaningless — do not render them as zero, because a real zero and an
+     * uncomputable value look identical and only one of them is news.
+     */
+    finance_available: boolean;
     users: { total: number; students: number; drivers: number; new_this_month: number };
     drivers: { pending_review: number; approved: number };
     trips: { this_month: number; completed: number; cancelled: number };

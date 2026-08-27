@@ -5,6 +5,7 @@ namespace Rafeeq\Modules\AI\Services;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Core\Support\Safely;
 use Rafeeq\Infrastructure\Gpt\Contracts\GptClient;
@@ -161,7 +162,18 @@ class AssistantService extends BaseService
             }
 
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => $totalTokens];
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            /*
+             * Without this log an OpenAI outage, a malformed tool response and a
+             * missing API key all produced the same thing: the "assistant is not
+             * enabled" paragraph. One of those is a configuration choice and two are
+             * incidents, and they must not look alike from the outside.
+             */
+            Log::error('assistant.reply_failed', [
+                'user' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return ['content' => $this->fallback($latest), 'ai' => false, 'tokens' => 0];
         }
     }
