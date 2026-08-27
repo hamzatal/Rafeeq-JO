@@ -17,8 +17,8 @@ import { fileURLToPath } from 'url';
 import { chromium } from 'playwright';
 import {
   INK, BRAND, BRAND_D, BRAND_L, AMBER, BONE, BONE_D, CHALK,
-  N, grain, stroke, imprint, rail, index, page, mark, SQ, PT, ST,
-  skyline, car, gate, hills, olive,
+  N, KM, grain, stroke, imprint, rail, index, page, mark, SQ, PT, ST,
+  skyline, car, gate, hills, olive, columns, castle, rooftop, bus,
 } from './poster-kit.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -32,6 +32,32 @@ const foot = (dark) => `<div style="position:absolute;bottom:66px;right:64px;z-i
 
 const eyebrow = (t, color = BRAND) =>
   `<div style="font:700 27px/1 'Plex';color:${color};letter-spacing:.16em">${t}</div>`;
+
+/**
+ * Clearance between a big headline and the lede beneath it. THE SECOND LAW.
+ *
+ * The first law is that the stroke and the type never share a band. This is the
+ * one I had not written down, and it broke a different set of posters: TYPE AND
+ * TYPE must not share a band either.
+ *
+ * `margin-top:30px` was enough in Latin and is not enough in Arabic, because
+ * Arabic collides from both directions at once:
+ *
+ *   • the headline reaches DOWN — «للمشي» ends in ي, whose bowl drops well past
+ *     the 1.06 line-height the headline sets, and a line box does not contain it
+ *   • the lede reaches UP — a shadda or a hamza on the lede's first line sits
+ *     above its own cap height, so «بيسدّ» rises into the gap from below
+ *
+ * Neither overflows on its own. Together they met in the middle, and on poster 53
+ * the descender of the headline was touching the tashkeel of the lede. The user's
+ * report was exactly right: «في بعض الصور الكتابات فوق بعض».
+ *
+ * 54px is measured, not guessed: a 124px headline's ي reaches ~0.22em (27px)
+ * below its line box, and a 33px lede's shadda reaches ~0.30em (10px) above its
+ * cap — 37px of ink to clear, plus enough air that it reads as two blocks rather
+ * than one crowded one.
+ */
+const LEDE_GAP = 54;
 
 /** Big numeral + unit, on a shared baseline. Replaces every "stat card". */
 const stat = (value, unit, { size = 220, color = INK, dim = 0.58 } = {}) => `
@@ -53,13 +79,29 @@ const lines = (items, { color = INK, size = 40, gap = 30 } = {}) => items.map((t
 
 /* ═════════════════════════ ARCHETYPES ═════════════════════════════════════ */
 
-/** 1 · NUMBER WALL — one clipped numeral is the whole image. */
+/**
+ * 1 · NUMBER WALL — one clipped numeral is the whole image.
+ *
+ * BANDS (1350 tall), and they do not overlap:
+ *     68 –  400  the numeral (clipped off the right edge ON PURPOSE)
+ *    398 –  440  the unit, on the numeral's own baseline
+ *    540 –  740  the stroke, and nothing else
+ *    810 – 1114  headline + lede
+ *
+ * The stroke used to run from 0.615h (830) up to 0.395h (533) while the copy
+ * block was anchored at `bottom:236` — which put its top at roughly 718. So the
+ * stroke's left half crossed the headline for about 110px and the route ran
+ * through «من حيّك لباب الجامعة». Same law, broken again: the stroke and the
+ * type never share a band. It is now raised to 540–740 and the copy is anchored
+ * from a measured top rather than only from the bottom, so the two cannot drift
+ * into each other when a headline grows a third line.
+ */
 function numberWall({ i, total, value, unit, head, lede, bg = BONE, fg = INK, accent = BRAND }) {
   const [w, h] = PT;
   const dark = bg !== BONE && bg !== CHALK;
 
   return page(w, h, `
-    ${stroke({ w, h, d: `M-120 ${h * 0.615} C ${w * 0.30} ${h * 0.615} ${w * 0.30} ${h * 0.44} ${w * 0.62} ${h * 0.44} S ${w * 0.84} ${h * 0.40} ${w * 0.885} ${h * 0.395}`, width: 92, color: accent })}
+    ${stroke({ w, h, d: `M-120 ${h * 0.545} C ${w * 0.30} ${h * 0.545} ${w * 0.30} ${h * 0.412} ${w * 0.62} ${h * 0.412} S ${w * 0.84} ${h * 0.400} ${w * 0.885} ${h * 0.398}`, width: 92, color: accent })}
     ${index(i, total, { color: fg })}
     ${rail('YOUR SEAT TO CAMPUS', { color: fg, opacity: dark ? 0.34 : 0.3 })}
     <div style="position:absolute;top:${h * 0.05}px;right:-26px;z-index:10">
@@ -67,9 +109,9 @@ function numberWall({ i, total, value, unit, head, lede, bg = BONE, fg = INK, ac
     </div>
     <div style="position:absolute;top:${h * 0.295}px;right:60px;z-index:10;
       font:500 44px/1 'Plex';color:${fg};opacity:.6">${unit}</div>
-    <div style="position:absolute;bottom:236px;right:64px;left:64px;z-index:10">
-      <div class="h" style="font-size:126px;color:${fg};max-width:900px">${head}</div>
-      ${lede ? `<div class="lede" style="margin-top:30px;font-size:33px;color:${fg};opacity:.64;max-width:770px">${lede}</div>` : ''}
+    <div style="position:absolute;top:${h * 0.60}px;bottom:236px;right:64px;left:64px;z-index:10">
+      <div class="h" style="font-size:118px;color:${fg};max-width:900px">${head}</div>
+      ${lede ? `<div class="lede" style="margin-top:${LEDE_GAP}px;font-size:33px;color:${fg};opacity:.64;max-width:770px">${lede}</div>` : ''}
     </div>
     ${foot(dark)}${grain(dark ? 0.07 : 0.06, 3 + i)}
   `, bg);
@@ -233,6 +275,10 @@ function bandTable({ i, total, head, rows, bg = BONE, note = 'السعر ثاب�
           flex-direction:row-reverse;padding:${pad}px 0;
           ${k ? 'border-top:1px solid rgba(11,18,32,.13);' : ''}">
           <span style="font:700 40px/1 'Plex';color:${INK};min-width:210px">${r[0]}</span>
+          <!-- The distance column MUST come through KM(). Passed as a bare
+               string, "3–5 كم" renders as «5–3 كم»: the en-dash is bidi-neutral,
+               so the two digit runs get laid out right-to-left and every band
+               advertised its range backwards. See KM() in poster-kit. -->
           <span style="font:500 27px/1 'Plex';color:${INK};opacity:.48;flex:1;text-align:center">${r[1]}</span>
           <span class="num" style="font-size:58px;color:${k === 2 ? BRAND : INK};min-width:190px;text-align:left">${N(r[2])}</span>
         </div>`).join('')}
@@ -263,7 +309,7 @@ function brandPost({ i, total, head, sub, bg = BRAND, fg = '#fff' }) {
     <div style="position:absolute;top:78px;right:60px;z-index:10">${mark(148, { path: fg, dot: AMBER, w: 9 })}</div>
     <div style="position:absolute;top:${h * 0.545}px;right:64px;left:64px;z-index:10">
       <div class="h" style="font-size:124px;color:${fg};max-width:900px">${head}</div>
-      ${sub ? `<div class="lede" style="margin-top:28px;font-size:34px;color:${fg};opacity:.8;max-width:860px">${sub}</div>` : ''}
+      ${sub ? `<div class="lede" style="margin-top:${LEDE_GAP}px;font-size:34px;color:${fg};opacity:.8;max-width:860px">${sub}</div>` : ''}
     </div>
     ${foot(true)}${grain(0.075, 59 + i)}
   `, bg);
@@ -293,7 +339,7 @@ function cityPost({ i, total, kicker, head, lede, bg = BONE, fg = INK, accent = 
     <div style="position:absolute;top:112px;right:64px;left:64px;z-index:10">
       ${kicker ? eyebrow(kicker, dark ? AMBER : BRAND) : ''}
       <div class="h" style="margin-top:32px;font-size:124px;color:${fg};max-width:900px">${head}</div>
-      ${lede ? `<div class="lede" style="margin-top:30px;font-size:33px;color:${fg};opacity:.66;max-width:780px">${lede}</div>` : ''}
+      ${lede ? `<div class="lede" style="margin-top:${LEDE_GAP}px;font-size:33px;color:${fg};opacity:.66;max-width:780px">${lede}</div>` : ''}
     </div>
     ${foot(dark)}${grain(dark ? 0.07 : 0.06, 67 + i)}
   `, bg);
@@ -365,9 +411,190 @@ function gatePost({ i, total, kicker, head, lede, bg = BRAND, fg = '#fff' }) {
   `, bg);
 }
 
-/* ═════════════════════════ THE 52 POSTS ═══════════════════════════════════ */
+/**
+ * 15 · RUIN — Umm Qais, and it is in Irbid governorate.
+ *
+ * ── Why a specific ruin and not a generic skyline ──────────────────────────
+ *
+ * `cityPost` draws rooftops with a minaret and a dome, which says "somewhere in
+ * the Arab world". The Decapolis colonnade at Umm Qais says IRBID, to anyone from
+ * the north — it is twenty minutes from Yarmouk University and every student there
+ * has been on a school trip to it. Place is only worth drawing if it is
+ * recognisable enough to be a claim.
+ *
+ * The colonnade recedes to the LEFT, which is the reading direction's exit in
+ * Arabic, so the eye leaves the headline and travels down the columns rather than
+ * fighting back against them.
+ *
+ * BANDS (1350 tall):
+ *   116 –  520  copy
+ *   660 –  810  the stroke, alone
+ *   980 – 1350  the colonnade
+ */
+function ruinPost({ i, total, kicker, head, lede, bg = BONE, fg = INK, accent = BRAND }) {
+  const [w, h] = PT;
+  const dark = bg !== BONE && bg !== CHALK;
 
-const T = 58;
+  return page(w, h, `
+    ${hills({ w, h: 300, color: accent, opacity: dark ? 0.16 : 0.1 })}
+    ${columns({ w, h: 370, color: dark ? '#FFFFFF' : INK, opacity: dark ? 0.17 : 0.19, n: 9 })}
+    ${stroke({ w, h, d: `M-120 ${h * 0.60} C ${w * 0.28} ${h * 0.60} ${w * 0.30} ${h * 0.505} ${w * 0.64} ${h * 0.505} S ${w * 0.86} ${h * 0.492} ${w * 0.895} ${h * 0.49}`, width: 70, color: accent })}
+    ${index(i, total, { color: fg })}
+    ${rail('UMM QAIS · IRBID', { color: fg, opacity: dark ? 0.34 : 0.3 })}
+    <div style="position:absolute;top:116px;right:64px;left:64px;z-index:10">
+      ${kicker ? eyebrow(kicker, dark ? AMBER : BRAND) : ''}
+      <div class="h" style="margin-top:32px;font-size:120px;color:${fg};max-width:900px">${head}</div>
+      ${lede ? `<div class="lede" style="margin-top:${LEDE_GAP}px;font-size:33px;color:${fg};opacity:.66;max-width:780px">${lede}</div>` : ''}
+    </div>
+    ${foot(dark)}${grain(dark ? 0.07 : 0.06, 91 + i)}
+  `, bg);
+}
+
+/**
+ * 16 · FORTRESS — Ajloun Castle on the ridge west of Irbid.
+ *
+ * A single mass on the right, standing on its own rock, with the copy given the
+ * whole left field. The asymmetry is the point: a castle centred on a poster is a
+ * tourism advert, and a castle pushed to one edge is a horizon.
+ *
+ * BANDS (1350 tall):
+ *   120 –  600  copy (kept narrow, so it never reaches the castle)
+ *   620 –  980  the castle mass, right, bleeding off that edge
+ *  1040 – 1180  the stroke, below it, alone
+ *
+ * The stroke ENDS at 0.20w, not 0.06w. Terminating it further left put the amber
+ * dot on top of the rotated Latin rail at `left:44` — a 31px-radius disc centred
+ * at x=65 covers x=34–96, and the rail sits at 44–70. The law is about the stroke
+ * and the TYPE, and the rail is type; it being rotated does not exempt it.
+ */
+function fortressPost({ i, total, kicker, head, lede, bg = INK, fg = '#fff', accent = BRAND_L }) {
+  const [w, h] = PT;
+
+  return page(w, h, `
+    ${hills({ w, h: 340, color: accent, opacity: 0.13 })}
+    <!-- Large and light enough to read as a horizon. At 520px/0.17 on an ink
+         field it was a grey smudge, which is worse than no landmark: it costs the
+         same attention and delivers no recognition. -->
+    <div style="position:absolute;top:${h * 0.44}px;right:-70px;z-index:3">
+      ${castle({ w: 720, color: '#FFFFFF', opacity: 0.26 })}
+    </div>
+    ${stroke({ w, h, d: `M ${w + 110} ${h * 0.79} C ${w * 0.70} ${h * 0.79} ${w * 0.66} ${h * 0.845} ${w * 0.34} ${h * 0.845} S ${w * 0.24} ${h * 0.858} ${w * 0.20} ${h * 0.861}`, width: 58, color: accent, dot: AMBER, dotR: 31 })}
+    ${index(i, total, { color: fg })}
+    ${rail('AJLOUN · NORTH JORDAN', { color: fg, opacity: 0.32 })}
+    <div style="position:absolute;top:120px;right:64px;left:64px;z-index:10">
+      ${kicker ? eyebrow(kicker, AMBER) : ''}
+      <div class="h" style="margin-top:32px;font-size:122px;color:${fg};max-width:860px">${head}</div>
+      ${lede ? `<div class="lede" style="margin-top:${LEDE_GAP}px;font-size:33px;color:${fg};opacity:.76;max-width:700px">${lede}</div>` : ''}
+    </div>
+    ${foot(true)}${grain(0.075, 97 + i)}
+  `, bg);
+}
+
+/**
+ * 17 · ROOFTOP — water tanks at poster scale.
+ *
+ * `skyline()` renders these as 13px texture. Here the same object is the subject,
+ * because it is the detail that cannot be mistaken for anywhere else: no stock
+ * skyline has three mismatched drums, a tilted solar collector and a dish on
+ * every roof. Cropped hard off the left edge so it reads as a fragment of a real
+ * roof rather than an illustration of one.
+ *
+ * BANDS (1080 square):
+ *    92 –  500  copy — headline MUST fit two lines at 100px (see below)
+ *   590 –  660  the stroke, alone
+ *   700 – 1080  the roof, bleeding off the left and bottom
+ *
+ * The first draft took a headline long enough to wrap to THREE lines, which
+ * pushed the lede down into the stroke's band — so the route ran through the lede
+ * and the amber dot landed on a word. I wrote the law at the top of this file and
+ * then broke it in the first archetype I added afterwards.
+ *
+ * The real lesson is that a band declared in a comment is not enforced by
+ * anything: a headline three words longer silently invalidates it. So the copy
+ * block now has a HARD max-height with the stroke starting below it, and the
+ * headline is short enough to fit. Overrun clips instead of colliding — visible
+ * in review, rather than shipping as an overlap.
+ */
+function rooftopPost({ i, total, kicker, head, lede, bg = BONE, fg = INK, accent = BRAND }) {
+  const [w, h] = SQ;
+  const dark = bg !== BONE && bg !== CHALK;
+
+  return page(w, h, `
+    <!-- Bleeds off BOTH side edges and the bottom: a fragment of a roof, not a
+         picture of one. 1180 wide on a 1080 canvas is the point. -->
+    <div style="position:absolute;bottom:-26px;left:-58px;z-index:3">
+      ${rooftop({ w: 1180, color: dark ? '#FFFFFF' : INK, opacity: dark ? 0.16 : 0.17 })}
+    </div>
+    ${stroke({ w, h, d: `M-110 ${h * 0.605} C ${w * 0.30} ${h * 0.605} ${w * 0.32} ${h * 0.565} ${w * 0.66} ${h * 0.565} S ${w * 0.88} ${h * 0.558} ${w * 0.905} ${h * 0.556}`, width: 56, color: accent, dot: AMBER, dotR: 30 })}
+    ${index(i, total, { color: fg })}
+    <div style="position:absolute;top:92px;right:60px;left:60px;z-index:10;
+      max-height:408px;overflow:hidden">
+      ${kicker ? eyebrow(kicker, dark ? AMBER : BRAND) : ''}
+      <div class="h" style="margin-top:30px;font-size:100px;color:${fg};max-width:840px">${head}</div>
+      ${lede ? `<div class="lede" style="margin-top:${LEDE_GAP}px;font-size:31px;color:${fg};opacity:.64;max-width:660px">${lede}</div>` : ''}
+    </div>
+    ${foot(dark)}${grain(dark ? 0.07 : 0.06, 103 + i)}
+  `, bg);
+}
+
+/**
+ * 18 · TWO VEHICLES — the minibus above, the car below, at the same scale.
+ *
+ * The comparison posters made their case with numbers alone. This one makes it
+ * with shapes: the blunt box that stops at the depot, and the saloon that stops
+ * at the door. Both drawn at one scale on two roads, so the difference the reader
+ * sees first is the object, not the caption.
+ *
+ * BANDS (1350 tall), five strict lanes and NOTHING crosses one:
+ *    96 –  300  copy — two lines at 92px, hard-capped
+ *   344 –  602  the bus, wheels on its road at 0.40h (540)
+ *   684 –  940  the car, wheels on its road at 0.665h (898)
+ *   985 – 1180  the two labels + note
+ *  1218 – 1350  the imprint
+ *
+ * The first draft got this wrong at BOTH ends. A three-line headline ran down into
+ * the bus, and the label block — anchored from the top at 0.775h — grew past the
+ * footer so the wordmark printed on top of the note. Anchoring a growing block by
+ * its top and the footer by its bottom means the two meet somewhere unpredictable,
+ * which is a layout that works until the copy changes.
+ *
+ * So the label block is anchored by its BOTTOM (clear of the imprint) and the copy
+ * is capped. Both roads also moved up to make the room this actually needs.
+ */
+function twoVehiclePost({ i, total, kicker, head, busLabel, carLabel, note, bg = CHALK, fg = INK }) {
+  const [w, h] = PT;
+
+  return page(w, h, `
+    ${stroke({ w, h, d: `M-120 ${h * 0.404} C ${w * 0.34} ${h * 0.404} ${w * 0.40} ${h * 0.398} ${w * 0.74} ${h * 0.398} S ${w * 0.92} ${h * 0.397} ${w * 0.95} ${h * 0.397}`, width: 44, color: 'rgba(11,18,32,.18)', dotAt: null })}
+    ${stroke({ w, h, d: `M-120 ${h * 0.669} C ${w * 0.34} ${h * 0.669} ${w * 0.40} ${h * 0.663} ${w * 0.74} ${h * 0.663} S ${w * 0.92} ${h * 0.662} ${w * 0.95} ${h * 0.662}`, width: 52, color: BRAND, dot: AMBER, dotR: 30 })}
+    ${index(i, total, { color: fg })}
+    ${rail('DEPOT vs DOOR', { color: fg, opacity: 0.3 })}
+    <div style="position:absolute;top:96px;right:64px;left:64px;z-index:10;
+      max-height:214px;overflow:hidden">
+      ${kicker ? eyebrow(kicker, BRAND) : ''}
+      <div class="h" style="margin-top:26px;font-size:92px;color:${fg};max-width:880px">${head}</div>
+    </div>
+    <!-- Each vehicle's wheels rest ON its own road: the bus offset by its 38px
+         wheel radius plus body height, the car by its 42px. -->
+    <div style="position:absolute;top:${Math.round(h * 0.404) - 196}px;left:52%;transform:translateX(-50%);z-index:12">
+      ${bus({ w: 500, color: INK, opacity: 0.30 })}
+    </div>
+    <div style="position:absolute;top:${Math.round(h * 0.669) - 214}px;left:48%;transform:translateX(-50%);z-index:12">
+      ${car({ w: 600, color: INK, opacity: 0.92, seats: 4 })}
+    </div>
+    <!-- Anchored from the BOTTOM so it can never grow into the imprint. -->
+    <div style="position:absolute;bottom:170px;right:64px;left:64px;z-index:14">
+      <div style="font:500 30px/1.4 'Plex';color:${fg};opacity:.44">${busLabel}</div>
+      <div style="margin-top:16px;font:700 35px/1.35 'Plex';color:${BRAND}">${carLabel}</div>
+      ${note ? `<div style="margin-top:26px;font:500 28px/1.5 'Plex';color:${fg};opacity:.56;max-width:820px">${note}</div>` : ''}
+    </div>
+    ${foot(false)}${grain(0.055, 109 + i)}
+  `, bg);
+}
+
+/* ═════════════════════════ THE POSTS ══════════════════════════════════════ */
+
+const T = 62;
 const P = [];
 const add = (name, html, size, caption) => P.push({ name, html, size, caption });
 
@@ -405,12 +632,12 @@ add('05-fixed-price', statement({
 add('06-bands', bandTable({
   i: 6, total: T, head: 'ستّة نطاقات. سعر لكل واحد.',
   rows: [
-    ['نطاق A', 'حتى 3 كم', '1.000'],
-    ['نطاق B', '3–5 كم', '1.250'],
-    ['نطاق C', '5–7 كم', '1.500'],
-    ['نطاق D', '7–10 كم', '1.750'],
-    ['نطاق E', '10–14 كم', '2.000'],
-    ['نطاق F', 'أكثر من 14 كم', '2.250'],
+    ['نطاق A', `حتى ${KM('3')}`, '1.000'],
+    ['نطاق B', KM('3–5'), '1.250'],
+    ['نطاق C', KM('5–7'), '1.500'],
+    ['نطاق D', KM('7–10'), '1.750'],
+    ['نطاق E', KM('10–14'), '2.000'],
+    ['نطاق F', `أكثر من ${KM('14')}`, '2.250'],
   ],
 }), PT, `التعرفة كاملة، معلنة:\n\nA حتى 3كم — 1.000\nB 3–5كم — 1.250\nC 5–7كم — 1.500\nD 7–10كم — 1.750\nE 10–14كم — 2.000\nF فوق 14كم — 2.250\n\nدوّر على نطاقك واحسب شهرك من هلق.\n\n#رفيق #التعرفة`);
 
@@ -729,6 +956,39 @@ add('58-morning', cityPost({
   lede: 'محاضرة الثامنة، وباص ما بتعرف إيمتى بيجي. رفيق بيحسب وقتك قبل ما تطلب.',
   bg: BONE, fg: INK, seed: 43,
 }), PT, `محاضرة الثامنة، وباص ما بتعرف إيمتى بيجي.\n\nرفيق بيوريك وقت الوصول والسعر قبل ما تطلب — مو تقدير مفتوح.\n\n#رفيق #طلاب #إربد`);
+
+
+/* ── معالم الشمال · مركبتان (٥٩–٦٢) ──────────────────────────────────────────
+   Place made SPECIFIC. The skyline posts above say "a city"; these name the
+   north. Umm Qais and Ajloun are both within an hour of Yarmouk's gate, the
+   rooftop is the detail no stock photograph of "the Middle East" contains, and
+   the two-vehicle post argues with shapes instead of numbers. */
+
+add('59-umm-qais', ruinPost({
+  i: 59, total: T, kicker: 'أم قيس · إربد',
+  head: 'الشمال أقدم من كل خطوط الباص',
+  lede: 'أعمدة أم قيس واقفة من ألفين سنة، وطالب اليرموك لسّا ما لقى طريقة يوصل بيها للبوابة. صار وقتها.',
+}), PT, `أم قيس على ٢٠ دقيقة من بوابة اليرموك — مدينة رومانية كاملة.\n\nالشمال فيه كل شي إلا طريقة نقل تحترم وقت طالبه. من هون بلّشنا.\n\n#رفيق #أم_قيس #إربد #اليرموك #الأردن`);
+
+add('60-ajloun', fortressPost({
+  i: 60, total: T, kicker: 'عجلون',
+  head: 'قلعة على تلّة، وطالب بلا مقعد',
+  lede: 'بنوا قلعة على أعلى تلّة بالشمال قبل ثمان قرون. إحنا بس بدنا نوصّلك للمحاضرة بسعر تعرفه.',
+}), PT, `قلعة عجلون على أعلى تلّة بالشمال، مبنية قبل ٨٠٠ سنة.\n\nإحنا هدفنا أبسط: مقعد لطالب، بسعر معلن، على وقت المحاضرة.\n\n#رفيق #عجلون #الأردن #الشمال`);
+
+add('61-rooftop', rooftopPost({
+  i: 61, total: T, kicker: 'من فوق',
+  head: 'إربد من فوق السطوح',
+  lede: 'ثلاث خزّانات وسخّان وطبق — وتحتهم طالب بيحسب أجرة الرجعة.',
+}), SQ, `كل سطح بإربد: ثلاث خزّانات، سخّان شمسي، وطبق.\n\nوتحت كل واحد منهم طالب بيحسب أجرة الرجعة. رفيق للحساب هاض.\n\n#رفيق #إربد #الأردن`);
+
+add('62-depot-vs-door', twoVehiclePost({
+  i: 62, total: T, kicker: 'الفرق بالشكل',
+  head: 'واحد بيوقّف بالمجمّع',
+  busLabel: 'الباص: أجرة رخيصة + تكسي للمجمّع + مشي + انتظار مفتوح',
+  carLabel: 'رفيق: من باب بيتك لبوابة جامعتك — ١.٥٠٠',
+  note: 'مو مقارنة أسعار — مقارنة كم مرة لازم تبدّل مركبة وأنت رايح لمحاضرة الثامنة.',
+}), PT, `الباص أرخص على الورق: أجرة + تكسي للمجمّع + مشي + انتظار.\n\nرفيق: مقعد واحد، من الباب للبوابة، بسعر تعرفه قبل ما تطلب.\n\n#رفيق #إربد #نقل_جامعي`);
 
 /* ═════════════════════════ RENDER ═════════════════════════════════════════ */
 

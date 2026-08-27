@@ -37,6 +37,29 @@ export const CHALK = '#FBF8F2';
 export const N = (t) => `<span style="unicode-bidi:isolate;direction:ltr">${t}</span>`;
 export const JOD = (v) => `${N(v)}<span style="font-size:.42em;font-weight:500;margin-inline-start:.18em">د.أ</span>`;
 
+/**
+ * A measurement inside Arabic text: «٣–٥ كم».
+ *
+ * ── The bug this exists to kill ────────────────────────────────────────────
+ *
+ * The fare table printed EVERY band's distance backwards. The source said
+ * `'3–5 كم'` and the poster rendered «5–3 كم» — so band B advertised "5 to 3
+ * kilometres", and so did C, D and E. Six posters published a reversed tariff.
+ *
+ * The cause is the bidirectional algorithm, not a typo. In an RTL paragraph the
+ * en-dash is a NEUTRAL character, so "3–5" is not one left-to-right run — it is
+ * two digit runs with a neutral between them, and neutrals take the direction of
+ * their surroundings. The surroundings are Arabic, so the two runs are laid out
+ * right-to-left and the range inverts. Nothing is misspelled and nothing warns
+ * you; the string is correct in the file and wrong on the page.
+ *
+ * `N()` alone is not the fix: wrapping the whole «3–5 كم» in `direction:ltr`
+ * straightens the digits and then throws «كم» to the wrong side of them. The
+ * numeral must be isolated and the unit must stay in the Arabic run — which is
+ * why this is a helper rather than a thing each caller is trusted to remember.
+ */
+export const KM = (range, unit = 'كم') => `${N(range)}&nbsp;${unit}`;
+
 /* ── Paper grain ─────────────────────────────────────────────────────────────
    feTurbulence at low opacity. Without it large flat fields read as "rendered
    in a browser"; with it they read as printed. */
@@ -56,19 +79,36 @@ export const grain = (opacity = 0.055, seed = 3) => `
  * amber dot, which is the destination marker from the logo. Never decorative:
  * it is always the same object, at different scales.
  */
+let strokeSeq = 0;
+
 export function stroke({
   w, h, d, width = 84, color = BRAND, dot = AMBER, dotAt = 1,
   dotR = null, opacity = 1, dash = null, cap = 'round',
 } = {}) {
   const r = dotR ?? Math.round(width * 0.62);
 
+  /*
+   * The path id must be UNIQUE per call.
+   *
+   * It used to be the literal `id="rt"`, which is fine on a poster with one
+   * stroke and silently wrong on a poster with two: `<mpath href="#rt">` resolves
+   * to the FIRST matching id in the document, so the second stroke's amber
+   * destination dot was positioned along the FIRST stroke's path. On the
+   * two-vehicle poster that put the dot on the bus's road instead of the car's —
+   * the destination marker landed on the thing we are arguing against.
+   *
+   * It failed silently and only on multi-stroke layouts, so no existing poster
+   * revealed it until one was drawn.
+   */
+  const id = `rt${++strokeSeq}`;
+
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none"
     style="position:absolute;inset:0;opacity:${opacity};z-index:1">
-    <path id="rt" d="${d}" stroke="${color}" stroke-width="${width}"
+    <path id="${id}" d="${d}" stroke="${color}" stroke-width="${width}"
       stroke-linecap="${cap}" ${dash ? `stroke-dasharray="${dash}"` : ''}/>
     ${dotAt !== null ? `<circle r="${r}" fill="${dot}">
       <animateMotion dur="0.001s" fill="freeze" keyPoints="${dotAt};${dotAt}"
-        keyTimes="0;1" calcMode="linear"><mpath href="#rt"/></animateMotion>
+        keyTimes="0;1" calcMode="linear"><mpath href="#${id}"/></animateMotion>
     </circle>` : ''}
   </svg>`;
 }
@@ -278,6 +318,189 @@ export function hills({ w, h = 210, color = BRAND, opacity = 0.1 } = {}) {
     style="position:absolute;left:0;bottom:0;z-index:2;opacity:${opacity}">
     <path d="M0 ${h} V${h * 0.52} C ${w * 0.16} ${h * 0.22} ${w * 0.3} ${h * 0.66} ${w * 0.46} ${h * 0.46}
       S ${w * 0.66} ${h * 0.1} ${w * 0.8} ${h * 0.4} S ${w * 0.94} ${h * 0.6} ${w} ${h * 0.34} V${h} z"/>
+  </svg>`;
+}
+
+/**
+ * Umm Qais — the Roman colonnade, and it is IN Irbid governorate.
+ *
+ * This matters more than it sounds. A generic minaret says "somewhere Arab"; the
+ * Decapolis colonnade at Umm Qais says Irbid specifically, to anyone from the
+ * north. It is a twenty-minute drive from Yarmouk University and every student
+ * there has been on a school trip to it.
+ *
+ * Drawn as a receding row: columns shorten and fade toward the left so the band
+ * has depth without perspective tricks. Two are deliberately BROKEN — a ruin with
+ * every column intact reads as a museum reconstruction, not a ruin.
+ */
+export function columns({ w, h = 300, color = INK, opacity = 0.16, n = 9 } = {}) {
+  const gap = w / (n - 0.4);
+  let out = '';
+
+  for (let k = 0; k < n; k++) {
+    const x = w - 40 - k * gap;
+    // Recede: shorter and thinner as they go left (further away).
+    const t = 1 - k / (n + 3);
+    const ch = Math.round(h * 0.78 * t);
+    const cw = Math.round(26 * t) + 12;
+    const y = h - ch;
+    const broken = k === 3 || k === 6;
+    const shaft = broken ? Math.round(ch * (k === 3 ? 0.46 : 0.66)) : ch;
+    const sy = h - shaft;
+
+    // Shaft, with fluting suggested by two hairlines rather than drawn grooves.
+    out += `<rect x="${x - cw / 2}" y="${sy}" width="${cw}" height="${shaft}"/>`;
+
+    if (!broken) {
+      // Capital and abacus.
+      out += `<rect x="${x - cw / 2 - 7}" y="${y - 4}" width="${cw + 14}" height="16" rx="3"/>`;
+      out += `<rect x="${x - cw / 2 - 11}" y="${y - 18}" width="${cw + 22}" height="15" rx="2"/>`;
+    }
+    // Base block — the stylobate every column stands on.
+    out += `<rect x="${x - cw / 2 - 9}" y="${h - 16}" width="${cw + 18}" height="16"/>`;
+  }
+
+  // The stylobate itself, bleeding off both edges.
+  out += `<rect x="-20" y="${h - 16}" width="${w + 40}" height="16"/>`;
+
+  // A fallen drum on the ground, because that is what a ruin actually looks like.
+  out += `<ellipse cx="${Math.round(w * 0.30)}" cy="${h - 26}" rx="46" ry="15"/>`;
+
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"
+    style="position:absolute;left:0;bottom:0;z-index:2;opacity:${opacity}"
+    fill="${color}">${out}</svg>`;
+}
+
+/**
+ * Ajloun Castle — the silhouette on the ridge west of Irbid.
+ *
+ * Twelfth-century, square towers, and it sits on top of a hill rather than in a
+ * town, which is why it works as a shape on a horizon instead of inside a skyline.
+ * Used as a single mass on the right, never centred.
+ */
+export function castle({ w = 460, color = INK, opacity = 0.16 } = {}) {
+  const h = Math.round(w * 0.58);
+
+  // Crenellations along a wall run, drawn rather than hand-listed so the merlon
+  // rhythm stays even at any width.
+  const merlons = (x0, x1, y, step = 26) => {
+    let s = '';
+    for (let x = x0; x < x1 - 12; x += step) s += `<rect x="${x}" y="${y - 14}" width="14" height="15"/>`;
+
+    return s;
+  };
+
+  return `<svg width="${w}" height="${h}" viewBox="0 0 460 268" fill="${color}"
+    style="opacity:${opacity}">
+    <!-- the rock the whole thing stands on -->
+    <path d="M0 268 C 60 240 96 232 150 228 L330 224 C 392 230 430 244 460 268 z" opacity=".55"/>
+    <!-- curtain wall -->
+    <rect x="86" y="150" width="292" height="82"/>
+    ${merlons(90, 378, 150)}
+    <!-- keep, and two flanking towers of different heights: a castle grown in
+         stages, not designed in one -->
+    <rect x="182" y="86" width="104" height="146"/>
+    ${merlons(186, 286, 86)}
+    <rect x="96" y="120" width="62" height="112"/>
+    ${merlons(100, 158, 120)}
+    <rect x="312" y="106" width="70" height="126"/>
+    ${merlons(316, 382, 106)}
+    <!-- arrow slits -->
+    <rect x="210" y="126" width="10" height="30" fill="#F4EFE4" opacity=".5"/>
+    <rect x="248" y="126" width="10" height="30" fill="#F4EFE4" opacity=".5"/>
+    <rect x="120" y="156" width="9" height="26" fill="#F4EFE4" opacity=".5"/>
+    <rect x="340" y="146" width="9" height="26" fill="#F4EFE4" opacity=".5"/>
+    <!-- the gate -->
+    <path d="M212 232 v-42 a22 22 0 0 1 44 0 v42 z" fill="#F4EFE4" opacity=".42"/>
+  </svg>`;
+}
+
+/**
+ * A rooftop, close up — water tanks, a dish, a washing line.
+ *
+ * The one detail that is unmistakably Jordanian and appears in no stock skyline.
+ * `skyline()` uses tanks at 13px as texture; this is the same object at poster
+ * scale, where it becomes the subject instead of the background.
+ */
+export function rooftop({ w = 1180, color = INK, opacity = 0.18 } = {}) {
+  // Deliberately WIDE (0.33, not 0.52). A rooftop band has to bleed off both
+  // canvas edges to read as a fragment of a real roof; at a squarer aspect it
+  // either has to be shrunk until it sits in one corner as an illustration — which
+  // is the "graphic floating in the middle" this whole system exists to avoid — or
+  // scaled up until it collides with the stroke above it.
+  const h = Math.round(w * 0.33);
+
+  /** A tank on its stand. Heights vary because nobody installs these level. */
+  const tank = (x, y, tw, th) => `
+    <rect x="${x}" y="${y}" width="${tw}" height="${th}" rx="${Math.round(tw * 0.26)}"/>
+    <rect x="${x - 6}" y="${y - 9}" width="${tw + 12}" height="14" rx="7"/>
+    <rect x="${x + 10}" y="${y + th}" width="12" height="${262 - y - th}"/>
+    <rect x="${x + tw - 22}" y="${y + th}" width="12" height="${262 - y - th}"/>`;
+
+  return `<svg width="${w}" height="${h}" viewBox="0 0 980 322" fill="${color}"
+    style="opacity:${opacity}">
+    <!-- parapet, bleeding the full width -->
+    <rect x="0" y="276" width="980" height="46"/>
+    <rect x="0" y="262" width="980" height="16" opacity=".7"/>
+
+    <!-- first cluster: three drums, uneven -->
+    ${tank(78, 152, 104, 108)}
+    ${tank(228, 118, 112, 142)}
+    ${tank(392, 168, 92, 92)}
+
+    <!-- solar collector, angled — the other thing on every roof here -->
+    <path d="M508 212 l112-36 v22 l-112 36 z"/>
+    <rect x="512" y="232" width="10" height="30"/><rect x="602" y="206" width="10" height="56"/>
+
+    <!-- second cluster, further along the roof, so the band has rhythm rather
+         than one group and then emptiness -->
+    ${tank(668, 160, 96, 100)}
+    ${tank(800, 134, 104, 126)}
+
+    <!-- the stair head — every roof is reached through one -->
+    <rect x="556" y="196" width="86" height="66" opacity=".0"/>
+    <path d="M916 262 v-58 h58 v58 z"/>
+    <path d="M916 204 h58 l-10-16 h-38 z"/>
+
+    <!-- satellite dish -->
+    <ellipse cx="44" cy="198" rx="30" ry="34" transform="rotate(-22 44 198)"/>
+    <rect x="40" y="224" width="9" height="38"/>
+
+    <!-- the pipe run that ties them together -->
+    <path d="M120 262 h120 M284 262 h116 M500 262 h180 M712 262 h96"
+      stroke="${color}" stroke-width="7"/>
+
+    <!-- a washing line, because a roof here is also where laundry goes -->
+    <path d="M188 128 C 320 154 470 152 596 132" stroke="${color}"
+      stroke-width="4" fill="none" opacity=".6"/>
+  </svg>`;
+}
+
+/**
+ * A minibus — «الكوستر», the thing this product competes with.
+ *
+ * Drawn deliberately blunter than `car()`: a flat front, a taller box, more
+ * windows. When it appears beside the saloon in a comparison the shapes have to
+ * be distinguishable at thumbnail size, or the comparison is a caption doing all
+ * the work.
+ */
+export function bus({ w = 560, color = INK, opacity = 1 } = {}) {
+  const h = Math.round(w * 0.46);
+  const windows = Array.from({ length: 5 }, (_, k) =>
+    `<rect x="${132 + k * 74}" y="64" width="58" height="56" rx="6" fill="#FFFFFF" opacity=".40"/>`).join('');
+
+  return `<svg width="${w}" height="${h}" viewBox="0 0 560 258" fill="${color}"
+    style="opacity:${opacity}">
+    <path d="M28 196 V70 c0-16 12-28 28-28 h420 c18 0 32 12 38 30 l20 62 v62
+      c0 8-6 14-14 14 h-42 a38 38 0 0 0-76 0 H188 a38 38 0 0 0-76 0 H42
+      c-8 0-14-6-14-14 z"/>
+    ${windows}
+    <!-- driver's screen, split by the A-pillar -->
+    <path d="M494 122 l-16-50 c-3-10 3-16 12-16 h6 l22 66 z" fill="#FFFFFF" opacity=".40"/>
+    <circle cx="150" cy="196" r="38"/><circle cx="150" cy="196" r="16" fill="#FFFFFF" opacity=".3"/>
+    <circle cx="426" cy="196" r="38"/><circle cx="426" cy="196" r="16" fill="#FFFFFF" opacity=".3"/>
+    <!-- destination board, blank: it never says where you actually want to go -->
+    <rect x="64" y="58" width="52" height="26" rx="4" fill="#FFFFFF" opacity=".28"/>
   </svg>`;
 }
 
