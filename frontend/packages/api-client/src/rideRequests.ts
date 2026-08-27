@@ -21,11 +21,21 @@ export interface CreateRideRequestInput {
   coupon_code?: string;
 }
 
+/**
+ * `pickup_lat`, `pickup_lng` and `university_id` are what make a quote possible.
+ *
+ * They read as optional and are typed that way because the endpoint accepts partial
+ * input, but omitting them now guarantees an `unpriced_corridor` answer with no fare:
+ * a seat price is a property of the (zone × university) pair, and there is no longer
+ * any distance fallback to synthesise one from.
+ */
 export interface EstimateInput {
   type?: RideType;
   riders?: number;
   capacity?: number;
-  base_fare_fils?: number;
+  pickup_lat?: number;
+  pickup_lng?: number;
+  university_id?: string;
 }
 
 /** Door-to-door pooling ride requests + fare estimate. */

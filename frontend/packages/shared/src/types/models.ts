@@ -338,10 +338,36 @@ export interface RideRequest {
   created_at?: string | null;
 }
 
-export interface FareQuote {
-  base_fare_fils: number;
+/**
+ * The answer to "what will this cost?" — which now has two shapes.
+ *
+ * `/estimate` no longer always returns a number. A corridor with no approved price in
+ * the (zone × university) matrix gets `unpriced_corridor` and NO fare fields at all,
+ * because the previous behaviour — falling back to a GPS distance calculation —
+ * invented a price nobody had approved and that changed with where the rider dropped
+ * their pin.
+ *
+ * Modelled as a discriminated union rather than making the fields optional, so the
+ * compiler forces callers to handle the uncovered case. With optional fields, reading
+ * `quote.fare_fils` on an uncovered corridor silently yields `undefined` and the price
+ * simply renders blank — which is exactly the bug this shape prevents.
+ */
+export type FareQuote = PricedFareQuote | UnpricedFareQuote;
+
+/** A corridor we serve, at a published price. */
+export interface PricedFareQuote {
+  pricing_source: 'zone_matrix';
+  /** Which published distance band the price came from. Provenance, not formula. */
+  band: string;
+  tariff_version: string;
+  is_solo: boolean;
   express_fee_fils: number;
-  surge_multiplier: number;
+  /** Whole-car price for this corridor, or null if the row has none recorded. */
+  solo_fare_fils: number | null;
+  zone_id: string;
+  in_coverage?: boolean;
+  /** True when fewer riders than min-fill, i.e. the captain guarantee may apply. */
+  below_min_fill: boolean;
   fare_fils: number;
   commission_fils: number;
   captain_share_fils: number;
@@ -349,9 +375,20 @@ export interface FareQuote {
   capacity: number;
   expected_total_fils: number;
   expected_captain_earnings_fils: number;
-  below_min_fill: boolean;
 }
 
+/**
+ * A corridor with no approved price yet. Deliberately carries no fare fields.
+ *
+ * The honest answer to «بكم؟» when the tariff for this route has not been approved is
+ * "we haven't reached this area yet" — not a plausible-looking number. A quoted fare
+ * is a promise, and this is a promise we decline to make rather than improvise.
+ */
+export interface UnpricedFareQuote {
+  pricing_source: 'unpriced_corridor';
+  in_coverage: false;
+  tariff_version: string;
+}
 
 
 // ── Support & Complaints (Phase 6) ───────────────────────────────────

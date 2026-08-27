@@ -56,31 +56,21 @@ return [
 
     // Default per-seat fare for pooled (door-to-door) rides, in fils.
     // Used as a fallback when no GPS distance is available.
-    'default_fare_fils' => (int) env('RAFEEQ_DEFAULT_FARE_FILS', 1000),
 
     // ── Distance-based pricing (Phase 3) — money in fils ────────────────────
     // Opening fare ("meter drop") added to every distance-priced ride.
-    'base_fare_fils' => (int) env('RAFEEQ_BASE_FARE_FILS', 300),
     // Per-kilometre rate (GPS/Haversine distance pickup → destination).
-    'per_km_fils' => (int) env('RAFEEQ_PER_KM_FILS', 250),
     // Per-minute rate (estimated from distance / avg speed unless provided).
-    'per_min_fils' => (int) env('RAFEEQ_PER_MIN_FILS', 20),
     // Hard floor: no distance-priced ride is ever charged below this.
-    'min_fare_fils' => (int) env('RAFEEQ_MIN_FARE_FILS', 1000),
     // Night tariff multiplier applied from `night_start_hour` onward.
-    'night_multiplier' => (float) env('RAFEEQ_NIGHT_MULTIPLIER', 1.25),
-    'night_start_hour' => (int) env('RAFEEQ_NIGHT_START_HOUR', 21),
     // Average urban speed (km/h) used to estimate trip minutes from distance.
-    'avg_speed_kmh' => (int) env('RAFEEQ_AVG_SPEED_KMH', 30),
 
     // Express surcharge in fils.
-    'express_fee_fils' => (int) env('RAFEEQ_EXPRESS_FEE_FILS', 1500),
 
     // Empty-seat economics: minimum riders before a pooled trip is "full enough".
     'min_fill_riders' => (int) env('RAFEEQ_MIN_FILL_RIDERS', 3),
 
     // Fair cap on dynamic surge applied to under-filled pooled trips.
-    'max_surge_multiplier' => (float) env('RAFEEQ_MAX_SURGE_MULTIPLIER', 1.5),
 
     // ── GPS anti-fraud thresholds ───────────────────────────────────────────
     // Max distance (m) allowed between the captain and a rider's pickup at the
@@ -106,6 +96,51 @@ return [
      * published 30-day window from an environment variable — a promise that can be
      * changed without a code review, a test, or a document update is not a promise.
      */
+
+    /*
+     * ── Pricing ──────────────────────────────────────────────────────────────
+     *
+     * The TARIFF itself is NOT here. Six bands with a seat price and a whole-car
+     * price live in `Modules\Matching\Data\Tariff`, versioned, because the
+     * regulator approves a tariff and an env var must not be able to change one
+     * (roadmap decision 17: «التعرفة بيانات لا كود»).
+     *
+     * Deleted in phase 5, and each deletion matters:
+     *   per_km_fils · per_min_fils · avg_speed_kmh — distance/time pricing made
+     *     the fare unquotable in advance, which is the product.
+     *   night_multiplier · night_start_hour — charging above the approved tariff
+     *     is a regulatory offence in Jordan (decision 18).
+     *   max_surge_multiplier — surge charged the RIDER for our failure to fill a
+     *     car. The captain is protected by the guarantee below instead.
+     */
+
+    // Priority surcharge for an express (urgent) request. NOT surge: it is a
+    // published fee for a different product, chosen by the rider up front.
+    'express_fee_fils' => (int) env('RAFEEQ_EXPRESS_FEE_FILS', 1500),
+
+    // Fallback seat price when a corridor has no approved matrix row yet.
+    'default_fare_fils' => (int) env('RAFEEQ_DEFAULT_FARE_FILS', 1500),
+
+    // Riders below which a car is not worth a captain's time. Drives the
+    // aggregation window and the guarantee — never the price.
+    'min_fill_riders' => (int) env('RAFEEQ_MIN_FILL_RIDERS', 3),
+
+    /*
+     * ── Captain minimum guarantee ────────────────────────────────────────────
+     * Paid out of OUR commission when a car dispatches under-filled. Capped three
+     * ways (off-peak only, daily cap, below min-fill) because PRICING.md §3 shows
+     * a one-rider trip costs the platform 2.000 net — «الدعم وحده يُفلس المنصّة».
+     */
+    'captain_guarantee_fils' => (int) env('RAFEEQ_CAPTAIN_GUARANTEE_FILS', 3500),
+    'captain_guarantee_daily_cap' => (int) env('RAFEEQ_CAPTAIN_GUARANTEE_DAILY_CAP', 2),
+
+    /*
+     * ── Aggregation window (phase 5.2 — not yet wired into MatchingService) ──
+     * A full car dispatches immediately regardless; these only bound how long an
+     * under-filled one waits.
+     */
+    'match_window_peak_minutes' => (int) env('RAFEEQ_MATCH_WINDOW_PEAK_MIN', 8),
+    'match_window_offpeak_minutes' => (int) env('RAFEEQ_MATCH_WINDOW_OFFPEAK_MIN', 18),
 
     // ── Operations ──────────────────────────────────────────────────────────
     // Failed jobs in the last 24h before `rafeeq:worker-alive --alert-on-failures`

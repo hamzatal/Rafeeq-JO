@@ -17,6 +17,16 @@ enum WalletTxnType: string
     case SubscriptionPayment = 'subscription_payment'; // - paying for a subscription from balance
     case Adjustment = 'adjustment';  // +/- manual admin correction
 
+    /**
+     * The captain minimum guarantee: + to the captain, − from the platform treasury.
+     *
+     * Its own type rather than a `Payout` with a particular description, because the
+     * daily cap is enforced by COUNTING these entries. Counting by description means
+     * matching an Arabic string, and the day someone edits that string for clarity
+     * the cap silently stops applying and every under-filled trip draws a subsidy.
+     */
+    case Guarantee = 'guarantee';
+
     public function labelAr(): string
     {
         return match ($this) {
@@ -28,6 +38,7 @@ enum WalletTxnType: string
             self::RewardRedemption => 'استبدال نقاط',
             self::SubscriptionPayment => 'دفع اشتراك',
             self::Adjustment => 'تسوية',
+            self::Guarantee => 'ضمان الحدّ الأدنى',
         };
     }
 
@@ -42,6 +53,7 @@ enum WalletTxnType: string
             self::RewardRedemption => 'Points redemption',
             self::SubscriptionPayment => 'Subscription payment',
             self::Adjustment => 'Adjustment',
+            self::Guarantee => 'Minimum guarantee',
         };
     }
 

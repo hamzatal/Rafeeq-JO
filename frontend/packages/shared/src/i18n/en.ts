@@ -469,7 +469,7 @@ export const en: Translations = {
     type: 'Ride type',
     estimate: 'Estimate fare',
     estimatedFare: 'Estimated fare',
-    surge: 'Surge multiplier',
+    notCovered: "We haven't reached your area yet. We open areas as demand grows — try a pickup point closer to a served university.",
     submit: 'Send request',
     created: 'Request created. Matching you with nearby students.',
     myRequests: 'My requests',

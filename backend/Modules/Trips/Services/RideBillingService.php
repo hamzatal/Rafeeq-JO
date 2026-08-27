@@ -140,7 +140,8 @@ class RideBillingService extends BaseService
             if ($method === PaymentMethod::Cash) {
                 // The captain has the whole fare in hand, so the platform is owed its
                 // commission. Taken from their balance where it covers it, and recorded
-                // as debt where it does not — see CaptainDebtService.
+                // as debt where it does not — see CaptainDebtService, which credits the
+                // treasury as and when the money is actually collected.
                 $this->debts->chargeCommission($captainWallet, $commission - $discount, $trip->id);
             } else {
                 $this->wallets->credit(
@@ -150,6 +151,30 @@ class RideBillingService extends BaseService
                     'أرباح رحلة',
                     $trip->id,
                 );
+
+                /*
+                 * The commission now lands somewhere.
+                 *
+                 * It used to be the arithmetic gap between the student's debit and the
+                 * captain's credit — 225 fils on a band-C seat that was never written
+                 * to any account. Revenue was therefore unrecorded, the ledger did not
+                 * sum to zero, and the captain guarantee had nothing to be funded from.
+                 *
+                 * Net of the coupon: a platform-funded discount is the platform
+                 * forgoing its own margin, so it reduces what the treasury takes rather
+                 * than what the captain earns. When the discount equals the commission
+                 * this is zero and no entry is written.
+                 */
+                $earned = max(0, $commission - $discount);
+                if ($earned > 0) {
+                    $this->wallets->credit(
+                        $this->wallets->platform(),
+                        $earned,
+                        WalletTxnType::Commission,
+                        'عمولة رحلة',
+                        $trip->id,
+                    );
+                }
 
                 // Earnings settle any outstanding cash commission automatically, so a
                 // captain working a mix of methods never has to think about the debt.

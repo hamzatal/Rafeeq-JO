@@ -8,7 +8,8 @@ use Rafeeq\Shared\Traits\HasUuid;
 
 /**
  * @property string $id
- * @property string $user_id
+ * @property string $kind 'user' for a person's wallet, 'platform' for the treasury.
+ * @property string|null $user_id Null on the platform treasury — it is not a person.
  * @property int $balance_fils
  * @property int $held_fils
  * @property int $debt_fils What this wallet's owner owes the platform. Always >= 0.
@@ -18,7 +19,21 @@ class Wallet extends Model
 {
     use HasUuid;
 
-    protected $fillable = ['user_id', 'balance_fils', 'held_fils', 'debt_fils', 'currency'];
+    /** An ordinary person's wallet. */
+    public const KIND_USER = 'user';
+
+    /**
+     * The single platform treasury.
+     *
+     * Commission arrives here and subsidies leave from here, so the ledger balances
+     * and the guarantee has a funded source. Because `WalletService::apply()` refuses
+     * to take any balance negative, the platform cannot subsidise more than it has
+     * earned — the bankruptcy risk in PRICING.md §3 is enforced by the ledger rather
+     * than by policy.
+     */
+    public const KIND_PLATFORM = 'platform';
+
+    protected $fillable = ['kind', 'user_id', 'balance_fils', 'held_fils', 'debt_fils', 'currency'];
 
     protected function casts(): array
     {
@@ -56,6 +71,11 @@ class Wallet extends Model
     public function debtFils(): int
     {
         return (int) $this->debt_fils;
+    }
+
+    public function isPlatform(): bool
+    {
+        return $this->kind === self::KIND_PLATFORM;
     }
 
     /** Is the owner over the debt ceiling that blocks accepting new trips? */

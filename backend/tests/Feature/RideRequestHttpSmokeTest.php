@@ -7,6 +7,7 @@ use Rafeeq\Core\Permissions\Models\Role;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Modules\Zones\Models\ZoneUniversityPrice;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
 use Tests\TestCase;
@@ -29,9 +30,16 @@ class RideRequestHttpSmokeTest extends TestCase
         $student->assignRole('student');
 
         $uni = University::create(['name_ar' => 'ج', 'name_en' => 'U', 'code' => 'U1', 'city' => 'Irbid', 'lat' => 32.49, 'lng' => 35.98, 'is_active' => true]);
-        Zone::create([
+        $zone = Zone::create([
             'name_ar' => 'م', 'name_en' => 'Z', 'city' => 'Irbid',
             'center_lat' => 32.56, 'center_lng' => 35.85, 'radius_km' => 20, 'is_active' => true,
+        ]);
+        // An approved price for this corridor. Coverage alone is not enough to sell a
+        // seat — a zone with no tariff to this university is refused.
+        ZoneUniversityPrice::create([
+            'zone_id' => $zone->id, 'university_id' => $uni->id,
+            'band' => 'C', 'fare_fils' => 1500, 'solo_fare_fils' => 5250,
+            'is_active' => true,
         ]);
 
         // Create (with coupon_code + direction — the fields that broke before).

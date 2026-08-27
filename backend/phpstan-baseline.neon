@@ -355,18 +355,6 @@ parameters:
 			path: Modules/Matching/Services/MatchingService.php
 
 		-
-			message: '#^Instanceof between Illuminate\\Support\\Carbon and DateTimeInterface will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: Modules/Matching/Services/MatchingService.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between float and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 2
-			path: Modules/Matching/Services/MatchingService.php
-
-		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\Notifications\\Resources\\NotificationResource\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 1

@@ -8,33 +8,37 @@ import { Skeleton } from '../../../src/components/Skeleton';
 
 type FieldKey = keyof PricingSettings;
 
-const GROUPS: { titleKey: string; fields: { key: FieldKey; step?: string }[] }[] = [
+/**
+ * Four knobs, down from thirteen.
+ *
+ * The "distance" group (opening fare, per-km, per-minute, minimum fare, average
+ * speed) and half the "pooling" group (night multiplier, night start hour, max surge)
+ * are gone, because the things they controlled are gone. The fare is read from the
+ * (zone × university) matrix, so there is no meter to calibrate; and surge and the
+ * night multiplier both charged above the approved tariff.
+ *
+ * They were not merely hidden. A form field that posts a value the API discards is a
+ * trap: an admin will set it, watch it save, and plan a month of margin around a
+ * number that never reached the fare.
+ */
+const GROUPS: { titleKey: string; hintKey?: string; fields: { key: FieldKey; step?: string }[] }[] = [
   {
     titleKey: 'pricing.groupCommission',
-    fields: [{ key: 'commission_percent' }, { key: 'default_fare_fils' }, { key: 'express_fee_fils' }],
-  },
-  {
-    titleKey: 'pricing.groupDistance',
-    fields: [
-      { key: 'base_fare_fils' },
-      { key: 'per_km_fils' },
-      { key: 'per_min_fils' },
-      { key: 'min_fare_fils' },
-      { key: 'avg_speed_kmh' },
-    ],
+    fields: [{ key: 'commission_percent' }, { key: 'default_fare_fils' }],
   },
   {
     titleKey: 'pricing.groupPooling',
-    fields: [
-      { key: 'night_multiplier', step: '0.05' },
-      { key: 'night_start_hour' },
-      { key: 'min_fill_riders' },
-      { key: 'max_surge_multiplier', step: '0.05' },
-    ],
+    hintKey: 'pricing.groupPooling_hint',
+    fields: [{ key: 'express_fee_fils' }, { key: 'min_fill_riders' }],
   },
 ];
 
-const COMMISSION_HINT: Partial<Record<FieldKey, string>> = { commission_percent: 'pricing.commission_percent_hint' };
+const HINTS: Partial<Record<FieldKey, string>> = {
+  commission_percent: 'pricing.commission_percent_hint',
+  default_fare_fils: 'pricing.default_fare_fils_hint',
+  express_fee_fils: 'pricing.express_fee_fils_hint',
+  min_fill_riders: 'pricing.min_fill_riders_hint',
+};
 
 export default function PricingPage() {
   const { t } = useT();
@@ -90,7 +94,17 @@ export default function PricingPage() {
     <div>
       <h1 className="text-2xl font-extrabold surface-text mb-1">{t('pricing.title')}</h1>
       <p className="text-sm text-muted mb-1">{t('pricing.intro')}</p>
-      <p className="text-xs text-muted mb-6">{t('pricing.filsHint')}</p>
+      <p className="text-xs text-muted mb-4">{t('pricing.filsHint')}</p>
+
+      {/*
+        Says out loud where a seat price actually comes from. Without this, the
+        obvious reading of a page titled "Pricing" holding four fields is that these
+        four fields set the fares — and then nobody finds the fare matrix.
+      */}
+      <div className="card mb-6 border-s-4 border-s-brand-500">
+        <p className="text-sm surface-text font-semibold mb-1">{t('pricing.tariffNotice')}</p>
+        <p className="text-xs text-muted">{t('pricing.tariffNotice_body')}</p>
+      </div>
 
       {loading || !form ? (
         <div className="card space-y-3">{Array.from({ length: 8 }).map((_, i) => (<Skeleton key={i} className="h-10 w-full" />))}</div>
@@ -98,8 +112,9 @@ export default function PricingPage() {
         <form onSubmit={save}>
           {GROUPS.map((g) => (
             <div key={g.titleKey} className="card mb-4">
-              <h2 className="font-bold surface-text mb-4">{t(g.titleKey)}</h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <h2 className="font-bold surface-text mb-1">{t(g.titleKey)}</h2>
+              {g.hintKey && <p className="text-xs text-muted mb-4">{t(g.hintKey)}</p>}
+              <div className={`grid gap-4 sm:grid-cols-2 ${g.hintKey ? '' : 'mt-4'}`}>
                 {g.fields.map(({ key, step }) => (
                   <label key={key} className="block">
                     <span className="text-xs text-muted">{t(`pricing.${key}`)}</span>
@@ -111,8 +126,8 @@ export default function PricingPage() {
                       value={String(form[key])}
                       onChange={(e) => setField(key, e.target.value)}
                     />
-                    {COMMISSION_HINT[key] && (
-                      <span className="mt-1 block text-[11px] text-muted">{t(COMMISSION_HINT[key]!)}</span>
+                    {HINTS[key] && (
+                      <span className="mt-1 block text-[11px] text-muted">{t(HINTS[key]!)}</span>
                     )}
                   </label>
                 ))}
