@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Matching\Data\Tariff;
 use Rafeeq\Modules\Matching\Services\MatchingService;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Modules\Zones\Models\ZoneUniversityPrice;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\RideType;
 use Rafeeq\Shared\Enums\UserStatus;
@@ -16,8 +18,14 @@ use Rafeeq\Shared\Enums\UserType;
 use Tests\TestCase;
 
 /**
- * Verifies the pooling engine prices trips through PricingService and gives
+ * Verifies the pooling engine prices trips from the TARIFF MATRIX and gives
  * Express riders priority + a private (single-rider) car with the surcharge.
+ *
+ * These assertions used to read `surge_multiplier === 1.3` and `fare_fils === 2800`
+ * for the single express rider — a 30% penalty charged to the one rider who could
+ * not be pooled. Surge is deleted (see PricingService): a rider is not billed for
+ * the platform's failure to fill a car. What remains is a lookup plus a flat fee,
+ * so the same corridor quotes the same number whether one rider or four turn up.
  */
 class MatchingExpressTest extends TestCase
 {
@@ -36,6 +44,14 @@ class MatchingExpressTest extends TestCase
         $this->zone = Zone::create([
             'name_ar' => 'منطقة', 'name_en' => 'Zone', 'city' => 'Irbid',
             'center_lat' => 32.5, 'center_lng' => 35.85, 'radius_km' => 5, 'is_active' => true,
+        ]);
+
+        // Pricing and express separation are the subject here. The cars below are
+        // deliberately partial, so the aggregation window would correctly hold them —
+        // see MatchingWindowTest for that behaviour on its own.
+        config([
+            'rafeeq.match_window_peak_minutes' => 0,
+            'rafeeq.match_window_offpeak_minutes' => 0,
         ]);
     }
 
@@ -70,20 +86,84 @@ class MatchingExpressTest extends TestCase
         $created = app(MatchingService::class)->formTrips();
         $this->assertSame(2, $created, 'Express and scheduled must not be pooled together.');
 
+        // This corridor has no matrix row, so the seat falls to the configured
+        // default rather than to a distance calculation.
+        $default = (int) config('rafeeq.default_fare_fils');
+        $fee = (int) config('rafeeq.express_fee_fils');
+
         $express = Trip::where('is_express', true)->first();
         $this->assertNotNull($express);
         $this->assertSame(1, $express->passengers()->count(), 'Express may be a private single-rider car.');
-        $this->assertSame(1500, $express->express_fee_fils);
-        // single-rider express surge: base 1000 * 1.3 + 1500 fee = 2800
-        $this->assertSame(1.3, (float) $express->surge_multiplier);
-        $this->assertSame(2800, $express->fare_fils);
+        $this->assertSame($fee, $express->express_fee_fils);
+        $this->assertSame($default, $express->base_fare_fils);
+        $this->assertSame($default + $fee, $express->fare_fils);
+        $this->assertSame(1.0, (float) $express->surge_multiplier, 'Surge is retired; the column is pinned at 1.00.');
 
         $scheduled = Trip::where('is_express', false)->first();
         $this->assertNotNull($scheduled);
         $this->assertSame(2, $scheduled->passengers()->count());
         $this->assertSame(0, $scheduled->express_fee_fils);
-        // 2 of 3 min-fill => surge 1.25 => 1250, no express fee
-        $this->assertSame(1.25, (float) $scheduled->surge_multiplier);
-        $this->assertSame(1250, $scheduled->fare_fils);
+        $this->assertSame($default, $scheduled->fare_fils);
+        $this->assertSame(1.0, (float) $scheduled->surge_multiplier);
+    }
+
+    /**
+     * The point of the rewrite: an underfilled car costs the rider nothing extra.
+     *
+     * One scheduled rider and four scheduled riders on the same corridor must be
+     * quoted the identical seat price. Under the old surge rule the lone rider paid
+     * 1.3× and the full car paid 1.0×, so the cheapest way to ride was to hope
+     * strangers showed up. That is the bug this asserts is gone.
+     */
+    public function test_seat_price_does_not_depend_on_how_full_the_car_is(): void
+    {
+        $this->request(false, 10);
+        app(MatchingService::class)->formTrips();
+        $alone = Trip::where('is_express', false)->sole();
+        // Read both numbers BEFORE clearing the corridor: deleting the trip cascades
+        // to its passengers, so a lazily-counted relation would report zero here.
+        $aloneRiders = $alone->passengers()->count();
+        $aloneFare = $alone->fare_fils;
+
+        Trip::query()->delete();
+        RideRequest::query()->delete();
+
+        for ($i = 20; $i < 24; $i++) {
+            $this->request(false, $i);
+        }
+        app(MatchingService::class)->formTrips();
+        $full = Trip::where('is_express', false)->sole();
+
+        $this->assertSame(1, $aloneRiders);
+        $this->assertSame(4, $full->passengers()->count());
+        $this->assertSame($aloneFare, $full->fare_fils, 'A half-empty car must not cost the rider more.');
+    }
+
+    /**
+     * When the corridor IS in the matrix, the matrix wins over the config default.
+     *
+     * This is the whole premise of «التعرفة بيانات لا كود»: an admin holding a
+     * corridor at an approved exception must see that exception charged, not a
+     * number the code preferred.
+     */
+    public function test_matrix_row_overrides_the_default_fare(): void
+    {
+        ZoneUniversityPrice::create([
+            'zone_id' => $this->zone->id,
+            'university_id' => $this->uni->id,
+            'band' => 'E',
+            'fare_fils' => 2000,
+            'solo_fare_fils' => 7000,
+            'tariff_version' => Tariff::VERSION,
+            'is_active' => true,
+        ]);
+
+        $this->request(false, 30);
+        app(MatchingService::class)->formTrips();
+
+        $trip = Trip::where('is_express', false)->sole();
+        $this->assertSame(2000, $trip->fare_fils);
+        $this->assertSame(2000, $trip->base_fare_fils);
+        $this->assertNotSame((int) config('rafeeq.default_fare_fils'), $trip->fare_fils);
     }
 }

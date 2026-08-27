@@ -8,6 +8,7 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
+use Rafeeq\Modules\Zones\Services\ZonePricingService;
 use Rafeeq\Modules\Zones\Services\ZoneService;
 use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\RideDirection;
@@ -18,6 +19,7 @@ class RideRequestService extends BaseService
 {
     public function __construct(
         private readonly ZoneService $zones,
+        private readonly ZonePricingService $zonePricing,
         private readonly AuditLogger $audit,
     ) {}
 
@@ -36,6 +38,28 @@ class RideRequestService extends BaseService
             throw new BusinessRuleException(
                 'موقع الانطلاق خارج نطاق الخدمة الحالي (إربد). اختر نقطة قريبة من إحدى الجامعات المخدومة.',
                 'OUT_OF_COVERAGE',
+            );
+        }
+
+        /*
+         * Being inside a zone is not the same as that zone having a price to this
+         * university, and the two were being conflated.
+         *
+         * `/estimate` refuses to quote a corridor with no approved matrix row — it
+         * answers `in_coverage: false` rather than inventing a number. But creation
+         * only checked the zone, so a student could be told "we don't serve this
+         * route yet" and then successfully request it anyway, at which point the
+         * matcher priced the trip from `default_fare_fils`. That is precisely the
+         * fare-nobody-approved that deleting the distance fallback was meant to
+         * eliminate; it had simply moved downstream where nobody would look for it.
+         *
+         * The same refusal at both entry points. A corridor without an approved
+         * tariff is not a corridor we can sell a seat on.
+         */
+        if (! $this->zonePricing->fareForZone($zone->id, (string) $data['university_id'])) {
+            throw new BusinessRuleException(
+                'ما وصلنا لهذه المنطقة بعد — بنفتح المناطق حسب الطلب.',
+                'UNPRICED_CORRIDOR',
             );
         }
 

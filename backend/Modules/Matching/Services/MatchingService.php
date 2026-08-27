@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Services\BaseService;
-use Rafeeq\Core\Support\Geo;
+use Rafeeq\Core\Support\Clock;
+use Rafeeq\Modules\Matching\Data\PeakWindows;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Universities\Models\University;
+use Rafeeq\Modules\Zones\Services\ZonePricingService;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
@@ -22,16 +24,24 @@ use Rafeeq\Shared\Enums\TripStatus;
  * Express (urgent) requests are matched with PRIORITY and separately from
  * scheduled ones: they may form a private single-rider trip and always carry
  * the express surcharge. Fares are computed by PricingService (base + express
- * fee + bounded surge for under-filled cars) and persisted on the trip so the
+ * fee) and persisted on the trip so the
  * captain sees real expected earnings before accepting.
  */
 class MatchingService extends BaseService
 {
     private const SEAT_CAPACITY = 4; // private car
 
+    /**
+     * No PricingService here, deliberately.
+     *
+     * It used to be injected to CALCULATE a fare from distance and duration. There is
+     * nothing left for it to calculate: the seat price is a lookup in the (zone ×
+     * university) matrix and the express fee is a flat configured amount. The matcher
+     * groups riders; it does not price them.
+     */
     public function __construct(
         private readonly AuditLogger $audit,
-        private readonly PricingService $pricing,
+        private readonly ZonePricingService $zonePricing,
     ) {}
 
     /**
@@ -154,9 +164,40 @@ class MatchingService extends BaseService
                 return $created;
             }
 
+            $formed = 0;
             foreach ($requests->chunk(self::SEAT_CAPACITY) as $chunk) {
-                $this->createPooledTrip($chunk->values(), $isExpress, $university);
+                $group = $chunk->values();
+
+                /*
+                 * 5.2 — the aggregation window, which is what replaced surge.
+                 *
+                 * A partial car is HELD for a few minutes so more riders in the same
+                 * corridor can join it. This is the honest fix for the problem surge
+                 * was papering over: an under-filled car does not pay a captain, and
+                 * the two ways to respond are to charge the rider more or to fill the
+                 * car. Filling the car is the product.
+                 *
+                 * A full car never waits — there is nothing left to gain.
+                 */
+                if (! $this->readyToDispatch($group, $isExpress)) {
+                    // Groups are ordered by desired_time, so every later group departs
+                    // no earlier than this one and is therefore also still waiting.
+                    break;
+                }
+
+                $this->createPooledTrip($group, $isExpress, $university);
                 $created++;
+                $formed++;
+            }
+
+            /*
+             * Nothing formed means every remaining group is inside its window. Asking
+             * again in this run would return the same rows and hold them again — and
+             * with a full batch of held riders the pass counter would spin to its cap
+             * doing no work and then log a false "corridor not drained" warning.
+             */
+            if ($formed === 0) {
+                return $created;
             }
 
             // Fewer than a full batch means the corridor is drained; asking again
@@ -179,33 +220,97 @@ class MatchingService extends BaseService
     }
 
     /**
+     * May this group be dispatched now, or should it wait for more riders?
+     *
+     * ── The three ways a group becomes ready ───────────────────────────────────
+     *
+     * **It is full.** Four riders is a car. Waiting longer cannot improve it and
+     * only delays everyone in it.
+     *
+     * **Its departure is due.** Holding past the time the students asked to travel
+     * would make them late, which no amount of pooling efficiency justifies. This is
+     * the cap that makes the window safe: the wait can never push someone past their
+     * own stated departure.
+     *
+     * **It has waited its window.** Measured from when the EARLIEST rider asked, so
+     * the person who has been waiting longest sets the deadline rather than being
+     * repeatedly reset by newcomers joining the group.
+     *
+     * ── Why express never waits ────────────────────────────────────────────────
+     *
+     * Express riders pay a surcharge (`express_fee_fils`) explicitly to skip this.
+     * Charging for immediacy and then making them wait anyway would be taking money
+     * for nothing.
+     *
+     * ── Peak vs off-peak ───────────────────────────────────────────────────────
+     *
+     * At peak the queue fills quickly, so a short window (8 min) already yields a
+     * full car and a longer one would just be dead time. Off-peak, demand trickles,
+     * so the wait is longer (18 min) because that is the only chance of pooling at
+     * all — and off-peak is exactly where the guarantee has to pay out when it
+     * fails. The window is judged against the DEPARTURE hour, not the current hour:
+     * a 07:30 trip being matched at 07:10 is a peak trip.
+     *
+     * @param  Collection<int, RideRequest>  $group
+     */
+    private function readyToDispatch(Collection $group, bool $isExpress): bool
+    {
+        if ($isExpress || $group->count() >= self::SEAT_CAPACITY) {
+            return true;
+        }
+
+        $now = Clock::now();
+
+        // Ordered by desired_time, so the first is the earliest departure.
+        // `desired_time` is NOT NULL, which is what makes it safe to treat as the
+        // deadline: without it there would be no bound on the wait at all.
+        $departure = $group->first()->desired_time;
+        if ($now->greaterThanOrEqualTo($departure)) {
+            return true;
+        }
+
+        $waitedFrom = $group->pluck('created_at')->filter()->min();
+        if ($waitedFrom === null) {
+            // No timestamp to measure a wait from. Dispatch rather than hold riders
+            // forever on missing data — a rider stuck pending is worse than a car
+            // that left one seat short.
+            return true;
+        }
+
+        $minutes = PeakWindows::windowMinutes($departure);
+
+        return $now->greaterThanOrEqualTo(Clock::now()->setTimestamp($waitedFrom->getTimestamp())->addMinutes($minutes));
+    }
+
+    /**
      * @param  Collection<int, RideRequest>  $requests
      * @param  University|null  $university  Resolved by the caller once per corridor.
      */
     private function createPooledTrip(Collection $requests, bool $isExpress, ?University $university = null): Trip
     {
-        return $this->transaction(function () use ($requests, $isExpress, $university) {
+        return $this->transaction(function () use ($requests, $isExpress) {
             $first = $requests->first();
             $riders = $requests->count();
 
-            // Distance-based pricing: measure pickup → university (a fair
-            // representative for the pooled group, who share zone + university).
-            // Falls back to the flat base when coordinates are unavailable.
-            $distanceKm = null;
-            $uni = $university ?? ($first->university_id ? University::find($first->university_id) : null);
-            if ($uni && $uni->lat !== null && $uni->lng !== null && $first->pickup_lat !== null && $first->pickup_lng !== null) {
-                $distanceKm = Geo::haversineKm((float) $first->pickup_lat, (float) $first->pickup_lng, (float) $uni->lat, (float) $uni->lng);
-            }
+            /*
+             * The fare is a LOOKUP, not a calculation.
+             *
+             * This block used to measure pickup → university with haversine and
+             * price the seat from distance + duration + a night multiplier + a
+             * surge multiplier. All of that is gone (see PricingService): distance
+             * places a corridor into a band once, when the matrix is seeded, and
+             * after that the corridor has an approved price. Two riders on the
+             * same corridor quoted different fares because their pickup pins were
+             * 400m apart is indefensible.
+             */
+            $band = $this->zonePricing->bandForZone($first->zone_id, $first->university_id);
+            $seatFare = $this->zonePricing->fareForZone($first->zone_id, $first->university_id)
+                ?? (int) config('rafeeq.default_fare_fils', 1500);
 
-            // Compute the real per-seat fare for this pooled car.
-            $quote = $this->pricing->quote(
-                baseFareFils: $this->pricing->baseFareFils(),
-                isExpress: $isExpress,
-                riders: $riders,
-                capacity: self::SEAT_CAPACITY,
-                distanceKm: $distanceKm,
-                when: $first->desired_time instanceof \DateTimeInterface ? $first->desired_time : null,
-            );
+            // The matrix price wins over the band's default: a corridor may be held
+            // at an approved exception, and that approval IS the tariff.
+            $express = $isExpress ? (int) config('rafeeq.express_fee_fils', 1500) : 0;
+            $fare = $seatFare + $express;
 
             $trip = Trip::create([
                 'type' => 'pooled',
@@ -213,10 +318,12 @@ class MatchingService extends BaseService
                 'is_express' => $isExpress,
                 'zone_id' => $first->zone_id,
                 'university_id' => $first->university_id,
-                'base_fare_fils' => $quote['base_fare_fils'],
-                'express_fee_fils' => $quote['express_fee_fils'],
-                'surge_multiplier' => $quote['surge_multiplier'],
-                'fare_fils' => $quote['fare_fils'],
+                'base_fare_fils' => $seatFare,
+                'express_fee_fils' => $express,
+                // Always 1.00 now. The column stays so historical trips keep
+                // their record; nothing writes anything else to it any more.
+                'surge_multiplier' => 1.0,
+                'fare_fils' => $fare,
                 'scheduled_at' => $first->desired_time,
                 'status' => TripStatus::PendingDriver,
                 'capacity' => self::SEAT_CAPACITY,
@@ -250,8 +357,8 @@ class MatchingService extends BaseService
             $this->audit->log('matching.trip_formed', auditable: $trip, changes: [
                 'passengers' => $riders,
                 'is_express' => $isExpress,
-                'fare_fils' => $quote['fare_fils'],
-                'surge_multiplier' => $quote['surge_multiplier'],
+                'fare_fils' => $fare,
+                'band' => $band,
             ]);
 
             return $trip;

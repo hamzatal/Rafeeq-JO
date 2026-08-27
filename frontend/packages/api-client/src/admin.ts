@@ -318,20 +318,30 @@ export interface CliqSettings {
   bank_name: string | null;
 }
 
-/** Editable pricing knobs (money in fils). Mirrors SettingService::PRICING_KEYS. */
+/**
+ * Editable pricing knobs (money in fils). Mirrors SettingService::PRICING_KEYS.
+ *
+ * Nine knobs were removed here, and the removal is the point. `base_fare_fils`,
+ * `per_km_fils`, `per_min_fils`, `min_fare_fils` and `avg_speed_kmh` described a
+ * distance-and-duration meter; the fare is now a lookup in the (zone × university)
+ * matrix, so a per-km rate is a dial that moves nothing. `night_multiplier`,
+ * `night_start_hour` and `max_surge_multiplier` charged ABOVE the approved tariff —
+ * surge billed the rider for the platform's failure to fill a car, and a night
+ * multiplier is an unapproved tariff, which in Jordan risks the licence.
+ *
+ * They are deleted rather than hidden because an admin left with a dial that silently
+ * does nothing is worse than an admin with no dial: they will use it, believe it, and
+ * plan around it. The per-corridor prices live in the fare matrix screen instead,
+ * where each number is an approved figure attached to a real route.
+ */
 export interface PricingSettings {
   commission_percent: number;
+  /** Seat price used only when a corridor somehow has no approved matrix row. */
   default_fare_fils: number;
-  base_fare_fils: number;
-  per_km_fils: number;
-  per_min_fils: number;
-  min_fare_fils: number;
+  /** Flat surcharge for skipping the aggregation window. */
   express_fee_fils: number;
-  night_multiplier: number;
-  night_start_hour: number;
-  avg_speed_kmh: number;
+  /** Riders below which a car is under-filled and the captain guarantee applies. */
   min_fill_riders: number;
-  max_surge_multiplier: number;
 }
 
 /** A row of the unified (zone ↔ university) fare matrix. */

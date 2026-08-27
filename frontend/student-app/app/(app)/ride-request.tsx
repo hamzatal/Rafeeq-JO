@@ -51,6 +51,8 @@ export default function RideRequestScreen() {
   const [direction, setDirection] = useState<RideDirection>('to_university');
   const [selectedClass, setSelectedClass] = useState<ClassKey>('economical');
   const [fares, setFares] = useState<Record<ClassKey, number | null>>({ economical: null, family: null, plus: null });
+  /** Null until the first estimate answers; false means this corridor has no price. */
+  const [covered, setCovered] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -58,6 +60,21 @@ export default function RideRequestScreen() {
     void useMyLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /*
+   * Re-estimate whenever the corridor changes.
+   *
+   * A fare is a property of the (pickup zone × university) pair, so it cannot be
+   * asked for until both are known. This used to run once from `load()` with neither,
+   * which was survivable only while the API silently fell back to a distance
+   * calculation. That fallback is gone — an unpriced corridor now returns no number at
+   * all — so estimating before the location resolves would leave all three price cards
+   * permanently blank.
+   */
+  useEffect(() => {
+    void estimateClasses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng, universityId]);
 
   const load = async () => {
     try {
@@ -67,23 +84,35 @@ export default function RideRequestScreen() {
     } catch {
       /* silent */
     }
-    void estimateClasses();
   };
 
   const estimateClasses = async () => {
+    if (lat == null || lng == null || !universityId) return;
+
     const results = await Promise.all(
       CLASSES.map((c) =>
         api.rideRequests
-          .estimate({ type: c.type, riders: 1, capacity: c.capacity })
-          .then((q) => [c.key, q.fare_fils] as const)
+          .estimate({
+            type: c.type,
+            riders: 1,
+            capacity: c.capacity,
+            pickup_lat: lat,
+            pickup_lng: lng,
+            university_id: universityId,
+          })
+          // The union discriminant forces the uncovered branch to be handled: there is
+          // no `fare_fils` to read when the corridor has no approved price.
+          .then((q) => [c.key, q.pricing_source === 'zone_matrix' ? q.fare_fils : null] as const)
           .catch(() => [c.key, null] as const),
       ),
     );
+
     setFares((prev) => {
       const next = { ...prev };
       for (const [k, v] of results) next[k] = v;
       return next;
     });
+    setCovered(results.some(([, v]) => v != null));
   };
 
   const useMyLocation = async () => {
@@ -174,6 +203,18 @@ export default function RideRequestScreen() {
         <ScrollView contentContainerStyle={s.sheetContent} showsVerticalScrollIndicator={false}>
           <Text style={s.title}>{t('rideRequest.chooseClass')}</Text>
 
+          {/*
+            Say it plainly when we cannot serve this route yet.
+            Three cards reading "—" look like a loading failure or a bug, and the
+            student retries instead of learning that we have not opened their area.
+          */}
+          {covered === false && (
+            <View style={s.notice}>
+              <MaterialIcons name="info-outline" size={18} color={theme.colors.accent} />
+              <Text style={s.noticeText}>{t('rideRequest.notCovered')}</Text>
+            </View>
+          )}
+
           <View style={s.carList}>
             {CLASSES.map((c) => {
               const on = selectedClass === c.key;
@@ -262,6 +303,20 @@ const makeStyles = (t: AppTheme) =>
     handle: { alignSelf: 'center', width: 48, height: 6, borderRadius: 9999, backgroundColor: t.colors.border, opacity: 0.5, marginTop: 12, marginBottom: 4 },
     sheetContent: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 },
     title: { ...text.headlineMd, color: t.colors.text, textAlign: 'right', marginBottom: 24 },
+
+    // "We haven't reached your area yet" banner
+    notice: {
+      flexDirection: 'row-reverse',
+      alignItems: 'center',
+      gap: 10,
+      backgroundColor: t.colors.surfaceAlt,
+      borderColor: t.colors.border,
+      borderWidth: 1,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 20,
+    },
+    noticeText: { ...text.bodyMd, color: t.colors.textSecondary, textAlign: 'right', flex: 1, lineHeight: 22 },
 
     // Car cards
     carList: { gap: 12, marginBottom: 24 },

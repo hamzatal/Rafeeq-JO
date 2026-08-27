@@ -14,8 +14,14 @@ use Rafeeq\Shared\Enums\UserType;
 use Tests\TestCase;
 
 /**
- * Unified (zone ↔ university) fare matrix: admin CRUD + fixed-fare resolution
- * in the student estimate, with fallback to distance pricing outside a zone.
+ * The unified (zone ↔ university) fare matrix: admin CRUD, and the matrix as the
+ * SOLE source of a fare.
+ *
+ * There is deliberately no distance fallback. A GPS-derived fare is a price nobody
+ * approved that changes with where the rider dropped their pin, so two neighbours on
+ * the same corridor get two numbers. An unpriced corridor is refused instead — at
+ * BOTH entry points, which is the subtle part: refusing to quote while still accepting
+ * the request just moves the invented price downstream into the matcher.
  */
 class ZoneUniversityPriceTest extends TestCase
 {
@@ -109,7 +115,18 @@ class ZoneUniversityPriceTest extends TestCase
         $res->assertJsonPath('data.zone_id', $zone->id);
     }
 
-    public function test_estimate_falls_back_to_distance_outside_matrix(): void
+    /**
+     * Outside the matrix, `/estimate` declines to quote.
+     *
+     * This test used to be `test_estimate_falls_back_to_distance_outside_matrix`
+     * and asserted `pricing_source === 'distance'`. That fallback was deleted, and
+     * deleting it is the point: a distance-derived fare is a number no regulator
+     * approved, and it changes with where the rider happens to drop their pin, so
+     * two neighbours got two prices for the same corridor. An unserved area now
+     * gets a truthful "not yet" instead of an invented figure the platform would
+     * then be held to.
+     */
+    public function test_estimate_declines_to_quote_an_unpriced_corridor(): void
     {
         $uni = $this->university();
         // A zone far from the pickup so covering() returns null.
@@ -124,7 +141,65 @@ class ZoneUniversityPriceTest extends TestCase
         ]);
 
         $res->assertOk();
-        $res->assertJsonPath('data.pricing_source', 'distance');
+        $res->assertJsonPath('data.in_coverage', false);
+        $res->assertJsonPath('data.pricing_source', 'unpriced_corridor');
+
+        // And critically: no number at all. A null fare is honest; a guessed one
+        // gets screenshotted and quoted back at support.
+        $res->assertJsonMissingPath('data.fare_fils');
+        $res->assertJsonMissingPath('data.solo_fare_fils');
+    }
+
+    /**
+     * Coverage and a tariff are two different things, and conflating them left a hole.
+     *
+     * `/estimate` refused to quote a corridor with no approved row, but creation only
+     * checked that the pickup fell inside SOME zone. So a student could be told "we
+     * don't serve this route yet" and then request it anyway, and the matcher would
+     * price the trip from `default_fare_fils` — reintroducing the invented fare that
+     * deleting the distance fallback was meant to remove, somewhere nobody would look.
+     */
+    public function test_a_ride_cannot_be_requested_on_a_corridor_with_no_approved_price(): void
+    {
+        $uni = $this->university();
+        // Inside a served zone, but that zone has no price to this university.
+        $this->zoneAt(32.55, 35.85);
+
+        Sanctum::actingAs($this->student());
+
+        $res = $this->postJson('/api/v1/ride-requests', [
+            'university_id' => $uni->id,
+            'pickup_lat' => 32.55,
+            'pickup_lng' => 35.85,
+            'desired_time' => now()->addHour()->toIso8601String(),
+            'type' => 'scheduled',
+            'direction' => 'to_university',
+        ]);
+
+        $res->assertStatus(422);
+        $res->assertJsonPath('code', 'UNPRICED_CORRIDOR');
+    }
+
+    /** With an approved price for the pair, the same request succeeds. */
+    public function test_the_same_request_succeeds_once_the_corridor_is_priced(): void
+    {
+        $uni = $this->university();
+        $zone = $this->zoneAt(32.55, 35.85);
+        ZoneUniversityPrice::create([
+            'zone_id' => $zone->id, 'university_id' => $uni->id,
+            'band' => 'C', 'fare_fils' => 1500, 'solo_fare_fils' => 5250, 'is_active' => true,
+        ]);
+
+        Sanctum::actingAs($this->student());
+
+        $this->postJson('/api/v1/ride-requests', [
+            'university_id' => $uni->id,
+            'pickup_lat' => 32.55,
+            'pickup_lng' => 35.85,
+            'desired_time' => now()->addHour()->toIso8601String(),
+            'type' => 'scheduled',
+            'direction' => 'to_university',
+        ])->assertCreated();
     }
 
     public function test_student_cannot_manage_zone_prices(): void

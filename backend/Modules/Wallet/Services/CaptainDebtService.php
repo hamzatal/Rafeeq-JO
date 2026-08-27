@@ -69,6 +69,17 @@ class CaptainDebtService extends BaseService
                 'عمولة رحلة نقدية',
                 $tripId,
             );
+            // Collected, so it belongs to the platform — and only the collected part.
+            // The remainder becomes debt below and is credited when it is actually
+            // settled, not when it is merely owed. Booking a receivable as cash is how
+            // a set of books starts lying.
+            $this->wallets->credit(
+                $this->wallets->platform(),
+                $fromBalance,
+                WalletTxnType::Commission,
+                'عمولة رحلة نقدية',
+                $tripId,
+            );
         }
 
         if ($toDebt > 0) {
@@ -114,6 +125,14 @@ class CaptainDebtService extends BaseService
 
             $this->wallets->debit(
                 $locked,
+                $settle,
+                WalletTxnType::Commission,
+                'تسوية عمولة مستحقّة',
+                $locked->id,
+            );
+            // The receivable has turned into money, so now it reaches the treasury.
+            $this->wallets->credit(
+                $this->wallets->platform(),
                 $settle,
                 WalletTxnType::Commission,
                 'تسوية عمولة مستحقّة',

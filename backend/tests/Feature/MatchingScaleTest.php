@@ -50,6 +50,18 @@ class MatchingScaleTest extends TestCase
         $this->uni = University::create(['name_ar' => 'ج', 'name_en' => 'U', 'code' => 'U1', 'is_active' => true]);
         $this->zoneA = $this->zone('A', 32.50);
         $this->zoneB = $this->zone('B', 32.60);
+
+        /*
+         * These tests are about GROUPING under batching, so the aggregation window is
+         * switched off. Left on, a partial trailing group is legitimately held for
+         * more riders and stays pending, and every "0 pending" assertion below would
+         * fail for a reason that has nothing to do with what is being tested.
+         * MatchingWindowTest covers the waiting itself.
+         */
+        config([
+            'rafeeq.match_window_peak_minutes' => 0,
+            'rafeeq.match_window_offpeak_minutes' => 0,
+        ]);
     }
 
     private function zone(string $name, float $lat): Zone

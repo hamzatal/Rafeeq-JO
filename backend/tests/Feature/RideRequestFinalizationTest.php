@@ -11,6 +11,7 @@ use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Services\TripService;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Modules\Zones\Models\ZoneUniversityPrice;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripStatus;
@@ -29,10 +30,17 @@ class RideRequestFinalizationTest extends TestCase
             'type' => UserType::Student, 'status' => UserStatus::Active, 'locale' => 'ar',
         ]);
         $uni = University::create(['name_ar' => 'ج', 'name_en' => 'U', 'code' => 'UJ', 'city' => 'Amman', 'is_active' => true]);
-        // A served zone covering the pickup so coverage validation passes.
-        Zone::create([
+        // A served zone covering the pickup so coverage validation passes...
+        $zone = Zone::create([
             'name_ar' => 'منطقة', 'name_en' => 'Zone', 'city' => 'إربد',
             'center_lat' => 32.5, 'center_lng' => 35.85, 'radius_km' => 3.0, 'is_active' => true,
+        ]);
+        // ...and an approved price for the corridor, without which the request is
+        // refused. Coverage and a tariff are two different things.
+        ZoneUniversityPrice::create([
+            'zone_id' => $zone->id, 'university_id' => $uni->id,
+            'band' => 'C', 'fare_fils' => 1500, 'solo_fare_fils' => 5250,
+            'is_active' => true,
         ]);
         $captain = User::create([
             'full_name' => 'Cap', 'phone' => '0790000078', 'password' => 'secret-pass',

@@ -18,7 +18,29 @@ class WalletService extends BaseService
 
     public function forUser(User $user): Wallet
     {
-        return Wallet::firstOrCreate(['user_id' => $user->id]);
+        return Wallet::firstOrCreate(
+            ['user_id' => $user->id],
+            ['kind' => Wallet::KIND_USER],
+        );
+    }
+
+    /**
+     * The single platform treasury wallet.
+     *
+     * Commission is credited here and subsidies are debited from here, so every
+     * movement has two sides and the ledger sums to the money actually paid in from
+     * outside. See the 5.5 migration for why this is a wallet and not a counter.
+     *
+     * The row is created by that migration; `firstOrCreate` is a safety net for a
+     * database restored from a dump taken before it, not the normal path. A partial
+     * unique index makes a second treasury impossible either way.
+     */
+    public function platform(): Wallet
+    {
+        return Wallet::firstOrCreate(
+            ['kind' => Wallet::KIND_PLATFORM],
+            ['user_id' => null],
+        );
     }
 
     /** Spendable balance after subtracting active pre-authorisation holds. */

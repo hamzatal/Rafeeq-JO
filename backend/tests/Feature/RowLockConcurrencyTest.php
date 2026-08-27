@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Payouts\Models\PayoutRequest;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
+use Rafeeq\Modules\Wallet\Models\Wallet;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
@@ -61,9 +63,41 @@ class RowLockConcurrencyTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * Clear the tables these tests touch — and put back what the SCHEMA owns.
+     *
+     * ── Why the treasury has to be restored ────────────────────────────────────
+     *
+     * Because `RefreshDatabase` is not used here, this `TRUNCATE` is not rolled back:
+     * it COMMITS. And `wallets` contains one row that is not test data — the single
+     * platform treasury, inserted by its migration, which every billed trip credits its
+     * commission into and every captain guarantee is paid out of.
+     *
+     * Truncating it therefore destroyed it for the remainder of the run, and the
+     * failure landed on whichever test happened to be scheduled next — a test that
+     * passed in isolation and failed in the suite, which is the most expensive kind of
+     * failure to diagnose. `SeededEnvironmentCanSellASeatTest` caught it.
+     *
+     * `WalletService::platform()` would lazily re-create the row, so application code
+     * self-heals. That is not a reason to leave this: a lazily re-created treasury has
+     * a zero balance, so the commission recorded before the truncate is simply gone,
+     * and any test asserting that money moved would be silently wrong rather than red.
+     */
     private function freshSchema(): void
     {
         DB::statement('TRUNCATE trip_passengers, payout_requests, trips, driver_profiles, wallets, users CASCADE');
+
+        DB::table('wallets')->insert([
+            'id' => (string) Str::uuid7(),
+            'kind' => Wallet::KIND_PLATFORM,
+            'user_id' => null,
+            'balance_fils' => 0,
+            'held_fils' => 0,
+            'debt_fils' => 0,
+            'currency' => 'JOD',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

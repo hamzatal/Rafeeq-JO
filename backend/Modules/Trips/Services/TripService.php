@@ -9,6 +9,7 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Matching\Services\CaptainGuaranteeService;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
 use Rafeeq\Modules\Rewards\Services\RewardService;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
@@ -38,6 +39,7 @@ class TripService extends BaseService
         private readonly GpsFraudService $gps,
         private readonly NotificationService $notifications,
         private readonly WalletService $wallets,
+        private readonly CaptainGuaranteeService $guarantee,
     ) {}
 
     public function schedule(DriverProfile $driver, Route $route, string $scheduledAt, ?string $vehicleId = null): Trip
@@ -171,6 +173,21 @@ class TripService extends BaseService
             RideRequest::where('trip_id', $trip->id)
                 ->whereIn('status', [RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
                 ->update(['status' => RideRequestStatus::Completed->value]);
+
+            /*
+             * The captain minimum guarantee — what replaced surge.
+             *
+             * Settled here, inside the same transaction, because this is the first
+             * moment the final rider count is known. An under-filled off-peak trip
+             * tops the captain up to a floor out of the platform treasury; a full
+             * car, a peak-hour trip, an all-cash trip or a captain already at their
+             * daily cap draws nothing. See CaptainGuaranteeService.
+             *
+             * It cannot fail the completion: an exhausted treasury returns 0 rather
+             * than throwing, so a journey that physically happened is never rolled
+             * back over a discretionary payment.
+             */
+            $this->guarantee->settleForTrip($trip);
         });
 
         if ($unconfirmed > 0) {

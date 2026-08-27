@@ -52,7 +52,31 @@ class PricingSettingsTest extends TestCase
 
         $res->assertOk();
         $res->assertJsonPath('data.commission_percent', (int) config('rafeeq.commission_percent'));
-        $res->assertJsonPath('data.per_km_fils', (int) config('rafeeq.per_km_fils'));
+        $res->assertJsonPath('data.default_fare_fils', (int) config('rafeeq.default_fare_fils'));
+        $res->assertJsonPath('data.express_fee_fils', (int) config('rafeeq.express_fee_fils'));
+        $res->assertJsonPath('data.min_fill_riders', (int) config('rafeeq.min_fill_riders'));
+    }
+
+    /**
+     * The knob list is the contract, so assert it exactly.
+     *
+     * `per_km_fils`, `per_min_fils`, `night_multiplier`, `night_start_hour`,
+     * `night_end_hour`, `max_surge`, `min_fare_fils`, `base_fare_fils` and
+     * `avg_speed_kmh` were all editable here. Every one of them is gone: the fare
+     * is a matrix lookup, so a per-km rate is not a knob that means anything, and
+     * a night multiplier is above-tariff charging. An admin left with a dial that
+     * silently moves nothing is worse than no dial.
+     */
+    public function test_pricing_exposes_exactly_the_knobs_that_still_do_something(): void
+    {
+        Sanctum::actingAs($this->admin());
+
+        $data = $this->getJson('/api/v1/admin/settings/pricing')->json('data');
+
+        $this->assertSame(
+            ['commission_percent', 'default_fare_fils', 'express_fee_fils', 'min_fill_riders'],
+            collect(array_keys($data))->sort()->values()->all(),
+        );
     }
 
     public function test_admin_can_update_pricing_and_it_persists_and_overrides_config(): void
@@ -61,19 +85,21 @@ class PricingSettingsTest extends TestCase
 
         $res = $this->patchJson('/api/v1/admin/settings/pricing', [
             'commission_percent' => 20,
-            'per_km_fils' => 300,
-            'night_multiplier' => 1.5,
+            'default_fare_fils' => 1750,
+            'express_fee_fils' => 2000,
+            'min_fill_riders' => 2,
         ]);
 
         $res->assertOk();
         $res->assertJsonPath('data.commission_percent', 20);
-        $res->assertJsonPath('data.per_km_fils', 300);
+        $res->assertJsonPath('data.default_fare_fils', 1750);
 
         // Resolved through the service (DB override).
         $pricing = app(SettingService::class)->pricing();
         $this->assertSame(20, $pricing['commission_percent']);
-        $this->assertSame(300, $pricing['per_km_fils']);
-        $this->assertSame(1.5, $pricing['night_multiplier']);
+        $this->assertSame(1750, $pricing['default_fare_fils']);
+        $this->assertSame(2000, $pricing['express_fee_fils']);
+        $this->assertSame(2, $pricing['min_fill_riders']);
 
         // Hydrated into runtime config so PricingService uses it.
         app(SettingService::class)->applyPricingToConfig();
@@ -90,7 +116,16 @@ class PricingSettingsTest extends TestCase
         ])->assertStatus(422);
 
         $this->patchJson('/api/v1/admin/settings/pricing', [
-            'per_km_fils' => -5,
+            'default_fare_fils' => -5,
+        ])->assertStatus(422);
+
+        $this->patchJson('/api/v1/admin/settings/pricing', [
+            'express_fee_fils' => -1,
+        ])->assertStatus(422);
+
+        // A car cannot be filled by zero riders.
+        $this->patchJson('/api/v1/admin/settings/pricing', [
+            'min_fill_riders' => 0,
         ])->assertStatus(422);
     }
 

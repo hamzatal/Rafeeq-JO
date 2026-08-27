@@ -6,7 +6,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Http\Controllers\Controller;
-use Rafeeq\Core\Support\Geo;
 use Rafeeq\Modules\Matching\Services\PricingService;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\RideRequests\Requests\CreateRideRequestRequest;
@@ -58,27 +57,45 @@ class RideRequestController extends Controller
             $matrix = $this->zonePricing->fareForPoint($uni, $lat, $lng);
         }
 
-        if ($matrix !== null) {
-            $quote = $this->pricing->fixedQuote($matrix['fare_fils'], $isExpress, $riders, $capacity);
-            $quote['pricing_source'] = 'zone_matrix';
-            $quote['zone_id'] = $matrix['zone_id'];
-        } else {
-            // 2) Distance-based estimate: when pickup + university coordinates are
-            //    provided, price the ride by GPS distance (pickup → university).
-            $distanceKm = null;
-            if ($lat !== null && $lng !== null && $uni && $uni->lat !== null && $uni->lng !== null) {
-                $distanceKm = round(Geo::haversineKm($lat, $lng, (float) $uni->lat, (float) $uni->lng), 2);
-            }
-
-            $quote = $this->pricing->quote(
-                $data['base_fare_fils'] ?? null,
-                $isExpress,
-                $riders,
-                $capacity,
-                distanceKm: $distanceKm,
-            );
-            $quote['pricing_source'] = $distanceKm !== null ? 'distance' : 'flat';
+        /*
+         * ── Why there is no distance fallback any more ────────────────────────
+         *
+         * This used to fall back to a GPS distance estimate when a corridor had no
+         * approved matrix row. That produced a number nobody had approved, varying
+         * per pickup pin, presented with the same confidence as a real tariff.
+         *
+         * A corridor without an approved price is NOT COVERED, and saying so is the
+         * honest answer. «السعر وعد لا حساب» — a promise you cannot make yet is a
+         * promise you decline to make, not one you improvise.
+         */
+        if ($matrix === null) {
+            return $this->ok([
+                'in_coverage' => false,
+                'pricing_source' => 'unpriced_corridor',
+                'tariff_version' => $this->pricing->tariffVersion(),
+            ], 'ما وصلنا لهذه المنطقة بعد — بنفتح المناطق حسب الطلب.');
         }
+
+        $band = $this->zonePricing->bandForZone($matrix['zone_id'], (string) $uni->id);
+        $express = $isExpress ? (int) config('rafeeq.express_fee_fils', 1500) : 0;
+
+        $quote = $this->pricing->seatQuote($band, $riders);
+        // The approved matrix price overrides the band default.
+        $quote['fare_fils'] = $matrix['fare_fils'] + $express;
+        $quote['express_fee_fils'] = $express;
+        $split = $this->pricing->splitCommission($quote['fare_fils']);
+        $quote['commission_fils'] = $split['commission_fils'];
+        $quote['captain_share_fils'] = $split['captain_share_fils'];
+        $quote['expected_total_fils'] = $quote['fare_fils'] * max(1, $riders);
+        $quote['expected_captain_earnings_fils'] = $split['captain_share_fils'] * max(1, $riders);
+
+        // Both products, side by side and both approved — this is what makes the
+        // aggregation wait acceptable: the alternative has a printed price.
+        $solo = $this->zonePricing->soloFareForZone($matrix['zone_id'], (string) $uni->id);
+        $quote['solo_fare_fils'] = $solo === null ? null : $solo + $express;
+
+        $quote['pricing_source'] = 'zone_matrix';
+        $quote['zone_id'] = $matrix['zone_id'];
 
         // Coverage flag so the app can warn before requesting outside Irbid.
         if ($lat !== null && $lng !== null) {

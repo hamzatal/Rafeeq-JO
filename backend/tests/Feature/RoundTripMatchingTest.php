@@ -32,6 +32,14 @@ class RoundTripMatchingTest extends TestCase
             'name_ar' => 'م', 'name_en' => 'Z', 'city' => 'Irbid',
             'center_lat' => 32.5, 'center_lng' => 35.85, 'radius_km' => 5, 'is_active' => true,
         ]);
+
+        // Direction separation is the subject here, not the aggregation window: these
+        // groups are deliberately partial, and with the window on they would correctly
+        // be held for more riders instead of forming. See MatchingWindowTest.
+        config([
+            'rafeeq.match_window_peak_minutes' => 0,
+            'rafeeq.match_window_offpeak_minutes' => 0,
+        ]);
     }
 
     private function request(RideDirection $direction, int $i): RideRequest

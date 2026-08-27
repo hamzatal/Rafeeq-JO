@@ -25,26 +25,29 @@ class SettingService
     ];
 
     /**
-     * Editable pricing knobs. Each maps a settings key to the runtime
-     * config() path it overrides and its scalar type. This is the single
-     * source of truth for what an admin may tune from the dashboard, and
+     * Editable pricing knobs, mapped to the runtime config() path each overrides.
+     * The single source of truth for what an admin may tune from the dashboard, and
      * for hydrating config() at boot so PricingService stays pure.
      *
-     * @var array<string, array{0:string, 1:string}> key => [configPath, type]
+     * ── Every value here is an integer, and that is not a coincidence ──────────
+     *
+     * This map used to carry a type tag per key because `night_multiplier` and
+     * `max_surge` were floats. Both are deleted — a night multiplier is charging above
+     * the approved tariff, and surge charges the rider for our failure to fill a car.
+     * What is left is fils, a percentage and a head count: all integers, because money
+     * is integer fils everywhere in this codebase and a float multiplier is exactly the
+     * shape of a knob that quietly re-prices an approved tariff.
+     *
+     * Adding a float knob means reintroducing that shape, so it should be argued for
+     * rather than slipped in through a type tag that already handled it.
+     *
+     * @var array<string, string> settings key => config path
      */
     public const PRICING_KEYS = [
-        'pricing.commission_percent' => ['rafeeq.commission_percent', 'int'],
-        'pricing.default_fare_fils' => ['rafeeq.default_fare_fils', 'int'],
-        'pricing.base_fare_fils' => ['rafeeq.base_fare_fils', 'int'],
-        'pricing.per_km_fils' => ['rafeeq.per_km_fils', 'int'],
-        'pricing.per_min_fils' => ['rafeeq.per_min_fils', 'int'],
-        'pricing.min_fare_fils' => ['rafeeq.min_fare_fils', 'int'],
-        'pricing.express_fee_fils' => ['rafeeq.express_fee_fils', 'int'],
-        'pricing.night_multiplier' => ['rafeeq.night_multiplier', 'float'],
-        'pricing.night_start_hour' => ['rafeeq.night_start_hour', 'int'],
-        'pricing.avg_speed_kmh' => ['rafeeq.avg_speed_kmh', 'int'],
-        'pricing.min_fill_riders' => ['rafeeq.min_fill_riders', 'int'],
-        'pricing.max_surge_multiplier' => ['rafeeq.max_surge_multiplier', 'float'],
+        'pricing.commission_percent' => 'rafeeq.commission_percent',
+        'pricing.default_fare_fils' => 'rafeeq.default_fare_fils',
+        'pricing.express_fee_fils' => 'rafeeq.express_fee_fils',
+        'pricing.min_fill_riders' => 'rafeeq.min_fill_riders',
     ];
 
     public function __construct(private readonly AuditLogger $audit) {}
@@ -117,16 +120,15 @@ class SettingService
      * Resolve every pricing knob (DB override -> config fallback), correctly
      * typed. This is what the admin dashboard reads and edits.
      *
-     * @return array<string, int|float> short key (without the `pricing.` prefix)
+     * @return array<string, int> short key (without the `pricing.` prefix)
      */
     public function pricing(): array
     {
         $out = [];
-        foreach (self::PRICING_KEYS as $key => [$configPath, $type]) {
+        foreach (self::PRICING_KEYS as $key => $configPath) {
             $short = substr($key, strlen('pricing.'));
             $stored = $this->get($key);
-            $value = $stored ?? config($configPath);
-            $out[$short] = $type === 'float' ? (float) $value : (int) $value;
+            $out[$short] = (int) ($stored ?? config($configPath));
         }
 
         return $out;
@@ -136,18 +138,18 @@ class SettingService
      * Upsert pricing knobs. Only provided keys change; each is validated by
      * the request layer. Returns the full resolved pricing set.
      *
-     * @param  array<string, int|float>  $data  short keys (without `pricing.`)
-     * @return array<string, int|float>
+     * @param  array<string, int>  $data  short keys (without `pricing.`)
+     * @return array<string, int>
      */
     public function updatePricing(array $data, ?User $actor): array
     {
         $changes = [];
-        foreach (self::PRICING_KEYS as $key => [$configPath, $type]) {
+        foreach (self::PRICING_KEYS as $key => $configPath) {
             $short = substr($key, strlen('pricing.'));
             if (! array_key_exists($short, $data)) {
                 continue;
             }
-            $value = $type === 'float' ? (float) $data[$short] : (int) $data[$short];
+            $value = (int) $data[$short];
             $this->set($key, (string) $value, 'pricing', $actor);
             // Reflect immediately for the rest of this request lifecycle.
             config([$configPath => $value]);
@@ -173,12 +175,12 @@ class SettingService
         }
 
         try {
-            foreach (self::PRICING_KEYS as $key => [$configPath, $type]) {
+            foreach (self::PRICING_KEYS as $key => $configPath) {
                 $stored = $this->get($key);
                 if ($stored === null) {
                     continue;
                 }
-                config([$configPath => $type === 'float' ? (float) $stored : (int) $stored]);
+                config([$configPath => (int) $stored]);
             }
         } catch (\Throwable) {
             // Never let settings hydration break the boot/request cycle.

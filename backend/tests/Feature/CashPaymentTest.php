@@ -9,6 +9,7 @@ use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\Matching\Data\Tariff;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Services\RideBillingService;
@@ -17,6 +18,7 @@ use Rafeeq\Modules\Wallet\Models\WalletTransaction;
 use Rafeeq\Modules\Wallet\Services\CaptainDebtService;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Modules\Zones\Models\ZoneUniversityPrice;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
@@ -100,12 +102,16 @@ class CashPaymentTest extends TestCase
     }
 
     /**
-     * A university AND a serving zone: a ride request outside a served zone is
-     * rejected, which is correct behaviour and not what these tests are about.
+     * A university, a serving zone, AND an approved price for that pair.
+     *
+     * All three are required to request a ride, and the third is the one that is easy
+     * to forget: being inside a served zone does not mean that zone has an approved
+     * tariff to this university, and a corridor without one cannot be sold a seat on.
+     * Skipping the price row is how a fixture ends up exercising an invented fare.
      */
     private function university(): University
     {
-        Zone::firstOrCreate(
+        $zone = Zone::firstOrCreate(
             ['name_en' => 'Irbid Test Zone'],
             [
                 'name_ar' => 'إربد', 'city' => 'إربد',
@@ -113,11 +119,19 @@ class CashPaymentTest extends TestCase
             ]
         );
 
-        return University::create([
+        $uni = University::create([
             'code' => 'YU-'.random_int(1000, 9999),
             'name_ar' => 'جامعة اليرموك', 'name_en' => 'Yarmouk', 'city' => 'إربد',
             'lat' => 32.5333, 'lng' => 35.8500, 'is_active' => true,
         ]);
+
+        ZoneUniversityPrice::create([
+            'zone_id' => $zone->id, 'university_id' => $uni->id,
+            'band' => 'C', 'fare_fils' => 1500, 'solo_fare_fils' => 5250,
+            'tariff_version' => Tariff::VERSION, 'is_active' => true,
+        ]);
+
+        return $uni;
     }
 
     // ── the inversion ──────────────────────────────────────────────────────

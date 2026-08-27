@@ -2,32 +2,71 @@
 
 namespace Rafeeq\Modules\Matching\Services;
 
+use Rafeeq\Modules\Matching\Data\Tariff;
+
 /**
- * Empty-seat economics for zone-based pooling.
+ * The fixed-seat pricing engine.
  *
- * Captains drive small private cars, so an under-filled trip can be a loss.
- * This service computes a fair fare that protects the captain's minimum
- * earnings WITHOUT overcharging students:
+ * ── What was deleted, and why each deletion matters ────────────────────────────
  *
- *  - base fare per seat comes from the route/config,
- *  - Express adds a flat surcharge,
- *  - when a pooled group is below the "min-fill" threshold, a bounded surge
- *    multiplier is applied (capped) so the captain still earns a viable amount,
- *  - the captain's expected earnings (after commission) are previewed before
- *    they accept an offer.
+ * This service used to compute a fare at request time from distance, duration, a
+ * night multiplier and a surge multiplier. All four are gone.
  *
- * All money is in fils. Pure functions — no side effects.
+ *  • **SURGE (deleted).** It existed to protect a captain on an under-filled car
+ *    by charging the RIDER more. That inverts the entire product: the promise is
+ *    «السعر وعد لا حساب» — a price you know before you ask, unchanged by how many
+ *    other people happened to book. Covering an empty seat out of the student's
+ *    pocket breaks the one thing this app sells. The captain is protected instead
+ *    by an aggregation window (fill the car first) and, when that fails, by a
+ *    guarantee paid out of OUR commission — see CaptainGuaranteeService.
+ *
+ *  • **NIGHT MULTIPLIER (deleted).** Roadmap decision 18: charging above the
+ *    approved tariff is a regulatory offence in Jordan whose penalty reaches
+ *    licence withdrawal. A 1.25× after 21:00 was not a pricing lever, it was an
+ *    unapproved tariff.
+ *
+ *  • **PER-MINUTE PRICING (deleted).** Time-based charging makes the rider pay for
+ *    traffic they did not cause and cannot predict, and it makes the fare
+ *    unquotable in advance — which is the product.
+ *
+ *  • **DISTANCE AT REQUEST TIME (deleted).** Distance now places a
+ *    (zone × university) pair into a band ONCE, when the matrix is seeded. After
+ *    that the pair has a price. A GPS-derived fare varies between two riders on
+ *    the same corridor, which is indefensible when both were quoted the same
+ *    number.
+ *
+ * What remains is a lookup: band → seat price, or band → whole-car price. Money is
+ * integer fils throughout, and every method here is a pure function.
  */
 class PricingService
 {
-    public function baseFareFils(): int
+    /* ── The tariff ──────────────────────────────────────────────────────────── */
+
+    public function seatFareFils(string $band): int
     {
-        return (int) config('rafeeq.default_fare_fils', 1000);
+        return Tariff::seatFils($band);
     }
 
-    public function expressFeeFils(): int
+    /** The whole car for one rider. A published price, not seat × capacity. */
+    public function soloFareFils(string $band): int
     {
-        return (int) config('rafeeq.express_fee_fils', 1500);
+        return Tariff::soloFils($band);
+    }
+
+    public function capacity(): int
+    {
+        return Tariff::CAPACITY;
+    }
+
+    public function tariffVersion(): string
+    {
+        return Tariff::VERSION;
+    }
+
+    /** Place a measured distance into a band. For SEEDING the matrix only. */
+    public function bandForKm(float $km): string
+    {
+        return Tariff::bandForKm($km);
     }
 
     public function commissionPercent(): int
@@ -35,111 +74,27 @@ class PricingService
         return (int) config('rafeeq.commission_percent', 15);
     }
 
+    /**
+     * Riders below which a car is not worth a captain's time.
+     *
+     * Not a pricing input any more — it decides whether the aggregation window
+     * keeps waiting, and whether the guarantee applies.
+     */
     public function minFillRiders(): int
     {
         return max(1, (int) config('rafeeq.min_fill_riders', 3));
     }
 
-    public function maxSurgeMultiplier(): float
-    {
-        return max(1.0, (float) config('rafeeq.max_surge_multiplier', 1.5));
-    }
-
-    // ── Distance-based pricing knobs (Phase 3) ──────────────────────────────
-    public function openingFareFils(): int
-    {
-        return (int) config('rafeeq.base_fare_fils', 300);
-    }
-
-    public function perKmFils(): int
-    {
-        return (int) config('rafeeq.per_km_fils', 250);
-    }
-
-    public function perMinFils(): int
-    {
-        return (int) config('rafeeq.per_min_fils', 20);
-    }
-
-    public function minFareFils(): int
-    {
-        return (int) config('rafeeq.min_fare_fils', 1000);
-    }
-
-    public function nightMultiplier(): float
-    {
-        return max(1.0, (float) config('rafeeq.night_multiplier', 1.25));
-    }
-
-    public function nightStartHour(): int
-    {
-        return (int) config('rafeeq.night_start_hour', 21);
-    }
-
-    public function avgSpeedKmh(): int
-    {
-        return max(1, (int) config('rafeeq.avg_speed_kmh', 30));
-    }
+    /* ── Commission ──────────────────────────────────────────────────────────── */
 
     /**
-     * Distance-based single-seat fare (opening + per-km + per-min), with the
-     * night tariff applied and floored at the minimum fare. Duration is
-     * estimated from distance / average speed when not supplied.
-     */
-    public function distanceFareFils(float $km, ?int $durationMin = null, ?\DateTimeInterface $when = null): int
-    {
-        $km = max(0.0, $km);
-        $min = $durationMin ?? (int) ceil(($km / $this->avgSpeedKmh()) * 60);
-        $fare = $this->openingFareFils()
-            + (int) round($this->perKmFils() * $km)
-            + $this->perMinFils() * max(0, $min);
-
-        $hour = $when ? (int) $when->format('G') : (int) now()->format('G');
-        if ($hour >= $this->nightStartHour()) {
-            $fare = (int) round($fare * $this->nightMultiplier());
-        }
-
-        return max($fare, $this->minFareFils());
-    }
-
-    /**
-     * Surge multiplier based on how far a group is below the min-fill target.
-     * Linear ramp from 1.0 (full) up to the configured cap (1 rider).
-     */
-    public function surgeMultiplier(int $riders, bool $isExpress): float
-    {
-        $minFill = $this->minFillRiders();
-        if ($riders >= $minFill) {
-            return 1.0;
-        }
-
-        $cap = $this->maxSurgeMultiplier();
-        // Fraction of the shortfall (0..1): 0 at min-fill, 1 at a single rider.
-        $shortfall = ($minFill - $riders) / max(1, $minFill - 1);
-        $multiplier = 1.0 + ($cap - 1.0) * $shortfall;
-
-        // Express rides already carry a surcharge; keep surge gentler for them.
-        if ($isExpress) {
-            $multiplier = 1.0 + (($multiplier - 1.0) * 0.6);
-        }
-
-        return round(min($cap, $multiplier), 2);
-    }
-
-    /**
-     * Quote a single seat fare and the captain's expected earnings for a trip.
+     * Split a per-seat fare into the platform's commission and the captain's share.
      *
-     * @param  int|null  $baseFareFils  route base fare; falls back to config
-     * @return array{
-     *   base_fare_fils:int, express_fee_fils:int, surge_multiplier:float,
-     *   fare_fils:int, commission_fils:int, captain_share_fils:int,
-     *   riders:int, capacity:int, expected_total_fils:int,
-     *   expected_captain_earnings_fils:int, below_min_fill:bool
-     * }
-     */
-    /**
-     * Split a final per-seat fare into the platform commission and the captain's
-     * share. Single source of truth so billing never re-derives this inline.
+     * `intdiv` floors the commission, so the remainder always lands with the
+     * CAPTAIN and `commission + captain_share === fare` exactly. That is the
+     * zero-sum property the whole ledger depends on: rounding must never create or
+     * destroy a fils, and where it has to fall somewhere it falls on the platform's
+     * side of the table, not the worker's.
      *
      * @return array{commission_fils:int, captain_share_fils:int}
      */
@@ -154,81 +109,76 @@ class PricingService
         ];
     }
 
-    /** Captain's expected earnings (after commission) for a given fare and rider count. */
+    /** Captain's expected earnings across a whole car. */
     public function expectedCaptainEarnings(int $fareFils, int $riders): int
     {
         return $this->splitCommission($fareFils)['captain_share_fils'] * max(0, $riders);
     }
 
+    /* ── Quotes ──────────────────────────────────────────────────────────────── */
+
     /**
-     * Quote from a FIXED unified fare (zone ↔ university matrix). No distance
-     * math and no surge — the price is predictable by design — but the express
-     * surcharge and commission split still apply. Same output shape as quote().
+     * A pooled seat. Every rider in the car pays this, and it does not move.
      *
      * @return array<string, mixed>
      */
-    public function fixedQuote(int $fixedFareFils, bool $isExpress, int $riders, int $capacity): array
+    public function seatQuote(string $band, int $riders = 1): array
     {
-        $base = max(0, $fixedFareFils);
-        $express = $isExpress ? $this->expressFeeFils() : 0;
-        $fare = $base + $express;
+        return $this->quote(
+            band: $band,
+            fare: $this->seatFareFils($band),
+            riders: max(1, $riders),
+            isSolo: false,
+        );
+    }
 
+    /**
+     * The whole car for one rider.
+     *
+     * Deliberately a PRODUCT and not a penalty: the rider chooses it, at a price
+     * printed next to the shared one, to skip the aggregation wait. Offering it
+     * plainly is what makes the wait acceptable for everyone who does not.
+     *
+     * @return array<string, mixed>
+     */
+    public function soloQuote(string $band): array
+    {
+        return $this->quote(
+            band: $band,
+            fare: $this->soloFareFils($band),
+            riders: 1,
+            isSolo: true,
+        );
+    }
+
+    /**
+     * @return array{
+     *   band:string, tariff_version:string, is_solo:bool,
+     *   fare_fils:int, commission_fils:int, captain_share_fils:int,
+     *   riders:int, capacity:int, expected_total_fils:int,
+     *   expected_captain_earnings_fils:int, below_min_fill:bool
+     * }
+     */
+    private function quote(string $band, int $fare, int $riders, bool $isSolo): array
+    {
         $split = $this->splitCommission($fare);
 
         return [
-            'base_fare_fils' => $base,
-            'express_fee_fils' => $express,
-            'surge_multiplier' => 1.0,
+            'band' => strtoupper($band),
+            'tariff_version' => $this->tariffVersion(),
+            'is_solo' => $isSolo,
             'fare_fils' => $fare,
             'commission_fils' => $split['commission_fils'],
             'captain_share_fils' => $split['captain_share_fils'],
             'riders' => $riders,
-            'capacity' => $capacity,
-            'expected_total_fils' => $fare * max(1, $riders),
-            'expected_captain_earnings_fils' => $split['captain_share_fils'] * max(1, $riders),
-            'below_min_fill' => $riders < $this->minFillRiders(),
-            'distance_km' => null,
-            'duration_min' => null,
-        ];
-    }
-
-    public function quote(?int $baseFareFils, bool $isExpress, int $riders, int $capacity, ?float $distanceKm = null, ?int $durationMin = null, ?\DateTimeInterface $when = null): array
-    {
-        // When a GPS distance is available the fare is distance-based (opening +
-        // per-km + per-min, night-adjusted, floored). Otherwise fall back to the
-        // route/config flat per-seat base (backward compatible).
-        if ($distanceKm !== null && $distanceKm > 0) {
-            $base = $this->distanceFareFils($distanceKm, $durationMin, $when);
-        } else {
-            $base = $baseFareFils !== null && $baseFareFils > 0 ? $baseFareFils : $this->baseFareFils();
-        }
-        $express = $isExpress ? $this->expressFeeFils() : 0;
-        $surge = $this->surgeMultiplier(max(1, $riders), $isExpress);
-
-        // Surge applies to the base portion only (not the flat express fee).
-        $fare = (int) round($base * $surge) + $express;
-
-        $split = $this->splitCommission($fare);
-        $commission = $split['commission_fils'];
-        $captainShare = $split['captain_share_fils'];
-
-        $expectedTotal = $fare * max(1, $riders);
-        $expectedCaptain = $captainShare * max(1, $riders);
-
-        return [
-            'base_fare_fils' => $base,
-            'express_fee_fils' => $express,
-            'surge_multiplier' => $surge,
-            'fare_fils' => $fare,
-            'commission_fils' => $commission,
-            'captain_share_fils' => $captainShare,
-            'riders' => $riders,
-            'capacity' => $capacity,
-            'expected_total_fils' => $expectedTotal,
-            'expected_captain_earnings_fils' => $expectedCaptain,
-            'below_min_fill' => $riders < $this->minFillRiders(),
-            'distance_km' => $distanceKm,
-            'duration_min' => $durationMin,
+            'capacity' => $this->capacity(),
+            // A solo rider pays once for the whole car, so the total is the fare.
+            'expected_total_fils' => $isSolo ? $fare : $fare * $riders,
+            'expected_captain_earnings_fils' => $isSolo
+                ? $split['captain_share_fils']
+                : $split['captain_share_fils'] * $riders,
+            // A solo car is full by definition — it can never be under-filled.
+            'below_min_fill' => ! $isSolo && $riders < $this->minFillRiders(),
         ];
     }
 }
