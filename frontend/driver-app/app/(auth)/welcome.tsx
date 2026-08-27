@@ -4,9 +4,8 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useI18n } from '../../src/i18n';
-import { Button } from '../../src/components/Button';
+import { Button, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useAuth } from '../../src/store/auth';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 /** Stitch landing (captain) — clean light canvas, teal brand mark, one CTA. */
 export default function Welcome() {

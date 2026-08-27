@@ -1,20 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { formatJod } from '@rafeeq/shared';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import type { CliqInstructions, PaymentRequest } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Input } from '../../src/components/Input';
-import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, SectionTitle, Badge } from '../../src/components/ui';
-import { Icon } from '../../src/components/Icon';
+import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, SectionTitle, listLabels, statusFromError, useTheme, type AppTheme, type ListStatus } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { saveInvoicePdf } from '../../src/lib/invoice';
 import { useAuth } from '../../src/store/auth';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 async function pickProof(): Promise<Blob | null> {
   if (Platform.OS === 'web') return null;
@@ -40,17 +35,21 @@ export default function Invoices() {
   const [uploading, setUploading] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  const load = async () => {
+  const [status, setStatus] = useState<ListStatus>({ kind: 'loading' });
+
+  const load = useCallback(async () => {
+    setStatus({ kind: 'loading' });
     try {
       setItems(await api.payments.mine());
-    } catch {
-      /* surfaced by actions */
+      setStatus({ kind: 'ready' });
+    } catch (e) {
+      setStatus(statusFromError(e));
     }
-  };
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+  }, [load]);
 
   const createTopup = async () => {
     const jod = Number(amount);
@@ -120,7 +119,9 @@ export default function Invoices() {
 
 
         <SectionTitle title={t('payments.title')} />
-        {items.length === 0 ? (
+        {status.kind !== 'ready' ? (
+          <ListState status={status} onRetry={load} labels={listLabels(t)} />
+        ) : items.length === 0 ? (
           <EmptyState icon="dollar-sign" title={t('payments.none')} />
         ) : (
           items.map((p) => (

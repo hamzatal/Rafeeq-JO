@@ -5,16 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Trip, TripPassenger } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, Badge, SkeletonList, ErrorState } from '../../src/components/ui';
-import { Icon } from '../../src/components/Icon';
-import { LiveMap } from '../../src/components/LiveMap';
-import { TripTimeline } from '../../src/components/kit';
+import { Badge, Banner, Card, EmptyState, ErrorState, Icon, LiveMap, SkeletonList, TripTimeline, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
 import { subscribeToTrip, realtimeEnabled } from '../../src/lib/realtime';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const ACTIVE_STATUSES = ['booked', 'onboard'];
 
@@ -129,7 +124,7 @@ export default function Trips() {
       <View style={s.header}>
         <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
         <Text style={s.brand}>رفيق</Text>
-        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={s.headerBtn}>
+        <Pressable onPress={() => router.push('/(app)/notifications')} accessibilityRole="button" accessibilityLabel={t('a11y.notifications')} hitSlop={8} style={s.headerBtn}>
           <Icon name="bell" size={24} color={theme.colors.primary} />
         </Pressable>
       </View>
@@ -230,7 +225,7 @@ export default function Trips() {
                   <View style={s.topLeft}>
                     <Text style={[s.fare, cancelled && { color: theme.colors.textSecondary }]}>{cancelled ? `0.00 ${t('subscriptions.currency')}` : (fare ?? '—')}</Text>
                     <View style={[s.statusPill, { backgroundColor: cancelled ? theme.colors.dangerSoft : theme.colors.accentSoft }]}>
-                      <Icon name={cancelled ? 'x-circle' : 'check-circle'} size={13} color={cancelled ? theme.colors.danger : theme.colors.accent} />
+                      <Icon name={cancelled ? 'circle-x' : 'circle-check'} size={13} color={cancelled ? theme.colors.danger : theme.colors.accent} />
                       <Text style={[s.statusText, { color: cancelled ? theme.colors.danger : theme.colors.accent }]}>{cancelled ? t('trips.filterCancelled') : t('trips.filterCompleted')}</Text>
                     </View>
                   </View>
@@ -262,7 +257,14 @@ export default function Trips() {
                 {completed && !rated[p.trip_id] ? (
                   <View style={s.starsInline}>
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <Pressable key={n} onPress={() => setStars((st) => ({ ...st, [p.trip_id]: n }))} hitSlop={4}>
+                      <Pressable
+                        key={n}
+                        onPress={() => setStars((st) => ({ ...st, [p.trip_id]: n }))}
+                        hitSlop={4}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${t('a11y.rateStars')} ${n}`}
+                        accessibilityState={{ selected: (stars[p.trip_id] ?? 0) >= n }}
+                      >
                         <Icon name="star" size={20} color={(stars[p.trip_id] ?? 0) >= n ? theme.colors.accent : theme.colors.border} />
                       </Pressable>
                     ))}

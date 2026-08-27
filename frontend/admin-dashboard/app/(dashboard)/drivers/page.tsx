@@ -72,11 +72,11 @@ export default function DriversPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">الاسم</th>
-                <th className="text-right p-3 font-medium">الهاتف</th>
-                <th className="text-right p-3 font-medium">الحالة</th>
-                <th className="text-right p-3 font-medium">التقييم</th>
-                <th className="p-3"></th>
+                <th scope="col" className="text-right p-3 font-medium">الاسم</th>
+                <th scope="col" className="text-right p-3 font-medium">الهاتف</th>
+                <th scope="col" className="text-right p-3 font-medium">الحالة</th>
+                <th scope="col" className="text-right p-3 font-medium">التقييم</th>
+                <th scope="col" className="p-3"></th>
               </tr>
             </thead>
             <tbody>

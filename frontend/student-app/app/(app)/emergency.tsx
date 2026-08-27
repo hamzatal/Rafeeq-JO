@@ -1,16 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { EmergencyContact, EmergencyRelation } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Input } from '../../src/components/Input';
-import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, Badge } from '../../src/components/ui';
-import { Icon } from '../../src/components/Icon';
+import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, listLabels, statusFromError, useTheme, type AppTheme, type ListStatus } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const RELATIONS: EmergencyRelation[] = ['parent', 'sibling', 'spouse', 'relative', 'friend', 'other'];
 
@@ -48,7 +43,16 @@ export default function Emergency() {
   const s = useMemo(() => makeStyles(theme), [theme]);
 
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
-  const [loading, setLoading] = useState(true);
+  /* These are the people called when a student presses SOS. An empty list because
+     the fetch failed reads as "you have no emergency contacts". */
+  /*
+   * `status` replaced a bare `loading` boolean here.
+   *
+   * The old pair — `loading` plus an implicit "not loading means we have data" —
+   * is exactly what left no room for failure: there were two states for three
+   * outcomes, so the third one borrowed the empty state.
+   */
+  const [status, setStatus] = useState<ListStatus>({ kind: 'loading' });
 
   // SOS state
   const [arming, setArming] = useState(false);
@@ -67,15 +71,15 @@ export default function Emergency() {
 
   const primary = useMemo(() => contacts.find((c) => c.is_primary) ?? contacts[0] ?? null, [contacts]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    setStatus({ kind: 'loading' });
     try {
       setContacts(await api.emergency.listContacts());
-    } catch {
-      /* silent */
-    } finally {
-      setLoading(false);
+      setStatus({ kind: 'ready' });
+    } catch (e) {
+      setStatus(statusFromError(e));
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
@@ -173,7 +177,7 @@ export default function Emergency() {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Text style={s.h1}>{t('emergency.title')}</Text>
-          <Pressable onPress={() => (showForm ? (setShowForm(false), resetForm()) : openAdd())} style={s.addBtn}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('a11y.toggleForm')} onPress={() => (showForm ? (setShowForm(false), resetForm()) : openAdd())} style={s.addBtn}>
             <Icon name={showForm ? 'x' : 'plus'} size={18} color={theme.colors.onPrimary} />
           </Pressable>
         </View>
@@ -184,7 +188,7 @@ export default function Emergency() {
         {/* ── SOS panel ─────────────────────────────────────────────── */}
         <View style={s.sosCard}>
           <View style={s.sosIcon}>
-            <Icon name="alert-triangle" size={30} color={theme.colors.onPrimary} />
+            <Icon name="triangle-alert" size={30} color={theme.colors.onPrimary} />
           </View>
           <Text style={s.sosTitle}>{t('emergency.sosTitle')}</Text>
           <Text style={s.sosHint}>{t('emergency.sosHint')}</Text>
@@ -252,7 +256,9 @@ export default function Emergency() {
 
         {/* ── Contacts list ─────────────────────────────────────────── */}
         <Text style={s.section}>{t('emergency.contactsTitle')}</Text>
-        {!loading && contacts.length === 0 ? (
+        {status.kind !== 'ready' ? (
+          <ListState status={status} onRetry={load} labels={listLabels(t)} />
+        ) : contacts.length === 0 ? (
           <EmptyState icon="users" title={t('emergency.noContacts')} hint={t('emergency.noContactsHint')} />
         ) : (
           contacts.map((c) => (
@@ -279,7 +285,7 @@ export default function Emergency() {
                   </Pressable>
                 )}
                 <Pressable onPress={() => openEdit(c)} style={s.actionBtn}>
-                  <Icon name="edit-2" size={16} color={theme.colors.textSecondary} />
+                  <Icon name="pencil" size={16} color={theme.colors.textSecondary} />
                   <Text style={s.actionText}>{t('common.edit')}</Text>
                 </Pressable>
                 <Pressable onPress={() => remove(c)} style={s.actionBtn}>

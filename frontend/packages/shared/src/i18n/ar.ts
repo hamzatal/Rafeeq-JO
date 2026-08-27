@@ -18,6 +18,87 @@ export const ar = {
     unlimited: 'غير محدود',
     viewAll: 'عرض الكل',
     loadFailed: 'تعذّر تحميل البيانات. تحقّق من اتصالك وحاول مجدداً.',
+
+    /*
+     * «تعذّر الاتصال» is NOT «حدث خطأ», and the difference is the whole point.
+     *
+     * Six admin pages and two captain screens used to show an EMPTY state when a
+     * request failed — «لا سحوبات معلّقة» on a queue that was simply unreachable.
+     * Splitting offline from broken gives the user the one action that helps, and
+     * `<ListState>` is the component that can no longer reach "empty" without a
+     * successful load.
+     */
+    offline: 'تعذّر الاتصال',
+    offlineBody: 'تأكّد من اتصالك بالإنترنت ثم أعد المحاولة.',
+
+    /* Shown by `ErrorBoundary`, which renders when the theme itself may have failed. */
+    crashTitle: 'صار خطأ غير متوقّع',
+    crashBody: 'واجهنا مشكلة بعرض هذه الشاشة. باقي التطبيق يعمل بشكل طبيعي — جرّب مرة أخرى.',
+
+    /* Was a literal inside `store/auth.ts`. An admin signs in on the dashboard. */
+    mfaRequired: 'هذا الحساب يتطلب مصادقة ثنائية — سجّل الدخول عبر لوحة الإدارة.',
+
+    /*
+     * 403 is not 401. Signing out does not grant a permission, so these must never
+     * share a recovery path — that is how a permission error becomes a sign-out loop.
+     */
+    forbidden: 'ما عندك صلاحية لهذا الإجراء.',
+    serverError: 'صار خطأ عندنا، مو عندك. جرّب بعد لحظات.',
+  },
+
+  /**
+   * Android notification CHANNEL names — shown in the system settings, not in the app.
+   *
+   * The ids live in code (the backend addresses them) but these labels are the
+   * user's, and the two apps word the same channel differently: `rafeeq_payments`
+   * is spending to a student and income to a captain.
+   */
+  push: {
+    general: 'إشعارات عامة',
+    trips: 'الرحلات',
+    rides: 'طلبات الرحلات',
+    ridesDriver: 'طلبات الرحلات الواردة',
+    payments: 'المدفوعات والمحفظة',
+    paymentsDriver: 'الأرباح والمحفظة',
+    critical: 'تنبيهات حرجة وأمان',
+  },
+
+  /**
+   * Spoken labels for controls that show ONLY an icon.
+   *
+   * 28 pressables in the two apps had an icon as their only child and no
+   * `accessibilityLabel` — `accessibilityLabel` appeared zero times in either app.
+   * To VoiceOver and TalkBack every one of them announced as "button" and nothing
+   * else: the close on every sheet, the back arrow on every header, the send button
+   * in chat, the SOS control. The product was unusable without sight.
+   *
+   * These say what the control DOES, not what the glyph looks like: «إرسال», never
+   * «سهم». A screen-reader user hears this instead of seeing the icon, so it has to
+   * carry the same meaning.
+   */
+  a11y: {
+    back: 'رجوع',
+    close: 'إغلاق',
+    send: 'إرسال',
+    help: 'المساعدة والدعم',
+    copy: 'نسخ',
+    notifications: 'الإشعارات',
+    notificationPrefs: 'إعدادات الإشعارات',
+    markAllRead: 'تعليم كل الإشعارات كمقروءة',
+    swapDirection: 'عكس اتجاه الرحلة',
+    useMyLocation: 'استخدام موقعي الحالي',
+    openChat: 'فتح المحادثة',
+    toggleForm: 'إظهار أو إخفاء النموذج',
+    /** Receives the star number, e.g. «تقييم ٣ من ٥». */
+    rateStars: 'تقييم بعدد نجوم',
+  },
+  /** Brand copy. One place, so the splash and the logo cannot disagree. */
+  brand: {
+    slogan: 'مقعدك إلى الجامعة',
+    splashSlogan: 'رفيقك في كل خطوة جامعية',
+    studentTagline: 'النقل والخدمات الجامعية الذكية',
+    captainTagline: 'شريك النقل الذكي',
+    captain: 'كابتن',
   },
   onboarding: {
     skip: 'تخطّي',
@@ -56,6 +137,7 @@ export const ar = {
     later: 'لاحقاً',
   },
   map: {
+    title: 'الخريطة',
     openInMap: 'فتح في الخريطة',
     pickHint: 'اضغط على الخريطة لتحديد الموقع',
     captain: 'الكابتن',
@@ -440,6 +522,26 @@ export const ar = {
     status: 'الحالة',
     created: 'تم إنشاء طلب الدفع.',
     failed: 'تعذّر إنشاء الطلب',
+
+    /*
+     * The PDF receipt.
+     *
+     * These were literals inside a 60-line HTML builder duplicated in both apps —
+     * along with `#0B192C` and `#1FB6C1`, a navy and a teal that are not even the
+     * retired palette. The one artefact a user KEEPS was the last place still
+     * wearing a dead brand.
+     */
+    receiptTopUp: 'إيصال شحن محفظة',
+    receiptTransaction: 'إيصال معاملة',
+    receiptHeading: 'تفاصيل الفاتورة',
+    receiptReference: 'الرقم المرجعي',
+    receiptHolder: 'صاحب الحساب',
+    receiptPurpose: 'الغرض',
+    receiptMethod: 'طريقة الدفع',
+    receiptStatus: 'الحالة',
+    receiptAmount: 'المبلغ',
+    receiptFooter: 'هذه فاتورة إلكترونية صادرة عن تطبيق رفيق — يُرجى الاحتفاظ بها كمرجع.',
+    receiptShare: 'فاتورة',
   },
   notifications: {
     title: 'الإشعارات',

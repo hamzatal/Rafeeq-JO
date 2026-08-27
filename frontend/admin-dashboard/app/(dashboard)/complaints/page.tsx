@@ -96,12 +96,12 @@ export default function ComplaintsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('complaints.colNumber')}</th>
-                <th className="text-right p-3 font-medium">{t('complaints.colCategory')}</th>
-                <th className="text-right p-3 font-medium">{t('complaints.colSeverity')}</th>
-                <th className="text-right p-3 font-medium">{t('complaints.colReported')}</th>
-                <th className="text-right p-3 font-medium">{t('complaints.colStatus')}</th>
-                <th className="text-right p-3 font-medium">{t('complaints.colActions')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('complaints.colNumber')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('complaints.colCategory')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('complaints.colSeverity')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('complaints.colReported')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('complaints.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('complaints.colActions')}</th>
               </tr>
             </thead>
             <tbody>

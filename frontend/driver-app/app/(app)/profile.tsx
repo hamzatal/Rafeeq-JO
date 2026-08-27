@@ -5,8 +5,7 @@ import { useRouter } from 'expo-router';
 import type { DocumentStatus } from '@rafeeq/shared';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
-import { useTheme, type AppTheme } from '../../src/theme';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { Icon, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
 
 const DOC_ICON: Record<string, IconName> = {
   license: 'credit-card',
@@ -40,9 +39,18 @@ export default function Profile() {
           <Text style={s.avatarSmText}>{initial}</Text>
         </View>
         <Text style={s.brand}>رفيق</Text>
-        <Pressable hitSlop={8} style={s.headerBtn}>
+        {/*
+          A View, not a Pressable.
+        
+          This was a `<Pressable>` with NO `onPress` — five of them across the captain app.
+          A screen reader announced "button" and activating it did nothing, and a sighted
+          user tapped a bell that never opened anything, because the captain app has no
+          notifications screen to open. Phase 9 either adds that screen or drops the bell;
+          until then it is chrome and says so.
+        */}
+        <View style={s.headerBtn}>
           <Icon name="bell" size={24} color={theme.colors.primary} />
-        </Pressable>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -58,7 +66,7 @@ export default function Profile() {
           <View style={{ flex: 1 }}>
             <Text style={s.name} numberOfLines={1}>{user?.full_name ?? '—'}</Text>
             <View style={s.verifiedPill}>
-              <Icon name="check-circle" size={12} color={theme.colors.accent} />
+              <Icon name="circle-check" size={12} color={theme.colors.accent} />
               <Text style={s.verifiedText}>{t('driver.verifiedCaptain')}</Text>
             </View>
           </View>

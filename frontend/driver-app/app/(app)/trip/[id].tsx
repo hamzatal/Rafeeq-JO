@@ -4,16 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { Trip, TripPassenger } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Input } from '../../../src/components/Input';
-import { Button } from '../../../src/components/Button';
-import { Banner } from '../../../src/components/Banner';
-import { Card, SectionTitle, Badge, EmptyState } from '../../../src/components/ui';
-import { Icon } from '../../../src/components/Icon';
-import { LiveMap, type MapPoint } from '../../../src/components/LiveMap';
+import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, LiveMap, SectionTitle, getCurrentLocation, listLabels, statusFromError, useTheme, type AppTheme, type ListStatus, type MapPoint } from '@rafeeq/ui';
 import { useI18n } from '../../../src/i18n';
 import { api } from '../../../src/lib/api';
-import { getCurrentLocation } from '../../../src/lib/permissions';
-import { useTheme, type AppTheme } from '../../../src/theme';
 
 export default function TripDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -28,10 +21,22 @@ export default function TripDetail() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
+  const [status, setStatus] = useState<ListStatus>({ kind: 'loading' });
+
+  /*
+   * No `catch` at all. A failed load left `passengers` empty and the screen told the
+   * captain «لا ركّاب» — on the trip he is currently driving.
+   */
   const load = useCallback(async () => {
-    const [tr, p] = await Promise.all([api.driverTrips.show(id), api.driverTrips.passengers(id)]);
-    setTrip(tr);
-    setPassengers(p);
+    setStatus({ kind: 'loading' });
+    try {
+      const [tr, p] = await Promise.all([api.driverTrips.show(id), api.driverTrips.passengers(id)]);
+      setTrip(tr);
+      setPassengers(p);
+      setStatus({ kind: 'ready' });
+    } catch (e) {
+      setStatus(statusFromError(e));
+    }
   }, [id]);
 
   useEffect(() => { void load(); }, [load]);
@@ -138,7 +143,9 @@ export default function TripDetail() {
         )}
 
         <SectionTitle title={`${t('driver.passengers')} (${passengers.length})`} />
-        {passengers.length === 0 ? (
+        {status.kind !== 'ready' ? (
+          <ListState status={status} onRetry={load} labels={listLabels(t)} />
+        ) : passengers.length === 0 ? (
           <EmptyState icon="users" title={t('driver.noPassengers')} />
         ) : (
           passengers.map((p) => (
@@ -150,6 +157,8 @@ export default function TripDetail() {
                   <Pressable
                     onPress={() => router.push({ pathname: '/(app)/chat', params: { tripId: id, studentUserId: p.student_id, title: t('chat.withStudent') } })}
                     hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('a11y.openChat')}
                   >
                     <Icon name="message-circle" size={20} color={theme.colors.primary} />
                   </Pressable>

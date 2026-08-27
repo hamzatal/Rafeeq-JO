@@ -3,13 +3,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { validators } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Input } from '../../src/components/Input';
-import { Button } from '../../src/components/Button';
-import { Banner } from '../../src/components/Banner';
-import { AuthShell } from '../../src/components/AuthShell';
+import { AuthShell, Banner, Button, Input, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Otp() {
   const { t } = useI18n();

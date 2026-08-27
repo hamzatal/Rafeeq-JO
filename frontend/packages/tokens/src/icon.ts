@@ -48,60 +48,18 @@ export const RTL_MIRRORED = new Set<string>([
   'trending-up', 'trending-down',
 ]);
 
-/**
- * Feather → Lucide, for the handful of names that changed.
- *
- * Lucide renamed a few glyphs when it diverged from Feather. Left unmapped these
- * would render NOTHING — a silently missing icon, which is worse than a wrong one
- * because the layout still looks deliberate.
- */
-export const RENAMED: Record<string, string> = {
-  /*
-   * Lucide renamed both of these after forking from Feather, and BOTH would have
-   * rendered nothing: `home` became `house`, and the help glyph went
-   * `help-circle` → `circle-help` → `circle-question-mark`. A name that resolves
-   * to no component is the failure mode this map exists to prevent — the icon
-   * silently vanishes and the layout still looks deliberate. Caught by generating
-   * the registry against the installed package rather than trusting the names.
-   */
-  home: 'house',
-  'help-circle': 'circle-question-mark',
-  'edit-2': 'pencil',
-  'edit-3': 'pen-line',
-  'trash-2': 'trash-2',
-  'more-vertical': 'ellipsis-vertical',
-  'more-horizontal': 'ellipsis',
-  'log-out': 'log-out',
-  'alert-circle': 'circle-alert',
-  'alert-triangle': 'triangle-alert',
-  'check-circle': 'circle-check',
-  'info': 'info',
-  'x-circle': 'circle-x',
-  'plus-circle': 'circle-plus',
-  'minus-circle': 'circle-minus',
-  'chevrons-left': 'chevrons-left',
-  'message-square': 'message-square',
-  'message-circle': 'message-circle',
-  'refresh-cw': 'refresh-cw',
-  'upload-cloud': 'cloud-upload',
-  'download-cloud': 'cloud-download',
-  'external-link': 'external-link',
-  'file-text': 'file-text',
-  'credit-card': 'credit-card',
-  'map-pin': 'map-pin',
-  'phone-call': 'phone-call',
-  'user-check': 'user-check',
-  'zap': 'zap',
-  'sliders': 'sliders-horizontal',
-  'grid': 'grid-3x3',
-  'crosshair': 'crosshair',
-  'navigation': 'navigation',
-  'loader': 'loader-circle',
-};
 
 
 /*
- * There is no Material Symbols map, on purpose.
+ * There is no NAME MAP AT ALL any more, on purpose.
+ *
+ * Two used to exist. `MATERIAL_TO_LUCIDE` translated the dashboard's snake_case
+ * ligatures; phase 6 deleted it by rewriting those call sites. `RENAMED` translated
+ * the Expo apps' Feather-era kebab names — `alert-circle`, `check-circle`, `home`,
+ * `upload-cloud` — and phase 7 deleted it the same way: 17 call sites across 17
+ * files now use the canonical Lucide name.
+ *
+ * The remaining note is about the Material map, and applies equally to both.
  *
  * An intermediate version of this file carried a 62-entry `MATERIAL_TO_LUCIDE`
  * translating the dashboard's snake_case ligatures (`person_add`, `sports_motorsports`)
@@ -126,18 +84,20 @@ export const RENAMED: Record<string, string> = {
  */
 
 /**
- * Resolve a legacy Feather name to its Lucide name.
+ * The Lucide name for an icon.
  *
- * Returns the input unchanged when no mapping applies, which is the common case:
- * Lucide is a Feather superset, so most kebab-case names are already correct.
+ * The IDENTITY now, and kept as a function rather than deleted for two reasons: the
+ * three `Icon` components call it, and Lucide will rename a glyph again. When it
+ * does, this is the one place the mapping goes — and `check:icons` will have failed
+ * the build before anyone has to look for it.
  */
 export function lucideName(name: string): string {
-  return RENAMED[name] ?? name;
+  return name;
 }
 
 /** Should this icon be flipped in an RTL layout? */
 export function shouldMirror(name: string): boolean {
-  return RTL_MIRRORED.has(lucideName(name)) || RTL_MIRRORED.has(name);
+  return RTL_MIRRORED.has(lucideName(name));
 }
 
 /**

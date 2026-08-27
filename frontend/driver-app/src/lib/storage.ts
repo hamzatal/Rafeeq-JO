@@ -1,27 +1,10 @@
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { createTokenStorage } from '@rafeeq/ui';
 
-const TOKEN_KEY = 'rafeeq_driver_token';
-
-export const tokenStorage = {
-  async get(): Promise<string | null> {
-    if (Platform.OS === 'web') {
-      return typeof localStorage !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
-    }
-    return SecureStore.getItemAsync(TOKEN_KEY);
-  },
-  async set(token: string): Promise<void> {
-    if (Platform.OS === 'web') {
-      localStorage.setItem(TOKEN_KEY, token);
-      return;
-    }
-    await SecureStore.setItemAsync(TOKEN_KEY, token);
-  },
-  async clear(): Promise<void> {
-    if (Platform.OS === 'web') {
-      localStorage.removeItem(TOKEN_KEY);
-      return;
-    }
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
-  },
-};
+/**
+ * This app's bearer-token slot.
+ *
+ * `rafeeq_driver_token`, not `rafeeq_token`, and that is deliberate: one phone
+ * often holds both apps and one person is often both. Sharing the key would make
+ * signing in here end the student session on the same device.
+ */
+export const tokenStorage = createTokenStorage('rafeeq_driver_token');

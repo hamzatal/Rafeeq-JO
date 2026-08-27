@@ -100,13 +100,13 @@ export default function PaymentsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">الرقم</th>
-                <th className="text-right p-3 font-medium">الغرض</th>
-                <th className="text-right p-3 font-medium">المبلغ</th>
-                <th className="text-right p-3 font-medium">الثقة (AI)</th>
-                <th className="text-right p-3 font-medium">تدقيق الاحتيال</th>
-                <th className="text-right p-3 font-medium">الحالة</th>
-                <th className="text-right p-3 font-medium">إجراءات</th>
+                <th scope="col" className="text-right p-3 font-medium">الرقم</th>
+                <th scope="col" className="text-right p-3 font-medium">الغرض</th>
+                <th scope="col" className="text-right p-3 font-medium">المبلغ</th>
+                <th scope="col" className="text-right p-3 font-medium">الثقة (AI)</th>
+                <th scope="col" className="text-right p-3 font-medium">تدقيق الاحتيال</th>
+                <th scope="col" className="text-right p-3 font-medium">الحالة</th>
+                <th scope="col" className="text-right p-3 font-medium">إجراءات</th>
               </tr>
             </thead>
             <tbody>

@@ -6,10 +6,7 @@ import { RafeeqApiError } from '@rafeeq/api-client';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { useCoupon } from '../../src/store/coupon';
-import { useTheme, type AppTheme } from '../../src/theme';
-import { Card, EmptyState, SectionTitle, ErrorState } from '../../src/components/ui';
-import { ListSkeleton } from '../../src/components/kit';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { Card, EmptyState, ErrorState, Icon, ListSkeleton, SectionTitle, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
 
 const CATEGORY_ICON: Record<string, IconName> = {
   payments: 'dollar-sign',
@@ -140,12 +137,12 @@ export default function Notifications() {
           <Text style={s.h1}>{t('notifications.title')}</Text>
           <View style={s.headerActions}>
             {items.some((n) => !n.read) && (
-              <Pressable onPress={markAll} style={s.headerBtn}>
-                <Icon name="check-circle" size={18} color={theme.colors.primary} />
+              <Pressable onPress={markAll} accessibilityRole="button" accessibilityLabel={t('a11y.markAllRead')} style={s.headerBtn}>
+                <Icon name="circle-check" size={18} color={theme.colors.primary} />
               </Pressable>
             )}
-            <Pressable onPress={() => setShowPrefs((v) => !v)} style={s.headerBtn}>
-              <Icon name="sliders" size={18} color={theme.colors.text} />
+            <Pressable onPress={() => setShowPrefs((v) => !v)} accessibilityRole="button" accessibilityLabel={t('a11y.notificationPrefs')} style={s.headerBtn}>
+              <Icon name="sliders-horizontal" size={18} color={theme.colors.text} />
             </Pressable>
           </View>
         </View>

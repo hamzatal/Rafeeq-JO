@@ -3,9 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { SmartSuggestions as SmartSuggestionsModel } from '@rafeeq/shared';
 import { api } from '../lib/api';
-import { useTheme, type AppTheme } from '../theme';
-import { Icon, type IconName } from './Icon';
-import { PressableScale } from './kit';
+import { Icon, PressableScale, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
 
 /**
  * AI-powered, context-aware ride suggestions (time of day + saved addresses +

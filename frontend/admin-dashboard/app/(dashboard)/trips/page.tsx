@@ -50,11 +50,11 @@ export default function TripsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('trips.colRoute')}</th>
-                <th className="text-right p-3 font-medium">{t('trips.colTime')}</th>
-                <th className="text-right p-3 font-medium">{t('trips.colPassengers')}</th>
-                <th className="text-right p-3 font-medium">{t('trips.colCapacity')}</th>
-                <th className="text-right p-3 font-medium">{t('trips.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('trips.colRoute')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('trips.colTime')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('trips.colPassengers')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('trips.colCapacity')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('trips.colStatus')}</th>
               </tr>
             </thead>
             <tbody>

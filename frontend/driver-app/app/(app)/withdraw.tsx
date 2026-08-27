@@ -2,13 +2,9 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Screen } from '../../src/components/Screen';
-import { Input } from '../../src/components/Input';
-import { Button } from '../../src/components/Button';
-import { Banner } from '../../src/components/Banner';
+import { Banner, Button, Input, Screen, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Withdraw() {
   const { t } = useI18n();

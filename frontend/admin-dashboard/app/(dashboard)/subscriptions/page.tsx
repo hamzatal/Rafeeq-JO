@@ -61,11 +61,11 @@ export default function SubscriptionsPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-right p-3 font-medium">{t('subscriptions.colPlan')}</th>
-                <th className="text-right p-3 font-medium">{t('subscriptions.colStatus')}</th>
-                <th className="text-right p-3 font-medium">{t('subscriptions.colRemaining')}</th>
-                <th className="text-right p-3 font-medium">{t('subscriptions.colEnds')}</th>
-                <th className="p-3"></th>
+                <th scope="col" className="text-right p-3 font-medium">{t('subscriptions.colPlan')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('subscriptions.colStatus')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('subscriptions.colRemaining')}</th>
+                <th scope="col" className="text-right p-3 font-medium">{t('subscriptions.colEnds')}</th>
+                <th scope="col" className="p-3"></th>
               </tr>
             </thead>
             <tbody>

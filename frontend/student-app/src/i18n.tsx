@@ -1,35 +1,24 @@
-import React, { createContext, useContext, useMemo } from 'react';
-import { t as translate, type Locale } from '@rafeeq/shared';
+import type { ReactNode } from 'react';
+import { I18nProvider as Provider } from '@rafeeq/ui';
 import { usePrefs } from './store/prefs';
 
-interface I18nContextValue {
-  locale: Locale;
-  isRTL: boolean;
-  t: (key: string) => string;
-  setLocale: (locale: Locale) => void;
-}
+export { useI18n } from '@rafeeq/ui';
 
-const I18nContext = createContext<I18nContextValue | null>(null);
-
-export function I18nProvider({ children }: { children: React.ReactNode }) {
+/**
+ * Binds this app's prefs store to the shared provider.
+ *
+ * The provider itself takes `locale` as a prop and lives in `@rafeeq/ui`. That
+ * inversion is the whole reason it can be shared: the previous version imported
+ * `usePrefs` directly, and `usePrefs` imports the API client, whose token key is
+ * per-app — so a package-level import would have had to guess which app it was in.
+ */
+export function I18nProvider({ children }: { children: ReactNode }) {
   const locale = usePrefs((s) => s.locale);
-  const setLocalePref = usePrefs((s) => s.setLocale);
+  const setLocale = usePrefs((s) => s.setLocale);
 
-  const value = useMemo<I18nContextValue>(
-    () => ({
-      locale,
-      isRTL: locale === 'ar',
-      t: (key: string) => translate(locale, key),
-      setLocale: (l: Locale) => void setLocalePref(l),
-    }),
-    [locale, setLocalePref],
+  return (
+    <Provider locale={locale} setLocale={setLocale}>
+      {children}
+    </Provider>
   );
-
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
-}
-
-export function useI18n(): I18nContextValue {
-  const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error('useI18n must be used within I18nProvider');
-  return ctx;
 }

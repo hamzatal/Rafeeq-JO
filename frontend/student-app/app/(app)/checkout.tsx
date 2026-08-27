@@ -5,14 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { CliqInstructions, PaymentRequest } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Banner } from '../../src/components/Banner';
-import { Icon } from '../../src/components/Icon';
-import { KeyValue } from '../../src/components/kit';
+import { Banner, Button, Icon, KeyValue, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { pickProof } from '../../src/lib/proof';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 type Step = 'review' | 'instructions' | 'pending' | 'active';
 
@@ -147,13 +143,13 @@ export default function Checkout() {
       {/* AppBar — back (right) · title · help (left) per Stitch _10 */}
       <View style={s.appbar}>
         <View style={s.appbarStart}>
-          <Pressable onPress={() => router.back()} hitSlop={8} style={s.appbarBtn}>
+          <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('a11y.back')} hitSlop={8} style={s.appbarBtn}>
             <Icon name="arrow-right" size={24} color={theme.colors.textSecondary} />
           </Pressable>
           <Text style={s.appbarTitle}>{t('checkout.title')}</Text>
         </View>
-        <Pressable onPress={() => router.push('/(app)/support')} hitSlop={8} style={s.appbarBtn}>
-          <Icon name="help-circle" size={22} color={theme.colors.primary} />
+        <Pressable onPress={() => router.push('/(app)/support')} accessibilityRole="button" accessibilityLabel={t('a11y.help')} hitSlop={8} style={s.appbarBtn}>
+          <Icon name="circle-question-mark" size={22} color={theme.colors.primary} />
         </Pressable>
       </View>
 
@@ -204,7 +200,7 @@ export default function Checkout() {
                   </Text>
                 )}
               </View>
-              {busy === 'wallet' ? <Icon name="loader" size={20} color={theme.colors.primary} /> : <Icon name="chevron-left" size={20} color={theme.colors.muted} />}
+              {busy === 'wallet' ? <Icon name="loader-circle" size={20} color={theme.colors.primary} /> : <Icon name="chevron-left" size={20} color={theme.colors.muted} />}
             </Pressable>
 
             {/* Pay via CliQ */}
@@ -220,7 +216,7 @@ export default function Checkout() {
                 <Text style={s.methodTitle}>{t('checkout.payViaCliqOption')}</Text>
                 <Text style={s.methodSub}>{t('checkout.transferred')}</Text>
               </View>
-              {busy === 'cliq' ? <Icon name="loader" size={20} color={theme.colors.primary} /> : <Icon name="chevron-left" size={20} color={theme.colors.muted} />}
+              {busy === 'cliq' ? <Icon name="loader-circle" size={20} color={theme.colors.primary} /> : <Icon name="chevron-left" size={20} color={theme.colors.muted} />}
             </Pressable>
           </>
         )}
@@ -270,7 +266,7 @@ export default function Checkout() {
                   <Text style={s.aliasLabel}>{t('checkout.cliqAlias')}</Text>
                   <Text style={s.aliasValue} selectable>{instructions.alias ?? instructions.beneficiary ?? '—'}</Text>
                 </View>
-                <Pressable onPress={copyAlias} hitSlop={8} style={s.aliasCopy}>
+                <Pressable onPress={copyAlias} accessibilityRole="button" accessibilityLabel={t('a11y.copy')} hitSlop={8} style={s.aliasCopy}>
                   <Icon name="copy" size={18} color={theme.colors.primary} />
                 </Pressable>
               </View>
@@ -279,7 +275,7 @@ export default function Checkout() {
             {/* Proof of payment */}
             <View style={s.card}>
               <View style={s.cardHead}>
-                <Icon name="upload-cloud" size={20} color={theme.colors.accent} />
+                <Icon name="cloud-upload" size={20} color={theme.colors.accent} />
                 <Text style={s.cardTitle}>{t('checkout.proofTitle')}</Text>
               </View>
               <Pressable onPress={pickFile} style={s.upload}>
@@ -324,7 +320,7 @@ export default function Checkout() {
         {step === 'active' && (
           <View style={s.doneWrap}>
             <View style={[s.doneIcon, { backgroundColor: theme.colors.successSoft }]}>
-              <Icon name="check-circle" size={40} color={theme.colors.success} />
+              <Icon name="circle-check" size={40} color={theme.colors.success} />
             </View>
             <Text style={s.doneTitle}>{t('checkout.activatedTitle')}</Text>
             <Text style={s.doneBody}>{t('checkout.activatedBody')}</Text>
@@ -336,7 +332,7 @@ export default function Checkout() {
 
       {step === 'instructions' && (
         <View style={s.footer}>
-          <Button title={t('checkout.confirmPay')} icon="check-circle" onPress={confirmPay} loading={uploading} disabled={!proofFile} />
+          <Button title={t('checkout.confirmPay')} icon="circle-check" onPress={confirmPay} loading={uploading} disabled={!proofFile} />
         </View>
       )}
     </SafeAreaView>

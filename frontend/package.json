@@ -13,16 +13,18 @@
     "student": "npm run start --workspace=student-app",
     "driver": "npm run start --workspace=driver-app",
     "admin": "npm run dev --workspace=admin-dashboard",
-    "lint": "npm run lint --workspace=admin-dashboard",
+    "lint": "eslint student-app driver-app packages --ext .ts,.tsx && npm run lint --workspace=admin-dashboard",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
-    "test": "npm run test --workspace=packages/shared && npm run test --workspace=packages/tokens",
+    "test": "npm run test --workspace=packages/shared && npm run test --workspace=packages/tokens && npm run test --workspace=packages/ui",
     "check:money": "node scripts/check-money-formatting.mjs",
     "build:tokens": "node scripts/build-tokens.mjs",
     "check:tokens": "node scripts/build-tokens.mjs --check",
     "build:icons": "node scripts/build-icons.mjs",
     "check:icons": "node scripts/build-icons.mjs --check",
     "check:design": "node scripts/check-design-tokens.mjs",
-    "check": "npm run check:tokens && npm run check:icons && npm run check:design && npm run check:money"
+    "check": "npm run check:tokens && npm run check:icons && npm run check:design && npm run check:money && npm run check:invariants",
+    "check:invariants": "node scripts/check-invariants.mjs",
+    "typecheck": "npm run typecheck --workspace=packages/tokens && npm run typecheck --workspace=packages/shared && npm run typecheck --workspace=packages/api-client && npm run typecheck --workspace=packages/ui && npm run typecheck --workspace=student-app && npm run typecheck --workspace=driver-app && npm run typecheck --workspace=admin-dashboard"
   },
   "engines": {
     "node": ">=20"

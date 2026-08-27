@@ -2,13 +2,10 @@ import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { validators, validateForm } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Input } from '../../src/components/Input';
-import { Button } from '../../src/components/Button';
-import { Banner } from '../../src/components/Banner';
+import { Banner, Button, Input, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function Vehicle() {
   const { t } = useI18n();

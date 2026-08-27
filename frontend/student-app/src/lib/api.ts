@@ -1,26 +1,23 @@
-import { createRafeeqApi } from '@rafeeq/api-client';
-import { resolveApiBaseUrl } from '@rafeeq/shared';
+import { createAppApi, setApiLocale } from '@rafeeq/ui';
 import { tokenStorage } from './storage';
 
-let currentLocale: 'ar' | 'en' = 'ar';
-export const setApiLocale = (locale: 'ar' | 'en') => {
-  currentLocale = locale;
-};
+export { setApiLocale };
 
-// Callback wired by the auth store to react to 401s.
+/**
+ * The 401 hook, wired by the auth store.
+ *
+ * A module-level slot rather than a parameter because the store and the client
+ * need each other: the client reports 401, the store signs out, and the store
+ * needs the client to do anything at all.
+ */
 let unauthorizedHandler: (() => void) | null = null;
+
 export const setUnauthorizedHandler = (fn: () => void) => {
   unauthorizedHandler = fn;
 };
 
-// One resolver, shared with the other app, that refuses a missing or plain-HTTP
-// URL in a release build rather than silently defaulting to localhost — which is
-// what previously shipped. See @rafeeq/shared/apiBase.
-const apiUrl = resolveApiBaseUrl(process.env.EXPO_PUBLIC_API_URL);
-
-export const api = createRafeeqApi({
-  baseURL: apiUrl,
-  getToken: () => tokenStorage.get(),
-  getLocale: () => currentLocale,
+export const api = createAppApi({
+  apiUrl: process.env.EXPO_PUBLIC_API_URL,
+  storage: tokenStorage,
   onUnauthorized: () => unauthorizedHandler?.(),
 });

@@ -4,11 +4,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import type { EarningsSummary } from '@rafeeq/shared';
-import { Icon } from '../../src/components/Icon';
-import { Num } from '../../src/components/Num';
-import { EmptyState, ErrorState, SkeletonList } from '../../src/components/ui';
+import { EmptyState, ErrorState, Icon, Num, SkeletonList, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
-import { useTheme, type AppTheme } from '../../src/theme';
 import { api } from '../../src/lib/api';
 
 const jod = (fils: number) => bareJod(fils);
@@ -78,7 +75,7 @@ export default function EarningsDetail() {
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <View style={s.header}>
-        <Pressable hitSlop={8} onPress={() => router.back()} style={s.headerBtn}>
+        <Pressable hitSlop={8} onPress={() => router.back()} style={s.headerBtn} accessibilityRole="button" accessibilityLabel={t('a11y.back')}>
           <Icon name={locale === 'ar' ? 'chevron-right' : 'chevron-left'} size={24} color={theme.colors.primary} />
         </Pressable>
         <Text style={s.brand}>{t('driver.earningsDetails')}</Text>

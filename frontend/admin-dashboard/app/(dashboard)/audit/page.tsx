@@ -91,12 +91,12 @@ export default function AuditPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-right muted-text border-b border-line">
-              <th className="px-4 py-3 font-semibold">{t('audit.when')}</th>
-              <th className="px-4 py-3 font-semibold">{t('audit.action')}</th>
-              <th className="px-4 py-3 font-semibold">{t('audit.user')}</th>
-              <th className="px-4 py-3 font-semibold">{t('audit.target')}</th>
-              <th className="px-4 py-3 font-semibold">{t('audit.ip')}</th>
-              <th className="px-4 py-3 font-semibold">{t('audit.changes')}</th>
+              <th scope="col" className="px-4 py-3 font-semibold">{t('audit.when')}</th>
+              <th scope="col" className="px-4 py-3 font-semibold">{t('audit.action')}</th>
+              <th scope="col" className="px-4 py-3 font-semibold">{t('audit.user')}</th>
+              <th scope="col" className="px-4 py-3 font-semibold">{t('audit.target')}</th>
+              <th scope="col" className="px-4 py-3 font-semibold">{t('audit.ip')}</th>
+              <th scope="col" className="px-4 py-3 font-semibold">{t('audit.changes')}</th>
             </tr>
           </thead>
           <tbody>

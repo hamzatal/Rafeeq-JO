@@ -217,13 +217,21 @@ describe('icons', () => {
   });
 
   /*
-   * Both of these render NOTHING under the current Lucide if unmapped — a gap the
-   * right size, so the layout still looks deliberate and the missing icon survives
-   * review. Found by generating the registry against the installed package.
+   * `lucideName` is the IDENTITY now, and that is the assertion.
+   *
+   * It used to translate 17 Feather-era names — `home` → `house`, `help-circle` →
+   * `circle-question-mark`. Phase 7 rewrote those 17 call sites instead, the same way
+   * phase 6 retired the Material ligature map, so all three clients now spell every
+   * icon the one way Lucide spells it.
+   *
+   * The function stays because Lucide WILL rename a glyph again, and this is where
+   * that mapping goes — but a map that is empty today must be provably empty, or two
+   * spellings quietly stay legal and the second one comes back by copy-paste.
    */
-  it('maps the Lucide renames that would otherwise render nothing', () => {
-    expect(lucideName('home')).toBe('house');
-    expect(lucideName('help-circle')).toBe('circle-question-mark');
+  it('does not translate names — there is one vocabulary', () => {
+    for (const name of ['home', 'help-circle', 'check-circle', 'house', 'circle-check', 'search']) {
+      expect(lucideName(name), name).toBe(name);
+    }
   });
 
   it('mirrors directional glyphs under RTL and leaves symmetric ones alone', () => {

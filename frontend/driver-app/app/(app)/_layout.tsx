@@ -1,8 +1,7 @@
 import { Redirect, Tabs } from 'expo-router';
 import { useAuth } from '../../src/store/auth';
 import { useI18n } from '../../src/i18n';
-import { Icon, type IconName } from '../../src/components/Icon';
-import { TabBar } from '../../src/components/TabBar';
+import { Icon, TabBar, type IconName } from '@rafeeq/ui';
 
 export default function AppLayout() {
   const status = useAuth((s) => s.status);
@@ -28,7 +27,7 @@ export default function AppLayout() {
       screenOptions={{ headerShown: false }}
     >
       {/* Stitch order (RTL right→left): الرئيسية · الرحلات · المحفظة · الملف · الإعدادات */}
-      <Tabs.Screen name="dashboard" options={{ title: t('driver.dashboard'), tabBarIcon: tab('grid') }} />
+      <Tabs.Screen name="dashboard" options={{ title: t('driver.dashboard'), tabBarIcon: tab('grid-3x3') }} />
       <Tabs.Screen name="trips" options={{ title: t('driver.myTrips'), tabBarIcon: tab('navigation') }} />
       <Tabs.Screen name="earnings" options={{ title: t('driver.wallet'), tabBarIcon: tab('credit-card') }} />
       <Tabs.Screen name="profile" options={{ title: t('driver.profileTab'), tabBarIcon: tab('user') }} />

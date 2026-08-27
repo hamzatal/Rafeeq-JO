@@ -107,10 +107,10 @@ export default function CliqPage() {
           <table className="w-full text-sm">
             <thead className="table-head">
               <tr>
-                <th className="text-start p-3 font-medium">{t('cliq.number')}</th>
-                <th className="text-start p-3 font-medium">{t('cliq.payer')}</th>
-                <th className="text-start p-3 font-medium">{t('cliq.amount')}</th>
-                <th className="text-start p-3 font-medium">{t('cliq.status')}</th>
+                <th scope="col" className="text-start p-3 font-medium">{t('cliq.number')}</th>
+                <th scope="col" className="text-start p-3 font-medium">{t('cliq.payer')}</th>
+                <th scope="col" className="text-start p-3 font-medium">{t('cliq.amount')}</th>
+                <th scope="col" className="text-start p-3 font-medium">{t('cliq.status')}</th>
               </tr>
             </thead>
             <tbody>

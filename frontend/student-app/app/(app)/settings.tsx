@@ -6,8 +6,7 @@ import { useRouter } from 'expo-router';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { usePrefs } from '../../src/store/prefs';
-import { useTheme, type AppTheme } from '../../src/theme';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { Icon, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
 
 /**
  * Settings & Support — pixel-faithful to Stitch `_19`:
@@ -46,7 +45,7 @@ export default function Settings() {
           <Text style={s.avatarText}>{initial}</Text>
         </View>
         <Text style={s.brand}>رفيق</Text>
-        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={s.headerBtn}>
+        <Pressable onPress={() => router.push('/(app)/notifications')} accessibilityRole="button" accessibilityLabel={t('a11y.notifications')} hitSlop={8} style={s.headerBtn}>
           <Icon name="bell" size={24} color={theme.colors.textSecondary} />
         </Pressable>
       </View>
@@ -85,7 +84,7 @@ export default function Settings() {
         />
         <GeneralRow
           theme={theme}
-          icon="alert-triangle"
+          icon="triangle-alert"
           title={t('settings.emergencyContact')}
           subtitle={t('settings.emergencyDesc')}
           onPress={() => router.push('/(app)/emergency')}
@@ -95,7 +94,7 @@ export default function Settings() {
         {/* Support center — stacked cards (grid-cols-1 on mobile) */}
         <Text style={[s.section, { marginTop: theme.spacing.xl }]}>{t('settings.supportCenter')}</Text>
         <SupportCard theme={theme} icon="headphones" tone="accent" label={t('settings.contactUs')} onPress={() => router.push('/(app)/support')} />
-        <SupportCard theme={theme} icon="help-circle" tone="primary" label={t('settings.faq')} onPress={() => router.push('/(app)/support')} />
+        <SupportCard theme={theme} icon="circle-question-mark" tone="primary" label={t('settings.faq')} onPress={() => router.push('/(app)/support')} />
         <Pressable onPress={() => router.push('/(app)/lost-found')} style={({ pressed }) => [s.lostCard, pressed && { opacity: 0.92 }]}>
           <View style={s.lostBlob} pointerEvents="none" />
           <View style={s.lostIcon}>

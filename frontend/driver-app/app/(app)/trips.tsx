@@ -5,13 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Route, Trip } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Banner } from '../../src/components/Banner';
-import { Card, EmptyState, SectionTitle, SkeletonList, ErrorState } from '../../src/components/ui';
-import { Icon } from '../../src/components/Icon';
+import { Banner, Card, EmptyState, ErrorState, Icon, SectionTitle, SkeletonList, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 export default function DriverTrips() {
   const { t, locale } = useI18n();
@@ -66,9 +63,18 @@ export default function DriverTrips() {
       <View style={s.header}>
         <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
         <Text style={s.brand}>رفيق</Text>
-        <Pressable hitSlop={8} style={s.headerBtn}>
+        {/*
+          A View, not a Pressable.
+        
+          This was a `<Pressable>` with NO `onPress` — five of them across the captain app.
+          A screen reader announced "button" and activating it did nothing, and a sighted
+          user tapped a bell that never opened anything, because the captain app has no
+          notifications screen to open. Phase 9 either adds that screen or drops the bell;
+          until then it is chrome and says so.
+        */}
+        <View style={s.headerBtn}>
           <Icon name="bell" size={24} color={theme.colors.primary} />
-        </Pressable>
+        </View>
       </View>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>{t('driver.myTrips')}</Text>
@@ -115,7 +121,7 @@ export default function DriverTrips() {
                     {time ? <Text style={s.tripTime}>{time}</Text> : null}
                     <Text style={s.tripRoute} numberOfLines={1}>{tr.route?.name ?? t('driver.pooledTrip')}</Text>
                     <View style={s.tripStatusRow}>
-                      <Icon name={completed ? 'check-circle' : 'clock'} size={13} color={completed ? theme.colors.accent : theme.colors.textSecondary} />
+                      <Icon name={completed ? 'circle-check' : 'clock'} size={13} color={completed ? theme.colors.accent : theme.colors.textSecondary} />
                       <Text style={[s.tripStatus, { color: completed ? theme.colors.accent : theme.colors.textSecondary }]}>{tr.status_label}</Text>
                       <Text style={s.tripPax}>· {tr.booked_count ?? 0}/{tr.capacity}</Text>
                     </View>

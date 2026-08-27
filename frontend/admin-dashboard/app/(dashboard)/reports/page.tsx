@@ -155,12 +155,12 @@ export default function ReportsPage() {
             <table className="w-full text-sm">
               <thead className="table-head">
                 <tr>
-                  <th className="text-right p-3 font-medium">{t('reports.colFunding')}</th>
-                  <th className="text-right p-3 font-medium">{t('reports.colRides')}</th>
-                  <th className="text-right p-3 font-medium">{t('reports.colFares')}</th>
-                  <th className="text-right p-3 font-medium">{t('reports.colCommission')}</th>
-                  <th className="text-right p-3 font-medium">{t('reports.colCaptainShare')}</th>
-                  <th className="text-right p-3 font-medium">{t('reports.colDiscount')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('reports.colFunding')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('reports.colRides')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('reports.colFares')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('reports.colCommission')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('reports.colCaptainShare')}</th>
+                  <th scope="col" className="text-right p-3 font-medium">{t('reports.colDiscount')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -197,12 +197,12 @@ export default function ReportsPage() {
               <table className="w-full text-sm">
                 <thead className="table-head">
                   <tr>
-                    <th className="text-right p-3 font-medium">{t('reports.colZone')}</th>
-                    <th className="text-right p-3 font-medium">{t('reports.colRides')}</th>
-                    <th className="text-right p-3 font-medium">{t('reports.colFares')}</th>
-                    <th className="text-right p-3 font-medium">{t('reports.colCommission')}</th>
-                    <th className="text-right p-3 font-medium">{t('reports.colRideCommission')}</th>
-                    <th className="text-right p-3 font-medium">{t('reports.colDiscount')}</th>
+                    <th scope="col" className="text-right p-3 font-medium">{t('reports.colZone')}</th>
+                    <th scope="col" className="text-right p-3 font-medium">{t('reports.colRides')}</th>
+                    <th scope="col" className="text-right p-3 font-medium">{t('reports.colFares')}</th>
+                    <th scope="col" className="text-right p-3 font-medium">{t('reports.colCommission')}</th>
+                    <th scope="col" className="text-right p-3 font-medium">{t('reports.colRideCommission')}</th>
+                    <th scope="col" className="text-right p-3 font-medium">{t('reports.colDiscount')}</th>
                   </tr>
                 </thead>
                 <tbody>

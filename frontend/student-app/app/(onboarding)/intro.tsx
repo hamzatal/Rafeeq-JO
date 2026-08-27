@@ -6,8 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useI18n } from '../../src/i18n';
 import { usePrefs } from '../../src/store/prefs';
-import { useTheme, type AppTheme } from '../../src/theme';
-import { Icon, type IconName } from '../../src/components/Icon';
+import { Icon, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
 
 interface Slide {
   icon: IconName;

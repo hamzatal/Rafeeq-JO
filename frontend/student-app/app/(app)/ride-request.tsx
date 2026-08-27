@@ -6,15 +6,9 @@ import { useRouter } from 'expo-router';
 import { legacyText as text } from '@rafeeq/tokens';
 import type { RideDirection, RideType, University } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { LiveMap } from '../../src/components/LiveMap';
-import { Icon, type IconName } from '../../src/components/Icon';
-import { Num } from '../../src/components/Num';
-import { PressableScale } from '../../src/components/kit';
-import { useToast } from '../../src/components/Feedback';
+import { getCurrentLocation, Icon, LiveMap, Num, PressableScale, useTheme, useToast, type AppTheme, type IconName } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { getCurrentLocation } from '../../src/lib/permissions';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 type ClassKey = 'economical' | 'family' | 'plus';
 interface RideClass {
@@ -27,9 +21,9 @@ interface RideClass {
   featured?: boolean;
 }
 const CLASSES: RideClass[] = [
-  { key: 'economical', labelKey: 'rideRequest.classEconomical', type: 'scheduled', capacity: 4, eta: 5, icon: 'directions-car' },
-  { key: 'family', labelKey: 'rideRequest.classFamily', type: 'scheduled', capacity: 6, eta: 8, icon: 'airport-shuttle' },
-  { key: 'plus', labelKey: 'rideRequest.classPlus', type: 'express', capacity: 4, eta: 4, icon: 'local-taxi', featured: true },
+  { key: 'economical', labelKey: 'rideRequest.classEconomical', type: 'scheduled', capacity: 4, eta: 5, icon: 'car' },
+  { key: 'family', labelKey: 'rideRequest.classFamily', type: 'scheduled', capacity: 6, eta: 8, icon: 'bus' },
+  { key: 'plus', labelKey: 'rideRequest.classPlus', type: 'express', capacity: 4, eta: 4, icon: 'car-taxi-front', featured: true },
 ];
 
 /**
@@ -59,7 +53,7 @@ export default function RideRequestScreen() {
 
   useEffect(() => {
     load();
-    void useMyLocation();
+    void applyMyLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -117,7 +111,15 @@ export default function RideRequestScreen() {
     setCovered(results.some(([, v]) => v != null));
   };
 
-  const useMyLocation = async () => {
+  /*
+   * NOT a hook, despite what the old name implied.
+   *
+   * It was `useMyLocation`, and `react-hooks/rules-of-hooks` correctly refused a
+   * call to it from inside a callback — the `use` prefix is how React decides what
+   * a hook is, and a plain async function wearing it defeats every check that
+   * matters. Renamed rather than suppressed.
+   */
+  const applyMyLocation = async () => {
     const loc = await getCurrentLocation();
     if (loc) {
       setLat(loc.lat);
@@ -171,7 +173,7 @@ export default function RideRequestScreen() {
       {/* Top app bar (RTL back + centered brand + spacer) */}
       <SafeAreaView edges={['top']} style={s.headerSafe}>
         <View style={s.header}>
-          <Pressable onPress={() => router.back()} hitSlop={8} style={s.backBtn}>
+          <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={t('a11y.back')} hitSlop={8} style={s.backBtn}>
             <Icon name="arrow-right" size={24} color={theme.colors.textSecondary} />
           </Pressable>
           <Text style={s.brand}>رفيق</Text>
@@ -191,10 +193,10 @@ export default function RideRequestScreen() {
             setLng(Number(p.lng.toFixed(6)));
           }}
         />
-        <Pressable onPress={() => setDirection((d) => (d === 'to_university' ? 'from_university' : 'to_university'))} style={[s.mapFab, { right: 16 }]} hitSlop={8}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('a11y.swapDirection')} onPress={() => setDirection((d) => (d === 'to_university' ? 'from_university' : 'to_university'))} style={[s.mapFab, { right: 16 }]} hitSlop={8}>
           <Icon name="arrow-up-down" size={20} color={theme.colors.primary} />
         </Pressable>
-        <Pressable onPress={useMyLocation} style={[s.mapFab, { right: 68 }]} hitSlop={8}>
+        <Pressable onPress={applyMyLocation} accessibilityRole="button" accessibilityLabel={t('a11y.useMyLocation')} style={[s.mapFab, { right: 68 }]} hitSlop={8}>
           <Icon name="locate-fixed" size={20} color={theme.colors.accent} />
         </Pressable>
       </View>
@@ -249,11 +251,11 @@ export default function RideRequestScreen() {
           </View>
 
           {/* Destination selector row (design-consistent with _16 payment row) */}
-          <SelectorRow theme={theme} icon="place" label={dirLabel} sub={uniName} onPress={cycleUniversity} />
+          <SelectorRow theme={theme} icon="map-pin" label={dirLabel} sub={uniName} onPress={cycleUniversity} />
 
           {/* Payment method */}
           <Text style={s.selLabel}>{t('rideRequest.paymentMethod')}</Text>
-          <SelectorRow theme={theme} icon="account-balance-wallet" label={t('rideRequest.walletPay')} sub="CliQ" onPress={() => {}} />
+          <SelectorRow theme={theme} icon="wallet" label={t('rideRequest.walletPay')} sub="CliQ" onPress={() => {}} />
         </ScrollView>
 
         {/* Sticky confirm */}

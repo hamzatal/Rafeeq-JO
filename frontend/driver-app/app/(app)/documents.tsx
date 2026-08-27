@@ -4,15 +4,10 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import type { DocumentType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Button } from '../../src/components/Button';
-import { Card } from '../../src/components/ui';
-import { Sheet } from '../../src/components/kit';
-import { Icon, type IconName } from '../../src/components/Icon';
-import { useToast } from '../../src/components/Feedback';
+import { Button, Card, Icon, Sheet, useTheme, useToast, type AppTheme, type IconName } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { useTheme, type AppTheme } from '../../src/theme';
 
 const DOC_ICON: Partial<Record<DocumentType, IconName>> = {
   national_id: 'credit-card',
@@ -142,10 +137,10 @@ export default function Documents() {
         {DOCS.map((doc) => {
           const existing = statusOf(doc.type);
           const preview = previews[doc.type];
-          const badge = existing?.status === 'approved' ? { text: t('driver.docApproved'), color: theme.colors.success, icon: 'check-circle' as IconName }
-            : existing?.status === 'rejected' ? { text: t('driver.docRejected'), color: theme.colors.danger, icon: 'x-circle' as IconName }
+          const badge = existing?.status === 'approved' ? { text: t('driver.docApproved'), color: theme.colors.success, icon: 'circle-check' as IconName }
+            : existing?.status === 'rejected' ? { text: t('driver.docRejected'), color: theme.colors.danger, icon: 'circle-x' as IconName }
             : existing ? { text: t('driver.docUnderReview'), color: theme.colors.warning, icon: 'clock' as IconName }
-            : { text: t('driver.docNotUploaded'), color: theme.colors.muted, icon: 'upload-cloud' as IconName };
+            : { text: t('driver.docNotUploaded'), color: theme.colors.muted, icon: 'cloud-upload' as IconName };
           return (
             <Card key={doc.type} style={{ marginBottom: theme.spacing.sm }}>
               <View style={s.row}>
