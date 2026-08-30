@@ -37,6 +37,9 @@ export const ar = {
      */
     forbidden: 'ما عندك صلاحية لهذا الإجراء.',
     serverError: 'صار خطأ عندنا، مو عندك. جرّب بعد لحظات.',
+    crashTitle: 'صار خطأ غير متوقّع',
+    crashBody: 'واجهنا مشكلة بعرض هذه الشاشة. باقي التطبيق يعمل بشكل طبيعي — جرّب مرة أخرى.',
+    mfaRequired: 'هذا الحساب يتطلب مصادقة ثنائية — سجّل الدخول عبر لوحة الإدارة.',
   },
 
   /**
@@ -98,6 +101,18 @@ export const ar = {
     studentNumberOptional: 'الرقم الجامعي (اختياري)',
     noUniversities: 'لا توجد جامعات متاحة حالياً',
     finish: 'تم، لنبدأ',
+    s1Title: 'وصلت لمكانك المفضل؟',
+    s1Body: 'رفيق يوصلك من باب بيتك لباب جامعتك بكل راحة وأمان.',
+    s2Title: 'تتبع رحلتك لحظة بلحظة',
+    s2Body: 'خلك مرتاح، تقدر تشوف الكابتن وين صار وتعرف متى بيوصلك بالضبط.',
+    s3Title: 'أمانك أولويتنا',
+    s3Body: 'كباتننا معتمدين وموثقين، ورحلاتنا مراقبة لضمان وصولك بسلام.',
+    d1Title: 'استقبل الطلبات على الخريطة',
+    d1Body: 'شغّل وضع الاتصال واستقبل طلبات الطلاب القريبين منك مباشرةً.',
+    d2Title: 'أرباحك بوضوح',
+    d2Body: 'تابع أرباح يومك، رتبتك، واسحب أموالك بسهولة.',
+    d3Title: 'وثّق مركبتك وانطلق',
+    d3Body: 'أكمل وثائقك ومركبتك مرة واحدة، وابدأ الكسب.',
   },
   permissions: {
     title: 'نحتاج إذنين بسيطين',
@@ -169,7 +184,6 @@ export const ar = {
     title: 'الرئيسية',
     trips: 'رحلاتي',
     wallet: 'المحفظة',
-    hello: 'أهلاً',
     goodMorning: 'صباح الخير',
     goodAfternoon: 'مساء الخير',
     goodEvening: 'مساء الخير',
@@ -178,7 +192,6 @@ export const ar = {
     /* ── Idle: the map plus one sheet ── */
     whereTo: 'إلى أين؟',
     searchDestination: 'ابحث عن وجهة',
-    frequentDestinations: 'وجهات متكرّرة',
     noDestinations: 'احفظ بيتك وجامعتك، وبعدها الطلب نقرة واحدة',
     addDestination: 'أضف وجهة',
     labelHome: 'البيت',
@@ -360,6 +373,16 @@ export const ar = {
     tripsShort: 'رحلة',
     noEarningsYet: 'لا توجد أرباح بعد — ابدأ باستقبال الرحلات',
     weekOf: 'أسبوع',
+    statusPending: 'أكمل التوثيق لتفعيل حسابك',
+    statusApproved: 'حسابك معتمد — يمكنك بدء العمل',
+    statusRejected: 'تم رفض الطلب، راجع الملاحظات',
+    statusSuspended: 'حسابك موقوف، تواصل مع الدعم',
+    totalToday: 'اليوم',
+    totalWeek: 'هذا الأسبوع',
+    totalMonth: 'هذا الشهر',
+    totalAllTime: 'الإجمالي الكلي',
+    tabDaily: 'يومي (٧ أيام)',
+    tabWeekly: 'أسبوعي (٦ أسابيع)',
   },
   subscriptions: {
     title: 'الاشتراكات',
@@ -430,6 +453,8 @@ export const ar = {
     cancelBookingMsg: 'سنُحرّر المبلغ المحجوز من محفظتك، ويعود مقعدك للطلاب الآخرين.',
     bookingCancelled: 'تم إلغاء الحجز وتحرير المبلغ المحجوز.',
     captainFallback: 'الكابتن',
+    filterCompleted: 'مكتملة',
+    filterCancelled: 'ملغاة',
   },
   wallet: {
     balance: 'الرصيد',
@@ -477,6 +502,17 @@ export const ar = {
      * retired palette. The one artefact a user KEEPS was the last place still
      * wearing a dead brand.
      */
+    receiptTopUp: 'إيصال شحن محفظة',
+    receiptTransaction: 'إيصال معاملة',
+    receiptHeading: 'تفاصيل الفاتورة',
+    receiptReference: 'الرقم المرجعي',
+    receiptHolder: 'صاحب الحساب',
+    receiptPurpose: 'الغرض',
+    receiptMethod: 'طريقة الدفع',
+    receiptStatus: 'الحالة',
+    receiptAmount: 'المبلغ',
+    receiptFooter: 'هذه فاتورة إلكترونية صادرة عن تطبيق رفيق — يُرجى الاحتفاظ بها كمرجع.',
+    receiptShare: 'فاتورة',
   },
   notifications: {
     title: 'الإشعارات',
@@ -600,6 +636,10 @@ export const ar = {
       friend: 'صديق',
       other: 'أخرى',
     },
+    addContact: 'إضافة جهة اتصال',
+    editContact: 'تعديل جهة الاتصال',
+    added: 'تمت إضافة جهة الاتصال.',
+    updated: 'تم تحديث جهة الاتصال.',
   },
   chat: {
     title: 'المحادثة',

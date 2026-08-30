@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════════════════════════
-   Structural invariants — the four things phase 7 established that a future
-   commit could quietly undo.
+   Structural invariants — what a future commit could quietly undo.
+
 
    These are all HARD ZEROS, unlike the budgets in `check-design-tokens.mjs`.
    That difference is deliberate: a budget exists when the debt is real and being
@@ -16,6 +16,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { missingKeys, unreadKeys } from './lib/i18n-keys.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SKIP = new Set(['node_modules', '.expo', '.next', 'dist', 'build', 'android', 'ios']);
@@ -327,6 +328,51 @@ function gate(id, why, findings) {
     }
   }
   gate('table-without-caption', 'add <caption className="sr-only">{…}</caption> as the table\'s first child so it has a name.', findings);
+}
+
+/* ── 9. Every translation key the apps ask for actually exists ───────────────
+ *
+ * `t()` returns the KEY when it cannot resolve one (`i18n/index.ts`), so a missing
+ * key is not a crash and not a type error — it is a screen calmly showing
+ * `driver.statusPending` to a captain. Nothing failed when phase 8.9 deleted 42
+ * live keys: the receipt PDF printed `payments.receiptHeading` as its title and
+ * the crash screen was headed `common.crashTitle`.
+ *
+ * All 42 were reached through a lookup table (`{ key: 'driver.statusPending' }`)
+ * rather than a literal `t('…')`, which is exactly what the dead-key detector
+ * could not see. This gate and that detector now share one collector — see
+ * `scripts/lib/i18n-keys.mjs` — so "dead" and "missing" are inverses by
+ * construction instead of by coincidence.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  const findings = missingKeys().map(
+    ({ key, sites }) => `${key}  ← ${sites.slice(0, 2).join(', ')}${sites.length > 2 ? ` (+${sites.length - 2})` : ''}`,
+  );
+  gate(
+    'missing-translation-key',
+    'the apps ask for these and ar.ts does not have them, so t() renders the key itself. Add them to BOTH ar.ts and en.ts, or stop referencing them.',
+    findings,
+  );
+}
+
+/* ── 10. And no key nothing asks for ────────────────────────────────────────
+ *
+ * The other half of gate 9, and the reason it is here rather than in a one-off
+ * script: the 188-key deletion was performed by a script that was RUN and never
+ * committed, so the judgement it encoded could not be reviewed, re-run, or
+ * corrected — it just landed. A dead key is cheap on its own; a dead key nobody
+ * can re-detect is how the dictionary drifts from the app in both directions.
+ *
+ * A dead translation is also the SHAPE of a feature. Sixteen keys describing a
+ * services-grid home screen outlived the screen, and the next person builds
+ * around the string instead of around the data.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  gate(
+    'dead-translation-key',
+    'nothing reads these. Delete them from ar.ts and en.ts, or wire them up — a key kept "for later" is a feature that looks half-built.',
+    unreadKeys(),
+  );
 }
 
 /* ── report ─────────────────────────────────────────────────────────────────── */
