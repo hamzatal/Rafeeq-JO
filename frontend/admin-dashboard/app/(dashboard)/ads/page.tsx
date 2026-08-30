@@ -119,6 +119,7 @@ export default function AdsPage() {
           <div className="p-6 text-center text-muted">{t('ads.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('ads.title')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('ads.colTitle')}</th>

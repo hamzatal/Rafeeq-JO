@@ -40,16 +40,46 @@ return [
      */
     'captain_debt_ceiling_fils' => (int) env('RAFEEQ_CAPTAIN_DEBT_CEILING_FILS', 10000),
 
-    'terms' => [
+    /*
+     * The legal documents, and which version of them a user agreed to.
+     *
+     * `url` and `privacy_url` were defined here and read NOWHERE — while the apps
+     * carried their own copies in `packages/shared/src/utils/legal.ts`, defaulted from
+     * `EXPO_PUBLIC_LEGAL_BASE_URL`. Two sources for the same four links, so a staging
+     * deployment that changed one and not the other shipped an app whose privacy link
+     * pointed at production. Both stores require a REACHABLE privacy policy, and under
+     * PDPL a notice the user cannot read is not a notice.
+     *
+     * They are now served by `GET /v1/config`, which every app already calls at start-up
+     * for the maps key. The app keeps its compile-time values as a fallback, so a
+     * failed config fetch degrades to a working link rather than to none.
+     */
+    'legal' => [
         'version' => env('RAFEEQ_TERMS_VERSION', '2026-08-26'),
-        'url' => env('RAFEEQ_TERMS_URL', 'https://rafeeq.jo/legal/terms'),
-        'privacy_url' => env('RAFEEQ_PRIVACY_URL', 'https://rafeeq.jo/legal/privacy'),
+        'base_url' => rtrim((string) env('RAFEEQ_LEGAL_BASE_URL', 'https://rafeeq.jo/legal'), '/'),
     ],
 
     // Hard ceiling on a single manual admin wallet credit, in fils. A manual
     // credit creates balance with no incoming bank transfer behind it, so it is
     // bounded here rather than trusted to the operator.
     'admin_credit_max_fils' => (int) env('RAFEEQ_ADMIN_CREDIT_MAX_FILS', 50000),
+
+    // The same argument for the SELF-SERVICE top-up, which had a floor and no ceiling
+    // — and which `runVerification()` can auto-approve into a wallet credit with no
+    // human in the path. 200 JOD is far above any student top-up and far below a
+    // number worth laundering through a vision model.
+    'topup_max_fils' => (int) env('RAFEEQ_TOPUP_MAX_FILS', 200000),
+
+    /*
+     * Where a failed scheduled command reports.
+     *
+     * `routes/console.php` read `env('OPS_ALERT_EMAIL')` directly — the only two
+     * `env()` calls anywhere outside `config/`. Under `php artisan config:cache`, which
+     * is the normal containerised posture, `env()` outside config returns null: the
+     * failure alerts for retention pruning and the nightly backup went nowhere, and
+     * silently. That is the failure mode that hides every other failure.
+     */
+    'ops_alert_email' => env('OPS_ALERT_EMAIL'),
 
     /*
      * ── What used to be here ─────────────────────────────────────────────────

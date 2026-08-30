@@ -69,19 +69,88 @@ class I18nContractTest extends TestCase
         return $out;
     }
 
+    /**
+     * Every key a call site asks for, INCLUDING the ones built at runtime.
+     *
+     * ── What the old regex could not see ────────────────────────────────────
+     *
+     * It was `t\(\s*['\"]key['\"]\s*\)` — a quoted literal followed IMMEDIATELY by a
+     * closing paren. Two whole shapes were therefore invisible:
+     *
+     *   • **Template literals.** `t(`ads.placement.${b.placement}`)`,
+     *     `t(`trips.status.${s || 'all'}`)`, `t(`emergency.relation.${r}`)`,
+     *     `t(`home.${greetingKey()}`)` and eleven more. Those are the keys MOST likely
+     *     to be missing, because no compiler sees them either — a new enum case on the
+     *     backend ships a raw dot-path onto the screen and this test passed.
+     *   • **A fallback second argument.** `t('disputes.status.x', d.status)` was skipped
+     *     entirely because of the `\)` anchor, which silently shrank the admin coverage.
+     *
+     * A template literal contributes its static PREFIX (`ads.placement.`), which
+     * `assertNamespaceExists` then checks is a non-empty namespace. That is the strongest
+     * claim available without evaluating the expression, and it is enough to catch a
+     * namespace that was renamed or deleted.
+     *
+     * @return array{0: array<string, true>, 1: array<string, true>} [exact keys, namespace prefixes]
+     */
     private function usedIn(array $files): array
     {
         $used = [];
+        $prefixes = [];
+
         foreach ($files as $file) {
             $code = file_get_contents($file);
-            if (preg_match_all('/\bt\(\s*[\'"]([A-Za-z][\w.\-]*)[\'"]\s*\)/', $code, $mm)) {
+
+            /* A complete literal key: quotes or backticks, and any second argument. */
+            if (preg_match_all('/\bt\(\s*[\'"`]([A-Za-z][\w.\-]*)[\'"`]\s*[,)]/', $code, $mm)) {
                 foreach ($mm[1] as $k) {
                     $used[$k] = true;
                 }
             }
+
+            /* A template literal: keep the static prefix before the first `${`. */
+            if (preg_match_all('/\bt\(\s*`([A-Za-z][\w.\-]*)\$\{/', $code, $mm)) {
+                foreach ($mm[1] as $prefix) {
+                    $prefixes[rtrim($prefix, '.')] = true;
+                }
+            }
         }
 
-        return $used;
+        return [$used, $prefixes];
+    }
+
+    /**
+     * A dynamic namespace must exist and be non-empty.
+     *
+     * `t(`plans.type.${p->type}`)` cannot be resolved statically, but `plans.type` can:
+     * if that namespace has no keys at all, every one of those call sites is rendering a
+     * raw dot-path and nobody would know.
+     *
+     * @param  array<string, true>  $prefixes
+     * @param  array<string, true>  $dictionary
+     */
+    private function assertNamespacesExist(array $prefixes, array $dictionary, string $where): void
+    {
+        $empty = [];
+        foreach (array_keys($prefixes) as $prefix) {
+            $hit = false;
+            foreach (array_keys($dictionary) as $key) {
+                /*
+                 * A prefix match, not `$prefix.'.'`. Some dynamic keys are CONCATENATED
+                 * rather than nested — `t(`home.label${kind}`)` addresses `home.labelHome`,
+                 * not `home.label.home` — so requiring the dot reported a live namespace
+                 * as empty.
+                 */
+                if (str_starts_with($key, $prefix)) {
+                    $hit = true;
+                    break;
+                }
+            }
+            if (! $hit) {
+                $empty[] = $prefix;
+            }
+        }
+
+        $this->assertSame([], $empty, "{$where}: dynamic t(`ns.\${…}`) on an empty namespace:\n".implode("\n", $empty));
     }
 
     public function test_shared_ar_and_en_have_identical_keys(): void
@@ -112,11 +181,13 @@ class I18nContractTest extends TestCase
 
         $ar = $this->parseNested(file_get_contents($arPath));
         $files = array_merge($this->sources($this->fe('student-app/app')), $this->sources($this->fe('student-app/src')), $this->sources($this->fe('driver-app/app')), $this->sources($this->fe('driver-app/src')));
-        $used = $this->usedIn($files);
+        [$used, $prefixes] = $this->usedIn($files);
         $this->assertNotEmpty($used, 'expected to find t() usages');
 
         $missing = array_keys(array_diff_key($used, $ar));
         $this->assertSame([], $missing, "mobile t('key') referencing missing translations:\n".implode("\n", $missing));
+
+        $this->assertNamespacesExist($prefixes, $ar, 'mobile');
     }
 
     public function test_admin_only_uses_existing_translation_keys(): void
@@ -131,8 +202,73 @@ class I18nContractTest extends TestCase
         $defined = array_fill_keys($mm[1], true);
         $this->assertNotEmpty($defined);
 
-        $used = $this->usedIn(array_merge($this->sources($this->fe('admin-dashboard/app')), $this->sources($this->fe('admin-dashboard/src'))));
+        [$used, $prefixes] = $this->usedIn(array_merge($this->sources($this->fe('admin-dashboard/app')), $this->sources($this->fe('admin-dashboard/src'))));
         $missing = array_keys(array_diff_key($used, $defined));
         $this->assertSame([], $missing, "admin t('key') referencing missing translations:\n".implode("\n", $missing));
+
+        $this->assertNamespacesExist($prefixes, $defined, 'admin');
+    }
+
+    /**
+     * No translation without a reader.
+     *
+     * ── Why an UNUSED key is worth failing a build over ─────────────────────
+     *
+     * A dead translation is not inert: it is the SHAPE OF A FEATURE. `rewards.*` carried
+     * eleven keys describing a points screen that does not exist, `payout.*` eight for a
+     * payout screen the captain app never built, `performance.*` seven more. The next
+     * person to touch that area builds around the strings instead of around the data —
+     * which is how the dictionary came to hold 152 dead keys out of 660 while every
+     * other gate was green.
+     *
+     * ── Why an allow-list rather than cleverness ────────────────────────────
+     *
+     * A key reached only through `t(`ns.${x}`)` cannot be proven used, and guessing
+     * would either miss real dead keys or fail on live ones. Naming the dynamic
+     * namespaces explicitly makes the exception auditable: the list is short, every
+     * entry has a call site, and adding to it is a decision someone has to write down.
+     */
+    public function test_no_shared_translation_is_unread(): void
+    {
+        $arPath = $this->fe('packages/shared/src/i18n/ar.ts');
+        if (! is_file($arPath)) {
+            $this->markTestSkipped('frontend workspace not present');
+        }
+
+        /** Namespaces whose leaves are addressed as `t(`ns.${value}`)`. */
+        $dynamic = [
+            'emergency.relation',   // emergency.tsx — the relation chips
+            'home.good',            // home.tsx — greetingKey()
+            'home.label',           // home.tsx / ride-request.tsx — saved-address labels
+            'push',                 // packages/ui/runtime/push.ts — Android channel names
+            'a11y',                 // composed labels, e.g. `${t('a11y.rateStars')} ${n}`
+        ];
+
+        $ar = $this->parseNested(file_get_contents($arPath));
+        $files = array_merge(
+            $this->sources($this->fe('student-app')),
+            $this->sources($this->fe('driver-app')),
+            $this->sources($this->fe('packages')),
+        );
+        [$used, $prefixes] = $this->usedIn($files);
+
+        $unread = [];
+        foreach (array_keys($ar) as $key) {
+            if (isset($used[$key])) {
+                continue;
+            }
+            foreach (array_merge($dynamic, array_keys($prefixes)) as $prefix) {
+                if (str_starts_with($key, $prefix)) {
+                    continue 2;
+                }
+            }
+            $unread[] = $key;
+        }
+
+        $this->assertSame(
+            [],
+            $unread,
+            count($unread)." translation key(s) nothing reads. Delete them, or wire the screen they describe:\n".implode("\n", $unread),
+        );
     }
 }

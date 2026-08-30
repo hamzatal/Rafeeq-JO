@@ -41,7 +41,9 @@
    and phase 6 already proved what that does to a Next.js build: re-exporting a
    `lucide-react-native` registry from the tokens barrel typechecked cleanly on all
    six workspaces and then failed `next build` on Flow syntax inside
-   `react-native/index.js`. `check:layers` fails the build on such an import.
+   `react-native/index.js`. The `layer-violation` gate in `scripts/check-invariants.mjs`
+   fails the build on such an import (it was named `check:layers` here, which is not a
+   script that exists — a reference to a guard that is not wired up is worse than none).
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── theme + primitives ───────────────────────────────────────────────────── */
@@ -73,6 +75,7 @@ export { TabBar } from './components/TabBar';
 export type { TabBarProps } from './components/TabBar';
 
 /* ── surfaces ─────────────────────────────────────────────────────────────── */
+export { ChatThread } from './components/ChatThread';
 export { Badge, Card, ListRow, ScreenHeader, SectionTitle, StatCard } from './components/surfaces';
 
 /* ── list states ──────────────────────────────────────────────────────────── */
@@ -131,7 +134,7 @@ export type { TokenStorage } from './runtime/storage';
 export { createPrefsStore } from './runtime/prefs';
 export type { PrefsState, PrefsStore } from './runtime/prefs';
 export { I18nProvider, useI18n } from './runtime/i18n';
-export { getMapsKey, getMapsProvider, loadAppConfig } from './runtime/appConfig';
+export { getLegalUrl, getMapsKey, getMapsProvider, getTermsVersion, loadAppConfig } from './runtime/appConfig';
 export {
   getCurrentLocation,
   getLocationState,

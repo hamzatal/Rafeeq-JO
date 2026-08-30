@@ -69,6 +69,22 @@ aside { scrollbar-color: rgba(18,47,107,0.22) transparent; }
   .table-head { @apply bg-brand-50 text-muted border-b border-line; }
   .row-line { @apply border-t border-line; }
 
+  /*
+   * Every number in every table lines up, from one rule.
+   *
+   * `src/components/Num.tsx` exists for this and defaults `tabular = true`, and it was
+   * used in zero table bodies — `tabular-nums` appeared twice in 24 tables. The visible
+   * cost is a proportional digit column that shifts as values change; the worse one is
+   * `{r.pickup_lat.toFixed(4)}, {r.pickup_lng.toFixed(4)}`, two proportional digit runs
+   * separated by a bidi-neutral comma inside an RTL cell, which is exactly the
+   * reordering `Num`'s docblock describes.
+   *
+   * Applying it to `td`/`th` rather than per cell means a new column gets it for free,
+   * which is the only version of this fix that stays true.
+   */
+  table td,
+  table th { font-variant-numeric: tabular-nums; }
+
   /* Sidebar nav items — muted text, brand-tinted active state */
   .nav-item {
     @apply flex items-center gap-3 mx-2 my-0.5 px-4 py-3 rounded-lg text-sm font-medium text-muted hover:text-primary hover:bg-brand-100 transition-colors;

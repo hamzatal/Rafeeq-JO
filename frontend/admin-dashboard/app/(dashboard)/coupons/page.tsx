@@ -5,6 +5,7 @@ import { formatJod } from '@rafeeq/shared';
 import type { Coupon, CouponScope, CouponType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
@@ -25,16 +26,22 @@ const EMPTY = {
 const SCOPES: CouponScope[] = ['any', 'subscription', 'wallet_topup', 'ride'];
 
 export default function CouponsPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [items, setItems] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [form, setForm] = useState({ ...EMPTY });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
-    api.admin.listCoupons({ per_page: 100 }).then((r) => setItems(r.items)).finally(() => setLoading(false));
+    setLoadError(false);
+    api.admin
+      .listCoupons({ per_page: 100 })
+      .then((r) => setItems(r.items))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => load(), [load]);
@@ -70,9 +77,17 @@ export default function CouponsPage() {
     }
   };
 
-  const toggle = (c: Coupon) => api.admin.updateCoupon(c.id, { is_active: !c.is_active }).then(load);
+  /* A silent failure left the row exactly as it was, so the operator clicked again —
+     on a control that publishes or withdraws a discount. */
+  const toggle = (c: Coupon) =>
+    api.admin
+      .updateCoupon(c.id, { is_active: !c.is_active })
+      .then(load)
+      .catch(() => setError(t('coupons.saveFailed')));
+
   const remove = (c: Coupon) => {
-    if (confirm(`${t('coupons.deleteConfirm')} ${c.code}`)) api.admin.deleteCoupon(c.id).then(load);
+    if (!confirm(`${t('coupons.deleteConfirm')} ${c.code}`)) return;
+    api.admin.deleteCoupon(c.id).then(load).catch(() => setError(t('coupons.saveFailed')));
   };
   const valueLabel = (c: Coupon) =>
     c.type === 'percentage' ? `${c.value}%` : formatJod(c.value);
@@ -113,10 +128,13 @@ export default function CouponsPage() {
       <div className="card p-0 overflow-hidden">
         {loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('coupons.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('coupons.title')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('coupons.colCode')}</th>
@@ -135,7 +153,7 @@ export default function CouponsPage() {
                   <td className="p-3 text-muted">{valueLabel(c)}</td>
                   <td className="p-3 text-muted">{c.scope_label}</td>
                   <td className="p-3 text-muted">{c.used_count}{c.usage_limit ? ` / ${c.usage_limit}` : ''}</td>
-                  <td className="p-3 text-muted font-mono">{c.expires_at ? new Date(c.expires_at).toLocaleDateString('ar') : '—'}</td>
+                  <td className="p-3 text-muted font-mono">{c.expires_at ? new Date(c.expires_at).toLocaleDateString(locale) : '—'}</td>
                   <td className="p-3">
                     <button onClick={() => toggle(c)} className={`badge ${c.is_active ? 'bg-green-100 text-success' : 'bg-slate-100 text-muted'}`}>
                       {c.is_active ? t('coupons.active') : t('coupons.inactive')}

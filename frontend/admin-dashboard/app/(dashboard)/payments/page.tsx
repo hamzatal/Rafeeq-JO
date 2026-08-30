@@ -5,6 +5,7 @@ import { formatJod } from '@rafeeq/shared';
 import type { PaymentRequest } from '@rafeeq/shared';
 import { ENDPOINTS } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 
 const STATUSES = [
   { value: '', label: 'قيد المراجعة' },
@@ -25,13 +26,16 @@ export default function PaymentsPage() {
   const [items, setItems] = useState<PaymentRequest[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
+    setLoadError(false);
     api.payments
       .adminQueue(status || undefined)
       .then(setItems)
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, [status]);
 
@@ -94,10 +98,13 @@ export default function PaymentsPage() {
       <div className="card p-0 overflow-hidden">
         {loading ? (
           <div className="p-6 text-center text-muted">جارٍ التحميل...</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">لا توجد مدفوعات</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">المدفوعات</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">الرقم</th>

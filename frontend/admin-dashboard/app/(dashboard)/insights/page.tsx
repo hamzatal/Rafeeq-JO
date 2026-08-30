@@ -34,7 +34,7 @@ function Stat({ label, value, icon }: { label: string; value: string; icon: stri
 }
 
 export default function InsightsPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [data, setData] = useState<AdminInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export default function InsightsPage() {
               {data.source === 'ai' ? t('insights.sourceAi') : t('insights.sourceRules')}
             </span>
             <span className="text-muted font-mono">
-              {new Date(data.generated_at).toLocaleString('ar')}
+              {new Date(data.generated_at).toLocaleString(locale)}
             </span>
           </div>
 

@@ -105,6 +105,7 @@ export default function CliqPage() {
           <div className="p-6 text-center text-muted">{t('cliq.noTopups')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('cliq.title')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-start p-3 font-medium">{t('cliq.number')}</th>

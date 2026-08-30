@@ -20,7 +20,7 @@ class SafetyAdminController extends Controller
             $query->where('severity', $severity);
         }
 
-        $flags = $query->paginate((int) $request->query('per_page', 30));
+        $flags = $query->paginate($this->perPage($request, 30));
 
         return $this->ok($flags->through(fn (RiskFlag $f) => [
             'id' => $f->id,
@@ -44,7 +44,7 @@ class SafetyAdminController extends Controller
 
     public function cancellations(Request $request): JsonResponse
     {
-        $logs = CancellationLog::query()->latest('created_at')->paginate((int) $request->query('per_page', 30));
+        $logs = CancellationLog::query()->latest('created_at')->paginate($this->perPage($request, 30));
 
         return $this->ok($logs->through(fn (CancellationLog $c) => [
             'id' => $c->id,

@@ -64,7 +64,7 @@ class SubscriptionController extends Controller
             $query->where('status', $status);
         }
 
-        return $this->ok(SubscriptionResource::collection($query->paginate((int) $request->query('per_page', 30))));
+        return $this->ok(SubscriptionResource::collection($query->paginate($this->perPage($request, 30))));
     }
 
     public function activate(Subscription $subscription): JsonResponse

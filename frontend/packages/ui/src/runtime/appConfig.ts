@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import type { RafeeqApi } from '@rafeeq/api-client';
+import { LEGAL_URLS, type AppConfig, type LegalDocument } from '@rafeeq/shared';
 
 /**
  * Runtime config fetched from the backend (`GET /v1/config`).
@@ -32,7 +33,50 @@ export async function loadAppConfig(api: RafeeqApi): Promise<void> {
     const cfg = await api.config.get();
     if (cfg?.maps?.key) mapsKey = cfg.maps.key;
     if (cfg?.maps?.provider) mapsProvider = cfg.maps.provider;
+    if (cfg?.legal) legal = cfg.legal;
   } catch {
     /* offline or not configured — the fallback above works */
   }
+}
+
+/**
+ * The legal documents, from the server when we have it and from the build when we
+ * do not.
+ *
+ * ── Why the server is preferred ─────────────────────────────────────────────
+ *
+ * `config/rafeeq.php` defined `terms.url` and `terms.privacy_url` and read them
+ * nowhere, while `packages/shared/src/utils/legal.ts` carried its own copies
+ * defaulted from `EXPO_PUBLIC_LEGAL_BASE_URL`. Two sources for the same four links:
+ * a staging deploy that changed one and not the other shipped an app whose privacy
+ * link pointed at production, and nothing failed.
+ *
+ * ── Why the fallback stays ──────────────────────────────────────────────────
+ *
+ * `loadAppConfig` is fire-and-forget by design (a slow config call must not delay
+ * the splash), so the first render can happen before the answer arrives. Both app
+ * stores require a reachable privacy policy from INSIDE the app, so a link that is
+ * momentarily absent is a rejection risk; a link that is momentarily the build-time
+ * default is not.
+ */
+let legal: AppConfig['legal'] | null = null;
+
+export function getLegalUrl(doc: LegalDocument): string {
+  if (legal) {
+    const fromServer = ({
+      terms: legal.terms_url,
+      privacy: legal.privacy_url,
+      retention: legal.retention_url,
+      prohibited: legal.prohibited_url,
+    } as const)[doc];
+
+    if (fromServer) return fromServer;
+  }
+
+  return LEGAL_URLS[doc];
+}
+
+/** The terms version to DISPLAY. What was accepted is stamped server-side. */
+export function getTermsVersion(): string | null {
+  return legal?.version ?? null;
 }

@@ -3,7 +3,6 @@
 export const API_VERSION = 'v1';
 
 export const ENDPOINTS = {
-  ping: '/ping',
   config: '/config',
   zones: '/zones',
   ads: '/ads',
@@ -25,7 +24,6 @@ export const ENDPOINTS = {
     me: '/auth/me',
     becomeDriver: '/auth/become-driver',
     logout: '/auth/logout',
-    logoutAll: '/auth/logout-all',
   },
   profile: {
     base: '/profile',
@@ -48,11 +46,9 @@ export const ENDPOINTS = {
   },
   universities: {
     list: '/universities',
-    one: (id: string) => `/universities/${id}`,
   },
   routes: {
     list: '/routes',
-    one: (id: string) => `/routes/${id}`,
   },
   transport: {
     plans: '/plans',
@@ -142,7 +138,6 @@ export const ENDPOINTS = {
   },
   rewards: {
     show: '/rewards',
-    transactions: '/rewards/transactions',
     options: '/rewards/options',
     redeem: '/rewards/redeem',
     redeemWallet: '/rewards/redeem-wallet',
@@ -222,5 +217,25 @@ export const ENDPOINTS = {
   },
 } as const;
 
+/**
+ * How many digits an OTP has.
+ *
+ * It was exported and read by nothing, while both `otp.tsx` screens hard-coded
+ * `maxLength={6}` and a six-dash placeholder — three copies of one number, and the
+ * backend has a fourth (`Modules/Auth`). Deleting it would have left the three
+ * copies; wiring it leaves one.
+ *
+ * Distinct from the BOARDING code, which is 4 digits (decision 14) — that difference
+ * is deliberate and is why neither number should be a literal at a call site.
+ */
 export const OTP_LENGTH = 6;
+
+/**
+ * The captain tier ladder, in order.
+ *
+ * `reward_accounts.tier` is read by the captain dashboard through
+ * `ENDPOINTS.driver.performance`. Kept rather than deleted because the ORDER is the
+ * meaning — "next tier" is only computable from a sequence — and a screen that
+ * re-derives it will get it wrong.
+ */
 export const REWARD_TIERS = ['bronze', 'silver', 'gold', 'platinum'] as const;

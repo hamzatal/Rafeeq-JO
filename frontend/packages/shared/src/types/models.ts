@@ -868,6 +868,20 @@ export interface AppConfig {
     mapbox_token: string;
     default_center: { lat: number; lng: number };
   };
+  /**
+   * The legal documents, served so the app and the server cannot disagree.
+   *
+   * `LEGAL_URLS` in `utils/legal.ts` remains the compile-time fallback: a failed
+   * config fetch must degrade to a working link, not to none — both app stores
+   * require a reachable privacy policy from inside the app.
+   */
+  legal: {
+    version: string;
+    terms_url: string;
+    privacy_url: string;
+    retention_url: string;
+    prohibited_url: string;
+  };
   features: {
     realtime: boolean;
   };

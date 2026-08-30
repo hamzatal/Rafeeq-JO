@@ -211,6 +211,124 @@ function gate(id, why, findings) {
   gate('duplicated-app-file', 'this file is identical in both apps. Move it to packages/ui and pass the difference in as an argument.', findings);
 }
 
+/* ── 6. A fetch that can fail has a failure branch ───────────────────────────
+ *
+ * `admin-dashboard/src/components/LoadError.tsx` was written for exactly this bug and
+ * its own docblock names it: "Six pages fetched with `.then(setItems).finally(…)` and
+ * no `.catch()`… the page rendered its EMPTY state." Nineteen of the twenty-four
+ * `(dashboard)` pages then never imported it.
+ *
+ * An empty state is a CLAIM ABOUT THE DATA. On `/withdrawals` the claim is "there are
+ * no pending payouts", which an operator acts on by going home. Gate 4 is the RN side
+ * of this invariant; this is the web side.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  const findings = [];
+  for (const file of walk(resolve(ROOT, 'admin-dashboard/app'))) {
+    const src = code(readFileSync(file, 'utf8'));
+
+    /*
+     * Split into STATEMENTS first, then ask each one whether it handles failure.
+     *
+     * Two earlier versions of this scan were wrong in opposite ways, and both produced
+     * false positives — which is how a gate gets deleted rather than obeyed:
+     *
+     *   • stopping at the next `;` cut `.then((p) => { setA(p); setB(p); }).catch(…)`
+     *     in half, so four already-correct files were reported;
+     *   • walking forward from `api.` broke on `Promise.all([api.a(), api.b()]).catch(…)`,
+     *     because the inner call's scan hits `]` and ends before the `.catch`.
+     *
+     * A statement is the unit that either has a failure branch or does not, so that is
+     * the unit to test.
+     *
+     * Depth counts `(` and `[` ONLY, not `{`. Counting braces made every line inside a
+     * component body depth ≥ 1 — so the whole component was one "statement", and one
+     * `.catch` anywhere in the file cleared every chain in it. That is the third way to
+     * get this wrong, and the quietest: the gate reported zero.
+     */
+    const statements = [];
+    let depth = 0;
+    let from = 0;
+    for (let i = 0; i < src.length; i += 1) {
+      const ch = src[i];
+      if ('(['.includes(ch)) depth += 1;
+      else if (')]'.includes(ch)) depth -= 1;
+      else if (ch === ';' && depth <= 0) {
+        statements.push([from, src.slice(from, i)]);
+        from = i + 1;
+      }
+    }
+
+    for (const [offset, statement] of statements) {
+      if (!statement.includes('api.') || !statement.includes('.then(')) continue;
+      if (statement.includes('.catch(')) continue;
+      findings.push(`${relative(ROOT, file)}:${src.slice(0, offset).split('\n').length + 1}`);
+    }
+  }
+  gate(
+    'fetch-without-catch',
+    'a rejected promise leaves the page on its EMPTY state, which asserts the data is empty. Add .catch(() => setLoadError(true)) and render <LoadError onRetry={load}/> before the length===0 branch.',
+    findings,
+  );
+}
+
+/* ── 7. No hardcoded locale in a formatter ───────────────────────────────────
+ *
+ * `toLocaleString('en-US')` on an Arabic RTL dashboard freezes the grouping separator
+ * while the date beside it is locale-aware, so one card shows both conventions.
+ * `toLocaleString('ar')` is worse: `'ar'` without a region resolves to the Arabic ROOT
+ * locale, whose default calendar in several ICU builds is islamic — so a Hijri date can
+ * appear beside a Gregorian one, and did, on the PDF receipt a user keeps.
+ *
+ * An empty argument list is the third shape: it follows the OS, so the audit log was the
+ * one table whose date format depended on the reader's laptop.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  const findings = [];
+  for (const app of ['student-app', 'driver-app', 'admin-dashboard', 'packages']) {
+    for (const file of walk(resolve(ROOT, app))) {
+      const raw = readFileSync(file, 'utf8');
+      const src = code(raw);
+      for (const m of src.matchAll(/\.toLocale(?:Date|Time)?String\(\s*[,)]/g)) {
+        findings.push(`${relative(ROOT, file)}:${raw.slice(0, m.index).split('\n').length}  (no locale — follows the OS)`);
+      }
+      /*
+       * A literal locale. `code()` blanks strings, so the argument is invisible there —
+       * the scan runs on the raw source and then confirms there is real code under the
+       * match, which is what keeps a comment naming the bug from failing the gate.
+       */
+      for (const m of raw.matchAll(/\.toLocale(?:Date|Time)?String\(\s*['"][a-zA-Z][\w-]*['"]/g)) {
+        if (src.slice(m.index, m.index + 12).trim() === '') continue;
+        findings.push(`${relative(ROOT, file)}:${raw.slice(0, m.index).split('\n').length}  ${m[0].trim()}`);
+      }
+    }
+  }
+  gate(
+    'hardcoded-locale',
+    "pass the user's locale: `toLocaleString(locale)` from useT()/useI18n(), or getApiLocale() inside packages/ui.",
+    findings,
+  );
+}
+
+/* ── 8. Every table has an accessible name ───────────────────────────────────
+ *
+ * `scope="col"` (gate 2) tells a screen reader which column a cell belongs to. It does
+ * not say WHICH TABLE the reader is in. All 24 admin tables had no `<caption>`, so
+ * tabbing into `/withdrawals` announced "table, 6 columns" and nothing else.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  const findings = [];
+  for (const file of walk(resolve(ROOT, 'admin-dashboard'))) {
+    const src = code(readFileSync(file, 'utf8'));
+    const tables = (src.match(/<table\b/g) ?? []).length;
+    const captions = (src.match(/<caption\b/g) ?? []).length;
+    if (tables > captions) {
+      findings.push(`${relative(ROOT, file)}  ${tables} table(s), ${captions} caption(s)`);
+    }
+  }
+  gate('table-without-caption', 'add <caption className="sr-only">{…}</caption> as the table\'s first child so it has a name.', findings);
+}
+
 /* ── report ─────────────────────────────────────────────────────────────────── */
 
 console.log('\nstructural invariants\n');

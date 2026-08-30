@@ -52,12 +52,44 @@ class RideBillingService extends BaseService
         $commission = $split['commission_fils'];
         $captainShare = $split['captain_share_fils'];
 
+        /*
+         * The payment method is resolved HERE, before the coupon, and that ordering is
+         * the whole fix.
+         *
+         * ── What the old order cost ────────────────────────────────────────────
+         *
+         * `$method` used to be read inside the transaction below, after `$discount` had
+         * already been computed and capped. So on a CASH ride the coupon block ran, a
+         * discount was calculated — and then three things went wrong at once:
+         *
+         *   1. **The rider never got the discount.** On cash they hand physical notes to
+         *      the captain at the published band price. `$payable` was computed and then
+         *      never used on that path.
+         *   2. **The platform forgave its commission for nobody's benefit.** The cash
+         *      branch charged the captain `commission - discount`, so the discount was a
+         *      pure loss that landed in the captain's pocket instead of the rider's.
+         *   3. **The coupon was never consumed, so it was infinitely reusable.**
+         *      `redeem()` sits inside the wallet branch, which cash skips — and `redeem()`
+         *      is the only place `used_count` is incremented and the only place a
+         *      `CouponRedemption` row is written. `validate()` therefore kept approving
+         *      the same code forever: one `first_order_only` coupon became a standing,
+         *      unlimited commission waiver on every cash ride its holder ever took.
+         *
+         * And `coupon_discount_fils` was written onto the accounting row regardless, so
+         * the financial report asserted a discount no rider had received.
+         *
+         * A platform-funded discount only works where the platform is holding the money.
+         * On cash it is not, so there is no discount to give — and saying so here, once,
+         * is what keeps the three consequences above impossible.
+         */
+        $method = $passenger->payment_method ?? PaymentMethod::Wallet;
+
         // Coupon (platform-funded): reduces what the STUDENT pays. The captain
         // still receives the full share — the platform absorbs the discount from
         // its commission. An invalid/expired coupon never blocks the ride.
         $discount = 0;
         $couponToRedeem = null;
-        if ($passenger->coupon_code && ! $passenger->subscription_id) {
+        if ($passenger->coupon_code && ! $passenger->subscription_id && $method !== PaymentMethod::Cash) {
             try {
                 $payer = User::find($passenger->student_id);
                 if ($payer) {
@@ -95,7 +127,7 @@ class RideBillingService extends BaseService
         $discount = min($discount, $commission);
         $payable = max(0, $fare - $discount);
 
-        $this->transaction(function () use ($passenger, $trip, $fare, $payable, $discount, $couponToRedeem, $commission, $captainShare) {
+        $this->transaction(function () use ($passenger, $trip, $fare, $payable, $discount, $couponToRedeem, $commission, $captainShare, $method) {
             // Student pays from wallet only when no subscription covers this ride.
             // Cash inverts the money flow. On wallet the platform holds the fare and
             // pays the captain their share. On cash the captain already holds the whole
@@ -105,8 +137,6 @@ class RideBillingService extends BaseService
             // The fare is still recorded at the published band price either way, so the
             // accounting row is identical and the tariff stays auditable. What changes
             // is only who is holding the money.
-            $method = $passenger->payment_method ?? PaymentMethod::Wallet;
-
             $student = null;
             if (! $passenger->subscription_id && $method !== PaymentMethod::Cash) {
                 $student = User::find($passenger->student_id);
@@ -161,7 +191,11 @@ class RideBillingService extends BaseService
                 // commission. Taken from their balance where it covers it, and recorded
                 // as debt where it does not — see CaptainDebtService, which credits the
                 // treasury as and when the money is actually collected.
-                $this->debts->chargeCommission($captainWallet, $commission - $discount, $trip->id);
+                //
+                // The FULL commission: `$discount` is now guaranteed to be 0 on this
+                // branch (see the ordering note above), because a platform-funded
+                // discount cannot be given out of money the platform is not holding.
+                $this->debts->chargeCommission($captainWallet, $commission, $trip->id);
             } else {
                 $this->wallets->credit(
                     $captainWallet,

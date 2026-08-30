@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Payments\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Http\Controllers\Controller;
 use Rafeeq\Modules\Payments\Models\Payment;
@@ -74,7 +75,7 @@ class PaymentController extends Controller
         $items = PaymentRequest::where('user_id', $request->user()->id)
             ->with('payments')
             ->latest()
-            ->paginate((int) $request->query('per_page', 20));
+            ->paginate($this->perPage($request, 20));
 
         return $this->ok(PaymentRequestResource::collection($items));
     }
@@ -93,7 +94,16 @@ class PaymentController extends Controller
     /** Review queue — pending/under-review requests for the finance team. */
     public function queue(Request $request): JsonResponse
     {
-        $status = $request->query('status');
+        /*
+         * Validated, because an unknown value used to reach `where('status', …)` and
+         * return an EMPTY PAGE. On the finance review queue that reads as «لا مدفوعات
+         * معلّقة» — the team concludes there is nothing to approve. A typo in a
+         * bookmarked URL is enough. Not injectable (the binding is parameterised);
+         * the failure is that it lies rather than that it leaks.
+         */
+        $status = $request->validate([
+            'status' => ['sometimes', 'nullable', Rule::in(PaymentStatus::values())],
+        ])['status'] ?? null;
 
         $items = PaymentRequest::query()
             ->when($status, fn ($q) => $q->where('status', $status))
@@ -103,7 +113,7 @@ class PaymentController extends Controller
             ]))
             ->with(['payments', 'user'])
             ->latest()
-            ->paginate((int) $request->query('per_page', 20));
+            ->paginate($this->perPage($request, 20));
 
         return $this->ok(PaymentRequestResource::collection($items));
     }

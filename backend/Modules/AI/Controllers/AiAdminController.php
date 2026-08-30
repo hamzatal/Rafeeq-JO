@@ -27,7 +27,7 @@ class AiAdminController extends Controller
     /** Highest-risk accounts for the safety center. */
     public function risks(Request $request): JsonResponse
     {
-        return $this->ok($this->fraud->topRisks((int) $request->query('limit', 20)));
+        return $this->ok($this->fraud->topRisks($this->limit($request, 20)));
     }
 
     /**

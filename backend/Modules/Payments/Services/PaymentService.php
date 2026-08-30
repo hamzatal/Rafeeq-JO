@@ -353,24 +353,47 @@ class PaymentService extends BaseService
                 ])->save();
             }
 
-            $this->fulfil($request);
-
-            // Consume the coupon (if any) now that the payment is approved.
-            // Wrapped so a redemption-recording hiccup never blocks fulfilment.
+            /*
+             * ── Redeem BEFORE fulfilling, and let a failure roll the approval back ──
+             *
+             * This block used to sit AFTER `fulfil()` and inside `Safely::run`, whose own
+             * docblock says «Do NOT use this around essential logic». It was around the
+             * only essential logic there is: `CouponService::redeem()` is the single place
+             * `used_count` is incremented and the single place a `CouponRedemption` row is
+             * written, so it is the ONLY enforcement of `max_redemptions`,
+             * `per_user_limit` and `first_order_only`.
+             *
+             * The limits are checked by `validate()` at CREATE time, one request earlier,
+             * when zero redemptions exist. So the exploit was: create N top-up requests
+             * all carrying the same `per_user_limit: 1` code. Every `validate()` passes.
+             * Every approval fulfils. `redeem()` succeeds once and the other N−1 throw
+             * `COUPON_PER_USER_LIMIT` straight into `Safely::run`, which logs a warning
+             * and discards it — while the discount has already been applied to all N.
+             *
+             * And `fulfilWalletTopup()` credits `amount_fils + discount_fils` (the
+             * pre-discount total, which is correct for one legitimate use), so each extra
+             * approval **mints exactly `discount_fils` of wallet balance with no bank
+             * transfer behind it** — withdrawable as real cash through `PayoutService`.
+             *
+             * Two changes close it: redeem first, so nothing is fulfilled against a coupon
+             * that cannot be consumed; and no `Safely::run`, so the throw reaches the
+             * enclosing transaction and the approval rolls back. `redeem()` takes the
+             * coupon row under `lockForUpdate()`, which is what makes the re-check real.
+             */
             if ($request->coupon_id) {
-                Safely::run(function () use ($request) {
-                    $coupon = Coupon::find($request->coupon_id);
-                    if ($coupon && $request->user) {
-                        $this->coupons->redeem(
-                            $coupon,
-                            $request->user,
-                            (int) $request->discount_fils,
-                            'payment_request',
-                            $request->id,
-                        );
-                    }
-                }, 'payment.coupon_redeem', ['request' => $request->id]);
+                $coupon = Coupon::find($request->coupon_id);
+                if ($coupon && $request->user) {
+                    $this->coupons->redeem(
+                        $coupon,
+                        $request->user,
+                        (int) $request->discount_fils,
+                        'payment_request',
+                        $request->id,
+                    );
+                }
             }
+
+            $this->fulfil($request);
 
             $this->audit->log($auto ? 'payment.auto_approved' : 'payment.approved', $actor, auditable: $request, changes: [
                 'number' => $request->number,
@@ -409,25 +432,56 @@ class PaymentService extends BaseService
         });
     }
 
+    /**
+     * Refuse a payment request.
+     *
+     * ── Why this needs the same lock `approve()` has ────────────────────────────
+     *
+     * It had neither a transaction nor a lock: the `isFinal()` guard read the
+     * route-model-bound instance, then two bare `save()` calls followed.
+     *
+     * `approve()` is reachable from a QUEUE WORKER — `runVerification()` auto-approves
+     * on the vision model's verdict — so "an admin clicks reject while the AI approves"
+     * is not a contrived interleaving, it is the normal operating mode. Both guards pass
+     * on stale reads; `approve()` credits the wallet or activates the subscription and
+     * writes `Approved`; `reject()` then overwrites the row to `Rejected`.
+     *
+     * The result is a payment the platform FULFILLED and its own ledger says it refused.
+     * There is no compensating reversal here, so the wallet credit stays, and no approved
+     * `payment_request` explains it — invisible to the finance report and to
+     * reconciliation. That is the worst shape a money bug can take: real, silent, and
+     * only findable by counting.
+     */
     public function reject(PaymentRequest $request, User $actor, string $reason): PaymentRequest
     {
-        if ($request->status->isFinal()) {
-            throw new BusinessRuleException('لا يمكن رفض طلب منتهٍ.', 'REQUEST_FINAL');
-        }
+        return $this->transaction(function () use ($request, $actor, $reason) {
+            /* Re-read and re-check UNDER the lock, exactly as `approve()` does. */
+            $locked = PaymentRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
 
-        $request->forceFill([
-            'status' => PaymentStatus::Rejected,
-            'reject_reason' => $reason,
-        ])->save();
+            if ($locked->status->isFinal()) {
+                throw new BusinessRuleException('لا يمكن رفض طلب منتهٍ.', 'REQUEST_FINAL');
+            }
 
-        $request->payments()->latest()->first()?->forceFill([
-            'status' => 'rejected',
-            'verified_by' => 'admin',
-            'notes' => $reason,
-        ])->save();
+            $locked->forceFill([
+                'status' => PaymentStatus::Rejected,
+                'reject_reason' => $reason,
+            ])->save();
 
-        $this->audit->log('payment.rejected', $actor, auditable: $request, changes: ['reason' => $reason]);
+            $locked->payments()->latest()->first()?->forceFill([
+                'status' => 'rejected',
+                'verified_by' => 'admin',
+                'notes' => $reason,
+            ])->save();
 
+            $this->audit->log('payment.rejected', $actor, auditable: $locked, changes: ['reason' => $reason]);
+
+            return $this->afterReject($locked, $reason);
+        });
+    }
+
+    /** The rejection notice. Split out only to keep the locked block short. */
+    private function afterReject(PaymentRequest $request, string $reason): PaymentRequest
+    {
         if ($request->user) {
             $this->notifications->notify(
                 $request->user,

@@ -25,7 +25,7 @@ class AdminCouponController extends Controller
             $query->where('is_active', $request->boolean('active'));
         }
 
-        return $this->ok(CouponResource::collection($query->paginate((int) $request->query('per_page', 50))));
+        return $this->ok(CouponResource::collection($query->paginate($this->perPage($request, 50))));
     }
 
     public function store(StoreCouponRequest $request): JsonResponse

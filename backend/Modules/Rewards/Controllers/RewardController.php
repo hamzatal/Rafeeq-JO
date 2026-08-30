@@ -42,7 +42,7 @@ class RewardController extends Controller
         $account = $this->rewards->account($request->user());
 
         return $this->ok(
-            $account->transactions()->paginate((int) $request->query('per_page', 30))
+            $account->transactions()->paginate($this->perPage($request, 30))
         );
     }
 

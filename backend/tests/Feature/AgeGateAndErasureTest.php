@@ -92,7 +92,7 @@ class AgeGateAndErasureTest extends TestCase
         $this->register()->assertSuccessful();
 
         $user = User::where('phone_hash', BlindIndex::phone('+962791234567'))->firstOrFail();
-        $this->assertSame((string) config('rafeeq.terms.version'), $user->terms_version);
+        $this->assertSame((string) config('rafeeq.legal.version'), $user->terms_version);
         $this->assertNotNull($user->terms_accepted_at);
         $this->assertTrue($user->hasAcceptedCurrentTerms());
     }
@@ -102,7 +102,7 @@ class AgeGateAndErasureTest extends TestCase
         $this->register()->assertSuccessful();
         $user = User::where('phone_hash', BlindIndex::phone('+962791234567'))->firstOrFail();
 
-        config(['rafeeq.terms.version' => '2027-01-01']);
+        config(['rafeeq.legal.version' => '2027-01-01']);
 
         $this->assertFalse($user->fresh()->hasAcceptedCurrentTerms(),
             'a new terms version must require fresh consent');

@@ -36,7 +36,9 @@ class StudentTripController extends Controller
             ->where('status', TripStatus::Scheduled->value)
             ->where('scheduled_at', '>', now())
             ->when($request->query('route_id'), fn ($q, $r) => $q->where('route_id', $r))
-            ->orderBy('scheduled_at')->get();
+            /* Bounded: `scheduled_at > now()` is the only limit this had, so the list
+               grew with how far ahead captains schedule. */
+            ->orderBy('scheduled_at')->paginate($this->perPage($request, 30));
 
         return $this->ok(TripResource::collection($trips));
     }
@@ -75,7 +77,10 @@ class StudentTripController extends Controller
                 'trip.route', 'trip.driver.user', 'trip.vehicle',
             ])
             ->where('student_id', $request->user()->id)
-            ->latest()->get();
+            /* Paginated: this is EVERY booking the student has ever made, with four
+               eager-loaded relations each. The N+1 was fixed (see `withRiderCount`
+               above); the unbounded row count was not. */
+            ->latest()->paginate($this->perPage($request, 30));
 
         return $this->ok(TripPassengerResource::collection($passengers));
     }

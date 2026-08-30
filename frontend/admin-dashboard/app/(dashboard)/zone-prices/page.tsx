@@ -114,6 +114,7 @@ export default function ZonePricesPage() {
           <div className="p-6 text-center text-muted">{t('zonePrices.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('zonePrices.title')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('zonePrices.colZone')}</th>

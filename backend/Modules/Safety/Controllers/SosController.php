@@ -81,7 +81,7 @@ class SosController extends Controller
             $query->where('status', 'open');
         }
 
-        return $this->ok($query->paginate((int) $request->query('per_page', 30))->through(fn (SosIncident $i) => [
+        return $this->ok($query->paginate($this->perPage($request, 30))->through(fn (SosIncident $i) => [
             'id' => $i->id,
             'user_id' => $i->user_id,
             'trip_id' => $i->trip_id,

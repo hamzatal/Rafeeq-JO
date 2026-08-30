@@ -23,7 +23,7 @@ class SupportController extends Controller
     {
         $items = SupportTicket::where('user_id', $request->user()->id)
             ->latest('last_reply_at')
-            ->paginate((int) $request->query('per_page', 20));
+            ->paginate($this->perPage($request, 20));
 
         return $this->ok(SupportTicketResource::collection($items));
     }
@@ -70,7 +70,7 @@ class SupportController extends Controller
             $query->where('level', (int) $level);
         }
 
-        return $this->ok(SupportTicketResource::collection($query->paginate((int) $request->query('per_page', 30))));
+        return $this->ok(SupportTicketResource::collection($query->paginate($this->perPage($request, 30))));
     }
 
     public function escalate(Request $request, SupportTicket $ticket): JsonResponse

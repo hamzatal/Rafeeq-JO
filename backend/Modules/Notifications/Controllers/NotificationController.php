@@ -25,7 +25,7 @@ class NotificationController extends Controller
             $query->where('category', $category);
         }
 
-        $items = $query->latest()->paginate((int) $request->query('per_page', 20));
+        $items = $query->latest()->paginate($this->perPage($request, 20));
 
         return $this->ok(NotificationResource::collection($items), null, [
             'unread_count' => $this->notifications->unreadCount($request->user()),

@@ -179,9 +179,17 @@ class PayoutService extends BaseService
     }
 
     /** @return Collection<int, PayoutRequest> */
-    public function forCaptain(User $captain)
+    /**
+     * A captain's payout history, paginated.
+     *
+     * This was a bare `->get()`, and there was no pagination anywhere in the chain —
+     * `DriverPayoutController::index` returned the collection straight out. `payout_requests`
+     * only ever grows, so a captain in their second year loaded every request they had
+     * ever made to render a list whose first screen shows four.
+     */
+    public function forCaptain(User $captain, int $perPage = 20)
     {
-        return PayoutRequest::where('captain_user_id', $captain->id)->latest()->get();
+        return PayoutRequest::where('captain_user_id', $captain->id)->latest()->paginate($perPage);
     }
 
     /** @return Collection<int, PayoutRequest> */

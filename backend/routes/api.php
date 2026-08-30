@@ -90,6 +90,27 @@ Route::prefix('v1')->group(function () {
                     : '',
                 'default_center' => ['lat' => 32.5556, 'lng' => 35.85], // Irbid
             ],
+            /*
+             * The legal documents, from the ONE place that defines them.
+             *
+             * `config/rafeeq.php` held `terms.url` and `terms.privacy_url` and nothing
+             * read them, while the apps carried their own copies defaulted from
+             * `EXPO_PUBLIC_LEGAL_BASE_URL` — two sources for the same four links. A
+             * staging deploy that changed one and not the other shipped an app whose
+             * privacy link pointed at production.
+             *
+             * `version` is here for the apps to DISPLAY. It is deliberately not trusted
+             * on the way in: `AuthService` stamps `terms_version` from this same config
+             * itself, so a client cannot claim to have accepted a version that is not
+             * current.
+             */
+            'legal' => [
+                'version' => (string) config('rafeeq.legal.version'),
+                'terms_url' => config('rafeeq.legal.base_url').'/terms',
+                'privacy_url' => config('rafeeq.legal.base_url').'/privacy',
+                'retention_url' => config('rafeeq.legal.base_url').'/data-retention',
+                'prohibited_url' => config('rafeeq.legal.base_url').'/prohibited-items',
+            ],
             'features' => [
                 'realtime' => config('broadcasting.default') === 'reverb',
             ],

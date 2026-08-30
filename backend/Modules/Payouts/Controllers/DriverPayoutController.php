@@ -19,7 +19,7 @@ class DriverPayoutController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        return $this->ok(PayoutResource::collection($this->payouts->forCaptain($request->user())));
+        return $this->ok(PayoutResource::collection($this->payouts->forCaptain($request->user(), $this->perPage($request, 20))));
     }
 
     public function store(RequestPayoutRequest $request): JsonResponse

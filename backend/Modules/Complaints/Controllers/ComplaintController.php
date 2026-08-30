@@ -19,7 +19,7 @@ class ComplaintController extends Controller
     {
         $items = Complaint::where('reporter_id', $request->user()->id)
             ->latest()
-            ->paginate((int) $request->query('per_page', 20));
+            ->paginate($this->perPage($request, 20));
 
         return $this->ok(ComplaintResource::collection($items));
     }
@@ -51,7 +51,7 @@ class ComplaintController extends Controller
             $query->where('severity', $severity);
         }
 
-        return $this->ok(ComplaintResource::collection($query->paginate((int) $request->query('per_page', 30))));
+        return $this->ok(ComplaintResource::collection($query->paginate($this->perPage($request, 30))));
     }
 
     public function show(Complaint $complaint): JsonResponse

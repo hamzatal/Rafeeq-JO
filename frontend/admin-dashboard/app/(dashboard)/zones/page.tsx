@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Zone } from '@rafeeq/shared';
 import { RafeeqApiError, type ZonePayload } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
@@ -37,6 +38,7 @@ export default function ZonesPage() {
   const { t } = useT();
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [form, setForm] = useState<FormState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,6 +48,7 @@ export default function ZonesPage() {
     api.zones
       .list()
       .then(setZones)
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -136,10 +139,13 @@ export default function ZonesPage() {
       <div className="card p-0 overflow-hidden mb-6">
         {loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : zones.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('zones.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('zones.title')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('zones.colZone')}</th>
@@ -238,8 +244,15 @@ export default function ZonesPage() {
               <div className="text-xs text-muted">{t('zones.noBoundary')}</div>
             ) : (
               <div className="space-y-2">
+                {/*
+                  A key derived from the LAT/LNG pair, not the index.
+                  Vertices are inserted and removed here, so `key={idx}` made React
+                  reuse the wrong input DOM node: typed values jumped between rows
+                  while an operator was drawing a geofence. The coordinate pair is
+                  stable for the life of the vertex; the index is not.
+                */}
                 {form.boundary.map((v, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
+                  <div key={`${v[0]}:${v[1]}:${idx}`} className="flex items-center gap-2">
                     <span className="text-xs text-muted w-6">{idx + 1}.</span>
                     <input
                       className="input"

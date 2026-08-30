@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { formatJod, type PaymentRequest } from '@rafeeq/shared';
+import { getApiLocale } from './api';
 import { brand, fontStack, live, neutral, radius, status } from '@rafeeq/tokens';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -48,7 +49,19 @@ export interface InvoiceLabels {
 }
 
 function invoiceHtml(p: PaymentRequest, holderName: string, l: InvoiceLabels): string {
-  const date = p.created_at ? new Date(p.created_at).toLocaleString('ar') : '';
+  /*
+   * The receipt's date, in the locale the app is running in.
+   *
+   * It was `toLocaleString('ar')`. `'ar'` without a region resolves to the Arabic
+   * ROOT locale, whose default calendar in several ICU builds is islamic — so the
+   * receipt could carry a Hijri date while every screen that produced it showed a
+   * Gregorian one. On the one artefact a user keeps to prove they paid, that is not a
+   * formatting preference.
+   *
+   * `getApiLocale()` is already imported by both apps' `invoice.ts` wrappers to pick
+   * the label language; using it here keeps the date and the labels in step.
+   */
+  const date = p.created_at ? new Date(p.created_at).toLocaleString(getApiLocale()) : '';
 
   return `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"/>
   <style>

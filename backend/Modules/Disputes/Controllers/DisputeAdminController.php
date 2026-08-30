@@ -25,7 +25,7 @@ class DisputeAdminController extends Controller
             $query->where('type', $type);
         }
 
-        $page = $query->paginate((int) $request->query('per_page', 20));
+        $page = $query->paginate($this->perPage($request, 20));
 
         return $this->ok($page->through(fn (Dispute $d) => $this->transform($d)));
     }

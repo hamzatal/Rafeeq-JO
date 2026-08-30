@@ -11,7 +11,7 @@ import { LoadError } from '../../../src/components/LoadError';
 const jod = (fils: number) => formatJod(fils);
 
 export default function WithdrawalsPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [items, setItems] = useState<PayoutRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -97,6 +97,7 @@ export default function WithdrawalsPage() {
           <div className="p-6 text-center text-muted">{t('withdrawals.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.withdrawals')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('withdrawals.colCaptain')}</th>
@@ -118,7 +119,7 @@ export default function WithdrawalsPage() {
                   <td className="p-3 text-muted">{p.destination ?? '—'}</td>
                   <td className="p-3 text-muted">{t(`withdrawals.status.${p.status}`, p.status)}</td>
                   <td className="p-3 text-muted text-xs">
-                    {p.created_at ? new Date(p.created_at).toLocaleString('ar') : '—'}
+                    {p.created_at ? new Date(p.created_at).toLocaleString(locale) : '—'}
                   </td>
                   <td className="p-3">
                     {p.status === 'pending' ? (

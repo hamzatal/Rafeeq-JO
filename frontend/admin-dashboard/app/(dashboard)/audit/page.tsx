@@ -11,7 +11,7 @@ import { Icon } from '../../../src/components/Icon';
 const short = (v: string | null, n = 8) => (v ? v.slice(0, n) : '—');
 
 export default function AuditPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [items, setItems] = useState<AuditLogEntry[]>([]);
   const [actions, setActions] = useState<string[]>([]);
   const [action, setAction] = useState('');
@@ -89,6 +89,7 @@ export default function AuditPage() {
 
       <div className="card overflow-x-auto p-0">
         <table className="w-full text-sm">
+            <caption className="sr-only">{t('audit.title')}</caption>
           <thead>
             <tr className="text-right muted-text border-b border-line">
               <th scope="col" className="px-4 py-3 font-semibold">{t('audit.when')}</th>
@@ -112,7 +113,7 @@ export default function AuditPage() {
               items.map((log) => (
                 <tr key={log.id} className="border-b border-line/60 align-top">
                   <td className="px-4 py-3 whitespace-nowrap text-xs muted-text">
-                    {new Date(log.created_at).toLocaleString()}
+                    {new Date(log.created_at).toLocaleString(locale)}
                   </td>
                   <td className="px-4 py-3">
                     <span className="badge bg-primary/10 text-primary font-semibold">{log.action}</span>

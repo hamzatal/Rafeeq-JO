@@ -153,6 +153,7 @@ export default function ReportsPage() {
           <h2 className="text-lg font-bold surface-text mb-2">{t('reports.byFunding')}</h2>
           <div className="card p-0 overflow-hidden mb-6">
             <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.reports')}</caption>
               <thead className="table-head">
                 <tr>
                   <th scope="col" className="text-right p-3 font-medium">{t('reports.colFunding')}</th>
@@ -195,6 +196,7 @@ export default function ReportsPage() {
               <div className="p-6 text-center text-muted">{t('reports.noData')}</div>
             ) : (
               <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.reports')}</caption>
                 <thead className="table-head">
                   <tr>
                     <th scope="col" className="text-right p-3 font-medium">{t('reports.colZone')}</th>
