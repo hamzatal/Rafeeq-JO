@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Support\BlindIndex;
 use Rafeeq\Shared\Traits\HasBlindIndexes;
@@ -78,5 +79,17 @@ class DriverProfile extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(DriverDocument::class, 'driver_id');
+    }
+
+    /**
+     * The trips this captain has driven.
+     *
+     * Added for `Notifications\Support\BroadcastAudience`: a captain's zone is
+     * likewise not stored on the profile, and the corridors they actually drive is
+     * the honest answer to "which captains serve this zone".
+     */
+    public function trips(): HasMany
+    {
+        return $this->hasMany(Trip::class, 'driver_id');
     }
 }

@@ -13,6 +13,7 @@ use Rafeeq\Modules\Notifications\Models\DeviceToken;
 use Rafeeq\Modules\Notifications\Models\Notification;
 use Rafeeq\Modules\Notifications\Models\NotificationPreference;
 use Rafeeq\Shared\Enums\NotificationType;
+use Rafeeq\Shared\Support\NotificationText;
 
 /**
  * Central notification dispatcher.
@@ -38,15 +39,29 @@ class NotificationService extends BaseService
 
     /**
      * @param  array<string, mixed>  $data
+     * @param  string|null  $dedupeKey  Set by senders that can be RETRIED (an admin
+     *                                  broadcast). A second attempt with the same key
+     *                                  finds the existing row and delivers nothing.
+     * @param  NotificationPreference|null  $prefs  Preloaded by bulk senders to avoid
+     *                                              one query per recipient.
      */
-    public function notify(User $user, NotificationType $type, string $title, string $body, array $data = []): ?Notification
-    {
+    public function notify(
+        User $user,
+        NotificationType $type,
+        string $title,
+        string $body,
+        array $data = [],
+        ?string $dedupeKey = null,
+        ?NotificationPreference $prefs = null,
+    ): ?Notification {
         // Notification dispatch is a side-effect: it must never throw into (and
         // roll back) the business transaction that triggered it.
         try {
+            [$title, $body] = $this->enforceNoPii($type, $title, $body);
+
             $category = $type->category();
             $critical = $type->isCritical();
-            $prefs = $this->preferences($user);
+            $prefs ??= $this->preferences($user);
             $allowsCategory = $critical || $prefs->allows($category);
             $wantsPush = $prefs->push_enabled && $allowsCategory;
             $wantsSmsFallback = $critical && $prefs->sms_enabled;
@@ -56,8 +71,7 @@ class NotificationService extends BaseService
                 $channels[] = 'push';
             }
 
-            $notification = Notification::create([
-                'user_id' => $user->id,
+            $attributes = [
                 'type' => $type->value,
                 'category' => $category,
                 'title' => $title,
@@ -65,7 +79,26 @@ class NotificationService extends BaseService
                 'data' => $data ?: null,
                 'channels' => $channels,
                 'is_critical' => $critical,
-            ]);
+            ];
+
+            /*
+             * A keyed notification is created at most once per user, enforced by the
+             * unique index on `(user_id, dedupe_key)`. `firstOrCreate` also tells us
+             * WHICH happened, and that answer decides whether to deliver: on a retried
+             * broadcast the users already reached must not be pushed to a second time.
+             */
+            if ($dedupeKey !== null) {
+                $notification = Notification::firstOrCreate(
+                    ['user_id' => $user->id, 'dedupe_key' => $dedupeKey],
+                    $attributes,
+                );
+
+                if (! $notification->wasRecentlyCreated) {
+                    return $notification;
+                }
+            } else {
+                $notification = Notification::create($attributes + ['user_id' => $user->id]);
+            }
 
             // Deliver external channels (push + critical SMS fallback) OFF the
             // request via a queue, so a slow FCM/SMS call never blocks the API.
@@ -86,6 +119,47 @@ class NotificationService extends BaseService
         }
     }
 
+    /**
+     * The «ولا PII في أي نصّ إشعار» rule, enforced instead of documented.
+     *
+     * It lived in a cell of a Markdown table in `docs/design/SCREENS.md` and nowhere
+     * else: this method took two free strings and inspected neither. See
+     * `Shared\Support\NotificationText` for which three identifiers are blocked and
+     * why names, plates and amounts deliberately are not.
+     *
+     * ── Why the behaviour differs by environment ───────────────────────────────
+     *
+     * A body reaching here with a phone number in it is a programming mistake, and
+     * the place to catch a programming mistake is the test suite — so outside
+     * production it throws, loudly, naming the caller's notification type. In
+     * production it redacts and delivers: this method runs on the SOS path, and
+     * trading a lock-screen exposure for a silent safety notification is the worse
+     * of the two failures.
+     *
+     * An operator-authored broadcast never gets here with PII at all — it is rejected
+     * at validation with a 422, where the operator can fix the words.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function enforceNoPii(NotificationType $type, string $title, string $body): array
+    {
+        $kind = NotificationText::piiKind($title, $body);
+        if ($kind === null) {
+            return [$title, $body];
+        }
+
+        if (! app()->environment('production')) {
+            throw new \LogicException(
+                "Notification [{$type->value}] carries {$kind} in its text. A notification body renders on a "
+                .'lock screen and travels through the SMS gateway; see Shared\\Support\\NotificationText.'
+            );
+        }
+
+        Log::warning('notifications.pii_redacted', ['type' => $type->value, 'kind' => $kind]);
+
+        return [NotificationText::redact($title), NotificationText::redact($body)];
+    }
+
     public function preferences(User $user): NotificationPreference
     {
         return NotificationPreference::firstOrCreate(['user_id' => $user->id]);
@@ -99,19 +173,66 @@ class NotificationService extends BaseService
      * chunking, because it owns the query; this method must never be handed the
      * result of a bare `User::all()`.
      *
+     * ── Preferences are loaded once per chunk, not once per user ───────────────
+     *
+     * `notify()` calls `NotificationPreference::firstOrCreate` per recipient. On a
+     * broadcast to ten thousand students that is ten thousand SELECTs (plus an INSERT
+     * for every user who had never opened the settings sheet) on top of the ten
+     * thousand notification inserts — an N+1 by construction, inside a job with a
+     * 600-second budget. One query per chunk answers the same question.
+     *
      * @param  iterable<int, User>  $users
      * @param  array<string, mixed>  $data
+     * @param  string|null  $dedupeKey  Shared by every attempt of one broadcast.
      */
-    public function broadcast(iterable $users, string $title, string $body, array $data = []): int
+    public function broadcast(iterable $users, string $title, string $body, array $data = [], ?string $dedupeKey = null): int
     {
+        $users = $users instanceof \Traversable ? iterator_to_array($users) : (array) $users;
+        if ($users === []) {
+            return 0;
+        }
+
+        $prefs = $this->preferencesFor(array_map(fn (User $u) => $u->id, $users));
+
         $count = 0;
         foreach ($users as $user) {
-            if ($this->notify($user, NotificationType::General, $title, $body, $data)) {
+            $sent = $this->notify(
+                $user,
+                NotificationType::General,
+                $title,
+                $body,
+                $data,
+                $dedupeKey,
+                $prefs[$user->id] ?? null,
+            );
+
+            if ($sent) {
                 $count++;
             }
         }
 
         return $count;
+    }
+
+    /**
+     * Preferences for many users in one query, defaulting the ones that have none.
+     *
+     * The default is constructed in memory rather than written, so a broadcast does
+     * not create a preference row for every user who never opened the settings sheet
+     * — `notify()` is a read of their choices, not the moment they make one.
+     *
+     * @param  list<string>  $userIds
+     * @return array<string, NotificationPreference>
+     */
+    private function preferencesFor(array $userIds): array
+    {
+        $found = NotificationPreference::whereIn('user_id', $userIds)->get()->keyBy('user_id')->all();
+
+        foreach ($userIds as $id) {
+            $found[$id] ??= new NotificationPreference(['user_id' => $id]);
+        }
+
+        return $found;
     }
 
     /**
@@ -248,6 +369,31 @@ class NotificationService extends BaseService
         }
     }
 
+    /**
+     * Push to every device this user has registered.
+     *
+     * ── The line that was wrong ────────────────────────────────────────────────
+     *
+     *     $this->push->send(...);
+     *     $delivered = true;
+     *
+     * `send()` returned a string and never threw, so an FCM 4xx, a malformed token,
+     * and a deployment with no Firebase at all — where `LogPushGateway` writes the
+     * message to a log file and drops it — were all recorded as delivered. And
+     * because `deliverExternal()` only sends the SMS fallback when push did NOT go
+     * out, **the fallback for SOS, a frozen account and a cancelled trip never
+     * fired for anyone who had a device token.** The class docblock above promises
+     * that safety categories cannot be fully muted; that promise was not kept.
+     *
+     * ── Dead tokens are deleted, here, on the spot ─────────────────────────────
+     *
+     * `UNREGISTERED` means the app was uninstalled. Nothing pruned those rows —
+     * `RetentionPolicy` has no entry for `device_tokens` and `last_used_at` was
+     * written once at registration and never again — so they accumulated forever.
+     * Each one cost a full round trip on every notification, and each one used to
+     * make `$delivered` true, which is how a user who reinstalled the app lost both
+     * their push AND their SMS fallback.
+     */
     private function sendPush(User $user, string $title, string $body, array $data, array $options = []): bool
     {
         $tokens = DeviceToken::where('user_id', $user->id)->pluck('token');
@@ -256,13 +402,36 @@ class NotificationService extends BaseService
         }
 
         $delivered = false;
+        $dead = [];
+
         foreach ($tokens as $token) {
             try {
-                $this->push->send($token, $title, $body, $data, $options);
-                $delivered = true;
+                $result = $this->push->send($token, $title, $body, $data, $options);
+
+                if ($result->delivered) {
+                    $delivered = true;
+                } elseif ($result->tokenIsDead) {
+                    $dead[] = $token;
+                }
             } catch (\Throwable $e) {
-                Log::warning('[Notifications] push failed', ['user' => $user->id, 'error' => $e->getMessage()]);
+                // A gateway must not throw, but one may; a broken gateway must not
+                // stop the remaining devices or the SMS fallback.
+                Log::warning('[Notifications] push threw', ['user' => $user->id, 'error' => $e->getMessage()]);
             }
+        }
+
+        if ($dead !== []) {
+            DeviceToken::whereIn('token', $dead)->delete();
+            Log::info('notifications.dead_tokens_pruned', ['user' => $user->id, 'count' => count($dead)]);
+        }
+
+        /*
+         * `last_used_at` is what makes an abandoned token identifiable later. It was
+         * set at registration and never touched again, so every token looked equally
+         * fresh forever.
+         */
+        if ($delivered) {
+            DeviceToken::where('user_id', $user->id)->update(['last_used_at' => now()]);
         }
 
         return $delivered;

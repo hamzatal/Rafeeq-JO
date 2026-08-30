@@ -11,6 +11,7 @@ export const ar = {
     edit: 'تعديل',
     delete: 'حذف',
     retry: 'إعادة المحاولة',
+    loadMore: 'تحميل المزيد',
     loading: 'جارٍ التحميل...',
     error: 'حدث خطأ',
     success: 'تم بنجاح',

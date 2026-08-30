@@ -11,9 +11,35 @@ import { unwrap } from './client';
 export class NotificationsApi {
   constructor(private http: AxiosInstance) {}
 
-  async list(params: { unread?: boolean; category?: string; page?: number } = {}): Promise<AppNotification[]> {
-    const { data } = await this.http.get<ApiSuccess<AppNotification[]>>(ENDPOINTS.notifications.list, { params });
-    return unwrap(data);
+  /**
+   * One page of the inbox, plus the total unread count and the pagination meta.
+   *
+   * ── What this used to throw away ───────────────────────────────────────────
+   *
+   * `unwrap(data)` returned only `data`, discarding a `meta` that the endpoint has
+   * always sent: `unread_count` for the whole inbox, and Laravel's paginator meta.
+   *
+   * Both losses were visible. The inbox inferred "is anything unread" from the twenty
+   * rows it happened to have loaded, so a student with thirty unread notifications and
+   * twenty read ones on page one saw no «تحديد الكل كمقروء» button; and nothing
+   * anywhere could render a badge, because no screen held a number. The paginator meta
+   * meant the app showed the first page and had no way to ask for the second — the
+   * `page` parameter existed on this method and no caller could tell there was one.
+   */
+  async list(
+    params: { unread?: boolean; category?: string; page?: number; per_page?: number } = {},
+  ): Promise<{ items: AppNotification[]; unreadCount: number; hasMore: boolean }> {
+    const { data } = await this.http.get<
+      ApiSuccess<AppNotification[]> & { meta?: { unread_count?: number; current_page?: number; last_page?: number } }
+    >(ENDPOINTS.notifications.list, { params });
+
+    const meta = data.meta ?? {};
+
+    return {
+      items: unwrap(data),
+      unreadCount: meta.unread_count ?? 0,
+      hasMore: (meta.current_page ?? 1) < (meta.last_page ?? 1),
+    };
   }
 
   async unreadCount(): Promise<number> {

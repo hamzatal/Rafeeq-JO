@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Slot } from 'expo-router';
+import { Slot, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import { t as translate } from '@rafeeq/shared';
 import { I18nProvider, useI18n } from '../src/i18n';
 import { api } from '../src/lib/api';
 import { ErrorBoundary, FeedbackProvider, loadAppConfig, useApiProblemToasts } from '@rafeeq/ui';
+import { subscribeToNotificationTaps } from '../src/lib/push';
 import { useAuth } from '../src/store/auth';
 import { usePrefs } from '../src/store/prefs';
 
@@ -25,6 +26,26 @@ SplashScreen.preventAutoHideAsync();
  * A component rather than a call in `RootLayout`, because the hook needs to be
  * below `FeedbackProvider` in the tree and `RootLayout` is what renders it.
  */
+/**
+ * A notification tap goes to the screen the notification is about.
+ *
+ * A component, not a call in `RootLayout`, because it needs the router — and it must
+ * sit inside the tree so unsubscribing happens with the tree.
+ */
+function NotificationTaps() {
+  const router = useRouter();
+
+  useEffect(
+    () =>
+      subscribeToNotificationTaps((path, params) =>
+        router.push(params && Object.keys(params).length > 0 ? { pathname: path, params } : path),
+      ),
+    [router],
+  );
+
+  return null;
+}
+
 function ApiProblems() {
   const { t } = useI18n();
   useApiProblemToasts({ forbidden: t('common.forbidden'), server: t('common.serverError') });
@@ -83,6 +104,7 @@ export default function RootLayout() {
             <StatusBar style="dark" />
             {/* Must sit UNDER FeedbackProvider — it needs the toast surface. */}
             <ApiProblems />
+            <NotificationTaps />
             <Slot />
           </FeedbackProvider>
         </I18nProvider>

@@ -25,6 +25,24 @@ export interface ListParams {
 }
 
 /** Admin/staff API surface (requires staff token + permissions). */
+/**
+ * The optional cuts a broadcast can be narrowed by.
+ *
+ * Before this the segment was three buttons — everyone, all students, all captains —
+ * which is not enough to run a campus-by-campus launch: «الخدمة انطلقت من حي الجامعة»
+ * is true for a few hundred students and noise for everyone else, and a notification
+ * that is noise to most recipients is how a user learns to swipe all of them away.
+ *
+ * `status` is the one that was most conspicuously missing: «حسابك قيد المراجعة، وهذه
+ * طريقة الاعتراض» is exactly the message a suspended user needs and the one they could
+ * not be sent. Banned users remain unreachable by any combination.
+ */
+export interface BroadcastFilters {
+  university_id?: string;
+  zone_id?: string;
+  status?: 'active' | 'suspended';
+}
+
 export class AdminApi {
   constructor(private http: AxiosInstance) {}
 
@@ -268,14 +286,26 @@ export class AdminApi {
   }
 
   // ── Broadcast notifications (permission: users.manage) ───────────
-  async notificationAudience(): Promise<{ all: number; students: number; drivers: number }> {
+  /**
+   * Audience size FOR THE SELECTED SEGMENT.
+   *
+   * It used to take no arguments and count without excluding banned users, while the
+   * send excluded them — so the chip in the compose screen disagreed with the number
+   * in the confirmation and with reality. Both now run one query
+   * (`Notifications\Support\BroadcastAudience`), and the filters are passed here so
+   * the operator sees the count for the segment they actually picked.
+   */
+  async notificationAudience(
+    filters: BroadcastFilters = {},
+  ): Promise<{ all: number; students: number; drivers: number }> {
     const { data } = await this.http.get<ApiSuccess<{ all: number; students: number; drivers: number }>>(
       ENDPOINTS.admin.notifyAudience,
+      { params: filters },
     );
     return unwrap(data);
   }
 
-  async sendNotification(payload: {
+  async sendNotification(payload: BroadcastFilters & {
     audience: 'all' | 'students' | 'drivers' | 'users';
     user_ids?: string[];
     title: string;

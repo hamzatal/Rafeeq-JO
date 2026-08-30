@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Auth\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,6 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Rafeeq\Core\Permissions\HasRoles;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
+use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Students\Models\StudentProfile;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
@@ -246,5 +248,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function driverProfile(): HasOne
     {
         return $this->hasOne(DriverProfile::class);
+    }
+
+    /**
+     * The rides this user has ASKED for.
+     *
+     * Added for `Notifications\Support\BroadcastAudience`, which segments by zone.
+     * A zone is not a property of a person — there is no `users.zone_id`, and adding
+     * one would be a value that goes stale the day a student moves house. It is a
+     * property of where they RIDE, and this relation is where the platform actually
+     * knows that.
+     */
+    public function rideRequests(): HasMany
+    {
+        return $this->hasMany(RideRequest::class, 'student_id');
     }
 }

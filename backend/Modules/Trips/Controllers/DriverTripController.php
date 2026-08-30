@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Trips\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Rafeeq\Core\Exceptions\AuthorizationException;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Http\Controllers\Controller;
@@ -82,25 +83,39 @@ class DriverTripController extends Controller
             app(WalletService::class)->forUser($request->user())
         );
 
-        // Atomic claim: only ONE captain's UPDATE can match `driver_id IS NULL`
-        // for a still-pending trip. A concurrent second claim matches 0 rows and
-        // is rejected — this prevents two captains taking the same pooled trip.
-        $claimed = Trip::whereKey($trip->id)
-            ->whereNull('driver_id')
-            ->where('status', TripStatus::PendingDriver->value)
-            ->update([
-                'driver_id' => $driver->id,
-                'status' => TripStatus::Scheduled->value,
-            ]);
+        /*
+         * The claim and the requests it assigns are ONE transaction.
+         *
+         * The claim itself was already correct: a single-statement compare-and-set that
+         * only one captain's UPDATE can match, so two simultaneous accepts cannot both
+         * win. What was wrong is that the second write — moving the grouped requests to
+         * `assigned` — sat outside it. A crash, a timeout or a killed worker between
+         * the two left a `scheduled` trip with a captain whose riders were still
+         * `grouped`, which is a state nothing reconciles: `rafeeq:expire-stale` looks
+         * for trips with no captain, and the matcher does not re-read `grouped` rows.
+         * The rider's app would show a car that is coming while the request that
+         * created it still reads «بنجمّعك مع طلاب منطقتك».
+         *
+         * Wrapping them makes the pair all-or-nothing without weakening the claim: the
+         * conditional UPDATE is still what decides the winner.
+         */
+        DB::transaction(function () use ($trip, $driver) {
+            $claimed = Trip::whereKey($trip->id)
+                ->whereNull('driver_id')
+                ->where('status', TripStatus::PendingDriver->value)
+                ->update([
+                    'driver_id' => $driver->id,
+                    'status' => TripStatus::Scheduled->value,
+                ]);
 
-        if ($claimed === 0) {
-            throw new BusinessRuleException('هذه الرحلة لم تعد متاحة.', 'OFFER_TAKEN');
-        }
+            if ($claimed === 0) {
+                throw new BusinessRuleException('هذه الرحلة لم تعد متاحة.', 'OFFER_TAKEN');
+            }
 
-        // Mark the grouped ride requests as assigned.
-        RideRequest::where('trip_id', $trip->id)
-            ->where('status', RideRequestStatus::Grouped->value)
-            ->update(['status' => RideRequestStatus::Assigned->value]);
+            RideRequest::where('trip_id', $trip->id)
+                ->where('status', RideRequestStatus::Grouped->value)
+                ->update(['status' => RideRequestStatus::Assigned->value]);
+        });
 
         return $this->ok(new TripResource($trip->fresh(['university', 'passengers'])), 'تم قبول الرحلة.');
     }

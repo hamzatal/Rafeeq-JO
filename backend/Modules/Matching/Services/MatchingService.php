@@ -210,7 +210,16 @@ class MatchingService extends BaseService
                     break;
                 }
 
-                $this->createPooledTrip($group, $isExpress, $university, $isSolo);
+                /*
+                 * `null` means a concurrent runner claimed part of this group between
+                 * the read above and the transaction below. Skip the car; those riders
+                 * are either in someone else's car now or still pending, and the next
+                 * pass re-reads them. See `createPooledTrip`.
+                 */
+                if ($this->createPooledTrip($group, $isExpress, $university, $isSolo) === null) {
+                    continue;
+                }
+
                 $created++;
                 $formed++;
             }
@@ -312,16 +321,80 @@ class MatchingService extends BaseService
     }
 
     /**
+     * Form one car, or refuse because somebody else already did.
+     *
+     * ── The race this closes ───────────────────────────────────────────────────
+     *
+     * `drainCorridor` reads pending requests OUTSIDE any transaction, and this method
+     * used to claim them with an unconditional write:
+     *
+     *     $request->forceFill(['status' => Grouped, 'trip_id' => $trip->id])->save();
+     *
+     * — a primary-key UPDATE with no predicate on the current status. So two runs of
+     * the matcher over the same corridor both read the same four pending riders, both
+     * created a `Trip` with four `TripPassenger` rows, and the second `save()` simply
+     * overwrote `trip_id`. The result: **two pooled trips offered to two captains for
+     * the same four students**, four wallet holds taken twice, and
+     * `unique(trip_id, student_id)` powerless to stop it because the two trips have
+     * different ids.
+     *
+     * That is not hypothetical. `rafeeq:match-rides` runs every five minutes and had
+     * neither `withoutOverlapping()` nor `onOneServer()` (both are now in
+     * `routes/console.php`), so a run that took longer than five minutes — a busy
+     * corridor, a slow database, the `MAX_PASSES_PER_GROUP` cap — overlapped itself.
+     * Two scheduler containers would have done it on every tick.
+     *
+     * ── Why a locking re-read and not `withoutOverlapping` alone ────────────────
+     *
+     * A schedule guard is a deployment convention: it does not cover
+     * `php artisan rafeeq:match-rides` typed by hand during an incident, a queued
+     * re-run, or a second app server. Correctness belongs in the write path.
+     *
+     * `lockForUpdate()` inside the transaction makes the second runner WAIT for the
+     * first to commit, and the `status = pending` predicate is re-evaluated after the
+     * lock is granted — so it then sees `grouped`, the count no longer matches, and it
+     * abandons this car instead of duplicating it. `orderBy('id')` gives every runner
+     * the same lock-acquisition order, which is what stops two overlapping groups
+     * deadlocking each other (there is no transaction retry anywhere in this codebase,
+     * so a deadlock would surface as a failed command, not a retried one).
+     *
      * @param  Collection<int, RideRequest>  $requests
      * @param  University|null  $university  Resolved by the caller once per corridor.
+     * @return Trip|null Null when a concurrent runner claimed part of the group.
      */
     private function createPooledTrip(
         Collection $requests,
         bool $isExpress,
         ?University $university = null,
         bool $isSolo = false,
-    ): Trip {
+    ): ?Trip {
         return $this->transaction(function () use ($requests, $isExpress, $isSolo) {
+            $wanted = $requests->pluck('id')->all();
+
+            $requests = RideRequest::query()
+                ->whereIn('id', $wanted)
+                ->where('status', RideRequestStatus::Pending->value)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            if ($requests->count() !== count($wanted)) {
+                Log::info('matching.group_claimed_elsewhere', [
+                    'wanted' => count($wanted),
+                    'still_pending' => $requests->count(),
+                ]);
+
+                return null;
+            }
+
+            /*
+             * Re-ordered by `id` for the lock, so restore the departure order the
+             * pickup sequence depends on — `pickup_order` below is the index in this
+             * collection, and a car that collects riders in primary-key order rather
+             * than route order is a longer, worse trip.
+             */
+            $requests = $requests->sortBy('desired_time')->values();
+
             $first = $requests->first();
             $riders = $requests->count();
 
@@ -415,6 +488,12 @@ class MatchingService extends BaseService
                     'dropoff_code' => $this->uniqueCode($usedDropoff),
                 ]);
 
+                /*
+                 * Still `forceFill`, but now under the row lock taken at the top of
+                 * this transaction with `status = pending` re-checked after the lock —
+                 * so this write can no longer overwrite a claim made by a concurrent
+                 * matcher run. That is what the guard above buys.
+                 */
                 $request->forceFill([
                     'status' => RideRequestStatus::Grouped,
                     'trip_id' => $trip->id,
