@@ -22,6 +22,16 @@ export default function Notifications() {
   const s = useMemo(() => makeStyles(theme), [theme]);
 
   const [items, setItems] = useState<AppNotification[]>([]);
+  /*
+   * The inbox-wide unread count, from `meta.unread_count`.
+   *
+   * It was inferred from the twenty rows page one happened to hold, so a student with
+   * thirty unread notifications behind them saw no «تحديد الكل كمقروء» button at all.
+   */
+  const [unread, setUnread] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [prefs, setPrefs] = useState<NotificationPreference | null>(null);
   const [showPrefs, setShowPrefs] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -44,13 +54,37 @@ export default function Notifications() {
   const load = async () => {
     setLoadError(false);
     try {
-      const [list, p] = await Promise.all([api.notifications.list(), api.notifications.preferences()]);
-      setItems(list);
+      const [list, p] = await Promise.all([api.notifications.list({ page: 1 }), api.notifications.preferences()]);
+      setItems(list.items);
+      setUnread(list.unreadCount);
+      setHasMore(list.hasMore);
+      setPage(1);
       setPrefs(p);
     } catch {
       setLoadError(true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  /*
+   * The next page. `api.notifications.list` has always accepted `page` and nothing
+   * could pass it, because the client discarded the paginator meta that says whether
+   * there IS a next page — so the inbox silently ended at twenty rows.
+   */
+  const loadMore = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const next = await api.notifications.list({ page: page + 1 });
+      setItems((prev) => [...prev, ...next.items]);
+      setUnread(next.unreadCount);
+      setHasMore(next.hasMore);
+      setPage((p) => p + 1);
+    } catch {
+      /* Keep what is already on screen; the retry is another tap on the same button. */
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -67,6 +101,7 @@ export default function Notifications() {
     if (!n.read) {
       await api.notifications.markRead(n.id);
       setItems((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+      setUnread((u) => Math.max(0, u - 1));
     }
   };
 
@@ -136,7 +171,7 @@ export default function Notifications() {
         <View style={s.header}>
           <Text style={s.h1}>{t('notifications.title')}</Text>
           <View style={s.headerActions}>
-            {items.some((n) => !n.read) && (
+            {unread > 0 && (
               <Pressable onPress={markAll} accessibilityRole="button" accessibilityLabel={t('a11y.markAllRead')} style={s.headerBtn}>
                 <Icon name="circle-check" size={18} color={theme.colors.primary} />
               </Pressable>
@@ -165,12 +200,26 @@ export default function Notifications() {
         ) : items.length === 0 ? (
           <EmptyState icon="bell" title={t('notifications.none')} />
         ) : (
-          groups.map((g) => (
-            <View key={g.key}>
-              <Text style={s.groupLabel}>{g.label}</Text>
-              {g.items.map(renderNotif)}
-            </View>
-          ))
+          <>
+            {groups.map((g) => (
+              <View key={g.key}>
+                <Text style={s.groupLabel}>{g.label}</Text>
+                {g.items.map(renderNotif)}
+              </View>
+            ))}
+            {hasMore ? (
+              <Pressable
+                onPress={() => void loadMore()}
+                disabled={loadingMore}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.loadMore')}
+                accessibilityState={{ disabled: loadingMore, busy: loadingMore }}
+                style={s.loadMore}
+              >
+                <Text style={s.loadMoreText}>{loadingMore ? t('common.loading') : t('common.loadMore')}</Text>
+              </Pressable>
+            ) : null}
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -212,5 +261,10 @@ const makeStyles = (t: AppTheme) =>
     couponBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, backgroundColor: t.colors.primary, borderRadius: t.radius.control, paddingHorizontal: 12, paddingVertical: 7 },
     couponBtnText: { fontFamily: t.fontFamily.bold, fontSize: 12, color: '#FFFFFF' },
     couponMsg: { fontFamily: t.fontFamily.medium, fontSize: 12, textAlign: 'right', marginTop: 6 },
-    dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.primary, marginRight: 6, marginTop: 6 },
+    dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.primary, marginEnd: 6, marginTop: 6 },
+    loadMore: { alignItems: 'center', paddingVertical: t.spacing.md, marginTop: t.spacing.sm, borderRadius: t.radius.control, borderWidth: 1, borderColor: t.colors.border },
+    /* From the type scale, not a new number: this screen is on the raw-`Text`
+       grandfather list, and adding another literal `fontSize` would push the
+       ratchet up rather than down. `titleSm` carries size, line height and face. */
+    loadMoreText: { ...t.type.titleSm, color: t.colors.primary },
   });

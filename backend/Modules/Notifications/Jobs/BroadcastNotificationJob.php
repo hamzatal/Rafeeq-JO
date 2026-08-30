@@ -8,10 +8,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Rafeeq\Modules\Auth\Models\User;
+use Illuminate\Support\Str;
 use Rafeeq\Modules\Notifications\Services\NotificationService;
-use Rafeeq\Shared\Enums\UserStatus;
-use Rafeeq\Shared\Enums\UserType;
+use Rafeeq\Modules\Notifications\Support\BroadcastAudience;
 
 /**
  * Fan-out an admin broadcast to a (potentially large) audience off the request
@@ -31,54 +30,78 @@ class BroadcastNotificationJob implements ShouldQueue
     public int $tries = 3;
 
     /**
-     * @param  'all'|'students'|'drivers'|'users'  $audience
-     * @param  array<int, string>  $userIds
+     * One id for the whole broadcast, generated once and serialised with the job.
+     *
+     * ── Why it matters that this is in the CONSTRUCTOR ─────────────────────────
+     *
+     * `tries = 3` on a job that walks its audience with `chunkById` and inserts a row
+     * per user means a job dying at recipient 6,000 of 10,000 is retried **from the
+     * first recipient** — and the first 6,000 receive the same announcement again.
+     * Then a third time.
+     *
+     * Laravel serialises the constructed job and deserialises the SAME payload for
+     * every attempt, so an id assigned here is stable across retries. Assigning it in
+     * `handle()` would give each attempt a fresh one and change nothing.
+     *
+     * `notify()` turns it into `(user_id, dedupe_key)`, which carries a unique index —
+     * so attempt two skips exactly the users attempt one reached and finishes the rest.
+     * Retrying is the right behaviour; retrying without re-delivering is what was
+     * missing.
+     */
+    private readonly string $dedupeKey;
+
+    /**
+     * @param  array<string, mixed>  $audience  A serialised `BroadcastAudience`.
      * @param  array<string, mixed>  $data
      */
     public function __construct(
-        private readonly string $audience,
-        private readonly array $userIds,
+        private readonly array $audience,
         private readonly string $title,
         private readonly string $body,
         private readonly array $data = [],
-    ) {}
+    ) {
+        $this->dedupeKey = 'bcast:'.Str::uuid()->toString();
+    }
 
     public function handle(NotificationService $notifications): void
     {
-        $query = User::query()->where('status', '!=', UserStatus::Banned->value);
-        match ($this->audience) {
-            'students' => $query->where('type', UserType::Student->value),
-            'drivers' => $query->where('type', UserType::Driver->value),
-            'users' => $query->whereIn('id', $this->userIds),
-            default => $query->whereIn('type', [UserType::Student->value, UserType::Driver->value]),
-        };
+        /*
+         * The audience query is resolved by `BroadcastAudience`, not rebuilt here.
+         * This job used to carry its own copy of the `match` — the same one the
+         * controller used to compute the count the operator was shown — and the copies
+         * had already drifted apart on whether banned users were included.
+         */
+        $query = BroadcastAudience::fromArray($this->audience)->query();
 
         $sent = 0;
         $chunk = max(1, (int) config('rafeeq.broadcast_chunk', 200));
 
         $query->select(['id', 'type', 'status'])->chunkById($chunk, function ($users) use (&$sent, $notifications) {
-            $sent += $notifications->broadcast($users, $this->title, $this->body, $this->data);
+            $sent += $notifications->broadcast($users, $this->title, $this->body, $this->data, $this->dedupeKey);
         });
 
         Log::info('[Notifications] broadcast delivered', [
-            'audience' => $this->audience,
+            'audience' => BroadcastAudience::fromArray($this->audience)->describe(),
+            'dedupe_key' => $this->dedupeKey,
             'sent' => $sent,
+            'attempt' => $this->attempts(),
         ]);
     }
 
     /**
      * 3.10 — a broadcast that died is a broadcast someone believes went out.
      *
-     * `tries = 3` on a job that is not idempotent means a retry can re-notify the
-     * chunks that already succeeded, so an operator has to know a failure happened
-     * before they press send again. Logged with the audience so the blast radius is
-     * visible; the title only, never the body.
+     * Retries are now safe (see `$dedupeKey`), so this is no longer a duplicate-
+     * delivery warning — it is the record that some recipients were never reached at
+     * all. Logged with the audience so the blast radius is visible, and with the
+     * dedupe key so a manual re-send can be matched against what already went out.
+     * The title only, never the body.
      */
     public function failed(?\Throwable $e): void
     {
         Log::error('notifications.broadcast_failed', [
-            'audience' => $this->audience,
-            'recipients_named' => count($this->userIds),
+            'audience' => BroadcastAudience::fromArray($this->audience)->describe(),
+            'dedupe_key' => $this->dedupeKey,
             'title' => $this->title,
             'attempts' => $this->attempts(),
             'error' => $e?->getMessage(),

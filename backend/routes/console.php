@@ -9,13 +9,43 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Clean up expired OTP codes every hour
-Schedule::command('rafeeq:prune-otps')->hourly();
+Schedule::command('rafeeq:prune-otps')->hourly()->onOneServer()->withoutOverlapping();
 
-// Pool pending ride requests into trips every few minutes
-Schedule::command('rafeeq:match-rides')->everyFiveMinutes();
+/*
+ * Pool pending ride requests into trips.
+ *
+ * ── Why the two guards are not optional here ───────────────────────────────
+ *
+ * This ran on a bare `everyFiveMinutes()`. A run that takes longer than five minutes
+ * — a busy corridor, a slow database, the `MAX_PASSES_PER_GROUP` cap — was started
+ * again ON TOP of itself, and both runs read the same `pending` requests. Two
+ * scheduler containers did it on every single tick.
+ *
+ * The consequence was not a wasted query. `createPooledTrip` claimed its riders with
+ * an unconditional write, so both runs formed a car from the same four students:
+ * **two pooled trips offered to two captains for the same four riders**, with the
+ * wallet hold taken twice. `unique(trip_id, student_id)` cannot see it, because the
+ * two trips have different ids.
+ *
+ * `withoutOverlapping` closes the scheduled case and `onOneServer` the multi-container
+ * one. Neither is sufficient on its own, and neither covers `php artisan
+ * rafeeq:match-rides` typed by hand during an incident — which is why the write path
+ * ALSO takes a row lock and re-checks the status now. A schedule flag is a deployment
+ * convention; correctness belongs in the transaction.
+ */
+Schedule::command('rafeeq:match-rides')
+    ->everyFiveMinutes()
+    ->onOneServer()
+    ->withoutOverlapping();
 
-// Re-assess top-risk accounts and auto-freeze + open dispute cases hourly
-Schedule::command('rafeeq:fraud-sweep')->hourly();
+/*
+ * Re-assess top-risk accounts and auto-freeze + open dispute cases hourly.
+ *
+ * `withoutOverlapping` because the sweep FREEZES accounts and opens dispute cases:
+ * two concurrent sweeps reading the same risk scores open two cases for one account,
+ * and a duplicate case is a second human being asked to adjudicate the same facts.
+ */
+Schedule::command('rafeeq:fraud-sweep')->hourly()->onOneServer()->withoutOverlapping();
 
 /*
  * Retention. ONE command enforces every promise in the privacy notice, reading the
@@ -36,7 +66,7 @@ Schedule::command('rafeeq:prune-retention')
 
 // Expire subscriptions whose window has closed. Without this every report that reads
 // `status = active` is wrong, and rows stay active forever.
-Schedule::command('rafeeq:expire-subscriptions')->dailyAt('00:05')->onOneServer();
+Schedule::command('rafeeq:expire-subscriptions')->dailyAt('00:05')->onOneServer()->withoutOverlapping();
 
 /*
  * The same argument, for the three states nothing else was closing.

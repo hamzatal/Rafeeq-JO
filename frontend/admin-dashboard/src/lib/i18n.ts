@@ -106,6 +106,22 @@ const DICT: Dict = {
   'notify.sentTo': { ar: 'تم الإرسال إلى', en: 'Sent to' },
   'notify.queuedFor': { ar: 'تمت جدولة الإرسال إلى', en: 'Queued for' },
   'notify.users': { ar: 'مستخدم', en: 'users' },
+  'notify.university': { ar: 'الجامعة (اختياري)', en: 'University (optional)' },
+  'notify.zone': { ar: 'المنطقة (اختياري)', en: 'Zone (optional)' },
+  'notify.status': { ar: 'حالة الحساب (اختياري)', en: 'Account status (optional)' },
+  'notify.anyUniversity': { ar: 'كل الجامعات', en: 'All universities' },
+  'notify.anyZone': { ar: 'كل المناطق', en: 'All zones' },
+  'notify.anyStatus': { ar: 'كل الحالات', en: 'Any status' },
+  'notify.statusActive': { ar: 'نشط', en: 'Active' },
+  'notify.statusSuspended': { ar: 'موقوف', en: 'Suspended' },
+  'notify.segmentHint': {
+    ar: 'الفئة = النوع × الجامعة × المنطقة × الحالة. الأرقام أدناه تُحسب للفئة المختارة، وبنفس الاستعلام الذي سيُرسل — ولا يشمل أيٌّ منها المحظورين.',
+    en: 'The segment is type × university × zone × status. The counts below are for the selected segment, from the same query the send will run — and none of them include banned users.',
+  },
+  'notify.noPii': {
+    ar: 'لا يجوز أن يحمل النصّ رقم هاتف أو بريداً أو رقماً وطنياً: الإشعار يظهر على شاشة القفل، ويُرسل للحالات الحرجة عبر بوّابة رسائل تسجّل النصّ.',
+    en: 'The text may not carry a phone number, an email or a national ID: a notification renders on a lock screen and, for critical types, travels through an SMS gateway that logs bodies.',
+  },
 
   // Profile page
   'profile.title': { ar: 'ملفي الشخصي', en: 'My Profile' },

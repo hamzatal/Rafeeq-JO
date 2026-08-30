@@ -643,12 +643,6 @@ parameters:
 			path: Modules/RideRequests/Resources/RideRequestResource.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type Rafeeq\\Modules\\Zones\\Models\\Zone\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: Modules/RideRequests/Services/RideRequestService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1

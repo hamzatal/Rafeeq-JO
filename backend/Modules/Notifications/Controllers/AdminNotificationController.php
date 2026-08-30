@@ -7,14 +7,29 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Http\Controllers\Controller;
-use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\Notifications\Jobs\BroadcastNotificationJob;
-use Rafeeq\Shared\Enums\UserStatus;
-use Rafeeq\Shared\Enums\UserType;
+use Rafeeq\Modules\Notifications\Support\BroadcastAudience;
+use Rafeeq\Shared\Rules\NoPersonalData;
 
 /**
- * Admin notification broadcasting — full control over who receives what.
- * Gated by `users.manage`.
+ * Admin notification broadcasting. Gated by `users.manage`.
+ *
+ * ── What changed here ──────────────────────────────────────────────────────
+ *
+ * **The audience is resolved in one place.** The `match` on audience existed twice —
+ * once here for the COUNT the operator reads, once in `BroadcastNotificationJob` for
+ * the people who actually receive it — and the copies had already drifted: `send()`
+ * excluded banned users and `audience()` did not, so the number in the dashboard and
+ * the number in the confirmation disagreed with each other and with reality. Both now
+ * call `BroadcastAudience::query()`.
+ *
+ * **The segment is no longer three buttons.** It is (type × university × zone ×
+ * status), which is what a campus-by-campus launch needs; see `BroadcastAudience`.
+ *
+ * **The text is checked for identifiers.** Length was the only validation. A body is
+ * rendered on a lock screen and, for critical types, sent through an SMS gateway that
+ * logs message bodies — so a phone number, an email or a national ID in it is
+ * rejected here with a 422, where the operator can rewrite the sentence.
  */
 class AdminNotificationController extends Controller
 {
@@ -22,34 +37,44 @@ class AdminNotificationController extends Controller
         private readonly AuditLogger $audit,
     ) {}
 
-    /** Audience sizes for the compose screen. */
-    public function audience(): JsonResponse
+    /**
+     * Audience size for the compose screen, for the SAME query the send will run.
+     *
+     * Accepts the filters, so the operator sees the number for the segment they have
+     * actually selected rather than a global total they then fail to reconcile with
+     * the confirmation.
+     */
+    public function audience(Request $request): JsonResponse
     {
-        return $this->ok([
-            'all' => User::whereIn('type', [UserType::Student->value, UserType::Driver->value])->count(),
-            'students' => User::where('type', UserType::Student->value)->count(),
-            'drivers' => User::where('type', UserType::Driver->value)->count(),
-        ]);
+        $filters = $request->validate($this->filterRules());
+
+        $counts = [];
+        foreach (['all', 'students', 'drivers'] as $type) {
+            $counts[$type] = BroadcastAudience::fromRequest($filters + ['audience' => $type])->query()->count();
+        }
+
+        return $this->ok($counts);
     }
 
     public function send(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'audience' => ['required', Rule::in(['all', 'students', 'drivers', 'users'])],
-            'user_ids' => ['required_if:audience,users', 'array'],
+            'audience' => ['required', Rule::in(BroadcastAudience::TYPES)],
+            'user_ids' => ['required_if:audience,users', 'array', 'max:500'],
             'user_ids.*' => ['uuid'],
-            'title' => ['required', 'string', 'max:120'],
-            'body' => ['required', 'string', 'max:500'],
+            /*
+             * Length was the only validation. A body renders on a LOCK SCREEN and, for
+             * critical types, travels through an SMS gateway that logs message bodies —
+             * so an identifier in it is rejected here, named, where the operator can
+             * rewrite the sentence. The rule and its reasoning: `NotificationText`.
+             * Names, plates and amounts are deliberately allowed.
+             */
+            'title' => ['required', 'string', 'max:120', new NoPersonalData],
+            'body' => ['required', 'string', 'max:500', new NoPersonalData],
             'coupon_code' => ['nullable', 'string', 'max:40'],
-        ]);
+        ] + $this->filterRules());
 
-        $query = User::query()->where('status', '!=', UserStatus::Banned->value);
-        match ($data['audience']) {
-            'students' => $query->where('type', UserType::Student->value),
-            'drivers' => $query->where('type', UserType::Driver->value),
-            'users' => $query->whereIn('id', $data['user_ids'] ?? []),
-            default => $query->whereIn('type', [UserType::Student->value, UserType::Driver->value]),
-        };
+        $audience = BroadcastAudience::fromRequest($data);
 
         $payload = [];
         if (! empty($data['coupon_code'])) {
@@ -58,18 +83,12 @@ class AdminNotificationController extends Controller
 
         // Estimate the audience now (cheap COUNT), then fan-out off the request
         // cycle so a large send never blocks/timeouts the admin's HTTP request.
-        $estimated = (clone $query)->count();
+        $estimated = $audience->query()->count();
 
-        BroadcastNotificationJob::dispatch(
-            $data['audience'],
-            $data['audience'] === 'users' ? ($data['user_ids'] ?? []) : [],
-            $data['title'],
-            $data['body'],
-            $payload,
-        );
+        BroadcastNotificationJob::dispatch($audience->toArray(), $data['title'], $data['body'], $payload);
 
         $this->audit->log('notifications.broadcast', $request->user(), changes: [
-            'audience' => $data['audience'],
+            'audience' => $audience->describe(),
             'estimated' => $estimated,
             'coupon' => $payload['coupon_code'] ?? null,
             'queued' => true,
@@ -79,5 +98,20 @@ class AdminNotificationController extends Controller
             ['queued' => true, 'estimated' => $estimated],
             "تم جدولة إرسال الإشعار إلى {$estimated} مستخدم. سيصل خلال لحظات."
         );
+    }
+
+    /**
+     * The segment filters, shared by `audience()` and `send()` so the count and the
+     * send can never be computed from different rules.
+     *
+     * @return array<string, array<int, mixed>>
+     */
+    private function filterRules(): array
+    {
+        return [
+            'university_id' => ['nullable', 'uuid', 'exists:universities,id'],
+            'zone_id' => ['nullable', 'uuid', 'exists:zones,id'],
+            'status' => ['nullable', Rule::in(BroadcastAudience::STATUSES)],
+        ];
     }
 }

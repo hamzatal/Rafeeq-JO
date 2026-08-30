@@ -199,7 +199,7 @@ const gates = [];
   }
   gates.push({
     id: 'physical-direction',
-    budget: 6,
+    budget: 5,
     count: hits.length,
     hits,
     why: 'a physical direction is correct in only one of the two directions this product ships',

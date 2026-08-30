@@ -27,7 +27,7 @@ class Notification extends Model
     protected $table = 'rafeeq_notifications';
 
     protected $fillable = [
-        'user_id', 'type', 'category', 'title', 'body',
+        'user_id', 'type', 'dedupe_key', 'category', 'title', 'body',
         'data', 'channels', 'is_critical', 'read_at',
     ];
 

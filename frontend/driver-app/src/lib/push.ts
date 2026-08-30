@@ -9,7 +9,36 @@ import {
 } from '@rafeeq/ui';
 import { api } from './api';
 
-export { onNotificationTap };
+/**
+ * Where each notification type takes a CAPTAIN.
+ *
+ * Deliberately not the same table as the student app: `ride_offer` is a captain's
+ * countdown screen with no student equivalent, and `payment_approved` means income
+ * here and spending there. That divergence is why the map is passed into
+ * `onNotificationTap` rather than living inside `packages/ui`.
+ */
+const ROUTES: Record<string, string> = {
+  ride_offer: '/(app)/offers',
+  ride_matched: '/(app)/offers',
+  trip_scheduled: '/(app)/trips',
+  trip_started: '/(app)/trips',
+  trip_cancelled: '/(app)/trips',
+  boarding_confirmed: '/(app)/trips',
+  dropoff_confirmed: '/(app)/trips',
+  trip_completed: '/(app)/earnings',
+  payment_approved: '/(app)/earnings',
+  payment_rejected: '/(app)/invoices',
+  payment_under_review: '/(app)/invoices',
+  wallet_credited: '/(app)/earnings',
+  account_frozen: '/(app)/settings',
+  general: '/(app)/dashboard',
+};
+
+export function subscribeToNotificationTaps(
+  navigate: (path: string, params?: Record<string, string>) => void,
+): () => void {
+  return onNotificationTap(ROUTES, navigate);
+}
 
 /**
  * The captain's channels.

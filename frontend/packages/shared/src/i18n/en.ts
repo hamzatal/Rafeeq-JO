@@ -13,6 +13,7 @@ export const en: Translations = {
     edit: 'Edit',
     delete: 'Delete',
     retry: 'Retry',
+    loadMore: 'Load more',
     loading: 'Loading...',
     error: 'An error occurred',
     success: 'Success',

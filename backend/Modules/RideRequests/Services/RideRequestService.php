@@ -2,12 +2,14 @@
 
 namespace Rafeeq\Modules\RideRequests\Services;
 
+use Illuminate\Database\UniqueConstraintViolationException;
 use Rafeeq\Core\Audit\AuditLogger;
 use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
+use Rafeeq\Modules\Zones\Models\Zone;
 use Rafeeq\Modules\Zones\Services\ZonePricingService;
 use Rafeeq\Modules\Zones\Services\ZoneService;
 use Rafeeq\Shared\Enums\PaymentMethod;
@@ -82,15 +84,54 @@ class RideRequestService extends BaseService
             );
         }
 
-        // Prevent duplicate active request to the same university.
+        /*
+         * One open request per (student × university).
+         *
+         * ── Why the check alone was not enough ─────────────────────────────────
+         *
+         * This was `exists()` then `create()` — no transaction, no lock, and nothing
+         * in the schema behind it. Two taps on «تأكيد الطلب» half a second apart, which
+         * a rider on a bad connection will produce because the first tap looks like it
+         * did nothing, both passed the check and both inserted.
+         *
+         * And the cost is money: the matcher pools the two requests into TWO cars, so
+         * the student is charged two fares and two captains are dispatched for one
+         * person. One of them arrives to nobody — the outcome that makes a captain
+         * stop accepting offers.
+         *
+         * `2026_09_02_000100_one_active_ride_request_per_corridor` adds a partial
+         * unique index over exactly the three open statuses. The check below stays
+         * because it produces the RIGHT ERROR — `DUPLICATE_REQUEST` with an Arabic
+         * message the app already handles — for the overwhelmingly common sequential
+         * case. The index is what covers the simultaneous one, and the `catch` turns
+         * its raw constraint violation into the same domain error rather than a 500.
+         */
+        $this->assertNoOpenRequest($student, (string) $data['university_id']);
+
+        try {
+            return $this->insert($student, $data, $zone, $type, $isExpress, $isSolo);
+        } catch (UniqueConstraintViolationException) {
+            throw new BusinessRuleException('لديك طلب نشط بالفعل لهذه الجامعة.', 'DUPLICATE_REQUEST');
+        }
+    }
+
+    private function assertNoOpenRequest(User $student, string $universityId): void
+    {
         $existing = RideRequest::where('student_id', $student->id)
-            ->where('university_id', $data['university_id'])
-            ->whereIn('status', [RideRequestStatus::Pending->value, RideRequestStatus::Grouped->value, RideRequestStatus::Assigned->value])
+            ->where('university_id', $universityId)
+            ->whereIn('status', RideRequestStatus::open())
             ->exists();
 
         if ($existing) {
             throw new BusinessRuleException('لديك طلب نشط بالفعل لهذه الجامعة.', 'DUPLICATE_REQUEST');
         }
+    }
+
+    /** @param array<string, mixed> $data */
+    private function insert(User $student, array $data, ?Zone $zone, RideType $type, bool $isExpress, bool $isSolo): RideRequest
+    {
+        $lat = (float) $data['pickup_lat'];
+        $lng = (float) $data['pickup_lng'];
 
         $request = RideRequest::create([
             'student_id' => $student->id,

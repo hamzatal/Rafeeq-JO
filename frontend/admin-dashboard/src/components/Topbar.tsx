@@ -107,7 +107,7 @@ export function Topbar() {
       const next = !o;
       if (next) {
         setLoadingItems(true);
-        api.notifications.list({ page: 1 }).then((list) => setItems(list.slice(0, 8))).finally(() => setLoadingItems(false));
+        api.notifications.list({ page: 1 }).then(({ items }) => setItems(items.slice(0, 8))).finally(() => setLoadingItems(false));
       }
       return next;
     });

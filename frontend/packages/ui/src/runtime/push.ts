@@ -106,17 +106,68 @@ export async function unregisterPush(api: RafeeqApi): Promise<void> {
       registeredToken = null;
     }
   } catch {
-    /* best effort — the token expires server-side anyway */
+    /*
+     * Best effort, and the token is NOT guaranteed to go away on its own.
+     *
+     * This used to say "the token expires server-side anyway". It did not: nothing
+     * pruned `device_tokens`, `last_used_at` was written once at registration and never
+     * again, and `RetentionPolicy` had no entry for the table. The backend now deletes a
+     * token the moment FCM answers `UNREGISTERED`, so an abandoned one is cleaned up on
+     * the next send rather than never — but a failed unregister still means this handset
+     * keeps receiving pushes until then.
+     */
   }
 }
 
 /**
- * Listen for a notification tap, for deep-linking. Returns an unsubscribe.
+ * Route a notification tap to the screen the notification is about.
+ *
+ * ── Why this needed a router, not just a listener ──────────────────────────
+ *
+ * The listener existed. It was exported from this file, re-exported by `packages/ui`,
+ * re-exported again by both apps' `push.ts` — and **never called**. So every push in
+ * the product opened the app on whatever screen it was last on, and the `data` payload
+ * the backend has always attached (`type`, `coupon_code`, …) was delivered to the
+ * device and thrown away.
+ *
+ * That is worst for the notifications that matter most: «الكابتن وصل» took a rider to
+ * their wallet if that is where they happened to be, and a captain's incoming offer —
+ * which expires on a countdown — took them nowhere at all.
+ *
+ * ── Why the mapping is a table passed in ───────────────────────────────────
+ *
+ * The `type` values are shared (`Shared\Enums\NotificationType`) but the destinations
+ * are not: `ride_offer` is a captain's full-screen offer and has no student equivalent,
+ * and `payment_approved` is the student wallet against the captain's earnings screen.
+ * A single map here would need to know which app it is in, which is the coupling
+ * `packages/ui` exists to avoid.
+ *
+ * @param routes  notification `type` → route path. A type with no entry is ignored
+ *                rather than sent somewhere arbitrary.
+ * @param navigate  the app's router push.
  */
-export function onNotificationTap(handler: (data: Record<string, unknown>) => void): () => void {
+export function onNotificationTap(
+  routes: Record<string, string>,
+  navigate: (path: string, params?: Record<string, string>) => void,
+): () => void {
   try {
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-      handler((response.notification.request.content.data ?? {}) as Record<string, unknown>);
+      const data = (response.notification.request.content.data ?? {}) as Record<string, unknown>;
+      const type = typeof data.type === 'string' ? data.type : null;
+      const path = type ? routes[type] : undefined;
+      if (!path) return;
+
+      /*
+       * Only string values are forwarded. FCM stringifies every `data` value on the
+       * wire anyway, and expo-router params must be strings — passing an object
+       * through would serialise as "[object Object]" in the URL.
+       */
+      const params: Record<string, string> = {};
+      for (const [key, value] of Object.entries(data)) {
+        if (key !== 'type' && typeof value === 'string') params[key] = value;
+      }
+
+      navigate(path, params);
     });
 
     return () => sub.remove();

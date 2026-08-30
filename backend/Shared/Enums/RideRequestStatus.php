@@ -15,6 +15,24 @@ enum RideRequestStatus: string
     case Cancelled = 'cancelled';
     case Expired = 'expired';     // time window passed without match
 
+    /**
+     * The statuses in which a request is still OPEN.
+     *
+     * One definition, because there were three: the duplicate guard in
+     * `RideRequestService::create`, the `WHERE` of the partial unique index that now
+     * backs it (`2026_09_02_000100`), and the app's own `OPEN_REQUEST` list on the
+     * home screen. Three copies of "not finished yet" is three chances for the index
+     * and the check to disagree about which rows they cover — and if they ever do, the
+     * index throws a raw constraint violation where the check would have thrown a
+     * domain error.
+     *
+     * @return list<string>
+     */
+    public static function open(): array
+    {
+        return [self::Pending->value, self::Grouped->value, self::Assigned->value];
+    }
+
     public function labelAr(): string
     {
         return match ($this) {

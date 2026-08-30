@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\Payments\Services;
 
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -44,6 +45,15 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class PaymentService extends BaseService
 {
+    /**
+     * Attempts at a unique reference before giving up.
+     *
+     * Three, because the collision window is one transaction wide and each retry
+     * re-reads the number the winner just committed. See `generateNumber()` for why a
+     * collision is possible at all.
+     */
+    private const NUMBER_ATTEMPTS = 3;
+
     private const DISK = 'secure';
 
     public function __construct(
@@ -88,8 +98,8 @@ class PaymentService extends BaseService
 
         $ttl = (int) config('services.cliq.request_ttl_minutes', 1440);
 
-        $request = PaymentRequest::create([
-            'number' => $this->generateNumber(),
+        $request = $this->withGeneratedNumber(fn (string $number) => PaymentRequest::create([
+            'number' => $number,
             'user_id' => $user->id,
             'payable_type' => $payableType,
             'payable_id' => $payableId,
@@ -102,7 +112,7 @@ class PaymentService extends BaseService
             'method' => 'cliq',
             'status' => PaymentStatus::Pending,
             'expires_at' => now()->addMinutes($ttl),
-        ]);
+        ]));
 
         $this->audit->log('payment.request_created', $user, auditable: $request, changes: [
             'amount_fils' => $request->amount_fils,
@@ -471,23 +481,65 @@ class PaymentService extends BaseService
         }
     }
 
-    /** Generates a per-year incrementing reference: RFQ-YYYY-#####. */
+    /**
+     * A per-year incrementing reference: RFQ-YYYY-#####.
+     *
+     * ── The one row that cannot be locked ──────────────────────────────────────
+     *
+     * `lockForUpdate()` on a `LIKE` scan locks the rows it FINDS. For every payment
+     * after the first there is a previous row to lock, so two concurrent requests
+     * serialise correctly. For the **first payment of a calendar year** there is
+     * nothing to lock: both transactions scan an empty set, both compute
+     * `RFQ-2027-00001`, and `unique(payment_requests.number)` turns the loser into a
+     * `QueryException` — a 500 handed to a student topping up their wallet, on the
+     * first day of January, at the exact moment a bug is hardest to reproduce.
+     *
+     * Nothing in this codebase passes a retry count to `DB::transaction`, so nothing
+     * retried it either.
+     *
+     * The fix is to expect the collision rather than to try to lock a row that does
+     * not exist. A handful of attempts is plenty: the window is one transaction wide,
+     * and each retry re-reads the number the winner just committed.
+     *
+     * `DB::transaction($callback, attempts: N)` is not the right tool here — it retries
+     * only on deadlock and serialisation failures, not on a unique violation.
+     */
     private function generateNumber(): string
     {
         $year = now()->format('Y');
+        $prefix = "RFQ-{$year}-";
 
-        return DB::transaction(function () use ($year) {
-            $prefix = "RFQ-{$year}-";
+        $last = PaymentRequest::where('number', 'like', $prefix.'%')
+            ->lockForUpdate()
+            ->orderByDesc('number')
+            ->value('number');
 
-            $last = PaymentRequest::where('number', 'like', $prefix.'%')
-                ->lockForUpdate()
-                ->orderByDesc('number')
-                ->value('number');
+        $seq = $last ? ((int) Str::afterLast($last, '-')) + 1 : 1;
 
-            $seq = $last ? ((int) Str::afterLast($last, '-')) + 1 : 1;
+        return $prefix.str_pad((string) $seq, 5, '0', STR_PAD_LEFT);
+    }
 
-            return $prefix.str_pad((string) $seq, 5, '0', STR_PAD_LEFT);
-        });
+    /**
+     * Run `$insert` and retry it on a duplicate reference.
+     *
+     * @template T
+     *
+     * @param  callable(string): T  $insert  Receives a freshly generated number.
+     * @return T
+     */
+    private function withGeneratedNumber(callable $insert): mixed
+    {
+        for ($attempt = 1; $attempt <= self::NUMBER_ATTEMPTS; $attempt++) {
+            try {
+                return $insert($this->generateNumber());
+            } catch (UniqueConstraintViolationException $e) {
+                if ($attempt === self::NUMBER_ATTEMPTS) {
+                    throw $e;
+                }
+            }
+        }
+
+        throw new \LogicException('unreachable');
     }
 
     /**
