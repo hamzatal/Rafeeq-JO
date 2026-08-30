@@ -31,6 +31,15 @@ export default defineConfig({
        * parse. Stubbed to a `View`; see the stub for why that loses nothing.
        */
       'react-native-svg': new URL('./src/test/stubs/react-native-svg.tsx', import.meta.url).pathname,
+      /*
+       * Same problem, different package: it resolves to its own `src/SafeAreaContext.tsx`
+       * which contains `import typeof`. Without the stub, nothing that reads the safe
+       * area is testable — `TabBar`, `Screen`, `Loader`, `Feedback` and six screens.
+       */
+      'react-native-safe-area-context': new URL(
+        './src/test/stubs/react-native-safe-area-context.tsx',
+        import.meta.url,
+      ).pathname,
     },
   },
   test: {

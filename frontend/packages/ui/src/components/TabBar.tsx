@@ -57,6 +57,24 @@ export function TabBar({ state, descriptors, navigation, centerRoute }: TabBarPr
         const descriptor = descriptors[route.key];
         if (!descriptor) return null;
         const { options } = descriptor;
+
+        /*
+         * A screen marked `href: null` must not be drawn.
+         *
+         * expo-router compiles that shortcut into `tabBarButton: () => null`
+         * (`expo-router/build/layouts/Tabs.js` — it destructures `href` out of the
+         * options and injects the button). React Navigation's DEFAULT bar renders every
+         * item through `tabBarButton`, so returning null is what hides the screen.
+         *
+         * This bar draws its own `Pressable` and never consulted that option, so
+         * `href: null` did nothing and all nine screens the student layout hides were
+         * drawn anyway: THIRTEEN items where the approved design has four. On a 390pt
+         * screen that is ~30pt each, with «الإعدادات» truncated to «الإعد…» — and it is
+         * not a web artefact, the code path is identical on a phone.
+         *
+         * Honouring the option is what makes `href: null` mean anything here.
+         */
+        if (options.tabBarButton?.({ children: null } as never) === null) return null;
         const focused = state.routes[state.index]?.key === route.key;
         const label = (options.title ?? route.name) as string;
         const isCenter = centerRoute !== undefined && route.name === centerRoute;
