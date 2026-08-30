@@ -6,105 +6,29 @@ import { useAuth } from '../lib/auth';
 import { useT } from '../lib/i18n';
 import { LogoMark } from './Logo';
 import { Icon } from './Icon';
+import { NAV, PROFILE, activeHref } from '../lib/nav';
 
-interface NavLink {
-  href: string;
-  labelKey: string;
-  icon: string;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SIDEBAR — four groups, sixteen destinations, one source.
 
-const GROUPS: { titleKey: string; links: NavLink[] }[] = [
-  {
-    titleKey: 'nav.group.operations',
-    links: [
-      { href: '/', labelKey: 'nav.dashboard', icon: 'layout-dashboard' },
-      { href: '/insights', labelKey: 'nav.insights', icon: 'brain' },
-      { href: '/ride-requests', labelKey: 'nav.rideRequests', icon: 'navigation' },
-      { href: '/zones', labelKey: 'nav.zones', icon: 'map' },
-      { href: '/universities', labelKey: 'nav.universities', icon: 'graduation-cap' },
-    ],
-  },
-  {
-    titleKey: 'nav.group.transport',
-    links: [
-      { href: '/routes', labelKey: 'nav.routes', icon: 'route' },
-      { href: '/plans', labelKey: 'nav.plans', icon: 'clipboard-list' },
-      { href: '/zone-prices', labelKey: 'nav.zonePrices', icon: 'circle-dollar-sign' },
-      { href: '/subscriptions', labelKey: 'nav.subscriptions', icon: 'repeat' },
-      { href: '/trips', labelKey: 'nav.trips', icon: 'car' },
-    ],
-  },
-  {
-    titleKey: 'nav.group.network',
-    links: [
-      { href: '/drivers', labelKey: 'nav.drivers', icon: 'car-front' },
-      { href: '/users', labelKey: 'nav.users', icon: 'users' },
-    ],
-  },
-  {
-    titleKey: 'nav.group.finance',
-    links: [
-      { href: '/payments', labelKey: 'nav.payments', icon: 'banknote' },
-      { href: '/coupons', labelKey: 'nav.coupons', icon: 'ticket-percent' },
-      { href: '/ads', labelKey: 'nav.ads', icon: 'monitor-play' },
-      { href: '/withdrawals', labelKey: 'nav.withdrawals', icon: 'wallet' },
-      { href: '/cliq', labelKey: 'nav.cliq', icon: 'landmark' },
-      { href: '/pricing', labelKey: 'nav.pricing', icon: 'sliders-horizontal' },
-      { href: '/reports', labelKey: 'nav.reports', icon: 'activity' },
-    ],
-  },
-  {
-    titleKey: 'nav.group.safety',
-    links: [
-      { href: '/safety', labelKey: 'nav.safety', icon: 'shield' },
-      { href: '/disputes', labelKey: 'nav.disputes', icon: 'gavel' },
-      { href: '/support', labelKey: 'nav.support', icon: 'headset' },
-      { href: '/complaints', labelKey: 'nav.complaints', icon: 'flag' },
-      { href: '/security', labelKey: 'nav.security', icon: 'lock' },
-    ],
-  },
-  {
-    titleKey: 'nav.group.admin',
-    links: [
-      { href: '/admins', labelKey: 'nav.admins', icon: 'user-cog' },
-      { href: '/notifications', labelKey: 'nav.notify', icon: 'megaphone' },
-      { href: '/audit', labelKey: 'nav.audit', icon: 'rotate-ccw-clock' },
-      { href: '/profile', labelKey: 'nav.profile', icon: 'circle-user' },
-    ],
-  },
-];
+   ── What changed in phase 10 ───────────────────────────────────────────────
 
-/** Short hover hints explaining what each page does (non-intrusive tooltips). */
-const HINTS: Record<string, string> = {
-  '/': 'نظرة عامة على مؤشرات المنصّة اللحظية',
-  '/insights': 'تحليلات ورؤى مولّدة بالذكاء الاصطناعي',
-  '/ride-requests': 'طلبات الرحلات الواردة وحالتها',
-  '/zones': 'مناطق التغطية والحدود الجغرافية',
-  '/universities': 'الجامعات ونقاط الالتقاط',
-  '/routes': 'مسارات النقل الثابتة',
-  '/plans': 'خطط الاشتراك وأسعارها',
-  '/subscriptions': 'اشتراكات الطلاب النشطة',
-  '/trips': 'مراقبة الرحلات الجارية والمكتملة',
-  '/drivers': 'الكباتن والتحقق من الوثائق',
-  '/users': 'كل المستخدمين + شحن المحافظ',
-  '/payments': 'مراجعة شحنات CliQ + تدقيق الاحتيال بالـ AI',
-  '/coupons': 'إنشاء وإدارة كوبونات الخصم',
-  '/ads': 'إدارة المساحات الإعلانية داخل التطبيقات',
-  '/withdrawals': 'طلبات سحب أرباح الكباتن',
-  '/reports': 'التقارير المالية والإيرادات',
-  '/cliq': 'إعدادات CliQ وتغيير الاسم المستعار',
-  '/pricing': 'ضبط أسعار الرحلات وعمولة المنصة',
-  '/zone-prices': 'أسعار موحّدة ثابتة لكل منطقة↔جامعة',
-  '/safety': 'بلاغات SOS وإدارة المخاطر',
-  '/disputes': 'النزاعات المالية بين الأطراف',
-  '/support': 'تذاكر الدعم مع فرز ذكي بالـ AI',
-  '/complaints': 'الشكاوى وتصعيدها الذكي',
-  '/security': 'المصادقة الثنائية وسجلّات الأمان',
-  '/admins': 'إضافة وتعديل موظفي الإدارة وأدوارهم',
-  '/notifications': 'إرسال إشعارات لفئات المستخدمين + إرفاق كوبونات',
-  '/audit': 'سجلّ التدقيق: كل إجراء حسّاس مع إمكانية التصدير CSV',
-  '/profile': 'تعديل بياناتك وكلمة المرور',
-};
+   Six groups and twenty-eight links became four and sixteen, per
+   `docs/design/v2/06-admin-1`. The list itself moved OUT of this file into
+   `src/lib/nav.ts`, because it was never only the sidebar's: `Topbar` kept a second
+   copy for its search, with the Arabic and English written inline, and the two had
+   drifted apart on both membership and wording.
+
+   ── The surface ────────────────────────────────────────────────────────────
+
+   `surface` (white), not `brand-50`. The approved sidebar is white against a tinted
+   page, so the ACTIVE row is the only tinted thing in the column — on a brand-50
+   column the active pill had to fight the background it sat on.
+
+   The active row also carries a bar on the leading edge. In an RTL column that is
+   `start-0`, which flips with `dir` on its own; a `left-0` would have detached the
+   marker from the text it marks the moment the dashboard is read in English.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -112,60 +36,69 @@ export function Sidebar() {
   const { t } = useT();
 
   const isAdmin = (user?.roles ?? []).includes('admin');
-  // Hide admin-only links from non-admin staff.
-  const adminOnly = new Set(['/admins', '/cliq', '/pricing', '/notifications', '/audit']);
-
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/');
+  const current = activeHref(pathname);
 
   return (
-    <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-brand-50 text-ink flex flex-col z-50 border-e border-line">
+    <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-surface text-ink flex flex-col z-50 border-e border-line">
       {/* Brand */}
-      <div className="px-5 py-5 flex items-center gap-3 border-b border-line">
-        <LogoMark size={42} />
-        <div>
+      <div className="px-5 py-4 flex items-center gap-3 border-b border-line">
+        <LogoMark size={40} />
+        <div className="min-w-0">
           <div className="text-lg font-bold font-display text-primary leading-tight">رفيق</div>
-          <div className="text-[11px] text-muted">{t('brand.tagline')}</div>
+          <div className="text-[11px] text-muted truncate">{t('brand.tagline')}</div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-1">
-        {GROUPS.map((g) => (
-          <div key={g.titleKey} className="mb-3">
-            <div className="px-5 mb-1 text-[10px] font-bold uppercase tracking-widest text-muted/60">
-              {t(g.titleKey)}
+      <nav aria-label={t('nav.group.operations')} className="flex-1 overflow-y-auto overflow-x-hidden py-3">
+        {NAV.map((group) => {
+          const items = group.items.filter((item) => !item.adminOnly || isAdmin);
+          // A group whose every entry is admin-only must not leave its heading behind.
+          if (items.length === 0) return null;
+
+          return (
+            <div key={group.titleKey} className="mb-4">
+              <div className="px-5 mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted/70">
+                {t(group.titleKey)}
+              </div>
+              {items.map((item) => {
+                const active = current === item.href;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    title={t(item.hintKey)}
+                    aria-current={active ? 'page' : undefined}
+                    className={`nav-item relative ${active ? 'nav-item-active' : ''}`}
+                  >
+                    {active && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute start-0 inset-y-1 w-[3px] rounded-e bg-primary"
+                      />
+                    )}
+                    {/*
+                      Lucide is a stroke set with no fill axis, so emphasis is carried
+                      by a heavier stroke — 2.25 against the 1.75 default, which reads
+                      at 20px without changing the glyph's silhouette.
+                    */}
+                    <Icon name={item.icon} size={20} strokeWidth={active ? 2.25 : undefined} />
+                    <span className="truncate">{t(item.labelKey)}</span>
+                  </Link>
+                );
+              })}
             </div>
-            {g.links.map((l) => {
-              if (adminOnly.has(l.href) && !isAdmin) return null;
-              const active = isActive(l.href);
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  title={HINTS[l.href] ?? ''}
-                  className={`nav-item ${active ? 'nav-item-active' : ''}`}
-                >
-                  {/*
-                    The active entry used Material Symbols' `FILL 1` axis. Lucide is
-                    a stroke set with no fill axis, so the emphasis is carried by a
-                    heavier stroke instead — 2.25 against the 1.75 default, which
-                    reads at 20px without changing the glyph's silhouette.
-                  */}
-                  <Icon name={l.icon} size={20} strokeWidth={active ? 2.25 : undefined} />
-                  <span className="truncate">{t(l.labelKey)}</span>
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
-      {/* User */}
+      {/* User — where the approved sidebar puts the signed-in operator. */}
       <div className="p-3 border-t border-line">
         <Link
-          href="/profile"
-          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-brand-100 transition-colors"
+          href={PROFILE.href}
+          title={t(PROFILE.hintKey)}
+          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-background transition-colors"
         >
           <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold shrink-0">
             {user?.full_name?.charAt(0) ?? 'A'}

@@ -1,55 +1,23 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AppNotification } from '@rafeeq/shared';
 import { usePrefs } from '../lib/prefs';
 import { useT } from '../lib/i18n';
 import { Tooltip } from './Tooltip';
 import { api } from '../lib/api';
 import { Icon } from './Icon';
-
-/** Searchable destinations for the global command-palette search. */
-type Target = { href: string; ar: string; en: string; icon: string; kw?: string };
-const TARGETS: Target[] = [
-  { href: '/', ar: 'مركز القيادة', en: 'Dashboard', icon: 'layout-dashboard', kw: 'home overview رئيسية' },
-  { href: '/insights', ar: 'الرؤى الذكية', en: 'AI Insights', icon: 'brain', kw: 'ai analytics تحليلات' },
-  { href: '/ride-requests', ar: 'طلبات الرحلات', en: 'Ride Requests', icon: 'navigation' },
-  { href: '/zones', ar: 'المناطق', en: 'Zones', icon: 'map' },
-  { href: '/universities', ar: 'الجامعات', en: 'Universities', icon: 'graduation-cap' },
-  { href: '/routes', ar: 'المسارات', en: 'Routes', icon: 'route' },
-  { href: '/plans', ar: 'خطط الاشتراك', en: 'Plans', icon: 'clipboard-list' },
-  { href: '/subscriptions', ar: 'الاشتراكات', en: 'Subscriptions', icon: 'repeat' },
-  { href: '/trips', ar: 'الرحلات', en: 'Trips', icon: 'car' },
-  { href: '/drivers', ar: 'الكباتن', en: 'Captains', icon: 'car-front', kw: 'drivers سائق' },
-  { href: '/users', ar: 'المستخدمون', en: 'Users', icon: 'users', kw: 'students طلاب wallet محفظة' },
-  { href: '/payments', ar: 'المدفوعات', en: 'Payments', icon: 'banknote', kw: 'cliq شحن fraud احتيال' },
-  { href: '/coupons', ar: 'الكوبونات', en: 'Coupons', icon: 'ticket-percent', kw: 'discount خصم' },
-  { href: '/withdrawals', ar: 'سحوبات الكباتن', en: 'Withdrawals', icon: 'wallet', kw: 'payout' },
-  { href: '/reports', ar: 'التقارير المالية', en: 'Reports', icon: 'activity' },
-  { href: '/cliq', ar: 'إعدادات CliQ', en: 'CliQ Settings', icon: 'landmark', kw: 'alias' },
-  { href: '/safety', ar: 'مركز الأمان', en: 'Safety', icon: 'shield', kw: 'sos risk مخاطر' },
-  { href: '/disputes', ar: 'النزاعات', en: 'Disputes', icon: 'gavel' },
-  { href: '/support', ar: 'الدعم', en: 'Support', icon: 'headset', kw: 'tickets تذاكر' },
-  { href: '/complaints', ar: 'الشكاوى', en: 'Complaints', icon: 'flag' },
-  { href: '/security', ar: 'الأمان (MFA)', en: 'Security', icon: 'lock' },
-  { href: '/admins', ar: 'فريق الإدارة', en: 'Admin Team', icon: 'user-cog' },
-  { href: '/profile', ar: 'ملفي الشخصي', en: 'My Profile', icon: 'circle-user' },
-];
+import { CommandPalette } from './CommandPalette';
 
 export function Topbar() {
   const { locale, setLocale } = usePrefs();
   const { t } = useT();
-  const router = useRouter();
 
-  const [query, setQuery] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<AppNotification[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const searchRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -65,42 +33,10 @@ export function Topbar() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) setOpen(false);
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
-
-  // ── Global search results ──────────────────────────────────────
-  const pageResults = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return TARGETS.filter(
-      (t2) => t2.ar.includes(query.trim()) || t2.en.toLowerCase().includes(q) || (t2.kw ?? '').toLowerCase().includes(q),
-    ).slice(0, 6);
-  }, [query]);
-
-  const entityActions = useMemo(() => {
-    const q = query.trim();
-    if (!q) return [] as { label: string; href: string; icon: string }[];
-    return [
-      { label: `بحث عن مستخدم: "${q}"`, href: `/users?q=${encodeURIComponent(q)}`, icon: 'user-search' },
-      { label: `بحث عن كابتن: "${q}"`, href: `/drivers?q=${encodeURIComponent(q)}`, icon: 'car-front' },
-    ];
-  }, [query]);
-
-  const go = (href: string) => {
-    setSearchOpen(false);
-    setQuery('');
-    router.push(href);
-  };
-
-  const submitSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pageResults[0]) return go(pageResults[0].href);
-    const q = query.trim();
-    if (q) go(`/users?q=${encodeURIComponent(q)}`);
-  };
 
   /*
    * Guarded, because this fetch outlives the component that started it.
@@ -141,57 +77,7 @@ export function Topbar() {
 
   return (
     <header className="sticky top-0 z-40 h-16 bg-surface/90 backdrop-blur border-b border-line flex items-center justify-between px-6">
-      {/* Global search */}
-      <div className="relative w-96 max-w-[48vw] hidden sm:block" ref={searchRef}>
-        <form onSubmit={submitSearch}>
-          <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-line bg-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-            <Icon name="search" size={20} className="text-muted shrink-0" />
-            <input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setSearchOpen(true);
-              }}
-              onFocus={() => setSearchOpen(true)}
-              className="flex-1 h-full bg-transparent text-sm outline-none"
-              placeholder={t('shell.search')}
-            />
-          </div>
-        </form>
-
-        {searchOpen && query.trim() && (
-          <div className="absolute mt-2 w-full rounded-xl border border-line bg-surface shadow-lift overflow-hidden">
-            {pageResults.length > 0 && (
-              <div className="py-1">
-                <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">الصفحات</div>
-                {pageResults.map((r) => (
-                  <button
-                    key={r.href}
-                    onClick={() => go(r.href)}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background text-start"
-                  >
-                    <Icon name={r.icon} size={18} className="text-primary-dark" />
-                    <span className="surface-text">{locale === 'ar' ? r.ar : r.en}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-            <div className="py-1 border-t border-line">
-              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">إجراءات</div>
-              {entityActions.map((a) => (
-                <button
-                  key={a.href}
-                  onClick={() => go(a.href)}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-background text-start"
-                >
-                  <Icon name={a.icon} size={18} className="text-muted" />
-                  <span className="surface-text">{a.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      <CommandPalette />
 
       <div className="flex items-center gap-2">
         {/* Notifications */}
