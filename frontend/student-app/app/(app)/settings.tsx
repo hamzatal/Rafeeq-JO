@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
-import { LEGAL_URLS, LegalDocument } from '@rafeeq/shared';
+import type { LegalDocument } from '@rafeeq/shared';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Icon, Text, useConfirm, useTheme, useToast, type AppTheme, type IconName } from '@rafeeq/ui';
+import { getLegalUrl, Icon, Text, useConfirm, useTheme, useToast, type AppTheme, type IconName } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { usePrefs } from '../../src/store/prefs';
@@ -48,7 +48,7 @@ import { api } from '../../src/lib/api';
  * a reachable privacy policy from inside the app.
  */
 const openLegal = (doc: LegalDocument) => {
-  Linking.openURL(LEGAL_URLS[doc]).catch(() => undefined);
+  Linking.openURL(getLegalUrl(doc)).catch(() => undefined);
 };
 
 export default function Settings() {

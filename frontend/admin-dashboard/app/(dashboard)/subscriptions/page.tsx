@@ -10,7 +10,7 @@ import { LoadError } from '../../../src/components/LoadError';
 const STATUSES = ['', 'pending', 'active', 'expired', 'cancelled'];
 
 export default function SubscriptionsPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [items, setItems] = useState<Subscription[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
@@ -59,6 +59,7 @@ export default function SubscriptionsPage() {
           <div className="p-6 text-center text-muted">{t('subscriptions.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.subscriptions')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('subscriptions.colPlan')}</th>
@@ -78,7 +79,7 @@ export default function SubscriptionsPage() {
                     </span>
                   </td>
                   <td className="p-3 text-muted">{s.remaining_rides ?? t('subscriptions.unlimited')}</td>
-                  <td className="p-3 text-muted font-mono">{s.ends_at ? new Date(s.ends_at).toLocaleDateString('ar') : '—'}</td>
+                  <td className="p-3 text-muted font-mono">{s.ends_at ? new Date(s.ends_at).toLocaleDateString(locale) : '—'}</td>
                   <td className="p-3 text-left">
                     {s.status === 'pending' && (
                       <button disabled={busyId === s.id} onClick={() => activate(s)} className="text-primary-dark text-sm hover:underline disabled:opacity-50">

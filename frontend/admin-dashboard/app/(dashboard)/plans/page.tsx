@@ -5,6 +5,7 @@ import { formatJod } from '@rafeeq/shared';
 import type { SubscriptionPlan, SubscriptionType } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
@@ -15,13 +16,19 @@ export default function PlansPage() {
   const { t } = useT();
   const [items, setItems] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [form, setForm] = useState({ ...EMPTY });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
-    api.admin.listPlans().then(setItems).finally(() => setLoading(false));
+    setLoadError(false);
+    api.admin
+      .listPlans()
+      .then(setItems)
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => load(), [load]);
@@ -50,9 +57,17 @@ export default function PlansPage() {
     }
   };
 
-  const toggle = (p: SubscriptionPlan) => api.admin.updatePlan(p.id, { is_active: !p.is_active }).then(load);
+  /* A failed toggle used to do nothing at all — no reload, no message, so the row
+     simply stayed as it was and the operator clicked again. */
+  const toggle = (p: SubscriptionPlan) =>
+    api.admin
+      .updatePlan(p.id, { is_active: !p.is_active })
+      .then(load)
+      .catch(() => setError(t('plans.saveFailed')));
+
   const remove = (p: SubscriptionPlan) => {
-    if (confirm(`${t('plans.deleteConfirm')} ${p.name}?`)) api.admin.deletePlan(p.id).then(load);
+    if (!confirm(`${t('plans.deleteConfirm')} ${p.name}?`)) return;
+    api.admin.deletePlan(p.id).then(load).catch(() => setError(t('plans.saveFailed')));
   };
 
   return (
@@ -79,10 +94,13 @@ export default function PlansPage() {
       <div className="card p-0 overflow-hidden">
         {loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('plans.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.plans')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('plans.colPlan')}</th>

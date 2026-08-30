@@ -77,6 +77,7 @@ export default function SupportPage() {
           <div className="p-6 text-center text-muted">لا توجد تذاكر</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">الدعم</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">الرقم</th>

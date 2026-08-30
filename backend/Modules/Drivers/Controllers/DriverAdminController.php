@@ -30,7 +30,7 @@ class DriverAdminController extends Controller
         }
 
         return $this->ok(
-            DriverProfileResource::collection($query->paginate((int) $request->query('per_page', 20)))
+            DriverProfileResource::collection($query->paginate($this->perPage($request, 20)))
         );
     }
 

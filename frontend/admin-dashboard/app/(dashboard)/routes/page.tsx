@@ -5,6 +5,7 @@ import { formatJod } from '@rafeeq/shared';
 import type { Route, University } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
@@ -15,17 +16,20 @@ export default function RoutesPage() {
   const [items, setItems] = useState<Route[]>([]);
   const [unis, setUnis] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [form, setForm] = useState({ ...EMPTY });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
+    setLoadError(false);
     Promise.all([api.admin.listRoutes(), api.admin.listUniversities({ per_page: 100 })])
       .then(([r, u]) => {
         setItems(r);
         setUnis(u.items);
       })
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -55,9 +59,17 @@ export default function RoutesPage() {
     }
   };
 
-  const toggle = (r: Route) => api.admin.updateRoute(r.id, { is_active: !r.is_active }).then(load);
+  /* Same silent-failure shape as the coupon toggle: the row did not move and nothing
+     said why, on the control that opens or closes a corridor. */
+  const toggle = (r: Route) =>
+    api.admin
+      .updateRoute(r.id, { is_active: !r.is_active })
+      .then(load)
+      .catch(() => setError(t('routes.saveFailed')));
+
   const remove = (r: Route) => {
-    if (confirm(`${t('routes.deleteConfirm')} ${r.name}?`)) api.admin.deleteRoute(r.id).then(load);
+    if (!confirm(`${t('routes.deleteConfirm')} ${r.name}?`)) return;
+    api.admin.deleteRoute(r.id).then(load).catch(() => setError(t('routes.saveFailed')));
   };
   const uniName = (id: string) => unis.find((u) => u.id === id)?.name_ar ?? '—';
 
@@ -86,10 +98,13 @@ export default function RoutesPage() {
       <div className="card p-0 overflow-hidden">
         {loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('routes.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.routes')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('routes.colRoute')}</th>

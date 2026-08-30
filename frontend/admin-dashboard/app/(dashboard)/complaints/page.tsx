@@ -94,6 +94,7 @@ export default function ComplaintsPage() {
           <div className="p-6 text-center text-muted">{t('complaints.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.complaints')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('complaints.colNumber')}</th>

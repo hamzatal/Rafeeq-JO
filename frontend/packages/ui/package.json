@@ -32,10 +32,10 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "@react-navigation/bottom-tabs": "^6.5.20"
   },
   "devDependencies": {
-    "@react-navigation/bottom-tabs": "^6.5.20",
     "@testing-library/react-native": "^12.5.3",
     "@types/react": "~18.2.45",
     "@types/react-test-renderer": "^18.3.1",
@@ -44,6 +44,7 @@
     "react-native": "0.74.5",
     "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3",
-    "vitest": "^2.1.9"
+    "vitest": "^2.1.9",
+    "react-native-web": "~0.19.10"
   }
 }

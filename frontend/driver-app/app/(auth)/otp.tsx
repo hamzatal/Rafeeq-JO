@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { validators } from '@rafeeq/shared';
+import { OTP_LENGTH, validators } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { AuthShell, Banner, Button, Input, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
@@ -43,7 +43,7 @@ export default function Otp() {
     <AuthShell title={t('auth.otpTitle')} subtitle={`${t('auth.otpSubtitle')} — ${params.phone}`}>
       {formError ? <Banner message={formError} variant="error" /> : null}
       {params.debug ? <Text style={s.debug}>{t('auth.testCode')}: {params.debug}</Text> : null}
-      <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} placeholder="------" style={s.codeInput} />
+      <Input value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={OTP_LENGTH} placeholder={'-'.repeat(OTP_LENGTH)} style={s.codeInput} />
       <Button title={t('auth.verify')} onPress={onVerify} loading={loading} />
     </AuthShell>
   );

@@ -643,10 +643,14 @@ function LivePanel({
                     {[vehicle.color, vehicle.make, vehicle.model].filter(Boolean).join(' ')}
                   </Text>
                 ) : null}
-                {details.rating_count > 0 ? (
+                {/* `rating_count > 0` is the guard, but `rating_avg` is typed
+                    `number` and comes off the wire — a null there would throw
+                    INSIDE render, so `ErrorBoundary` would replace the whole home
+                    screen with the crash panel while a captain was on the way. */}
+                {details.rating_count > 0 && details.rating_avg != null ? (
                   <>
                     <Icon name="star" size={12} color={theme.colors.accent} />
-                    <Text role="caption" tone="secondary">{details.rating_avg.toFixed(1)}</Text>
+                    <Text role="caption" tone="secondary">{Number(details.rating_avg).toFixed(1)}</Text>
                   </>
                 ) : null}
               </View>

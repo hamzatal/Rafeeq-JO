@@ -171,7 +171,7 @@ const gates = [];
   }
   gates.push({
     id: 'raw-font-size',
-    budget: 245,
+    budget: 238,
     count: hits.length,
     hits,
     why: 'a pixel literal is a type decision made in isolation — 21 different sizes across two apps',

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Trip } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
@@ -15,16 +16,19 @@ const tone = (status: string) =>
     : 'bg-slate-100 text-muted';
 
 export default function TripsPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [items, setItems] = useState<Trip[]>([]);
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
+    setLoadError(false);
     api.admin
       .listTrips(status ? { status, per_page: 50 } : { per_page: 50 })
       .then((r) => setItems(r.items))
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, [status]);
 
@@ -44,10 +48,13 @@ export default function TripsPage() {
       <div className="card p-0 overflow-hidden">
         {loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('trips.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.trips')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('trips.colRoute')}</th>
@@ -61,7 +68,7 @@ export default function TripsPage() {
               {items.map((tr) => (
                 <tr key={tr.id} className="row-line">
                   <td className="p-3 font-medium surface-text">{tr.route?.name ?? t('trips.poolTrip')}</td>
-                  <td className="p-3 text-muted font-mono">{tr.scheduled_at ? new Date(tr.scheduled_at).toLocaleString('ar') : '—'}</td>
+                  <td className="p-3 text-muted font-mono">{tr.scheduled_at ? new Date(tr.scheduled_at).toLocaleString(locale) : '—'}</td>
                   <td className="p-3 text-muted">{tr.booked_count ?? 0}</td>
                   <td className="p-3 text-muted">{tr.capacity}</td>
                   <td className="p-3">

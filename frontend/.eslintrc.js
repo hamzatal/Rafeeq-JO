@@ -30,7 +30,8 @@
  * mockups. Doing it in phase 7 would have been an unreviewed visual change to the
  * whole product in the same commit that extracted the component library.
  *
- * Phase 8 took it to 35: six student screens were rewritten onto the shared `Text`
+ * Phase 8 took it to 35, and the sweep after it to 33 (`chat.tsx` moved into
+ * `packages/ui` as `ChatThread`, so both copies went with it): six student screens were rewritten onto the shared `Text`
  * (`home`, `trips`, `wallet`, `settings`, `emergency`, `ride-request`) and four
  * entries went away with the files (`lost-found`, `rewards`, `payments`,
  * `SmartSuggestions`). Phase 9 owns the captain app, phase 10 the dashboard.
@@ -42,7 +43,6 @@
 const GRANDFATHERED_RAW_TEXT = [
   'student-app/app/(app)/addresses.tsx',
   'student-app/app/(app)/assistant.tsx',
-  'student-app/app/(app)/chat.tsx',
   'student-app/app/(app)/checkout.tsx',
   'student-app/app/(app)/notifications.tsx',
   'student-app/app/(app)/subscriptions.tsx',
@@ -55,7 +55,6 @@ const GRANDFATHERED_RAW_TEXT = [
   'student-app/app/(onboarding)/intro.tsx',
   'student-app/app/(onboarding)/permissions.tsx',
   'student-app/app/(onboarding)/profile-setup.tsx',
-  'driver-app/app/(app)/chat.tsx',
   'driver-app/app/(app)/dashboard.tsx',
   'driver-app/app/(app)/documents.tsx',
   'driver-app/app/(app)/earnings-detail.tsx',

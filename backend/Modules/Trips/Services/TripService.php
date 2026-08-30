@@ -266,20 +266,42 @@ class TripService extends BaseService
             );
         }
 
+        /*
+         * ── The pair of statuses this method handles ────────────────────────────
+         *
+         * Named once, because the three places below used to disagree: the count and the
+         * notify list took `[Booked, Onboard]`, and the UPDATE took `Booked` only. So an
+         * `Onboard` passenger was counted as affected, had their hold released and got a
+         * "trip cancelled" push — and their own row was never changed.
+         *
+         * That is a genuinely terminal state. The trip is `Cancelled`, so `end()` can
+         * never run (it asserts `Started`), nothing else in the codebase transitions
+         * `Onboard`, and `cancelBooking()` requires `Booked` — so the rider cannot get
+         * out either. The row stays `Onboard` forever and keeps occupying a seat in
+         * `bookedCount()`, which is the capacity guard.
+         *
+         * The `paid_at` check above normally makes this unreachable, but not always:
+         * `RideBillingService::chargeForBoarding()` returns early WITHOUT writing
+         * `paid_at` when the fare is non-positive, and `schedule()` copies the fare
+         * straight from `routes.price_fils` with no positivity check. A route priced at
+         * zero therefore produces exactly this.
+         */
+        $occupied = [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value];
+
         $passengersCount = $trip->passengers()
-            ->whereIn('status', [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value])
+            ->whereIn('status', $occupied)
             ->count();
 
         // Capture affected passengers before we flip their status.
         $affectedStudentIds = $trip->passengers()
-            ->whereIn('status', [TripPassengerStatus::Booked->value, TripPassengerStatus::Onboard->value])
+            ->whereIn('status', $occupied)
             ->pluck('student_id');
 
         // Atomic: cancelling the trip, releasing the riders' seats and returning
         // their requests to the matching pool must commit together.
-        $this->transaction(function () use ($trip) {
+        $this->transaction(function () use ($trip, $occupied) {
             $trip->forceFill(['status' => TripStatus::Cancelled])->save();
-            $trip->passengers()->where('status', TripPassengerStatus::Booked->value)
+            $trip->passengers()->whereIn('status', $occupied)
                 ->update(['status' => TripPassengerStatus::Cancelled->value]);
 
             // The trip (not the student) was cancelled, so the students still want

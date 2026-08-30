@@ -25,7 +25,7 @@ class WalletController extends Controller
         $wallet = $this->wallet->forUser($request->user());
 
         return $this->ok(
-            WalletTransactionResource::collection($wallet->transactions()->paginate((int) $request->query('per_page', 30)))
+            WalletTransactionResource::collection($wallet->transactions()->paginate($this->perPage($request, 30)))
         );
     }
 
@@ -73,7 +73,7 @@ class WalletController extends Controller
         return $this->ok([
             'wallet' => new WalletResource($wallet),
             'transactions' => WalletTransactionResource::collection(
-                $wallet->transactions()->latest()->limit((int) $request->query('limit', 20))->get()
+                $wallet->transactions()->latest()->limit($this->limit($request, 20))->get()
             ),
         ]);
     }

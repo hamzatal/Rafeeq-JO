@@ -143,6 +143,6 @@ class RideRequestController extends Controller
             $query->where('zone_id', $zoneId);
         }
 
-        return $this->ok(RideRequestResource::collection($query->paginate((int) $request->query('per_page', 50))));
+        return $this->ok(RideRequestResource::collection($query->paginate($this->perPage($request, 50))));
     }
 }

@@ -62,7 +62,7 @@ Schedule::command('rafeeq:prune-retention')
     ->dailyAt('03:30')
     ->onOneServer()
     ->withoutOverlapping()
-    ->emailOutputOnFailure(env('OPS_ALERT_EMAIL') ?: null);
+    ->emailOutputOnFailure(config('rafeeq.ops_alert_email') ?: null);
 
 // Expire subscriptions whose window has closed. Without this every report that reads
 // `status = active` is wrong, and rows stay active forever.
@@ -106,7 +106,7 @@ Schedule::exec(base_path('scripts/backup.sh'))
     ->dailyAt('02:00')
     ->onOneServer()
     ->withoutOverlapping()
-    ->emailOutputOnFailure(env('OPS_ALERT_EMAIL') ?: null);
+    ->emailOutputOnFailure(config('rafeeq.ops_alert_email') ?: null);
 
 // Alert when the failed-job table grows: a job failing repeatedly in silence is how a
 // notification backlog or a stuck payout goes unnoticed for a week.

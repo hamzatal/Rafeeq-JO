@@ -63,6 +63,7 @@ export default function AdminsPage() {
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('admins.title')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-start p-3 font-medium">{t('profile.fullName')}</th>

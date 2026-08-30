@@ -25,7 +25,7 @@ class UniversityAdminController extends Controller
                 ->orWhere('code', 'like', "%{$search}%"));
         }
 
-        return $this->ok(UniversityResource::collection($query->paginate((int) $request->query('per_page', 50))));
+        return $this->ok(UniversityResource::collection($query->paginate($this->perPage($request, 50))));
     }
 
     public function store(StoreUniversityRequest $request): JsonResponse

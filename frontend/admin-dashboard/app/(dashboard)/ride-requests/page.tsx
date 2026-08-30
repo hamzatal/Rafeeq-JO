@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ApiSuccess, RideRequest } from '@rafeeq/shared';
 import { ENDPOINTS } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { Tooltip } from '../../../src/components/Tooltip';
@@ -12,14 +13,17 @@ export default function RideRequestsPage() {
   const { t } = useT();
   const [items, setItems] = useState<RideRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [matching, setMatching] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
+    setLoadError(false);
     api.http
       .get<ApiSuccess<RideRequest[]>>(ENDPOINTS.admin.rideRequests)
       .then((r) => setItems(r.data.data))
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -56,10 +60,13 @@ export default function RideRequestsPage() {
       <div className="card p-0 overflow-hidden">
         {loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
+        ) : loadError ? (
+          <LoadError onRetry={load} />
         ) : items.length === 0 ? (
           <div className="p-6 text-center text-muted">{t('rideRequests.none')}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.rideRequests')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('rideRequests.colZone')}</th>

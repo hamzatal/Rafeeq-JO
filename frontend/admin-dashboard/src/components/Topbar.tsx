@@ -102,13 +102,29 @@ export function Topbar() {
     if (q) go(`/users?q=${encodeURIComponent(q)}`);
   };
 
+  /*
+   * Guarded, because this fetch outlives the component that started it.
+   *
+   * It had no mounted check and no `.catch`: navigating away with the panel open
+   * resolved into two `setState` calls on an unmounted `Topbar`, and a failed request
+   * left the panel spinning forever with nothing said. The `alive` idiom is already
+   * used three files over — this one just never got it.
+   */
+  const alive = useRef(true);
+  useEffect(() => () => { alive.current = false; }, []);
+
   const togglePanel = useCallback(() => {
     setOpen((o) => {
       const next = !o;
       if (next) {
         setLoadingItems(true);
-        api.notifications.list({ page: 1 }).then(({ items }) => setItems(items.slice(0, 8))).finally(() => setLoadingItems(false));
+        api.notifications
+          .list({ page: 1 })
+          .then(({ items }) => alive.current && setItems(items.slice(0, 8)))
+          .catch(() => alive.current && setItems([]))
+          .finally(() => alive.current && setLoadingItems(false));
       }
+
       return next;
     });
   }, []);

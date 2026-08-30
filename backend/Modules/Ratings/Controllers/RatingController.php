@@ -38,7 +38,7 @@ class RatingController extends Controller
     {
         $items = Rating::where('rater_id', $request->user()->id)
             ->latest()
-            ->paginate((int) $request->query('per_page', 20));
+            ->paginate($this->perPage($request, 20));
 
         return $this->ok(RatingResource::collection($items));
     }
@@ -48,7 +48,7 @@ class RatingController extends Controller
     {
         $items = Rating::where('ratee_id', $request->user()->id)
             ->latest()
-            ->paginate((int) $request->query('per_page', 20));
+            ->paginate($this->perPage($request, 20));
 
         return $this->ok(RatingResource::collection($items));
     }

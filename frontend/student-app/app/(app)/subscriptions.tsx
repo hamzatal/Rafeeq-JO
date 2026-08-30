@@ -9,7 +9,7 @@ import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 
 export default function Subscriptions() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
@@ -78,7 +78,7 @@ export default function Subscriptions() {
                   <View style={s.pDivider} />
                   <View style={{ flex: 1 }}>
                     <Text style={s.pStatLabel}>{t('subscriptions.endsAt')}</Text>
-                    <Text style={s.pStatValueSm}>{sub.ends_at ? new Date(sub.ends_at).toLocaleDateString('ar', { day: 'numeric', month: 'short' }) : '—'}</Text>
+                    <Text style={s.pStatValueSm}>{sub.ends_at ? new Date(sub.ends_at).toLocaleDateString(locale, { day: 'numeric', month: 'short' }) : '—'}</Text>
                   </View>
                 </View>
               </View>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { University } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
@@ -13,13 +14,19 @@ export default function UniversitiesPage() {
   const { t } = useT();
   const [items, setItems] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [form, setForm] = useState({ ...EMPTY });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
-    api.admin.listUniversities({ per_page: 100 }).then((r) => setItems(r.items)).finally(() => setLoading(false));
+    setLoadError(false);
+    api.admin
+      .listUniversities({ per_page: 100 })
+      .then((r) => setItems(r.items))
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => load(), [load]);
@@ -42,9 +49,14 @@ export default function UniversitiesPage() {
     }
   };
 
-  const toggle = (u: University) => api.admin.updateUniversity(u.id, { is_active: !u.is_active }).then(load);
+  /* A silent failure here left the row unchanged, so the operator clicked again. */
+  const toggle = (u: University) =>
+    api.admin
+      .updateUniversity(u.id, { is_active: !u.is_active })
+      .then(load)
+      .catch(() => setError(t('universities.saveFailed')));
   const remove = (u: University) => {
-    if (confirm(`${t('universities.deleteConfirm')} ${u.name_ar}?`)) api.admin.deleteUniversity(u.id).then(load);
+    if (confirm(`${t('universities.deleteConfirm')} ${u.name_ar}?`)) api.admin.deleteUniversity(u.id).then(load).catch(() => setError(t('universities.saveFailed')));
   };
 
   return (
@@ -64,10 +76,12 @@ export default function UniversitiesPage() {
       </div>
 
       <div className="card p-0 overflow-hidden">
+        {loadError ? <LoadError onRetry={load} /> : null}
         {loading ? (
           <div className="p-4 space-y-3">{Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} className="h-9 w-full" />))}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.universities')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-right p-3 font-medium">{t('universities.colName')}</th>

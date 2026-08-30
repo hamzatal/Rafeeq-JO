@@ -17,7 +17,7 @@ const DOC_ICON: Record<string, IconName> = {
 };
 
 export default function Profile() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
@@ -88,7 +88,7 @@ export default function Profile() {
               <Icon name="navigation" size={16} color={theme.colors.primary} />
               <Text style={s.statLabel}>{t('driver.totalTrips')}</Text>
             </View>
-            <Text style={s.statValue}>{driver?.total_trips?.toLocaleString('en-US') ?? '0'}</Text>
+            <Text style={s.statValue}>{driver?.total_trips?.toLocaleString(locale) ?? '0'}</Text>
           </View>
         </View>
 

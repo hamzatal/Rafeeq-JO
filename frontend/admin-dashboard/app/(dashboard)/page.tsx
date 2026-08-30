@@ -104,7 +104,7 @@ export default function CommandCenter() {
   const kpis: Kpi[] = [
     {
       label: t('home.kpi.rides'),
-      value: (report?.rides_count ?? 0).toLocaleString('en-US'),
+      value: (report?.rides_count ?? 0).toLocaleString(locale),
       icon: 'car',
       trend: t('home.trend.sinceMonth'),
       bar: 0.75,
@@ -245,6 +245,7 @@ export default function CommandCenter() {
             <div className="p-6 text-center text-muted">{t('home.noDisputes')}</div>
           ) : (
             <table className="data-table">
+            <caption className="sr-only">{t('home.title')}</caption>
               <thead>
                 <tr>
                   <th scope="col">{t('home.account')}</th>

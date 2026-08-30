@@ -209,7 +209,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasAcceptedCurrentTerms(): bool
     {
         return $this->terms_accepted_at !== null
-            && $this->terms_version === (string) config('rafeeq.terms.version');
+            && $this->terms_version === (string) config('rafeeq.legal.version');
     }
 
     /** Whether two-factor authentication is active for this account. */

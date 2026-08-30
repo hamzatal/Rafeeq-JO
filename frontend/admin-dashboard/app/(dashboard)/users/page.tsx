@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { bareJod, formatJod } from '@rafeeq/shared';
 import type { User, WalletTransaction } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { Icon } from '../../../src/components/Icon';
@@ -22,6 +23,7 @@ export default function UsersPage() {
   const [type, setType] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [topupUser, setTopupUser] = useState<User | null>(null);
 
   // Pick up a ?q= search term coming from the global Topbar search.
@@ -32,9 +34,11 @@ export default function UsersPage() {
 
   const reload = () => {
     setLoading(true);
+    setLoadError(false);
     api.admin
       .listUsers({ type: type || undefined, search: search || undefined, per_page: 50 })
       .then((r) => setUsers(r.items))
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   };
 
@@ -76,10 +80,13 @@ export default function UsersPage() {
               <Skeleton key={i} className="h-10 w-full" />
             ))}
           </div>
+        ) : loadError ? (
+          <LoadError onRetry={reload} />
         ) : users.length === 0 ? (
           <div className="p-6 text-center text-muted">{locale === 'ar' ? 'لا يوجد مستخدمون' : 'No users'}</div>
         ) : (
           <table className="w-full text-sm">
+            <caption className="sr-only">{t('nav.users')}</caption>
             <thead className="table-head">
               <tr>
                 <th scope="col" className="text-start p-3 font-medium">{t('profile.fullName')}</th>
@@ -134,7 +141,13 @@ function TopupModal({ user, onClose, onDone }: { user: User; onClose: () => void
   const loadTxns = useCallback(() => {
     api.admin
       .listUserWalletTransactions(user.id)
+      .catch(() => null)
       .then((r) => {
+        /* `null` on failure rather than an unhandled rejection: the top-up drawer
+           showed a blank balance and an empty history, which reads as "this user has
+           no money and has never moved any" — on the screen where an operator is
+           about to credit them. */
+        if (!r) return;
         setBalance(r.wallet.balance_fils);
         setTxns(r.transactions);
       })

@@ -15,7 +15,7 @@ const SEVERITY_CLASS: Record<string, string> = {
 };
 
 export default function DisputesPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [items, setItems] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -120,6 +120,7 @@ export default function DisputesPage() {
             <div className="p-6 text-center text-muted">{t('disputes.none')}</div>
           ) : (
             <table className="w-full text-sm">
+            <caption className="sr-only">{t('disputes.title')}</caption>
               <thead className="table-head">
                 <tr>
                   <th scope="col" className="text-right p-3 font-medium">{t('disputes.colAccount')}</th>
@@ -213,7 +214,7 @@ export default function DisputesPage() {
                 {detail.evidence.cancellations.map((c) => (
                   <div key={c.id} className="text-xs border border-line rounded-lg p-2 flex justify-between">
                     <span className="text-muted">{c.reason ?? t('disputes.noReason')} · {t('disputes.passengers')}: {c.passengers_count}</span>
-                    <span className="text-muted">{c.created_at ? new Date(c.created_at).toLocaleDateString('ar') : ''}</span>
+                    <span className="text-muted">{c.created_at ? new Date(c.created_at).toLocaleDateString(locale) : ''}</span>
                   </div>
                 ))}
                 {detail.evidence.cancellations.length === 0 && <div className="text-xs text-muted">{t('disputes.empty')}</div>}

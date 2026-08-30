@@ -31,7 +31,7 @@ class StaffController extends Controller
         $query->searchIdentity($request->query('search'));
 
         return $this->ok(
-            UserResource::collection($query->paginate((int) $request->query('per_page', 30)))
+            UserResource::collection($query->paginate($this->perPage($request, 30)))
         );
     }
 

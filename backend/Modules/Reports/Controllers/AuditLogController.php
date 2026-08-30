@@ -24,7 +24,7 @@ class AuditLogController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $page = $this->audit->paginate($this->filters($request), (int) $request->query('per_page', 30));
+        $page = $this->audit->paginate($this->filters($request), $this->perPage($request, 30));
 
         return $this->ok($page);
     }

@@ -49,7 +49,7 @@ class AuthService extends BaseService
                 // WHICH terms version was accepted, and when. Every fare, commission
                 // and no-show fee needs a contractual basis, and that basis has to be
                 // a specific version — bumping the version re-asks everyone.
-                'terms_version' => (string) config('rafeeq.terms.version'),
+                'terms_version' => (string) config('rafeeq.legal.version'),
                 'terms_accepted_at' => Clock::now(),
             ]);
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { User } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
+import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 
 export default function ProfilePage() {
@@ -18,6 +19,7 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPwd, setSavingPwd] = useState(false);
   const [pwdMsg, setPwdMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     api.profile
@@ -27,7 +29,9 @@ export default function ProfilePage() {
         setFullName(u.full_name ?? '');
         setEmail(u.email ?? '');
       })
-      .catch(() => {});
+      /* Silent before: the form rendered empty and the operator could not tell
+         whether their profile had no name or the request had failed. */
+      .catch(() => setLoadError(true));
   }, []);
 
   const saveProfile = async (e: React.FormEvent) => {
@@ -73,6 +77,7 @@ export default function ProfilePage() {
   return (
     <div>
       <h1 className="text-2xl font-bold surface-text mb-1">{t('profile.title')}</h1>
+      {loadError ? <LoadError onRetry={() => window.location.reload()} /> : null}
       <p className="text-sm text-muted mb-6">{user?.phone}</p>
 
       <div className="grid gap-6 xl:grid-cols-2 items-start">

@@ -29,7 +29,7 @@ class AdminTripController extends Controller
         }
 
         return $this->ok(TripResource::collection(
-            $query->paginate((int) $request->query('per_page', 30)),
+            $query->paginate($this->perPage($request, 30)),
         ));
     }
 }
