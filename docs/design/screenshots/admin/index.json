@@ -9,7 +9,7 @@
     "slug": "dashboard",
     "path": "/",
     "title": "لوحة القيادة",
-    "bytes": 112911
+    "bytes": 113035
   },
   {
     "slug": "ride-requests",
@@ -21,19 +21,19 @@
     "slug": "trips",
     "path": "/trips",
     "title": "الرحلات",
-    "bytes": 80510
+    "bytes": 80447
   },
   {
     "slug": "drivers",
     "path": "/drivers",
     "title": "الكباتن والتوثيق",
-    "bytes": 95046
+    "bytes": 95031
   },
   {
     "slug": "users",
     "path": "/users",
     "title": "المستخدمون",
-    "bytes": 147966
+    "bytes": 147879
   },
   {
     "slug": "payments",
@@ -75,13 +75,13 @@
     "slug": "subscriptions",
     "path": "/subscriptions",
     "title": "الاشتراكات",
-    "bytes": 94014
+    "bytes": 93972
   },
   {
     "slug": "coupons",
     "path": "/coupons",
     "title": "الكوبونات",
-    "bytes": 107807
+    "bytes": 108034
   },
   {
     "slug": "routes",
@@ -153,7 +153,7 @@
     "slug": "audit",
     "path": "/audit",
     "title": "سجلّ التدقيق",
-    "bytes": 78323
+    "bytes": 78287
   },
   {
     "slug": "admins",
@@ -165,7 +165,7 @@
     "slug": "insights",
     "path": "/insights",
     "title": "التحليلات",
-    "bytes": 138801
+    "bytes": 138652
   },
   {
     "slug": "profile",
