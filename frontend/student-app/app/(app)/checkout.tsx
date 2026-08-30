@@ -5,10 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { CliqInstructions, PaymentRequest } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Banner, Button, Icon, KeyValue, useTheme, type AppTheme } from '@rafeeq/ui';
+import { Banner, Button, Icon, KeyValue, pickProof, useTheme, type AppTheme } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
-import { pickProof } from '../../src/lib/proof';
 
 type Step = 'review' | 'instructions' | 'pending' | 'active';
 

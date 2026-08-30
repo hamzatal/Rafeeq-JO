@@ -166,8 +166,19 @@ docker exec -it rafeeq_postgres psql -U rafeeq -d rafeeq -c "CREATE EXTENSION IF
 php artisan migrate --seed
 ```
 هذا ينشئ كل الجداول ويزرع: الأدوار/الصلاحيات + مستخدم أدمن.
-- هاتف الأدمن الافتراضي: `+962790000000`
-- كلمة المرور: `Rafeeq@2026` (غيّرها عبر `SEED_ADMIN_PASSWORD` في `.env`).
+
+> **`AdminUserSeeder` لا يعمل بلا إعداد، وهذا مقصود.** كان يحمل كلمة مرور حقيقية
+> وبريداً شخصياً كقيمتَين افتراضيتَين لـ `env()` في مستودع عام — أي أنّ كل بيئة نُسي
+> فيها ضبط المتغيّرات كانت تعمل بكلمة مرور منشورة، بلا أي إشارة. صار يرفض التشغيل:
+>
+> ```bash
+> SEED_ADMIN_EMAIL=admin@example.jo \
+> SEED_ADMIN_PHONE=+962790000000 \
+> SEED_ADMIN_PASSWORD='<اختر كلمة مرور 12 حرفاً على الأقل>' \
+> php artisan migrate --seed
+> ```
+>
+> ولا تُطبع كلمة المرور في مخرجات الأمر — مخرجات الـ seeder تصل إلى سجلّات النشر.
 
 ## 5) شغّل السيرفر
 ```bash
@@ -208,7 +219,7 @@ curl http://localhost:8000/api/v1/auth/me \
 ```bash
 curl -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"phone":"0790000000","password":"Rafeeq@2026"}'
+  -d '{"phone":"<SEED_ADMIN_PHONE>","password":"<SEED_ADMIN_PASSWORD>"}'
 ```
 
 ## أوامر مفيدة
@@ -392,8 +403,8 @@ npm install              # مرة واحدة
 cp admin-dashboard/.env.local.example admin-dashboard/.env.local   # عنوان الـ API
 npm run admin            # على http://localhost:3000
 ```
-سجّل الدخول بحساب الأدمن المزروع:
-- الهاتف: `0790000000` · كلمة المرور: `Rafeeq@2026` (أو ما ضبطته في `SEED_ADMIN_PASSWORD`).
+سجّل الدخول بحساب الأدمن المزروع — بالهاتف والكلمة اللذين ضبطتهما في
+`SEED_ADMIN_PHONE` و`SEED_ADMIN_PASSWORD`. لا توجد قيمة افتراضية لأيٍّ منهما.
 
 ### المتوفّر في اللوحة
 - **الرئيسية:** نظرة عامة.

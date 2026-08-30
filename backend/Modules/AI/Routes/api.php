@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Rafeeq\Modules\AI\Controllers\AiAdminController;
 use Rafeeq\Modules\AI\Controllers\AssistantController;
-use Rafeeq\Modules\AI\Controllers\SmartSuggestionsController;
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Rafeeq Assistant (any authenticated user). Reads are cheap and unthrottled
@@ -30,11 +29,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
      */
     Route::post('assistant/send', [AssistantController::class, 'send'])
         ->middleware('throttle:sensitive');
-
-    // Context-aware smart ride suggestions (student home). Also billed — the headline
-    // is GPT-personalised — and polled on a screen the student returns to constantly.
-    Route::get('assistant/suggestions', [SmartSuggestionsController::class, 'index'])
-        ->middleware(['role:student', 'throttle:sensitive']);
 
     // Admin AI / fraud insights. The risk narrative is a completion per call, so an
     // admin holding down refresh is also spending money.

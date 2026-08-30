@@ -28,11 +28,28 @@ use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
 use Rafeeq\Shared\Support\BlindIndex;
+use RuntimeException;
 
 /**
  * Demo data for evaluating the platform end-to-end (students, captains,
  * vehicles, wallets, subscriptions, coupons, complaints, notifications, trips).
  * Idempotent by phone/code. Run with: php artisan db:seed --class=Database\\Seeders\\DemoSeeder
+ *
+ * ── Why this refuses to run in production ──────────────────────────────────
+ *
+ * It creates FUNDED WALLETS. `seedStudents` writes balances of up to 25,000 fils and
+ * `seedDrivers` up to 42,000 — spendable money, against accounts whose password was
+ * a literal in this file — and
+ * republished, in full, three times in `docs/engineering/OPERATIONS.md`. One `db:seed` against the wrong `DB_HOST` and
+ * the platform has fifteen accounts anyone who read the repo can log into, holding
+ * real balance, plus captains marked approved without a document ever being checked.
+ *
+ * There was no guard of any kind. Nothing about `php artisan db:seed --class=…`
+ * announces which database it is pointed at.
+ *
+ * The password now comes from `DEMO_SEED_PASSWORD` with no default, for the same
+ * reason `AdminUserSeeder` requires `SEED_ADMIN_PASSWORD`: a credential with a
+ * fallback in the source tree is a published credential.
  */
 class DemoSeeder extends Seeder
 {
@@ -40,8 +57,30 @@ class DemoSeeder extends Seeder
 
     private array $femaleNames = ['ليان فادي', 'سارة محمود', 'رهف أحمد', 'دانا سامر', 'مريم خالد', 'جنى وليد', 'تالا عماد'];
 
+    /** One shared demo password, supplied by the operator and never defaulted. */
+    private function demoPassword(): string
+    {
+        $value = env('DEMO_SEED_PASSWORD');
+
+        if (! is_string($value) || mb_strlen(trim($value)) < 12) {
+            throw new RuntimeException(
+                'DEMO_SEED_PASSWORD is not set, or is shorter than 12 characters. DemoSeeder has no '
+                .'default: the previous literal was published in this file and in the operations guide.'
+            );
+        }
+
+        return trim($value);
+    }
+
     public function run(): void
     {
+        if (app()->environment('production')) {
+            throw new RuntimeException(
+                'DemoSeeder creates funded wallets and shared-password accounts. It must never run '
+                .'against production. Point DB_* at a demo database, or set APP_ENV accordingly.'
+            );
+        }
+
         $unis = University::all();
         $zones = Zone::all();
 
@@ -100,7 +139,7 @@ class DemoSeeder extends Seeder
                     'phone' => $phone,
                     'full_name' => $name,
                     'email' => 'student'.$i.'@demo.rafeeq.jo',
-                    'password' => Hash::make('Rafeeq@2026'),
+                    'password' => Hash::make($this->demoPassword()),
                     'type' => UserType::Student,
                     'status' => $i % 7 === 0 ? UserStatus::Suspended : UserStatus::Active,
                     'phone_verified_at' => now(),
@@ -173,7 +212,7 @@ class DemoSeeder extends Seeder
                     'phone' => $phone,
                     'full_name' => 'الكابتن '.$this->maleNames[$i % count($this->maleNames)],
                     'email' => 'driver'.$i.'@demo.rafeeq.jo',
-                    'password' => Hash::make('Rafeeq@2026'),
+                    'password' => Hash::make($this->demoPassword()),
                     'type' => UserType::Driver,
                     'status' => $status === DriverStatus::Suspended ? UserStatus::Suspended : UserStatus::Active,
                     'phone_verified_at' => now(),

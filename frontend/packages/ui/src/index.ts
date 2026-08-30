@@ -143,5 +143,6 @@ export {
 export type { Coords, PermState } from './runtime/permissions';
 export { DEFAULT_VIBRATION, onNotificationTap, registerForPush, unregisterPush } from './runtime/push';
 export type { ChannelSpec } from './runtime/push';
+export { pickProof } from './runtime/proof';
 export { saveInvoicePdf } from './runtime/invoice';
 export type { InvoiceLabels } from './runtime/invoice';

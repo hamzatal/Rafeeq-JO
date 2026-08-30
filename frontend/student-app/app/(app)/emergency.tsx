@@ -1,65 +1,84 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { EmergencyContact, EmergencyRelation } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, listLabels, statusFromError, useTheme, type AppTheme, type ListStatus } from '@rafeeq/ui';
+import {
+  Badge,
+  Banner,
+  Button,
+  Card,
+  EmptyState,
+  Icon,
+  Input,
+  ListState,
+  listLabels,
+  statusFromError,
+  Text,
+  useConfirm,
+  useTheme,
+  useToast,
+  type AppTheme,
+  type ListStatus,
+} from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMERGENCY CONTACTS — and the sentence this screen was missing.
+
+   ── What moved out ─────────────────────────────────────────────────────────
+
+   The SOS trigger. It was a red card here, behind a two-step arm-then-confirm
+   flow, on a screen reachable only from the profile tab — so the control that
+   matters when a student is frightened was three taps and a scroll away from the
+   thing they were doing.
+
+   It is now the red shield on `home`, present the whole time a ride is, which is
+   what `docs/design/SCREENS.md` means by «زرّ استغاثة ظاهر دائماً». What stays here
+   is the part that needs a form: who gets called.
+
+   With the trigger went ~120 lines: the `arming` state, the confirm row, the
+   `sending` flag, the primary-contact auto-dial, and a LOCAL 40-line
+   `getCurrentLocation()` that reimplemented — differently — the one
+   `@rafeeq/ui` has exported since phase 7. The home screen uses the shared one.
+
+   ── What was added, because it was legally and practically absent ──────────
+
+   The disclosure that this is not 911. `SCREENS.md` lists it as required on this
+   screen and it was not here. A Rafeeq SOS pages our safety desk and texts a
+   guardian; it does not dispatch an ambulance. A student who believes otherwise
+   loses the minutes that matter, so the number is on the screen as a button.
+
+   ── Three silent failures fixed ────────────────────────────────────────────
+
+   `makePrimary` and `remove` both swallowed their error and did nothing else: a
+   failed delete looked exactly like a successful one until the list reloaded
+   unchanged.
+   And `remove` had no confirmation at all — one tap next to «تعديل» deleted the
+   person who gets called in an emergency.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 const RELATIONS: EmergencyRelation[] = ['parent', 'sibling', 'spouse', 'relative', 'friend', 'other'];
 
-/**
- * Best-effort current location. Uses expo-location on native, the browser
- * geolocation API on web. Returns null silently if unavailable — an SOS must
- * still go out without coordinates.
- */
-async function getCurrentLocation(): Promise<{ lat: number; lng: number } | null> {
-  try {
-    if (Platform.OS === 'web') {
-      if (typeof navigator === 'undefined' || !navigator.geolocation) return null;
-      return await new Promise((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-          (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-          () => resolve(null),
-          { enableHighAccuracy: true, timeout: 8000 },
-        );
-      });
-    }
-    // Native: load expo-location lazily so a missing module never crashes the screen.
-    const Location = await import('expo-location');
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return null;
-    const pos = await Location.getCurrentPositionAsync({});
-    return { lat: pos.coords.latitude, lng: pos.coords.longitude };
-  } catch {
-    return null;
-  }
-}
+/** Jordan's unified emergency number. */
+const EMERGENCY_NUMBER = '911';
 
 export default function Emergency() {
   const { t } = useI18n();
   const theme = useTheme();
+  const toast = useToast();
+  const confirm = useConfirm();
   const s = useMemo(() => makeStyles(theme), [theme]);
 
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
-  /* These are the people called when a student presses SOS. An empty list because
-     the fetch failed reads as "you have no emergency contacts". */
   /*
-   * `status` replaced a bare `loading` boolean here.
-   *
-   * The old pair — `loading` plus an implicit "not loading means we have data" —
-   * is exactly what left no room for failure: there were two states for three
-   * outcomes, so the third one borrowed the empty state.
+   * `status` replaced a bare `loading` boolean: two states for three outcomes meant
+   * a failed fetch borrowed the empty state, and «لا توجد جهات اتصال طوارئ» is a
+   * dangerous lie to tell someone who has three.
    */
   const [status, setStatus] = useState<ListStatus>({ kind: 'loading' });
 
-  // SOS state
-  const [arming, setArming] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [sosMsg, setSosMsg] = useState<{ text: string; ok: boolean } | null>(null);
-
-  // Contact form state
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<EmergencyContact | null>(null);
   const [name, setName] = useState('');
@@ -67,9 +86,7 @@ export default function Emergency() {
   const [relation, setRelation] = useState<EmergencyRelation>('parent');
   const [notifyOnSos, setNotifyOnSos] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [formMsg, setFormMsg] = useState<{ text: string; ok: boolean } | null>(null);
-
-  const primary = useMemo(() => contacts.find((c) => c.is_primary) ?? contacts[0] ?? null, [contacts]);
+  const [formMsg, setFormMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setStatus({ kind: 'loading' });
@@ -82,8 +99,8 @@ export default function Emergency() {
   }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+  }, [load]);
 
   const resetForm = () => {
     setEditing(null);
@@ -92,11 +109,6 @@ export default function Emergency() {
     setRelation('parent');
     setNotifyOnSos(true);
     setFormMsg(null);
-  };
-
-  const openAdd = () => {
-    resetForm();
-    setShowForm(true);
   };
 
   const openEdit = (c: EmergencyContact) => {
@@ -109,43 +121,26 @@ export default function Emergency() {
     setShowForm(true);
   };
 
-  const triggerSos = async () => {
-    setSending(true);
-    setSosMsg(null);
-    try {
-      const loc = await getCurrentLocation();
-      await api.emergency.triggerSos({ lat: loc?.lat ?? null, lng: loc?.lng ?? null });
-      setSosMsg({ text: t('emergency.sosSent'), ok: true });
-      setArming(false);
-      // Offer to call the primary guardian immediately.
-      if (primary) Linking.openURL(`tel:${primary.phone}`).catch(() => undefined);
-    } catch (e) {
-      setSosMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('emergency.sosFailed'), ok: false });
-    } finally {
-      setSending(false);
-    }
-  };
+  const message = (e: unknown, fallback: string) =>
+    e instanceof RafeeqApiError ? (e.firstError() ?? e.message) : fallback;
 
   const submit = async () => {
     if (name.trim().length < 2 || phone.trim().length < 6) {
-      setFormMsg({ text: t('emergency.invalid'), ok: false });
+      setFormMsg(t('emergency.invalid'));
       return;
     }
     setBusy(true);
     setFormMsg(null);
     try {
-      if (editing) {
-        await api.emergency.updateContact(editing.id, { name, phone, relation, notify_on_sos: notifyOnSos });
-        setFormMsg({ text: t('emergency.updated'), ok: true });
-      } else {
-        await api.emergency.addContact({ name, phone, relation, notify_on_sos: notifyOnSos });
-        setFormMsg({ text: t('emergency.added'), ok: true });
-      }
+      const payload = { name, phone, relation, notify_on_sos: notifyOnSos };
+      if (editing) await api.emergency.updateContact(editing.id, payload);
+      else await api.emergency.addContact(payload);
+      toast.success(t(editing ? 'emergency.updated' : 'emergency.added'));
       resetForm();
       setShowForm(false);
       await load();
     } catch (e) {
-      setFormMsg({ text: e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('emergency.saveFailed'), ok: false });
+      setFormMsg(message(e, t('emergency.saveFailed')));
     } finally {
       setBusy(false);
     }
@@ -154,77 +149,74 @@ export default function Emergency() {
   const makePrimary = async (c: EmergencyContact) => {
     try {
       await api.emergency.updateContact(c.id, { is_primary: true });
+      toast.success(t('emergency.primarySet'));
       await load();
-    } catch {
-      /* silent */
+    } catch (e) {
+      toast.error(message(e, t('emergency.saveFailed')));
     }
   };
 
   const remove = async (c: EmergencyContact) => {
+    const ok = await confirm({
+      title: t('emergency.deleteConfirmTitle'),
+      message: t('emergency.deleteConfirmMsg'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      tone: 'danger',
+    });
+    if (!ok) return;
     try {
       await api.emergency.deleteContact(c.id);
+      toast.success(t('emergency.deleted'));
       await load();
-    } catch {
-      /* silent */
+    } catch (e) {
+      toast.error(message(e, t('emergency.deleteFailed')));
     }
   };
-
-  const relationLabel = (r: EmergencyRelation | null) =>
-    r ? t(`emergency.relation.${r}`) : t('emergency.relation.other');
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
-          <Text style={s.h1}>{t('emergency.title')}</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('a11y.toggleForm')} onPress={() => (showForm ? (setShowForm(false), resetForm()) : openAdd())} style={s.addBtn}>
+          <Text role="display">{t('emergency.title')}</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('a11y.toggleForm')}
+            onPress={() => (showForm ? (setShowForm(false), resetForm()) : (resetForm(), setShowForm(true)))}
+            style={s.addBtn}
+          >
             <Icon name={showForm ? 'x' : 'plus'} size={18} color={theme.colors.onPrimary} />
           </Pressable>
         </View>
 
-        <Text style={s.intro}>{t('emergency.intro')}</Text>
-        {sosMsg && <Banner message={sosMsg.text} variant={sosMsg.ok ? 'success' : 'error'} />}
-
-        {/* ── SOS panel ─────────────────────────────────────────────── */}
-        <View style={s.sosCard}>
-          <View style={s.sosIcon}>
-            <Icon name="triangle-alert" size={30} color={theme.colors.onPrimary} />
+        {/* ── The 911 disclosure, above everything it could be mistaken for ── */}
+        <View style={s.notice}>
+          <View style={s.noticeHead}>
+            <Icon name="triangle-alert" size={20} color={theme.colors.danger} />
+            <Text role="titleSm" tone="danger" style={s.flex}>
+              {t('emergency.notNineOneOne')}
+            </Text>
           </View>
-          <Text style={s.sosTitle}>{t('emergency.sosTitle')}</Text>
-          <Text style={s.sosHint}>{t('emergency.sosHint')}</Text>
-
-          {!arming ? (
-            <Pressable onPress={() => setArming(true)} style={({ pressed }) => [s.sosBtn, pressed && s.pressed]}>
-              <Text style={s.sosBtnText}>{t('emergency.sosButton')}</Text>
-            </Pressable>
-          ) : (
-            <View style={s.confirmRow}>
-              <Pressable
-                onPress={triggerSos}
-                disabled={sending}
-                style={({ pressed }) => [s.confirmBtn, pressed && s.pressed, sending && s.disabled]}
-              >
-                <Text style={s.sosBtnText}>{sending ? t('emergency.sending') : t('emergency.confirmSend')}</Text>
-              </Pressable>
-              <Pressable onPress={() => setArming(false)} style={({ pressed }) => [s.cancelBtn, pressed && s.pressed]}>
-                <Text style={s.cancelText}>{t('common.cancel')}</Text>
-              </Pressable>
-            </View>
-          )}
-
-          {primary && (
-            <Pressable onPress={() => Linking.openURL(`tel:${primary.phone}`)} style={s.callPrimary}>
-              <Icon name="phone-call" size={16} color={theme.colors.onPrimary} />
-              <Text style={s.callPrimaryText}>{t('emergency.callPrimary')} {primary.name}</Text>
-            </Pressable>
-          )}
+          <Text role="body" tone="secondary">{t('emergency.notNineOneOneHint')}</Text>
+          <Pressable
+            onPress={() => void Linking.openURL(`tel:${EMERGENCY_NUMBER}`)}
+            accessibilityRole="button"
+            accessibilityLabel={t('emergency.callNineOneOne')}
+            style={({ pressed }) => [s.callNow, pressed && s.pressed]}
+          >
+            <Icon name="phone-call" size={18} color={theme.colors.onPrimary} />
+            <Text role="titleSm" tone="inverse">{t('emergency.callNineOneOne')}</Text>
+          </Pressable>
         </View>
 
-        {/* ── Add / edit form ───────────────────────────────────────── */}
-        {showForm && (
+        <Text role="body" tone="secondary">{t('emergency.intro')}</Text>
+
+        {showForm ? (
           <Card>
-            <Text style={s.formTitle}>{editing ? t('emergency.editContact') : t('emergency.addContact')}</Text>
-            {formMsg && <Banner message={formMsg.text} variant={formMsg.ok ? 'success' : 'error'} />}
+            <Text role="titleMd" style={s.formTitle}>
+              {t(editing ? 'emergency.editContact' : 'emergency.addContact')}
+            </Text>
+            <Banner message={formMsg} variant="error" />
             <Input label={t('emergency.name')} value={name} onChangeText={setName} />
             <Input
               label={t('emergency.phone')}
@@ -233,29 +225,38 @@ export default function Emergency() {
               keyboardType="phone-pad"
               placeholder="07XXXXXXXX"
             />
-            <Text style={s.fieldLabel}>{t('emergency.relationLabel')}</Text>
+            <Text role="titleSm" style={s.fieldLabel}>{t('emergency.relationLabel')}</Text>
             <View style={s.chips}>
               {RELATIONS.map((r) => (
-                <Pressable key={r} onPress={() => setRelation(r)} style={[s.chip, relation === r && s.chipActive]}>
-                  <Text style={[s.chipText, relation === r && s.chipTextActive]}>{t(`emergency.relation.${r}`)}</Text>
+                <Pressable
+                  key={r}
+                  onPress={() => setRelation(r)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={t(`emergency.relation.${r}`)}
+                  accessibilityState={{ selected: relation === r }}
+                  style={[s.chip, relation === r && s.chipOn]}
+                >
+                  <Text role="label" tone={relation === r ? 'primary' : 'default'}>
+                    {t(`emergency.relation.${r}`)}
+                  </Text>
                 </Pressable>
               ))}
             </View>
             <View style={s.switchRow}>
-              <Text style={s.switchLabel}>{t('emergency.notifyOnSos')}</Text>
+              <Text role="titleSm" style={s.flex}>{t('emergency.notifyOnSos')}</Text>
               <Switch
                 value={notifyOnSos}
                 onValueChange={setNotifyOnSos}
+                accessibilityLabel={t('emergency.notifyOnSos')}
                 trackColor={{ true: theme.colors.primary, false: theme.colors.border }}
                 thumbColor={theme.colors.surface}
               />
             </View>
             <Button title={t('common.save')} onPress={submit} loading={busy} />
           </Card>
-        )}
+        ) : null}
 
-        {/* ── Contacts list ─────────────────────────────────────────── */}
-        <Text style={s.section}>{t('emergency.contactsTitle')}</Text>
+        <Text role="titleMd" style={s.section}>{t('emergency.contactsTitle')}</Text>
         {status.kind !== 'ready' ? (
           <ListState status={status} onRetry={load} labels={listLabels(t)} />
         ) : contacts.length === 0 ? (
@@ -264,34 +265,21 @@ export default function Emergency() {
           contacts.map((c) => (
             <Card key={c.id}>
               <View style={s.row}>
-                <Text style={s.cardTitle} numberOfLines={1}>{c.name}</Text>
-                {c.is_primary && <Badge label={t('emergency.primary')} tone="success" />}
+                <Text role="titleSm" numberOfLines={1} style={s.flex}>{c.name}</Text>
+                {c.is_primary ? <Badge label={t('emergency.primary')} tone="success" /> : null}
               </View>
-              <Text style={s.meta}>{relationLabel(c.relation)} · {c.phone}</Text>
-              {!c.notify_on_sos && <Text style={s.metaMuted}>{t('emergency.sosOff')}</Text>}
+              <Text role="body" tone="secondary">
+                {t(`emergency.relation.${c.relation ?? 'other'}`)} · {c.phone}
+              </Text>
+              {!c.notify_on_sos ? <Text role="caption" tone="muted">{t('emergency.sosOff')}</Text> : null}
               <View style={s.actions}>
-                <Pressable onPress={() => Linking.openURL(`tel:${c.phone}`)} style={s.actionBtn}>
-                  <Icon name="phone" size={16} color={theme.colors.primary} />
-                  <Text style={s.actionText}>{t('emergency.call')}</Text>
-                </Pressable>
-                <Pressable onPress={() => Linking.openURL(`sms:${c.phone}`)} style={s.actionBtn}>
-                  <Icon name="message-square" size={16} color={theme.colors.primary} />
-                  <Text style={s.actionText}>{t('emergency.sms')}</Text>
-                </Pressable>
-                {!c.is_primary && (
-                  <Pressable onPress={() => makePrimary(c)} style={s.actionBtn}>
-                    <Icon name="star" size={16} color={theme.colors.warning} />
-                    <Text style={s.actionText}>{t('emergency.setPrimary')}</Text>
-                  </Pressable>
-                )}
-                <Pressable onPress={() => openEdit(c)} style={s.actionBtn}>
-                  <Icon name="pencil" size={16} color={theme.colors.textSecondary} />
-                  <Text style={s.actionText}>{t('common.edit')}</Text>
-                </Pressable>
-                <Pressable onPress={() => remove(c)} style={s.actionBtn}>
-                  <Icon name="trash-2" size={16} color={theme.colors.danger} />
-                  <Text style={[s.actionText, { color: theme.colors.danger }]}>{t('common.delete')}</Text>
-                </Pressable>
+                <Action icon="phone" label={t('emergency.call')} color={theme.colors.primary} onPress={() => void Linking.openURL(`tel:${c.phone}`)} />
+                <Action icon="message-square" label={t('emergency.sms')} color={theme.colors.primary} onPress={() => void Linking.openURL(`sms:${c.phone}`)} />
+                {!c.is_primary ? (
+                  <Action icon="star" label={t('emergency.setPrimary')} color={theme.colors.warning} onPress={() => void makePrimary(c)} />
+                ) : null}
+                <Action icon="pencil" label={t('common.edit')} color={theme.colors.textSecondary} onPress={() => openEdit(c)} />
+                <Action icon="trash-2" label={t('common.delete')} color={theme.colors.danger} tone="danger" onPress={() => void remove(c)} />
               </View>
             </Card>
           ))
@@ -301,46 +289,61 @@ export default function Emergency() {
   );
 }
 
+function Action({
+  icon,
+  label,
+  color,
+  tone,
+  onPress,
+}: {
+  icon: 'phone' | 'message-square' | 'star' | 'pencil' | 'trash-2';
+  label: string;
+  color: string;
+  tone?: 'danger';
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  const s = useMemo(() => makeStyles(theme), [theme]);
+
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={s.actionBtn} hitSlop={6}>
+      <Icon name={icon} size={16} color={color} />
+      <Text role="label" tone={tone ?? 'default'}>{label}</Text>
+    </Pressable>
+  );
+}
+
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
-    content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
-    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm },
-    h1: { fontFamily: t.fontFamily.bold, fontSize: 26, color: t.colors.text, textAlign: 'right' },
-    addBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    intro: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.base, lineHeight: 20 },
-
-    sosCard: { backgroundColor: t.colors.danger, borderRadius: t.radius.sheet, padding: t.spacing.lg, alignItems: 'center', marginBottom: t.spacing.lg, ...t.shadow.md },
-    sosIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm },
-    sosTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.onPrimary, textAlign: 'center' },
-    sosHint: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.onPrimary, opacity: 0.9, textAlign: 'center', marginTop: 4, marginBottom: t.spacing.base, lineHeight: 19 },
-    sosBtn: { backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: t.radius.card, paddingVertical: 14, paddingHorizontal: 40, width: '100%', alignItems: 'center' },
-    sosBtnText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.danger },
-    confirmRow: { flexDirection: 'row-reverse', gap: t.spacing.sm, width: '100%' },
-    confirmBtn: { flex: 1, backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: t.radius.card, paddingVertical: 14, alignItems: 'center' },
-    cancelBtn: { flex: 1, borderRadius: t.radius.card, paddingVertical: 14, alignItems: 'center', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.7)' },
-    cancelText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onPrimary },
-    callPrimary: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginTop: t.spacing.base, paddingVertical: 8 },
-    callPrimaryText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.onPrimary, textDecorationLine: 'underline' },
+    content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'], gap: t.spacing.md },
+    flex: { flex: 1 },
     pressed: { opacity: 0.85 },
-    disabled: { opacity: 0.6 },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+    addBtn: { width: 40, height: 40, borderRadius: t.radius.pill, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
 
-    formTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.sm },
-    fieldLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text, textAlign: 'right', marginBottom: t.spacing.xs },
+    notice: {
+      backgroundColor: t.colors.dangerSoft, borderWidth: 1, borderColor: t.colors.danger,
+      borderRadius: t.radius.card, padding: t.spacing.md, gap: t.spacing.sm,
+    },
+    noticeHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm },
+    callNow: {
+      flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: t.spacing.sm,
+      backgroundColor: t.colors.danger, borderRadius: t.radius.control, paddingVertical: t.spacing.md,
+    },
+
+    formTitle: { marginBottom: t.spacing.sm },
+    fieldLabel: { marginBottom: t.spacing.xs },
     chips: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.sm, marginBottom: t.spacing.base },
     chip: { paddingHorizontal: t.spacing.base, paddingVertical: 6, borderRadius: t.radius.control, borderWidth: 1, borderColor: t.colors.border, backgroundColor: t.colors.surface },
-    chipActive: { borderColor: t.colors.primary, backgroundColor: t.colors.primarySoft },
-    chipText: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text },
-    chipTextActive: { color: t.colors.primary, fontFamily: t.fontFamily.bold },
+    chipOn: { borderColor: t.colors.primary, backgroundColor: t.colors.primarySoft },
     switchRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.base },
-    switchLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.text, textAlign: 'right', flex: 1 },
 
-    section: { fontFamily: t.fontFamily.bold, fontSize: 17, color: t.colors.text, textAlign: 'right', marginTop: t.spacing.base, marginBottom: t.spacing.base },
-    row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-    cardTitle: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, flex: 1, textAlign: 'right' },
-    meta: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
-    metaMuted: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, textAlign: 'right', marginTop: 2 },
-    actions: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.base, marginTop: t.spacing.md, borderTopWidth: 1, borderTopColor: t.colors.border, paddingTop: t.spacing.md },
+    section: { marginTop: t.spacing.base },
+    row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', gap: t.spacing.sm },
+    actions: {
+      flexDirection: 'row-reverse', flexWrap: 'wrap', gap: t.spacing.base, marginTop: t.spacing.md,
+      borderTopWidth: 1, borderTopColor: t.colors.border, paddingTop: t.spacing.md,
+    },
     actionBtn: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5 },
-    actionText: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.text },
   });

@@ -1,26 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { formatJod } from '@rafeeq/shared';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
 import type { CliqInstructions, PaymentRequest } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, SectionTitle, listLabels, statusFromError, useTheme, type AppTheme, type ListStatus } from '@rafeeq/ui';
+import { Badge, Banner, Button, Card, EmptyState, Icon, Input, ListState, SectionTitle, listLabels, pickProof, statusFromError, useTheme, type AppTheme, type ListStatus } from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { api } from '../../src/lib/api';
 import { saveInvoicePdf } from '../../src/lib/invoice';
 import { useAuth } from '../../src/store/auth';
-
-async function pickProof(): Promise<Blob | null> {
-  if (Platform.OS === 'web') return null;
-  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!perm.granted) return null;
-  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
-  if (res.canceled || !res.assets?.length) return null;
-  const a = res.assets[0];
-  return { uri: a.uri, name: a.fileName ?? `receipt-${Date.now()}.jpg`, type: a.mimeType ?? 'image/jpeg' } as unknown as Blob;
-}
-
 
 export default function Invoices() {
   const { t, locale } = useI18n();
@@ -139,7 +127,14 @@ export default function Invoices() {
                   <Text style={s.uploadText}>{uploading === p.id ? '...' : t('payments.uploadProof')}</Text>
                 </Pressable>
               )}
-              <Pressable onPress={() => saveInvoicePdf(p, user?.full_name ?? '').catch(() => {})} style={s.invoiceBtn}>
+              {/* A silent `.catch(() => {})` here meant a failed PDF looked like a
+                  successful one: the sheet never opened and nothing said why. */}
+              <Pressable
+                onPress={() => void saveInvoicePdf(p, user?.full_name ?? '').catch(() => setMsg({ text: t('common.error'), ok: false }))}
+                accessibilityRole="button"
+                accessibilityLabel={t('payments.saveInvoice')}
+                style={s.invoiceBtn}
+              >
                 <Icon name="download" size={16} color={theme.colors.muted} />
                 <Text style={s.invoiceText}>{t('payments.saveInvoice')}</Text>
               </Pressable>

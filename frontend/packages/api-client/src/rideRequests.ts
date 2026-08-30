@@ -6,6 +6,7 @@ import {
   type RideRequest,
   type RideType,
   type RideDirection,
+  type PaymentMethod,
 } from '@rafeeq/shared';
 import { unwrap } from './client';
 
@@ -17,6 +18,24 @@ export interface CreateRideRequestInput {
   desired_time: string;
   type?: RideType;
   direction?: RideDirection;
+  /**
+   * The whole car instead of a seat in it.
+   *
+   * The API has accepted a whole-car TARIFF since phase 5 and `/estimate` returns
+   * `solo_fare_fils`, so the app could show the price — and had no way to order it.
+   * A price quoted for something unbuyable is worse than no price: it sits in the
+   * same list, with the same confidence, as the product that works.
+   */
+  is_solo?: boolean;
+  /**
+   * Cash or wallet, chosen BEFORE a captain is matched.
+   *
+   * The backend has validated this field all along; this client never sent it, so
+   * every request silently defaulted to `wallet` and the captain saw the default
+   * rather than the rider's choice. A captain who cannot take cash today should be
+   * able to decline the offer knowingly instead of discovering it at the pickup.
+   */
+  payment_method?: PaymentMethod;
   notes?: string;
   coupon_code?: string;
 }

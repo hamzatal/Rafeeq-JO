@@ -32,6 +32,9 @@ class RideRequestResource extends JsonResource
             'direction' => $this->direction?->value,
             'direction_label' => $this->direction?->label(),
             'is_express' => $this->is_express,
+            /* The whole car rather than a seat in it. The app reads this back to
+               confirm the product it asked for is the product it got. */
+            'is_solo' => (bool) $this->is_solo,
             'express_fee_fils' => $this->express_fee_fils,
             'status' => $this->status->value,
             'status_label' => $this->status->label(),

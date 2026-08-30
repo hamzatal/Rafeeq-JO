@@ -18,12 +18,21 @@ use Rafeeq\Shared\Enums\TripStatus;
 
 class StudentTripController extends Controller
 {
+    /**
+     * `booked_count` must mean SEATS TAKEN, not rows written.
+     *
+     * A plain `withCount('passengers')` counts cancelled bookings too, so a trip that
+     * four students booked and three cancelled reported 4 of 4 taken and vanished from
+     * the bookable list while three seats sat empty. It also disagreed with
+     * `TripResource`'s own fallback, which filters to `booked`/`onboard` — the same
+     * field meant two different things depending on which endpoint you asked.
+     */
     public function __construct(private readonly TripService $service) {}
 
     /** Upcoming scheduled trips (optionally filtered by route). */
     public function available(Request $request): JsonResponse
     {
-        $trips = Trip::query()->with('route')->withCount('passengers')
+        $trips = Trip::query()->with('route')->withRiderCount()
             ->where('status', TripStatus::Scheduled->value)
             ->where('scheduled_at', '>', now())
             ->when($request->query('route_id'), fn ($q, $r) => $q->where('route_id', $r))
@@ -39,10 +48,32 @@ class StudentTripController extends Controller
         return $this->created(new TripPassengerResource($passenger), 'تم حجز مقعدك. احتفظ بكود الصعود.');
     }
 
-    /** My bookings (with boarding code for the owner). */
+    /**
+     * My bookings — with the boarding code, and with who is driving.
+     *
+     * ── Why `driver.user` and `vehicle` are loaded here and nowhere else ────
+     *
+     * `TripResource` only emits its `captain` block when those relations are already
+     * loaded (see the comment on `TripResource::captainBlock`). That makes the
+     * eager-load the authorisation decision, and this query is the right place for
+     * it: it is filtered to `student_id = $viewer->id`, so a student can only ever
+     * pull the captain of a trip they are personally riding.
+     *
+     * `available()` above deliberately does not load them.
+     *
+     * ── Why `withRiderCount` ───────────────────────────────────────────────
+     *
+     * `TripResource` falls back to `$this->passengers()->count()` when
+     * `passengers_count` is absent, so this endpoint was running one extra COUNT per
+     * trip — a student with 30 rides paid 30 queries to render a list.
+     */
     public function mine(Request $request): JsonResponse
     {
-        $passengers = TripPassenger::query()->with('trip.route')
+        $passengers = TripPassenger::query()
+            ->with([
+                'trip' => fn ($q) => $q->withRiderCount(),
+                'trip.route', 'trip.driver.user', 'trip.vehicle',
+            ])
             ->where('student_id', $request->user()->id)
             ->latest()->get();
 

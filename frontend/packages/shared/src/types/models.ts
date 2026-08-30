@@ -6,6 +6,7 @@ import type {
   RewardTier,
   UserStatus,
   UserType,
+  PaymentMethod,
 } from './enums';
 
 export interface User {
@@ -172,6 +173,8 @@ export interface Trip {
   ended_at: string | null;
   capacity: number;
   booked_count?: number;
+  /** A whole-car booking: one passenger by construction, and its own fare. */
+  is_solo: boolean;
   /** Transparent fare breakdown + captain earnings preview (from TripResource). */
   pricing?: {
     fare_fils: number;
@@ -185,6 +188,25 @@ export interface Trip {
   };
   route?: { id: string; name: string; university_id: string };
   passengers?: TripPassenger[];
+  /**
+   * Who is driving — present only on endpoints the viewer is entitled to ask.
+   *
+   * `GET /trips/mine` returns it (that query is scoped to the calling student);
+   * `GET /trips/available` deliberately does not, because a captain's phone number
+   * is not something you get for browsing a list of bookable trips.
+   *
+   * `phone` is additionally null once the trip is completed or cancelled: the number
+   * exists so the captain can be reached when he cannot find you, and that window
+   * closes with the trip. Chat stays open for anything after the fact.
+   */
+  captain?: {
+    name: string | null;
+    phone: string | null;
+    rating_avg: number;
+    rating_count: number;
+    total_trips: number;
+    vehicle: { make: string; model: string; year: number; color: string; plate_number: string } | null;
+  } | null;
 }
 
 export interface TripLocation {
@@ -354,6 +376,15 @@ export interface RideRequest {
   id: string;
   zone_id: string | null;
   university_id: string;
+  /**
+   * Set once the matcher has grouped this request into a car.
+   *
+   * `RideRequestResource` has always sent it and this interface was missing it, so
+   * the app had a request in state that said `status: 'assigned'` and no way to reach
+   * the trip it was assigned to — the reason the home screen could not open a live
+   * trip from a pending request.
+   */
+  trip_id: string | null;
   pickup_lat: number;
   pickup_lng: number;
   pickup_address: string | null;
@@ -363,6 +394,9 @@ export interface RideRequest {
   direction?: RideDirection;
   direction_label?: string;
   is_express: boolean;
+  /** The whole car rather than a seat in it — priced from `solo_fare_fils`. */
+  is_solo: boolean;
+  payment_method?: PaymentMethod;
   express_fee_fils: number;
   status: RideRequestStatus;
   status_label: string;
@@ -517,25 +551,6 @@ export interface RewardTransaction {
   created_at: string | null;
 }
 
-export type LostFoundType = 'lost' | 'found';
-export type LostFoundStatus = 'open' | 'matched' | 'resolved';
-
-export interface LostFoundItem {
-  id: string;
-  reporter_id: string;
-  type: LostFoundType;
-  category: string;
-  title: string;
-  description: string | null;
-  location: string | null;
-  status: LostFoundStatus;
-  created_at: string | null;
-  /** AI semantic-match score (0-100) — present only on candidate results. */
-  ai_confidence?: number | null;
-  /** Short Arabic reason for the AI match — present only on candidate results. */
-  ai_match_reason?: string | null;
-}
-
 export type ExchangeType = 'book' | 'notes' | 'tool' | 'other';
 export type ExchangeStatus = 'available' | 'reserved' | 'closed';
 
@@ -640,23 +655,6 @@ export interface DriverPerformance {
   available_earnings_fils: number;
   rating: number;
   total_trips: number;
-}
-
-/** ── Smart ride suggestions (AI) ──────────────────────────────────── */
-export type SmartSuggestionKind = 'to_university' | 'to_home' | 'new';
-
-export interface SmartSuggestion {
-  id: string;
-  kind: SmartSuggestionKind;
-  icon: string;
-  title: string;
-  subtitle: string;
-  destination: { lat: number; lng: number; title: string } | null;
-}
-
-export interface SmartSuggestions {
-  headline: string;
-  suggestions: SmartSuggestion[];
 }
 
 /** ── Advertising banners ──────────────────────────────────────────── */

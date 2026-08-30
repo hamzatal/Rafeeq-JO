@@ -133,6 +133,33 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
+      # `AdminUserSeeder` carried a working password and a personal email address as
+      # `env()` DEFAULTS, in a public repository. The fix is that it now THROWS when
+      # they are unset — which is only a fix if something keeps checking that it
+      # throws. An `env()` default is trivial to reintroduce and completely silent, so
+      # the guard is asserted here before the seed that depends on it.
+      - name: The admin seeder must refuse to run without credentials
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: rafeeq
+          DB_USERNAME: rafeeq
+          DB_PASSWORD: secret
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+        run: |
+          php artisan migrate:fresh --force
+          if php artisan db:seed --force > seed.log 2>&1; then
+            echo "::error::db:seed succeeded with no SEED_ADMIN_* set — the admin seeder has a default credential again."
+            cat seed.log
+            exit 1
+          fi
+          grep -q 'SEED_ADMIN_EMAIL is not set' seed.log || {
+            echo "::error::db:seed failed, but not on the missing-credential guard:"; cat seed.log; exit 1;
+          }
+
       - name: Migrate + seed on PostgreSQL
         env:
           DB_CONNECTION: pgsql
@@ -144,6 +171,13 @@ jobs:
           CACHE_STORE: array
           SESSION_DRIVER: array
           QUEUE_CONNECTION: sync
+          # CI-only values. Not a secret being published: it is a throwaway database
+          # that is destroyed with the runner, and the point is to exercise the seed
+          # path, not to hold an account anyone can reach.
+          SEED_ADMIN_EMAIL: ci-admin@rafeeq.invalid
+          SEED_ADMIN_PHONE: '+962790000000'
+          SEED_ADMIN_NAME: CI Admin
+          SEED_ADMIN_PASSWORD: ${{ github.sha }}
         run: |
           php artisan migrate:fresh --force
           php artisan db:seed --force

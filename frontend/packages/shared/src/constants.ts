@@ -147,13 +147,6 @@ export const ENDPOINTS = {
     redeem: '/rewards/redeem',
     redeemWallet: '/rewards/redeem-wallet',
   },
-  lostFound: {
-    list: '/lost-found',
-    mine: '/lost-found/mine',
-    report: '/lost-found',
-    candidates: (id: string) => `/lost-found/${id}/candidates`,
-    resolve: (id: string) => `/lost-found/${id}/resolve`,
-  },
   rideRequests: {
     create: '/ride-requests',
     estimate: '/ride-requests/estimate',
@@ -164,7 +157,6 @@ export const ENDPOINTS = {
     conversations: '/assistant/conversations',
     messages: (id: string) => `/assistant/conversations/${id}`,
     send: '/assistant/send',
-    suggestions: '/assistant/suggestions',
     adminInsights: '/admin/ai/insights',
     adminRisks: '/admin/ai/risks',
     adminRisk: (userId: string) => `/admin/ai/risks/${userId}`,

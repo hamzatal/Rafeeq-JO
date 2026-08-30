@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Rafeeq\Core\Audit\AuditLogger;
+use Rafeeq\Core\Exceptions\BusinessRuleException;
 use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Matching\Data\PeakWindows;
@@ -92,6 +93,23 @@ class MatchingService extends BaseService
          * may arrive as `true`, `1` or `'f'`, and `(bool) 'f'` is true. Priority
          * ordering is not something to leave to a driver's type juggling.
          */
+        /*
+         * SOLO first, then express, then pooled.
+         *
+         * A whole-car request never shares and never waits, so draining it first costs
+         * nothing and gets the rider who paid the most served soonest. It is a separate
+         * pass rather than a flag inside the pooled pass for the same reason express is:
+         * a boolean read back through PDO from Postgres may arrive as `true`, `1` or
+         * `'f'`, and `(bool) 'f'` is true. The one outcome that would make this product
+         * a lie — a solo rider pooled with a stranger — is not left to type juggling.
+         */
+        foreach ($this->corridors(isExpress: false, isSolo: true) as $corridor) {
+            $created += $this->drainCorridor($corridor, isExpress: false, batch: $batch, isSolo: true);
+        }
+        foreach ($this->corridors(isExpress: true, isSolo: true) as $corridor) {
+            $created += $this->drainCorridor($corridor, isExpress: true, batch: $batch, isSolo: true);
+        }
+
         foreach ([true, false] as $isExpress) {
             foreach ($this->corridors($isExpress) as $corridor) {
                 $created += $this->drainCorridor($corridor, $isExpress, $batch);
@@ -111,12 +129,13 @@ class MatchingService extends BaseService
      *
      * @return Collection<int, \stdClass>
      */
-    private function corridors(bool $isExpress): Collection
+    private function corridors(bool $isExpress, bool $isSolo = false): Collection
     {
         return DB::table('ride_requests')
             ->where('status', RideRequestStatus::Pending->value)
             ->whereNotNull('zone_id')
             ->where('is_express', $isExpress)
+            ->where('is_solo', $isSolo)
             ->groupBy('zone_id', 'university_id', 'direction')
             // Busiest corridors first: if a run is cut short by the pass cap or a
             // deploy, the riders who benefit most from pooling are served first.
@@ -126,7 +145,7 @@ class MatchingService extends BaseService
     }
 
     /** Form cars out of one corridor until it holds no more pending riders. */
-    private function drainCorridor(object $corridor, bool $isExpress, int $batch): int
+    private function drainCorridor(object $corridor, bool $isExpress, int $batch, bool $isSolo = false): int
     {
         // Resolved once per corridor, not once per car. Every rider in a corridor
         // shares a university by construction, so the old per-trip
@@ -141,6 +160,7 @@ class MatchingService extends BaseService
                 ->where('zone_id', $corridor->zone_id)
                 ->where('direction', $corridor->direction)
                 ->where('is_express', $isExpress)
+                ->where('is_solo', $isSolo)
                 /*
                  * `ride_requests.university_id` is NOT NULL today, so the null branch
                  * is unreachable — and it stays, because it is the difference between
@@ -165,7 +185,12 @@ class MatchingService extends BaseService
             }
 
             $formed = 0;
-            foreach ($requests->chunk(self::SEAT_CAPACITY) as $chunk) {
+            /*
+             * One rider per car when solo. That IS the product: the chunk size is the
+             * difference between "a seat in a car" and "the car".
+             */
+            $perCar = $isSolo ? 1 : self::SEAT_CAPACITY;
+            foreach ($requests->chunk($perCar) as $chunk) {
                 $group = $chunk->values();
 
                 /*
@@ -179,13 +204,13 @@ class MatchingService extends BaseService
                  *
                  * A full car never waits — there is nothing left to gain.
                  */
-                if (! $this->readyToDispatch($group, $isExpress)) {
+                if (! $this->readyToDispatch($group, $isExpress || $isSolo)) {
                     // Groups are ordered by desired_time, so every later group departs
                     // no earlier than this one and is therefore also still waiting.
                     break;
                 }
 
-                $this->createPooledTrip($group, $isExpress, $university);
+                $this->createPooledTrip($group, $isExpress, $university, $isSolo);
                 $created++;
                 $formed++;
             }
@@ -212,6 +237,7 @@ class MatchingService extends BaseService
             'university_id' => $corridor->university_id,
             'direction' => $corridor->direction,
             'is_express' => $isExpress,
+            'is_solo' => $isSolo,
             'passes' => self::MAX_PASSES_PER_GROUP,
             'batch' => $batch,
         ]);
@@ -236,11 +262,14 @@ class MatchingService extends BaseService
      * the person who has been waiting longest sets the deadline rather than being
      * repeatedly reset by newcomers joining the group.
      *
-     * ── Why express never waits ────────────────────────────────────────────────
+     * ── Why express and solo never wait ────────────────────────────────────────
      *
      * Express riders pay a surcharge (`express_fee_fils`) explicitly to skip this.
      * Charging for immediacy and then making them wait anyway would be taking money
      * for nothing.
+     *
+     * A solo rider has nobody to wait FOR. The window exists to fill a car; a car
+     * that is full at one rider by definition cannot be improved by holding it.
      *
      * ── Peak vs off-peak ───────────────────────────────────────────────────────
      *
@@ -286,9 +315,13 @@ class MatchingService extends BaseService
      * @param  Collection<int, RideRequest>  $requests
      * @param  University|null  $university  Resolved by the caller once per corridor.
      */
-    private function createPooledTrip(Collection $requests, bool $isExpress, ?University $university = null): Trip
-    {
-        return $this->transaction(function () use ($requests, $isExpress) {
+    private function createPooledTrip(
+        Collection $requests,
+        bool $isExpress,
+        ?University $university = null,
+        bool $isSolo = false,
+    ): Trip {
+        return $this->transaction(function () use ($requests, $isExpress, $isSolo) {
             $first = $requests->first();
             $riders = $requests->count();
 
@@ -304,18 +337,44 @@ class MatchingService extends BaseService
              * 400m apart is indefensible.
              */
             $band = $this->zonePricing->bandForZone($first->zone_id, $first->university_id);
-            $seatFare = $this->zonePricing->fareForZone($first->zone_id, $first->university_id)
-                ?? (int) config('rafeeq.default_fare_fils', 1500);
+
+            /*
+             * Two products, two columns in the same approved row.
+             *
+             * `solo_fare_fils` is the whole car; `fare_fils` is one seat in it. Neither
+             * is derived from the other — the matrix holds both because the ratio is a
+             * commercial decision per corridor, not a multiplier.
+             *
+             * The solo branch has no `??` fallback on purpose. `RideRequestService`
+             * already refuses to CREATE a solo request on a corridor with no approved
+             * whole-car price, so reaching here without one means the tariff changed
+             * under a pending request. Falling back to the seat fare would silently
+             * sell a whole car at a shared price; failing loudly is the correct answer
+             * to a fare nobody approved.
+             */
+            $base = $isSolo
+                ? (int) $this->zonePricing->soloFareForZone($first->zone_id, $first->university_id)
+                : ($this->zonePricing->fareForZone($first->zone_id, $first->university_id)
+                    ?? (int) config('rafeeq.default_fare_fils', 1500));
+
+            if ($isSolo && $base <= 0) {
+                throw new BusinessRuleException(
+                    'الرحلة المنفردة غير متاحة على هذا المسار.',
+                    'SOLO_NOT_PRICED',
+                );
+            }
 
             // The matrix price wins over the band's default: a corridor may be held
             // at an approved exception, and that approval IS the tariff.
             $express = $isExpress ? (int) config('rafeeq.express_fee_fils', 1500) : 0;
-            $fare = $seatFare + $express;
+            $seatFare = $base;
+            $fare = $base + $express;
 
             $trip = Trip::create([
                 'type' => 'pooled',
                 'direction' => $first->direction->value,
                 'is_express' => $isExpress,
+                'is_solo' => $isSolo,
                 'zone_id' => $first->zone_id,
                 'university_id' => $first->university_id,
                 'base_fare_fils' => $seatFare,
@@ -326,7 +385,15 @@ class MatchingService extends BaseService
                 'fare_fils' => $fare,
                 'scheduled_at' => $first->desired_time,
                 'status' => TripStatus::PendingDriver,
-                'capacity' => self::SEAT_CAPACITY,
+                /*
+                 * A solo trip's capacity is 1, not 4.
+                 *
+                 * The car seats four either way, but `capacity` is what the offer shows a
+                 * captain and what stops a second rider being added. Leaving it at 4 would
+                 * let a later pass fill the seats of a car somebody paid to have to
+                 * themselves.
+                 */
+                'capacity' => $isSolo ? 1 : self::SEAT_CAPACITY,
             ]);
 
             $usedBoarding = [];

@@ -67,4 +67,17 @@ export class TransportApi {
     const { data } = await this.http.get<ApiSuccess<TripLocation | null>>(ENDPOINTS.transport.tripLocation(tripId));
     return unwrap(data);
   }
+
+  /**
+   * Cancel one seat booking.
+   *
+   * The endpoint has existed since the module did (`POST /trips/passengers/{id}/cancel`,
+   * and `ENDPOINTS.transport.cancelBooking` was already declared) but no client method
+   * called it — so a student who booked the wrong trip had no way out of it, and the
+   * hold on their wallet stayed put. The service releases the hold, refunds a
+   * subscription ride and returns the request to the matching pool in one transaction.
+   */
+  async cancelBooking(passengerId: string): Promise<void> {
+    await this.http.post(ENDPOINTS.transport.cancelBooking(passengerId));
+  }
 }

@@ -6,7 +6,9 @@ import { useRouter } from 'expo-router';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { usePrefs } from '../../src/store/prefs';
-import { Icon, useTheme, type AppTheme, type IconName } from '@rafeeq/ui';
+import { RafeeqApiError } from '@rafeeq/api-client';
+import { Icon, useConfirm, useTheme, useToast, type AppTheme, type IconName } from '@rafeeq/ui';
+import { api } from '../../src/lib/api';
 
 /**
  * Captain Settings & Support — pixel-faithful to Stitch `_23`:
@@ -29,12 +31,53 @@ export default function Settings() {
   const router = useRouter();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
+  const toast = useToast();
+  const confirm = useConfirm();
   const user = useAuth((a) => a.user);
   const logout = useAuth((a) => a.logout);
   const locale = usePrefs((p) => p.locale);
   const setLocale = usePrefs((p) => p.setLocale);
 
   const initial = (user?.full_name ?? 'ر').charAt(0);
+
+  const ask = async (key: 'logout' | 'delete') => {
+    const isDelete = key === 'delete';
+
+    return confirm({
+      title: t(isDelete ? 'settings.deleteConfirmTitle' : 'settings.logoutConfirmTitle'),
+      message: t(isDelete ? 'settings.deleteConfirmMsg' : 'settings.logoutConfirmMsg'),
+      confirmLabel: t(isDelete ? 'settings.deleteConfirm' : 'auth.logout'),
+      cancelLabel: t('common.cancel'),
+      tone: 'danger',
+    });
+  };
+
+  const signOut = async () => {
+    if (await ask('logout')) await logout();
+  };
+
+  /*
+   * Account deletion — the same gap the student app had.
+   *
+   * `DELETE /api/v1/profile` has been live since the Users module existed, wired to
+   * `AccountErasureService`, and neither app had a way to reach it. Both app stores
+   * require an in-app deletion path from any app that lets a user create an account,
+   * so this was a submission blocker sitting behind a working endpoint.
+   *
+   * For a captain, erasure additionally clears the document artifacts (see
+   * `AccountErasureService::eraseDriverArtifacts`) while KEEPING the payout ledger,
+   * because completed trips are still money that moved.
+   */
+  const eraseAccount = async () => {
+    if (! (await ask('delete'))) return;
+    try {
+      await api.profile.deleteAccount();
+      toast.success(t('settings.deleted'));
+      await logout();
+    } catch (e) {
+      toast.error(e instanceof RafeeqApiError ? (e.firstError() ?? e.message) : t('settings.deleteFailed'));
+    }
+  };
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -94,11 +137,25 @@ export default function Settings() {
           <GroupRow theme={theme} icon="file-text" title={t('settings.terms')} onPress={() => openLegal('terms')} />
         </View>
 
-        {/* Logout — centered pill */}
+        {/* The two ways out — both behind a confirmation. */}
         <View style={s.logoutWrap}>
-          <Pressable style={({ pressed }) => [s.logoutBtn, pressed && { opacity: 0.9 }]} onPress={logout}>
+          <Pressable
+            onPress={() => void signOut()}
+            accessibilityRole="button"
+            accessibilityLabel={t('auth.logout')}
+            style={({ pressed }) => [s.logoutBtn, pressed && { opacity: 0.9 }]}
+          >
             <Icon name="log-out" size={18} color={theme.colors.danger} />
             <Text style={s.logout}>{t('auth.logout')}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => void eraseAccount()}
+            accessibilityRole="button"
+            accessibilityLabel={t('settings.deleteAccount')}
+            style={({ pressed }) => [s.logoutBtn, pressed && { opacity: 0.9 }]}
+          >
+            <Icon name="trash-2" size={18} color={theme.colors.danger} />
+            <Text style={s.logout}>{t('settings.deleteAccount')}</Text>
           </Pressable>
         </View>
       </ScrollView>

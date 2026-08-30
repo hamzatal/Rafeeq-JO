@@ -47,7 +47,7 @@ class DriverTripController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $trips = Trip::query()->with('route')->withCount('passengers')
+        $trips = Trip::query()->with('route')->withRiderCount()
             ->where('driver_id', $this->driverId($request))
             ->orderByDesc('scheduled_at')->get();
 
@@ -58,7 +58,7 @@ class DriverTripController extends Controller
     public function offers(Request $request): JsonResponse
     {
         $this->driverId($request); // ensures driver profile exists
-        $offers = Trip::query()->with('university')->withCount('passengers')
+        $offers = Trip::query()->with('university')->withRiderCount()
             ->where('status', TripStatus::PendingDriver->value)
             ->whereNull('driver_id')
             ->orderBy('scheduled_at')->get();

@@ -13,7 +13,6 @@ use Rafeeq\Modules\Complaints\Providers\ComplaintsServiceProvider;
 use Rafeeq\Modules\Coupons\Providers\CouponsServiceProvider;
 use Rafeeq\Modules\Disputes\Providers\DisputesServiceProvider;
 use Rafeeq\Modules\Drivers\Providers\DriversServiceProvider;
-use Rafeeq\Modules\LostFound\Providers\LostFoundServiceProvider;
 use Rafeeq\Modules\Matching\Providers\MatchingServiceProvider;
 use Rafeeq\Modules\Notifications\Providers\NotificationsServiceProvider;
 use Rafeeq\Modules\Payments\Providers\PaymentsServiceProvider;
@@ -70,7 +69,6 @@ return [
     SupportServiceProvider::class,
     ComplaintsServiceProvider::class,
     RewardsServiceProvider::class,
-    LostFoundServiceProvider::class,
     AIServiceProvider::class,
     SafetyServiceProvider::class,
     DisputesServiceProvider::class,

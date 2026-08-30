@@ -1,23 +1,72 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DINAR, bareJod, formatJod, formatJodSigned } from '@rafeeq/shared';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { CliqInstructions, PaymentRequest, Wallet, WalletTransaction } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
-import { Badge, Button, Card, EmptyState, Icon, ListState, Skeleton, listLabels, statusFromError, useTheme, useToast, type AppTheme, type IconName, type ListStatus } from '@rafeeq/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Icon,
+  ListState,
+  pickProof,
+  Skeleton,
+  Text,
+  listLabels,
+  statusFromError,
+  useTheme,
+  useToast,
+  type AppTheme,
+  type IconName,
+  type ListStatus,
+} from '@rafeeq/ui';
 import { useI18n } from '../../src/i18n';
 import { useAuth } from '../../src/store/auth';
 import { api } from '../../src/lib/api';
-import { pickProof } from '../../src/lib/proof';
+import { saveInvoicePdf } from '../../src/lib/invoice';
 
-/** Map a wallet transaction type to a Stitch icon + tone. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE MONEY SCREEN, because there was never a second thing to see.
+
+   ── The screen this absorbed ───────────────────────────────────────────────
+
+   `payments.tsx` (195 lines) called `api.payments.mine()`, `api.payments.create()`
+   and `api.payments.submitProof()` — the same three calls this file already made,
+   against the same three states. It rendered them as a separate tab called
+   «المدفوعات», so a student wondering where their 5 dinars went had two screens to
+   check and no way to know which one was authoritative.
+
+   The two things it had that this one did not are now here: the FULL top-up history
+   (this file showed only requests still awaiting a receipt) and the PDF receipt.
+
+   ── Three controls that did nothing, and one that always failed ────────────
+
+     • «متابعة الشحن» on the balance card called `createTopup()` — while the amount
+       field lived in the card BELOW it. The amount was therefore always `''`, so the
+       button's only possible outcome was «أدخل مبلغاً صحيحاً». It is gone; the CliQ
+       card immediately below is the top-up flow, and there is now one of it.
+     • «تعرف على طريقة الاستخدام» was a `Pressable` with no `onPress`. It now expands
+       the explanation, which is the thing a student most needs on this screen:
+       the balance is credited by a HUMAN reviewing the receipt, not automatically.
+     • «عرض الكل» beside the ledger was also a `Pressable` with no `onPress`, and
+       there is no full-history screen for it to open — `api.wallet.transactions()`
+       takes a page argument and this screen only ever reads page 1. Removed rather
+       than faked.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Map a wallet transaction type to an icon + tone. */
 function txnVisual(type: string, positive: boolean): { icon: IconName; tint: 'danger' | 'success' | 'primary' } {
   if (type.includes('reward') || type.includes('point')) return { icon: 'star', tint: 'success' };
   if (type.includes('refund')) return { icon: 'corner-up-left', tint: 'primary' };
   if (type.includes('trip') || type.includes('ride') || type.includes('payout')) return { icon: 'navigation', tint: positive ? 'success' : 'danger' };
   return { icon: positive ? 'arrow-down-left' : 'arrow-up-right', tint: positive ? 'success' : 'danger' };
 }
+
+/** Statuses where the student still owes us a transfer receipt. */
+const AWAITING_PROOF = ['pending', 'submitted', 'under_review'];
 
 export default function WalletScreen() {
   const { t, locale } = useI18n();
@@ -37,6 +86,7 @@ export default function WalletScreen() {
   const [amount, setAmount] = useState('');
   const [creating, setCreating] = useState(false);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [howTo, setHowTo] = useState(false);
   const [active, setActive] = useState<{ request: PaymentRequest; instructions: CliqInstructions } | null>(null);
 
   const load = useCallback(async () => {
@@ -61,6 +111,9 @@ export default function WalletScreen() {
     void load();
   }, [load]);
 
+  const apiMessage = (e: unknown) =>
+    e instanceof RafeeqApiError ? (e.firstError() ?? e.message) : t('common.error');
+
   const createTopup = async () => {
     const jod = Number(amount);
     if (!Number.isFinite(jod) || jod < 1) {
@@ -75,7 +128,7 @@ export default function WalletScreen() {
       toast.success(t('wallet.topupCreated'));
       await load();
     } catch (e) {
-      toast.error(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
+      toast.error(apiMessage(e));
     } finally {
       setCreating(false);
     }
@@ -93,63 +146,70 @@ export default function WalletScreen() {
       setActive(null);
       await load();
     } catch (e) {
-      toast.error(e instanceof RafeeqApiError ? e.firstError() ?? e.message : t('common.error'));
+      toast.error(apiMessage(e));
     } finally {
       setUploadingId(null);
     }
   };
 
-  const canUpload = (status: string) => ['pending', 'submitted', 'under_review'].includes(status);
-  const payTone = (status: string) => (status === 'approved' ? 'success' : status === 'rejected' ? 'danger' : 'primary');
-  const pending = payments.filter((p) => canUpload(p.status) && p.id !== active?.request.id);
+  const payTone = (st: string) => (st === 'approved' ? 'success' : st === 'rejected' ? 'danger' : 'primary');
+  const pendingProof = payments.filter((p) => AWAITING_PROOF.includes(p.status) && p.id !== active?.request.id);
   const initial = (user?.full_name ?? 'ر').charAt(0);
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
-      {/* Header — avatar (right) · Rafeeq · bell (left) per Stitch _18 */}
       <View style={s.header}>
-        <Pressable onPress={() => router.push('/(app)/settings')} hitSlop={8} style={s.avatar}>
-          <Text style={s.avatarText}>{initial}</Text>
+        <Pressable
+          onPress={() => router.push('/(app)/settings')}
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.title')}
+          hitSlop={8}
+          style={s.avatar}
+        >
+          <Text role="titleMd" tone="inverse">{initial}</Text>
         </Pressable>
-        <Text style={s.brand}>رفيق</Text>
-        <Pressable onPress={() => router.push('/(app)/notifications')} accessibilityRole="button" accessibilityLabel={t('a11y.notifications')} hitSlop={8} style={s.headerBtn}>
+        <Text role="titleLg" tone="primary">{t('common.appName')}</Text>
+        <Pressable
+          onPress={() => router.push('/(app)/notifications')}
+          accessibilityRole="button"
+          accessibilityLabel={t('a11y.notifications')}
+          hitSlop={8}
+          style={s.headerBtn}
+        >
           <Icon name="bell" size={22} color={theme.colors.primary} />
         </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Balance card — decorative blurred blob top-right per Stitch _18 */}
         <View style={s.balanceCard}>
           <View style={s.balanceBlob} pointerEvents="none" />
-          <Text style={s.balanceLabel}>{t('wallet.balance')}</Text>
+          <Text role="titleSm" tone="secondary" align="center">{t('wallet.balance')}</Text>
           {loading ? (
-            <Skeleton width={170} height={44} radius={10} style={{ alignSelf: 'center', marginVertical: 6 }} />
+            <Skeleton width={170} height={44} radius={10} style={s.balanceSkeleton} />
           ) : (
-            <Text style={s.balanceValue}>
+            <Text role="displayMd" tone="primary" align="center">
               {/* `DINAR` («د.أ»), not a hardcoded Latin "JOD" — every other screen
                   in both apps uses the constant, and this one was the outlier. */}
-              <Text style={s.balanceCur}>{DINAR} </Text>
-              {wallet ? bareJod(wallet.available_fils) : bareJod(0)}
+              <Text role="titleLg" tone="primary">{DINAR} </Text>
+              {bareJod(wallet?.available_fils ?? 0)}
             </Text>
           )}
           {/*
             A hold is why the number above can be lower than the sum of top-ups.
             Left unexplained it reads as money going missing.
           */}
-          {!loading && wallet && wallet.held_fils > 0 && (
-            <Text style={s.balanceHeld}>
+          {!loading && wallet && wallet.held_fils > 0 ? (
+            <Text role="caption" tone="muted" align="center">
               {t('wallet.heldNote')}: {formatJod(wallet.held_fils)}
             </Text>
-          )}
-          <Button title={t('wallet.topupCta')} icon="circle-plus" onPress={createTopup} loading={creating} style={{ marginTop: theme.spacing.base }} />
+          ) : null}
         </View>
 
-        {/* Guided top-up OR CliQ request card */}
         {active ? (
           <TopupGuide
             data={active}
             uploading={uploadingId === active.request.id}
-            onUpload={() => uploadProof(active.request.id)}
+            onUpload={() => void uploadProof(active.request.id)}
             onDismiss={() => setActive(null)}
             s={s}
             t={t}
@@ -161,59 +221,69 @@ export default function WalletScreen() {
               <View style={s.cliqIcon}>
                 <Icon name="grid-3x3" size={22} color={theme.colors.accent} />
               </View>
-              <View>
-                <Text style={s.cliqTitle}>{t('wallet.cliqTitle')}</Text>
-                <Pressable hitSlop={6} style={s.cliqLinkRow}>
-                  <Text style={s.cliqLink}>{t('wallet.cliqHowTo')}</Text>
-                  <Icon name="circle-question-mark" size={13} color={theme.colors.accent} />
+              <View style={s.flex}>
+                <Text role="titleMd" tone="primary">{t('wallet.cliqTitle')}</Text>
+                <Pressable
+                  onPress={() => setHowTo((v) => !v)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('wallet.cliqHowTo')}
+                  accessibilityState={{ expanded: howTo }}
+                  hitSlop={6}
+                  style={s.cliqLinkRow}
+                >
+                  <Text role="label" tone="success">{t('wallet.cliqHowTo')}</Text>
+                  <Icon name={howTo ? 'chevron-up' : 'circle-question-mark'} size={14} color={theme.colors.accent} />
                 </Pressable>
               </View>
             </View>
+
+            {howTo ? (
+              <Text role="body" tone="secondary" style={s.howToBody}>{t('wallet.cliqHowToBody')}</Text>
+            ) : null}
+
             <View style={s.amountRow}>
-              <Text style={s.amountCur}>{DINAR}</Text>
+              <Text role="titleSm" tone="secondary">{DINAR}</Text>
               <TextInput
                 value={amount}
                 onChangeText={setAmount}
                 keyboardType="numeric"
                 placeholder={t('wallet.enterAmount')}
                 placeholderTextColor={theme.colors.muted}
+                accessibilityLabel={t('wallet.amount')}
                 style={s.amountInput}
                 textAlign="right"
               />
             </View>
-            <Pressable onPress={createTopup} style={({ pressed }) => [s.cliqBtn, pressed && { opacity: 0.85 }]} disabled={creating}>
-              <Icon name="link" size={18} color={theme.colors.primary} />
-              <Text style={s.cliqBtnText}>{creating ? '...' : t('wallet.createLink')}</Text>
-            </Pressable>
+            <Button title={t('wallet.createLink')} icon="link" variant="outline" onPress={createTopup} loading={creating} />
           </View>
         )}
 
-        {/* Pending top-ups still awaiting a receipt */}
-        {pending.length > 0 &&
-          pending.map((p) => (
-            <Card key={p.id} style={{ marginTop: theme.spacing.md }}>
-              <View style={s.payHead}>
-                <Text style={s.payNumber}>{p.purpose_label}</Text>
-                <Badge label={p.status === 'pending' ? t('wallet.awaitingProof') : t('wallet.underReview')} tone={payTone(p.status)} />
-              </View>
-              <Text style={s.meta}>{formatJod(p.amount_fils)} · {p.number}</Text>
-              {p.reject_reason ? <Text style={[s.meta, { color: theme.colors.danger }]}>{p.reject_reason}</Text> : null}
-              <Pressable onPress={() => uploadProof(p.id)} style={s.uploadBtn}>
-                <Icon name="upload" size={16} color={theme.colors.primary} />
-                <Text style={s.uploadText}>{uploadingId === p.id ? '...' : t('wallet.uploadProof')}</Text>
-              </Pressable>
-            </Card>
-          ))}
+        {/* Requests that still need a receipt — the only ones the student must act on. */}
+        {pendingProof.map((p) => (
+          <Card key={p.id} style={s.spaced}>
+            <View style={s.rowBetween}>
+              <Text role="titleSm">{p.purpose_label}</Text>
+              <Badge label={p.status === 'pending' ? t('wallet.awaitingProof') : t('wallet.underReview')} tone={payTone(p.status)} />
+            </View>
+            <Text role="caption" tone="muted">{formatJod(p.amount_fils)} · {p.number}</Text>
+            {p.reject_reason ? <Text role="caption" tone="danger">{p.reject_reason}</Text> : null}
+            <Pressable
+              onPress={() => void uploadProof(p.id)}
+              accessibilityRole="button"
+              accessibilityLabel={t('wallet.uploadProof')}
+              accessibilityState={{ busy: uploadingId === p.id }}
+              style={s.outlineBtn}
+            >
+              <Icon name="upload" size={16} color={theme.colors.primary} />
+              <Text role="label" tone="primary">{uploadingId === p.id ? t('common.loading') : t('wallet.uploadProof')}</Text>
+            </Pressable>
+          </Card>
+        ))}
 
-        {/* Transactions */}
-        <View style={s.txnHead}>
-          <Text style={s.sectionTitle}>{t('wallet.transactions')}</Text>
-          <Pressable hitSlop={6}>
-            <Text style={s.viewAll}>{t('common.viewAll')}</Text>
-          </Pressable>
-        </View>
+        {/* ── Ledger ── */}
+        <Text role="titleLg" tone="primary" style={s.sectionTitle}>{t('wallet.transactions')}</Text>
         {loading ? (
-          <View style={{ gap: theme.spacing.sm }}>
+          <View style={s.gap}>
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} width="100%" height={68} radius={theme.radius.card} />
             ))}
@@ -226,22 +296,52 @@ export default function WalletScreen() {
           txns.map((tx) => {
             const positive = tx.amount_fils >= 0;
             const v = txnVisual(tx.type ?? '', positive);
-            const tint = theme.colors[v.tint];
             return (
               <View key={tx.id} style={s.txn}>
-                <View style={[s.txnIcon, { backgroundColor: tint + '1A' }]}>
-                  <Icon name={v.icon} size={18} color={tint} />
+                <View style={[s.txnIcon, { backgroundColor: theme.colors[`${v.tint}Soft`] }]}>
+                  <Icon name={v.icon} size={18} color={theme.colors[v.tint]} />
                 </View>
-                <View style={s.txnBody}>
-                  <Text style={s.txnType}>{tx.type_label}</Text>
-                  {tx.created_at && <Text style={s.meta}>{new Date(tx.created_at).toLocaleString(locale)}</Text>}
+                <View style={s.flex}>
+                  <Text role="titleSm">{tx.type_label}</Text>
+                  {tx.created_at ? (
+                    <Text role="caption" tone="muted">{new Date(tx.created_at).toLocaleString(locale)}</Text>
+                  ) : null}
                 </View>
-                <Text style={[s.txnAmount, { color: positive ? theme.colors.success : theme.colors.danger }]}>
-                  {formatJodSigned(tx.amount_fils)}
-                </Text>
+                <Text role="titleSm" tone={positive ? 'success' : 'danger'}>{formatJodSigned(tx.amount_fils)}</Text>
               </View>
             );
           })
+        )}
+
+        {/* ── Top-up history, absorbed from `payments.tsx` ── */}
+        <Text role="titleLg" tone="primary" style={s.sectionTitle}>{t('wallet.history')}</Text>
+        {loading ? (
+          <Skeleton width="100%" height={68} radius={theme.radius.card} />
+        ) : payments.length === 0 ? (
+          <EmptyState icon="dollar-sign" title={t('payments.none')} />
+        ) : (
+          payments.map((p) => (
+            <Card key={p.id}>
+              <View style={s.rowBetween}>
+                <Text role="titleSm">{p.number}</Text>
+                <Badge label={p.status_label} tone={payTone(p.status)} />
+              </View>
+              <Text role="caption" tone="muted">{p.purpose_label} · {formatJod(p.amount_fils)}</Text>
+              {p.created_at ? (
+                <Text role="caption" tone="muted">{new Date(p.created_at).toLocaleString(locale)}</Text>
+              ) : null}
+              {p.reject_reason ? <Text role="caption" tone="danger">{p.reject_reason}</Text> : null}
+              <Pressable
+                onPress={() => void saveInvoicePdf(p, user?.full_name ?? '').catch(() => toast.error(t('common.error')))}
+                accessibilityRole="button"
+                accessibilityLabel={t('payments.saveInvoice')}
+                style={s.ghostRow}
+              >
+                <Icon name="download" size={16} color={theme.colors.muted} />
+                <Text role="label" tone="muted">{t('payments.saveInvoice')}</Text>
+              </Pressable>
+            </Card>
+          ))
         )}
       </ScrollView>
     </SafeAreaView>
@@ -267,10 +367,11 @@ function TopupGuide({
   theme: AppTheme;
 }) {
   const { instructions: ins } = data;
+
   return (
     <View style={s.cliqCard}>
-      <View style={s.guideHead}>
-        <Text style={s.guideTitle}>{t('wallet.newTopup')}</Text>
+      <View style={s.rowBetween}>
+        <Text role="titleMd" tone="primary">{t('wallet.newTopup')}</Text>
         <Pressable onPress={onDismiss} accessibilityRole="button" accessibilityLabel={t('a11y.close')} hitSlop={8}>
           <Icon name="x" size={18} color={theme.colors.muted} />
         </Pressable>
@@ -292,19 +393,19 @@ function TopupGuide({
 function StepRow({ n, label, done, s, theme }: { n: number; label: string; done?: boolean; s: ReturnType<typeof makeStyles>; theme: AppTheme }) {
   return (
     <View style={s.stepRow}>
-      <View style={[s.stepDot, done && { backgroundColor: theme.colors.success, borderColor: theme.colors.success }]}>
-        {done ? <Icon name="check" size={13} color={theme.colors.textInverse} /> : <Text style={s.stepNum}>{n}</Text>}
+      <View style={[s.stepDot, done && s.stepDotDone]}>
+        {done ? <Icon name="check" size={13} color={theme.colors.textInverse} /> : <Text role="label" tone="success">{n}</Text>}
       </View>
-      <Text style={s.stepLabel}>{label}</Text>
+      <Text role="titleSm" style={s.flex}>{label}</Text>
     </View>
   );
 }
 
 function Row({ label, value, s }: { label: string; value: string; s: ReturnType<typeof makeStyles> }) {
   return (
-    <View style={s.row}>
-      <Text style={s.rowLabel}>{label}</Text>
-      <Text style={s.rowValue} selectable>{value}</Text>
+    <View style={s.rowBetween}>
+      <Text role="body" tone="secondary">{label}</Text>
+      <Text role="titleSm" selectable>{value}</Text>
     </View>
   );
 }
@@ -312,55 +413,53 @@ function Row({ label, value, s }: { label: string; value: string; s: ReturnType<
 const makeStyles = (t: AppTheme) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: t.colors.background },
-    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline },
+    flex: { flex: 1 },
+    gap: { gap: t.spacing.sm },
+    spaced: { marginTop: t.spacing.md },
+    header: {
+      flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: t.spacing.lg, paddingVertical: t.spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.colors.hairline,
+    },
     headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-    brand: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.primary },
-    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
-    avatarText: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onPrimary },
+    avatar: { width: 40, height: 40, borderRadius: t.radius.pill, backgroundColor: t.colors.primary, alignItems: 'center', justifyContent: 'center' },
     content: { padding: t.spacing.lg, paddingBottom: t.spacing['3xl'] },
 
-    balanceCard: { backgroundColor: t.colors.surface, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.surfaceHighest, padding: t.spacing.lg, alignItems: 'center', overflow: 'hidden', ...t.shadow.md },
-    balanceBlob: { position: 'absolute', top: -64, right: -64, width: 128, height: 128, borderRadius: 64, backgroundColor: t.colors.onPrimaryMuted, opacity: 0.2 },
-    balanceLabel: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.textSecondary },
-    balanceValue: { fontFamily: t.fontFamily.bold, fontSize: 40, color: t.colors.primary, marginTop: 4 },
-    balanceCur: { fontFamily: t.fontFamily.bold, fontSize: 22, color: t.colors.primary },
-    balanceHeld: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.muted, marginTop: 6 },
+    balanceCard: {
+      backgroundColor: t.colors.surface, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.surfaceHighest,
+      padding: t.spacing.lg, alignItems: 'center', overflow: 'hidden', gap: 4, ...t.shadow.md,
+    },
+    balanceBlob: { position: 'absolute', top: -64, end: -64, width: 128, height: 128, borderRadius: 64, backgroundColor: t.colors.onPrimaryMuted, opacity: 0.2 },
+    balanceSkeleton: { alignSelf: 'center', marginVertical: 6 },
 
-    cliqCard: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.sheet, padding: t.spacing.lg, marginTop: t.spacing.md },
-    cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'flex-start', gap: t.spacing.sm, marginBottom: t.spacing.base },
-    cliqTitle: { fontFamily: t.fontFamily.bold, fontSize: 18, color: t.colors.primary, textAlign: 'right' },
+    cliqCard: { backgroundColor: t.colors.surfaceAlt, borderRadius: t.radius.sheet, padding: t.spacing.lg, marginTop: t.spacing.md, gap: t.spacing.sm },
+    cliqHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm },
     cliqLinkRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, marginTop: 2 },
-    cliqLink: { fontFamily: t.fontFamily.medium, fontSize: 12, color: t.colors.accent, textAlign: 'right' },
-    cliqIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.accentBright, alignItems: 'center', justifyContent: 'center' },
-    amountRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface, borderRadius: t.radius.control, borderWidth: 1, borderColor: t.colors.hairline, paddingHorizontal: t.spacing.base, height: 54, marginBottom: t.spacing.md },
+    cliqIcon: { width: 40, height: 40, borderRadius: t.radius.pill, backgroundColor: t.colors.accentBright, alignItems: 'center', justifyContent: 'center' },
+    howToBody: { backgroundColor: t.colors.surface, borderRadius: t.radius.control, padding: t.spacing.md },
+    amountRow: {
+      flexDirection: 'row-reverse', alignItems: 'center', gap: 8, backgroundColor: t.colors.surface,
+      borderRadius: t.radius.control, borderWidth: 1, borderColor: t.colors.hairline,
+      paddingHorizontal: t.spacing.base, height: 54,
+    },
     amountInput: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text },
-    amountCur: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.textSecondary },
-    cliqBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 8, height: 54, borderRadius: t.radius.control, borderWidth: 2, borderColor: t.colors.primary, backgroundColor: 'transparent' },
-    cliqBtnText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.primary },
 
-    guideHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: t.spacing.sm },
-    guideTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.primary },
     stepRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm, marginTop: t.spacing.sm },
     stepDot: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, borderColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' },
-    stepNum: { fontFamily: t.fontFamily.bold, fontSize: 12, color: t.colors.accent },
-    stepLabel: { flex: 1, fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
-    cliqBox: { backgroundColor: t.colors.surface, borderRadius: t.radius.control, padding: t.spacing.md, marginVertical: t.spacing.sm, marginRight: 32 },
+    stepDotDone: { backgroundColor: t.colors.success, borderColor: t.colors.success },
+    cliqBox: { backgroundColor: t.colors.surface, borderRadius: t.radius.control, padding: t.spacing.md, marginVertical: t.spacing.sm, marginEnd: 32, gap: 6 },
 
-    row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-    rowLabel: { fontFamily: t.fontFamily.regular, fontSize: 13, color: t.colors.textSecondary },
-    rowValue: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text },
-
-    sectionTitle: { fontFamily: t.fontFamily.bold, fontSize: 20, color: t.colors.primary, textAlign: 'right' },
-    viewAll: { fontFamily: t.fontFamily.medium, fontSize: 14, color: t.colors.accent },
-    txnHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: t.spacing.lg, marginBottom: t.spacing.md },
-    txn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline, padding: t.spacing.md, marginBottom: t.spacing.sm },
-    txnIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginLeft: t.spacing.md },
-    txnBody: { flex: 1 },
-    txnType: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.text, textAlign: 'right' },
-    txnAmount: { fontFamily: t.fontFamily.bold, fontSize: 15 },
-    meta: { fontFamily: t.fontFamily.regular, fontSize: 11, color: t.colors.muted, textAlign: 'right', marginTop: 2 },
-    payHead: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
-    payNumber: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.text, textAlign: 'right' },
-    uploadBtn: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm, borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 10 },
-    uploadText: { fontFamily: t.fontFamily.bold, fontSize: 14, color: t.colors.primary },
+    rowBetween: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', gap: t.spacing.sm },
+    sectionTitle: { marginTop: t.spacing.lg, marginBottom: t.spacing.md },
+    txn: {
+      flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.surface,
+      borderRadius: t.radius.card, borderWidth: 1, borderColor: t.colors.hairline,
+      padding: t.spacing.md, marginBottom: t.spacing.sm,
+    },
+    txnIcon: { width: 44, height: 44, borderRadius: t.radius.pill, alignItems: 'center', justifyContent: 'center' },
+    outlineBtn: {
+      flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.sm,
+      borderWidth: 1.5, borderColor: t.colors.primary, borderRadius: t.radius.control, paddingVertical: 10,
+    },
+    ghostRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: t.spacing.xs, paddingVertical: 8 },
   });

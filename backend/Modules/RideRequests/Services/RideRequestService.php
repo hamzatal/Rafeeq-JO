@@ -29,6 +29,7 @@ class RideRequestService extends BaseService
         $lng = (float) $data['pickup_lng'];
         $type = RideType::from($data['type'] ?? RideType::Scheduled->value);
         $isExpress = $type === RideType::Express;
+        $isSolo = (bool) ($data['is_solo'] ?? false);
 
         // Reject locations outside our service area (Irbid zones). Without this
         // guard the nearest-zone lookup would "snap" a far point (e.g. a spot
@@ -63,6 +64,24 @@ class RideRequestService extends BaseService
             );
         }
 
+        /*
+         * A whole-car request needs a whole-car price, and that is a SEPARATE column
+         * in the matrix from the seat price.
+         *
+         * A corridor can be priced for pooling and not for solo — the seat price is
+         * what the launch corridors were approved on, and `solo_fare_fils` is
+         * nullable. Without this check the matcher would fall through to the seat
+         * fare and charge a rider the pooled price for the whole car, which is the
+         * mirror image of the bug the unpriced-corridor refusal exists to prevent:
+         * a number nobody approved, presented as a tariff.
+         */
+        if ($isSolo && $this->zonePricing->soloFareForZone($zone->id, (string) $data['university_id']) === null) {
+            throw new BusinessRuleException(
+                'الرحلة المنفردة غير متاحة على هذا المسار بعد. المقعد المشترك متاح.',
+                'SOLO_NOT_PRICED',
+            );
+        }
+
         // Prevent duplicate active request to the same university.
         $existing = RideRequest::where('student_id', $student->id)
             ->where('university_id', $data['university_id'])
@@ -86,6 +105,7 @@ class RideRequestService extends BaseService
             'type' => $type,
             'direction' => RideDirection::tryFrom($data['direction'] ?? '') ?? RideDirection::ToUniversity,
             'is_express' => $isExpress,
+            'is_solo' => $isSolo,
             'express_fee_fils' => $isExpress ? (int) config('rafeeq.express_fee_fils', 1500) : 0,
             'status' => RideRequestStatus::Pending,
             'notes' => $data['notes'] ?? null,

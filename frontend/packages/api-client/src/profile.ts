@@ -40,4 +40,21 @@ export class ProfileApi {
     });
     return unwrap(data);
   }
+
+  /**
+   * Erase the account.
+   *
+   * `DELETE /api/v1/profile` has existed since the Users module did, wired to
+   * `AccountErasureService` — which anonymises the identifying columns rather than
+   * dropping rows, so the wallet ledger and the invoices stay auditable. There was
+   * no client method for it and no row on any screen in either app, which is both a
+   * privacy gap and an app-store submission blocker: a store requires an in-app
+   * deletion path from any app that lets you create an account.
+   *
+   * The caller must sign out afterwards — the token is no longer attached to a
+   * usable identity.
+   */
+  async deleteAccount(): Promise<void> {
+    await this.http.delete(ENDPOINTS.profile.base);
+  }
 }
