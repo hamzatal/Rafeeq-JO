@@ -224,11 +224,20 @@ export default function Offers() {
                 matcher and delays the next captain being asked.
               */}
               <View style={s.actions}>
+                {/*
+                  NOT `disabled={expired}`.
+
+                  The countdown is documented above as a display window with no
+                  authority — expiry is the backend's call when it reassigns the request.
+                  Disabling on it meant a captain who glanced at the road for a minute
+                  could not accept an offer that was still perfectly live, with no
+                  refresh control to recover. Let the accept go out and let the backend
+                  answer; `accept()` already reloads and surfaces a rejection.
+                */}
                 <Button
-                  title={t('driver.acceptOffer')}
-                  onPress={() => void accept(lead.id)}
+                  title={t(expired ? 'common.retry' : 'driver.acceptOffer')}
+                  onPress={() => void (expired ? load() : accept(lead.id))}
                   loading={busy === lead.id}
-                  disabled={expired}
                   style={s.accept}
                 />
                 <Pressable

@@ -16,7 +16,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { missingKeys, unreadKeys } from './lib/i18n-keys.mjs';
+import { localeMismatches, missingKeys, unreadKeys } from './lib/i18n-keys.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SKIP = new Set(['node_modules', '.expo', '.next', 'dist', 'build', 'android', 'ios']);
@@ -449,6 +449,25 @@ function gate(id, why, findings) {
     'dead-translation-key',
     'nothing reads these. Delete them from ar.ts and en.ts, or wire them up — a key kept "for later" is a feature that looks half-built.',
     unreadKeys(),
+  );
+}
+
+/* ── 11. The two dictionaries carry the same keys ────────────────────────────
+ *
+ * `en.ts` is typed as `Translations` derived from `ar.ts`, so a key missing from
+ * `en.ts` is a compile error — but an EXTRA key in `en.ts` is not, and that asymmetry
+ * is how a locale quietly grows a phantom.
+ *
+ * Parity was asserted only by `I18nContractTest`, which lives in the BACKEND CI job
+ * and skips when the frontend tree is not checked out. Splitting one contract across
+ * two runners with two skip conditions is a milder version of the fault that caused
+ * the 42-key incident: two implementations of one question.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  gate(
+    'locale-key-mismatch',
+    'ar.ts and en.ts must carry exactly the same keys. Add the missing side, or delete the extra one.',
+    localeMismatches(),
   );
 }
 

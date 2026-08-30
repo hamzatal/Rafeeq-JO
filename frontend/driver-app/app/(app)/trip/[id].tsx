@@ -117,7 +117,20 @@ export default function TripDetail() {
   const waiting = active.filter((p) => p.status === 'booked');
   const onboard = active.filter((p) => p.status === 'onboard');
 
-  /** The ONE thing to do next. */
+  /**
+   * The ONE thing to do next — and «boarding» must not be a trap.
+   *
+   * The first version of this returned `'boarding'` whenever ANY passenger was still
+   * `booked`, which meant a single rider who never turned up pinned the screen there
+   * for the rest of the trip: the drop-off input for the riders actually in the car
+   * was unreachable, so was end-trip, and so was cancel. `TripService::end()` is the
+   * only thing that marks a no-show, releases their stranded wallet hold and closes
+   * the trip — and nothing in the app could call it.
+   *
+   * A rider who has not boarded is a reason to OFFER boarding, never a reason to
+   * withhold everything else. So boarding is the default action, and `alsoAllows`
+   * below says what else is reachable at the same time.
+   */
   const step: Step = useMemo(() => {
     if (!trip) return 'start';
     if (trip.status === 'scheduled') return 'start';
@@ -127,6 +140,17 @@ export default function TripDetail() {
 
     return 'end';
   }, [trip, waiting.length, onboard.length]);
+
+  /*
+   * The escape hatches, always available while the trip is running.
+   *
+   * Not a second primary action competing for attention — a quieter row under the
+   * main one. The captain is driving, so there is still one obvious thing to do; there
+   * is simply no longer a state with no way out of it.
+   */
+  const running = trip?.status === 'started';
+  const canDropOff = running && onboard.length > 0 && step !== 'dropoff';
+  const canEnd = running && step !== 'end';
 
   const mapPoints = useMemo<MapPoint[]>(
     () =>
@@ -156,10 +180,22 @@ export default function TripDetail() {
     }
   };
 
-  const submitCode = () => {
+  /*
+   * 4 to `TRIP_CODE_LENGTH`, matching `TripCode::rule()` on the backend.
+   *
+   * This required exactly six, which defeated the whole reason the backend rule is
+   * deliberately loose: codes drawn before the length changed are still on live
+   * `trip_passengers` rows, and this app is the only client. A rider reading out four
+   * digits filled four cells and left the confirm button permanently disabled — the
+   * exact outcome `TripCode::rule()` and its test exist to prevent.
+   */
+  const LEGACY_MIN = 4;
+  const codeReady = code.trim().length >= LEGACY_MIN;
+
+  const submitCode = (kind: 'boarding' | 'dropoff') => {
     const value = code.trim();
-    if (value.length !== TRIP_CODE_LENGTH) return;
-    if (step === 'boarding') return act(() => api.driverTrips.confirmBoarding(id, value), t('driver.boardingConfirmed'));
+    if (!codeReady) return;
+    if (kind === 'boarding') return act(() => api.driverTrips.confirmBoarding(id, value), t('driver.boardingConfirmed'));
 
     return act(() => api.driverTrips.confirmDropoff(id, value), t('driver.dropoffConfirmed'));
   };
@@ -272,19 +308,58 @@ export default function TripDetail() {
 
             <Button
               title={t(step === 'boarding' ? 'common.confirm' : 'driver.confirmDropoffAndEnd')}
-              onPress={submitCode}
+              onPress={() => submitCode(step === 'boarding' ? 'boarding' : 'dropoff')}
               loading={busy}
-              disabled={code.trim().length !== TRIP_CODE_LENGTH}
+              disabled={!codeReady}
               style={s.tall}
             />
             <Pressable
-              onPress={() => router.push('/(app)/chat')}
+              /* With no `tripId`, ChatThread resolves no conversation and renders its
+                 error state — and this button is exactly what TOO_MANY_CODE_ATTEMPTS
+                 tells the captain to press. */
+              onPress={() => router.push({ pathname: '/(app)/chat', params: { tripId: id } })}
               accessibilityRole="button"
               accessibilityLabel={t('driver.reportProblem')}
               style={({ pressed }) => [s.secondaryBtn, pressed && s.pressed]}
             >
               <Text role="titleSm" tone="secondary" align="center">{t('driver.reportProblem')}</Text>
             </Pressable>
+          </View>
+        ) : null}
+
+        {/*
+          Always reachable while the trip runs: drop off someone who IS in the car even
+          though a booking is still open, and end the trip even though someone never
+          showed. `end()` is what marks them a no-show and releases their hold.
+        */}
+        {canDropOff || canEnd ? (
+          <View style={s.escapeRow}>
+            {canDropOff ? (
+              <Pressable
+                onPress={() => submitCode('dropoff')}
+                disabled={!codeReady || busy}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !codeReady || busy }}
+                accessibilityLabel={t('driver.confirmDropoffAndEnd')}
+                style={({ pressed }) => [s.escapeBtn, pressed && s.pressed, !codeReady && s.escapeBtnOff]}
+              >
+                <Icon name="circle-check" size={16} color={theme.colors.primary} />
+                <Text role="label" tone="primary" align="center">{t('driver.dropoffConfirmed')}</Text>
+              </Pressable>
+            ) : null}
+            {canEnd ? (
+              <Pressable
+                onPress={() => act(() => api.driverTrips.end(id), t('driver.tripEnded'))}
+                disabled={busy}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: busy }}
+                accessibilityLabel={t('driver.endTrip')}
+                style={({ pressed }) => [s.escapeBtn, pressed && s.pressed]}
+              >
+                <Icon name="flag" size={16} color={theme.colors.danger} />
+                <Text role="label" tone="danger" align="center">{t('driver.endTrip')}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
@@ -365,6 +440,9 @@ const makeStyles = (t: AppTheme) =>
        focusable for the keyboard to open when the cells are tapped. */
     hiddenInput: { position: 'absolute', opacity: 0, height: 1, width: 1 },
 
+    escapeRow: { flexDirection: 'row-reverse', gap: t.spacing.sm, marginBottom: t.spacing.base },
+    escapeBtn: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6, minHeight: 54, borderRadius: t.radius.control, borderWidth: 1, borderColor: t.colors.border },
+    escapeBtnOff: { opacity: 0.5 },
     paxCard: { marginBottom: t.spacing.sm },
     paxRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md },
     paxIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },

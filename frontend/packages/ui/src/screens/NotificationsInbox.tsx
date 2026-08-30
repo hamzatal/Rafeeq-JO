@@ -29,7 +29,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AppNotification, NotificationPreference } from '@rafeeq/shared';
-import type { RafeeqApi } from '@rafeeq/api-client';
+import { RafeeqApiError, type RafeeqApi } from '@rafeeq/api-client';
 import { Icon, type IconName } from '../components/Icon';
 import { Text } from '../components/Text';
 import { Card } from '../components/surfaces';
@@ -87,7 +87,14 @@ export function NotificationsInbox({ api, onActivateCoupon }: NotificationsInbox
       await onActivateCoupon(code);
       setCouponMsg((m) => ({ ...m, [id]: { text: t('payments.couponActivated'), ok: true } }));
     } catch (e) {
-      setCouponMsg((m) => ({ ...m, [id]: { text: e instanceof Error ? e.message : t('common.error'), ok: false } }));
+      /*
+       * `firstError()` before `message`. The student copy did this and the extraction
+       * dropped it: `RafeeqApiError.message` is the envelope's generic text, while
+       * `firstError()` is the 422 field reason — «هذا الكوبون منتهي» rather than
+       * «تعذّر إكمال العملية».
+       */
+      const text = e instanceof RafeeqApiError ? (e.firstError() ?? e.message) : t('common.error');
+      setCouponMsg((m) => ({ ...m, [id]: { text, ok: false } }));
     }
   };
 

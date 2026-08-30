@@ -525,6 +525,21 @@ class TripService extends BaseService
                 ->first();
 
             if (! $passenger) {
+                /*
+                 * A code that IS real but whose passenger has moved on is not a guess.
+                 *
+                 * The status filter above makes a re-submitted correct code — a double
+                 * tap, or a retry after a request that succeeded and timed out on the way
+                 * back — indistinguishable from a wrong one. It would consume an attempt,
+                 * write a rejection audit row, and on the tenth raise a HIGH-severity
+                 * fraud flag against an honest captain and lock code entry for the rest of
+                 * the trip. Answer idempotently instead.
+                 */
+                $already = $trip->passengers()->where('boarding_code', $code)->first();
+                if ($already) {
+                    return $already;
+                }
+
                 return null;
             }
 
@@ -608,6 +623,13 @@ class TripService extends BaseService
                 ->first();
 
             if (! $passenger) {
+                // Same as boarding: a real code for an already-dropped rider is a retry,
+                // not a guess, and must not spend an attempt or accuse the captain.
+                $already = $trip->passengers()->where('dropoff_code', $code)->first();
+                if ($already) {
+                    return $already;
+                }
+
                 return null;
             }
 
@@ -732,8 +754,17 @@ class TripService extends BaseService
      */
     private function rejectCode(Trip $trip, string $kind): never
     {
-        $attempts = (int) $trip->code_attempts + 1;
-        Trip::whereKey($trip->id)->update(['code_attempts' => $attempts]);
+        /*
+         * Atomic, because everything else in this file locks and this did not.
+         *
+         * It was `read $trip->code_attempts` then `update(+1)`, so two misses arriving
+         * together both read N and both wrote N+1: one attempt spent for two made, and
+         * two audit rows claiming the same count. `book()` takes the trip under
+         * `lockForUpdate` for exactly this reason, and `throttle:trip-code` allows six a
+         * minute per trip — ample concurrency for it to matter.
+         */
+        Trip::whereKey($trip->id)->increment('code_attempts');
+        $attempts = (int) (Trip::whereKey($trip->id)->value('code_attempts') ?? 0);
 
         $this->audit->log("trip.{$kind}_code_rejected", auditable: $trip, changes: ['attempts' => $attempts]);
 

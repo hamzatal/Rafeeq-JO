@@ -318,8 +318,24 @@ class SubscriptionLedgerTest extends TestCase
         $student = $this->student(40_000, '+962790980401');
         $plan = $this->plan(priceFils: 23_000, rides: 12);
 
-        // Activated by an admin without any payment, so nothing funded the treasury.
-        $subscription = app(SubscriptionService::class)->activate($this->pendingSubscription($student, $plan));
+        /*
+         * An Active row that never went through `activate()`.
+         *
+         * This used to read "activated by an admin without any payment", and that door is
+         * now closed — `SubscriptionService::activate()` credits the treasury itself, see
+         * `SubscriptionFundingPathsTest`. What remains reachable is a row written
+         * directly: a legacy record, a hand-edited database, a future path that forgets.
+         * The guard has to hold for those too, because the alternative is minting balance
+         * a captain will withdraw as real money.
+         */
+        $subscription = Subscription::create([
+            'student_id' => $student->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::Active,
+            'starts_at' => Clock::now()->subDay(),
+            'ends_at' => Clock::now()->addDays(6),
+            'remaining_rides' => $plan->rides_count,
+        ]);
 
         $captain = $this->captain('+962790980400');
         $trip = Trip::create([

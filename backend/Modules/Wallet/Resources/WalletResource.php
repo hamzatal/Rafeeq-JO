@@ -25,7 +25,7 @@ class WalletResource extends JsonResource
              * could not see.
              *
              * A captain working cash holds the whole fare and owes us the commission
-             * (`CaptainDebtService`). Past `rafeeq.max_captain_debt_fils` they stop
+             * (`CaptainDebtService`). Past `rafeeq.captain_debt_ceiling_fils` they stop
              * receiving trips altogether. That ceiling has been enforced since the cash
              * flow existed, and no endpoint ever reported the balance being measured
              * against it — so a captain went quiet with no way to find out why.

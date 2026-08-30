@@ -54,6 +54,17 @@ export const FRONTEND = resolve(dirname(fileURLToPath(import.meta.url)), '..', '
 const DICTIONARY = resolve(FRONTEND, 'packages/shared/src/i18n/ar.ts');
 
 /**
+ * The English half. `en.ts` is typed as `Translations` derived from `ar.ts`, so a
+ * MISSING key is a compile error — but an EXTRA one is not, and neither is a key
+ * added to `ar.ts` while `en.ts` is regenerated from a stale copy.
+ *
+ * Parity used to be asserted only by `I18nContractTest` in the backend CI job, which
+ * skips when the frontend tree is absent. One contract, two runners, two skip
+ * conditions. It is checked here too now, where the keys are.
+ */
+const DICTIONARY_EN = resolve(FRONTEND, 'packages/shared/src/i18n/en.ts');
+
+/**
  * Trees that read the shared dictionary.
  *
  * `admin-dashboard` is absent on purpose: it ships its own dictionary in
@@ -248,6 +259,21 @@ export function missingKeys() {
   }
 
   return found.sort((a, b) => a.key.localeCompare(b.key));
+}
+
+/**
+ * Keys present in one dictionary and not the other, in both directions.
+ *
+ * @returns {string[]} human-readable descriptions, empty when the two agree
+ */
+export function localeMismatches() {
+  const ar = dictionaryKeys().leaves;
+  const en = dictionaryKeys(readFileSync(DICTIONARY_EN, 'utf8')).leaves;
+
+  return [
+    ...[...ar].filter((k) => !en.has(k)).map((k) => `${k}  — in ar.ts, missing from en.ts`),
+    ...[...en].filter((k) => !ar.has(k)).map((k) => `${k}  — in en.ts, missing from ar.ts`),
+  ].sort();
 }
 
 /**

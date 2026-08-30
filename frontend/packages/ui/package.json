@@ -34,9 +34,10 @@
     "zustand": "^4.5.0"
   },
   "peerDependencies": {
+    "@react-navigation/bottom-tabs": "^6.5.20",
     "react": "*",
     "react-native": "*",
-    "@react-navigation/bottom-tabs": "^6.5.20"
+    "react-native-webview": "13.8.6"
   },
   "devDependencies": {
     "@testing-library/react-native": "^12.5.3",

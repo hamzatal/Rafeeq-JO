@@ -23,6 +23,7 @@ use Rafeeq\Modules\Payments\Models\PaymentRequest;
 use Rafeeq\Modules\Settings\Services\SettingService;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Services\SubscriptionService;
+use Rafeeq\Modules\Wallet\Services\CaptainDebtService;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\CouponScope;
 use Rafeeq\Shared\Enums\NotificationType;
@@ -63,6 +64,7 @@ class PaymentService extends BaseService
         private readonly SubscriptionService $subscriptions,
         private readonly NotificationService $notifications,
         private readonly CouponService $coupons,
+        private readonly CaptainDebtService $debts,
     ) {}
 
     /**
@@ -514,13 +516,31 @@ class PaymentService extends BaseService
 
         // Wallet is credited with the ORIGINAL amount (paid + discount), so a
         // wallet-top-up coupon acts as a bonus (pay less, receive full credit).
+        $wallet = $this->wallets->forUser($user);
         $this->wallets->credit(
-            $this->wallets->forUser($user),
+            $wallet,
             $request->amount_fils + (int) $request->discount_fils,
             WalletTxnType::Topup,
             'شحن المحفظة عبر CliQ',
             $request->number,
         );
+
+        /*
+         * And settle any cash commission owed, which is the whole reason a CAPTAIN
+         * tops up.
+         *
+         * `CaptainDebtService::settleFromBalance` was called from exactly two places,
+         * both inside ride billing — so a top-up did nothing to the debt. That closed a
+         * loop with no exit: `assertMayGoOnline` refuses to bring a captain online over
+         * `captain_debt_ceiling_fils`, settling required a cashless ride credit, and
+         * getting a ride required being online. Its own docblock says «on a top-up, or
+         * on earnings from a cashless trip», and the message the blocked captain sees
+         * says «اشحن رصيدك أو نفّذ رحلات بالمحفظة لتسويتها». Both were describing this
+         * call, which did not exist.
+         *
+         * A no-op for a student: `settleFromBalance` returns 0 when there is no debt.
+         */
+        $this->debts->settleFromBalance($wallet->fresh());
     }
 
     private function fulfilSubscription(PaymentRequest $request): void
@@ -558,7 +578,8 @@ class PaymentService extends BaseService
             $request->number,
         );
 
-        $this->subscriptions->activate($subscription);
+        // Credited immediately above — see `SubscriptionService::activate`.
+        $this->subscriptions->activate($subscription, fundTreasury: false);
     }
 
     /**

@@ -54,14 +54,23 @@ export interface PickedImage {
  */
 export type PickFailure = 'cancelled' | 'permission-denied' | 'unavailable';
 
-function pickFromWebInput(): Promise<File | null> {
+function pickFromWebInput(source: 'camera' | 'gallery'): Promise<File | null | 'unavailable'> {
   return new Promise((resolve) => {
     const doc = (globalThis as unknown as { document?: any }).document;
-    if (!doc) return resolve(null);
+    // Not `null`: no `document` means picking is IMPOSSIBLE here, which is a different
+    // answer from "the user changed their mind" and the caller needs to say so.
+    if (!doc) return resolve('unavailable');
     const input = doc.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    // `capture` asks a mobile browser for the camera directly; desktop ignores it.
+    /*
+     * `capture` asks a mobile browser to open the camera directly; desktop ignores it.
+     *
+     * It was documented here and never set, so `pickImage({ source: 'camera' })` opened
+     * the gallery on web — silently dropping the one capability the old bespoke
+     * `documents.tsx` picker had that the shared one did not.
+     */
+    if (source === 'camera') input.capture = 'environment';
     input.onchange = () => resolve(input.files && input.files[0] ? input.files[0] : null);
     input.click();
   });
@@ -92,15 +101,20 @@ async function toUploadable(asset: { uri: string; fileName?: string | null; mime
 }
 
 /**
- * Pick an image from the camera or the gallery. Never throws; returns null when the
- * user cancels, the permission is refused, or the native module is unavailable.
+ * Pick an image from the camera or the gallery.
+ *
+ * Never throws. Returns either a `PickedImage` or a `PickFailure` naming WHY there is
+ * none — use `isPicked()` to tell them apart. It does not return null: the whole point
+ * of the union is that «cancelled» and «permission-denied» are different answers and a
+ * caller that cannot distinguish them can only stay silent.
  */
 export async function pickImage(
   { source = 'gallery', quality = 0.8, name = 'upload' }: PickImageOptions = {},
 ): Promise<PickedImage | PickFailure> {
   try {
     if (Platform.OS === 'web') {
-      const file = await pickFromWebInput();
+      const file = await pickFromWebInput(source);
+      if (file === 'unavailable') return 'unavailable';
 
       return file ? { file, uri: URL.createObjectURL(file) } : 'cancelled';
     }

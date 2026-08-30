@@ -42,6 +42,21 @@ import { loadAppConfig } from '../runtime/appConfig';
 import { useI18n } from '../runtime/i18n';
 import { useApiProblemToasts } from '../runtime/problems';
 
+/*
+ * Module scope, and it has to be.
+ *
+ * Both root layouts called this before the extraction and it was dropped in the move,
+ * so nothing prevented the native splash from auto-hiding — while `AppRoot` returns
+ * `null` until fonts AND prefs are ready. Both apps therefore opened on an empty
+ * background for the duration of font loading and AsyncStorage hydration, and the
+ * `hideAsync()` below resolved against a splash that had already gone.
+ *
+ * That is constraint 4 in this file's own header, broken by the extraction written to
+ * protect it. It belongs here rather than in each app for exactly that reason: one
+ * copy cannot be forgotten in one place.
+ */
+void SplashScreen.preventAutoHideAsync();
+
 /** Unsubscribe function, as returned by each app's `subscribeToNotificationTaps`. */
 type Unsubscribe = () => void;
 

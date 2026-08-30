@@ -44,16 +44,33 @@ return new class extends Migration
         /** @var PlanSolvency $solvency */
         $solvency = app(PlanSolvency::class);
 
-        $unlimited = DB::table('subscription_plans')
-            ->whereNull('rides_count')
-            ->get(['id', 'route_id', 'price_fils']);
+        /*
+         * Every plan, not only the unlimited ones.
+         *
+         * The first version of this filtered on `rides_count IS NULL`, which fixed the
+         * unbounded plans and left the merely UNDERPRICED ones on sale — including the
+         * seeded `باقة أسبوعية` at 7 000 fils for 12 rides, whose captain payouts come to
+         * 15 300. That is the exact 8 300-fils-per-subscriber loss this migration's header
+         * uses to justify itself, in a plan the migration declined to touch, and
+         * `PlanSolvency` only runs on the admin write path so nothing else would have
+         * caught it either.
+         */
+        $plans = DB::table('subscription_plans')->get(['id', 'route_id', 'price_fils', 'rides_count', 'is_active']);
 
-        foreach ($unlimited as $plan) {
+        foreach ($plans as $plan) {
             $costPerRide = $solvency->costPerRideFils($plan->route_id);
             $affordable = $costPerRide > 0 ? intdiv((int) $plan->price_fils, $costPerRide) : 0;
+            $rides = $plan->rides_count === null ? max(1, $affordable) : (int) $plan->rides_count;
+
+            // Solvent and bounded already? Leave it exactly as it is.
+            if ($plan->rides_count !== null && (int) $plan->price_fils >= $costPerRide * $rides) {
+                continue;
+            }
 
             DB::table('subscription_plans')->where('id', $plan->id)->update([
-                'rides_count' => max(1, $affordable),
+                'rides_count' => max(1, min($rides, max(1, $affordable))),
+                // Deactivated, always. A converted or re-scoped plan is a NEW commercial
+                // offer and an operator has to look at it before it goes back on sale.
                 'is_active' => false,
                 'updated_at' => now(),
             ]);
