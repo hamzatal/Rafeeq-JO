@@ -61,7 +61,11 @@ export function validateForm<T extends Record<string, () => ValidationResult>>(
 ): { valid: boolean; errors: Partial<Record<keyof T, string>> } {
   const errors: Partial<Record<keyof T, string>> = {};
   for (const key in rules) {
-    const result = rules[key]();
+    // `rules` is an index signature, so a read can miss — and calling `undefined()`
+    // is the crash `noUncheckedIndexedAccess` exists to make visible.
+    const rule = rules[key];
+    if (!rule) continue;
+    const result = rule();
     if (result) errors[key] = result;
   }
   return { valid: Object.keys(errors).length === 0, errors };

@@ -169,7 +169,11 @@ export default function RideRequestScreen() {
   const cycleUniversity = () => {
     if (universities.length < 2) return;
     const i = universities.findIndex((u) => u.id === universityId);
-    setUniversityId(universities[(i + 1) % universities.length].id);
+    // `findIndex` returns -1 when the current id is not in the list, and -1 + 1 = 0
+    // lands on the first entry, which is the right answer — but the read still has to
+    // be checked, because `length` is only known at runtime.
+    const next = universities[(i + 1) % universities.length];
+    if (next) setUniversityId(next.id);
   };
 
   const submit = async () => {

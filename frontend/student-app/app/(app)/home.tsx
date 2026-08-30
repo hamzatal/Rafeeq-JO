@@ -326,7 +326,6 @@ export default function Home() {
   };
 
   /* ── Map points: every one of them a real coordinate ── */
-  const trip = seat?.trip ?? null;
   const points: MapPoint[] = [
     ...(captain ? [{ ...captain, kind: 'captain' as const, label: t('home.stepComing') }] : []),
     ...(myLoc ? [{ ...myLoc, kind: 'origin' as const, label: t('home.nearby') }] : []),

@@ -1,12 +1,18 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": [
+    "../../tsconfig.base.json",
+    "expo/tsconfig.base"
+  ],
   "compilerOptions": {
-    "strict": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals"
+    ]
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

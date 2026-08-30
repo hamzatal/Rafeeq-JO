@@ -54,6 +54,29 @@ export function render(element: ReactElement): Rendered {
 }
 
 /**
+ * The first match, asserting there is one.
+ *
+ * ── Why a helper and not `[0]!` ────────────────────────────────────────────────
+ *
+ * `noUncheckedIndexedAccess` types `findAllByType(X)[0]` as `T | undefined`, which is
+ * the truth: a query that matches nothing returns an empty array. Every test in this
+ * package read `[0]` and dereferenced it, so a query that stopped matching — because a
+ * component was renamed, or a role was dropped — failed with
+ * `Cannot read properties of undefined`, pointing at the assertion rather than at the
+ * query that found nothing.
+ *
+ * `!` would silence the compiler and keep that message. This says what went wrong.
+ */
+export function first<T>(matches: T[], what: string): T {
+  const [match] = matches;
+  if (match === undefined) {
+    throw new Error(`expected at least one ${what}, found none — the query matched nothing.`);
+  }
+
+  return match;
+}
+
+/**
  * Flatten an RN style prop into one object.
  *
  * Handles the function form: `Pressable` takes `style={({ pressed }) => […]}`, so

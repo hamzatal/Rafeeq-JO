@@ -3,7 +3,7 @@ import type { ReactTestInstance } from 'react-test-renderer';
 import { Text as RNText } from 'react-native';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { ListState, listLabels, statusFromError, type ListStatus } from './states';
-import { render } from '../test/render';
+import { first, render } from '../test/render';
 
 const LABELS = {
   retry: 'إعادة المحاولة',
@@ -97,7 +97,7 @@ describe('ListState', () => {
   it('retries through the given callback', () => {
     const onRetry = vi.fn();
     const r = show({ kind: 'offline' }, false, onRetry);
-    r.byRole('button')[0].props.onPress();
+    first(r.byRole('button'), 'button').props.onPress();
 
     expect(onRetry).toHaveBeenCalledOnce();
   });

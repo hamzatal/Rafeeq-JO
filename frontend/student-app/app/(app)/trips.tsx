@@ -6,7 +6,6 @@ import { formatJod } from '@rafeeq/shared';
 import type { Trip, TripPassenger } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import {
-  Badge,
   Card,
   EmptyState,
   ErrorState,

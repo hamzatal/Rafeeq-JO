@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { Text as RNText } from 'react-native';
 import { type as typeScale, fontFamily, colors } from '@rafeeq/tokens';
 import { Text } from './Text';
-import { flatStyle, render } from '../test/render';
+import { first, flatStyle, render } from '../test/render';
 
 /**
  * The style our `Text` HANDED to react-native's, before the platform touches it.
@@ -14,7 +14,7 @@ import { flatStyle, render } from '../test/render';
  * the moment the alias changed.
  */
 function styleOf(element: ReactElement) {
-  return flatStyle(render(element).root.findAllByType(RNText)[0].props.style);
+  return flatStyle(first(render(element).root.findAllByType(RNText), 'Text').props.style);
 }
 
 describe('Text', () => {
