@@ -25,6 +25,7 @@ use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Models\TripTracking;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\NotificationType;
+use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\RideRequestStatus;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
@@ -407,14 +408,66 @@ class TripService extends BaseService
         });
     }
 
-    /** Student books a seat. Requires a usable subscription for the route. */
-    public function book(User $student, Trip $trip, ?string $pickupPointId = null): TripPassenger
+    /**
+     * The student's plan that can pay for a seat on this route, if any.
+     *
+     * `scopeActiveForRoute` narrows on the two indexed columns; `isUsable()` is the
+     * single definition of usable (not expired, rides left). Keeping the second half
+     * in PHP rather than duplicating it in SQL is what stops the two from drifting —
+     * a scope that filtered `ends_at` itself would have to agree with `isUsable()`
+     * forever, and the day it stopped agreeing a lapsed plan would fund a ride.
+     */
+    public function coveringSubscription(User $student, ?string $routeId): ?Subscription
     {
+        return Subscription::activeForRoute($student->id, $routeId)
+            ->get()
+            ->first(fn (Subscription $s) => $s->isUsable());
+    }
+
+    /**
+     * Student books a seat. A subscription funds it if they have one; otherwise they
+     * pay per ride.
+     *
+     * ── Why the subscription requirement is gone ─────────────────────────────────
+     *
+     * This used to throw `NO_ACTIVE_SUBSCRIPTION` without a usable plan on the route,
+     * and `MatchingService` — the other way into the very same car — never checked at
+     * all. So the two entrances disagreed about whether prepayment was mandatory, and
+     * every pooled seat the matcher created was pay-per-ride while every directly
+     * booked seat had to be prepaid.
+     *
+     * The stricter door was the wrong one. A student who needs three rides before an
+     * exam cannot be told to buy a week, and a plan whose only purpose is to unlock
+     * the button is not a product, it is a toll. A plan is a DISCOUNT on volume the
+     * student has already committed to — it competes with paying per ride rather than
+     * gating it.
+     *
+     * ── What that required downstream, and what was already there ────────────────
+     *
+     * Almost everything already handled `subscription_id === null`, because the
+     * matching path has always produced exactly that: `placeFareHolds()` reserves the
+     * fare for null-subscription seats, `RideBillingService` debits the student for
+     * them, and `FinancialReportService` classes them as wallet or cash. The one gap
+     * was that `book()` wrote NEITHER `payment_method` NOR `coupon_code`, so a seat
+     * created here silently defaulted to wallet in billing and could never be cash.
+     * Both are accepted and persisted now, exactly as `MatchingService` does.
+     *
+     * The method is recorded even when a plan covers the seat: if the plan lapses
+     * between booking and boarding, `confirmBoarding()` detaches it and bills the
+     * fare, and it should bill it the way the student chose rather than assume wallet.
+     */
+    public function book(
+        User $student,
+        Trip $trip,
+        ?string $pickupPointId = null,
+        PaymentMethod $method = PaymentMethod::Wallet,
+        ?string $couponCode = null,
+    ): TripPassenger {
         // Every check that decides whether a seat exists has to run inside the
         // transaction that takes it, against a locked trip row. Previously the
         // capacity check sat outside, so two students could pass it on the same
         // last seat and both insert — overbooking a car.
-        return $this->transaction(function () use ($student, $trip, $pickupPointId) {
+        return $this->transaction(function () use ($student, $trip, $pickupPointId, $method, $couponCode) {
             $locked = Trip::whereKey($trip->id)->lockForUpdate()->firstOrFail();
 
             if ($locked->status !== TripStatus::Scheduled) {
@@ -427,18 +480,16 @@ class TripService extends BaseService
                 throw new BusinessRuleException('أنت محجوز بالفعل على هذه الرحلة.', 'ALREADY_BOOKED');
             }
 
-            $subscription = Subscription::activeForRoute($student->id, $locked->route_id)->get()
-                ->first(fn (Subscription $s) => $s->isUsable());
-
-            if (! $subscription) {
-                throw new BusinessRuleException('تحتاج اشتراكاً فعّالاً على هذا المسار.', 'NO_ACTIVE_SUBSCRIPTION');
-            }
+            // Use a plan if one covers this route. Not having one is not an error.
+            $subscription = $this->coveringSubscription($student, $locked->route_id);
 
             $passenger = $locked->passengers()->create([
                 'student_id' => $student->id,
-                'subscription_id' => $subscription->id,
+                'subscription_id' => $subscription?->id,
                 'pickup_point_id' => $pickupPointId,
                 'status' => TripPassengerStatus::Booked,
+                'payment_method' => $method,
+                'coupon_code' => $couponCode,
                 'boarding_code' => $this->uniqueTripCode($locked, 'boarding_code'),
             ]);
 

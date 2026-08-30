@@ -18,7 +18,9 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property SubscriptionStatus $status
  * @property Carbon|null $starts_at
  * @property Carbon|null $ends_at
- * @property int|null $remaining_rides
+ * @property int $remaining_rides Never null — see the 2026_09_03 migration. An
+ *                                unlimited plan was an unbounded liability, and a nullable count made
+ *                                "no limit" and "limit not reached" the same answer at every read site.
  * @property-read SubscriptionPlan|null $plan
  */
 class Subscription extends Model
@@ -48,19 +50,19 @@ class Subscription extends Model
 
     public function isUsable(): bool
     {
-        if ($this->status !== SubscriptionStatus::Active) {
-            return false;
-        }
-        if ($this->ends_at && $this->ends_at->isPast()) {
-            return false;
-        }
-        if ($this->remaining_rides !== null && $this->remaining_rides <= 0) {
-            return false;
-        }
-
-        return true;
+        return $this->status === SubscriptionStatus::Active
+            && ! ($this->ends_at && $this->ends_at->isPast())
+            && $this->remaining_rides > 0;
     }
 
+    /**
+     * Plans that could cover a seat on this route.
+     *
+     * Deliberately does NOT filter `ends_at` or `remaining_rides` — it narrows by the
+     * two indexed columns and leaves the rest to `isUsable()`, so there is one
+     * definition of "usable" instead of a SQL half and a PHP half that can disagree.
+     * Every caller must post-filter; see `TripService::coveringSubscription`.
+     */
     public function scopeActiveForRoute(Builder $q, string $studentId, ?string $routeId): Builder
     {
         return $q->where('student_id', $studentId)

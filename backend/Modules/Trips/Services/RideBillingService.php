@@ -186,7 +186,65 @@ class RideBillingService extends BaseService
 
             $captainWallet = $this->wallets->forUser($captainUser);
 
-            if ($method === PaymentMethod::Cash) {
+            /*
+             * Subscription BEFORE cash, deliberately — the same precedence
+             * `FinancialReportService::FUNDING` uses. A subscription seat carries
+             * whatever payment method the booking was made with, and that method stops
+             * meaning anything the moment a plan is covering the fare.
+             */
+            if ($passenger->subscription_id) {
+                /*
+                 * The treasury pays, out of the plan price it was credited at purchase.
+                 *
+                 * ── What this branch used to do ────────────────────────────────────
+                 *
+                 * It fell through to the wallet branch below, which credited the captain
+                 * their share AND credited the platform its commission — with no debit
+                 * anywhere, because the student pays nothing at boarding on a plan. So a
+                 * subscription seat CREATED the entire fare: 1 275 fils of withdrawable
+                 * captain balance and 225 fils of reported revenue, from nothing, every
+                 * ride. `FinancialReportService` papered over half of it by classifying
+                 * the seat as funding `'subscription'` and excluding its commission from
+                 * cash revenue — a REPORTING correction on top of a LEDGER error, which
+                 * is why the books looked right and were not.
+                 *
+                 * Debiting the treasury is the only truthful entry: the money the captain
+                 * is credited is money the student already handed over when they bought
+                 * the plan, and it has been sitting in the treasury since. Now it moves.
+                 *
+                 * ── And no commission on this row ──────────────────────────────────
+                 *
+                 * The platform's margin on a subscription was booked once, at the sale:
+                 * it is `price - rides × captain_share`, guaranteed non-negative by
+                 * `PlanSolvency`. Crediting a commission here as well would book the same
+                 * margin twice — once as a plan sale and again per ride.
+                 *
+                 * ── If the treasury cannot cover it ────────────────────────────────
+                 *
+                 * `debit()` refuses to overdraw, so this throws and the boarding rolls
+                 * back. That is the correct failure: it can only happen if plans were sold
+                 * whose prepayments have already been withdrawn as profit, which is
+                 * insolvency, and the alternative is minting balance a captain will draw
+                 * out as real money. A loud failure with an audit trail beats a quiet hole.
+                 */
+                $this->wallets->debit(
+                    $this->wallets->platform(),
+                    $captainShare,
+                    WalletTxnType::SubscriptionRide,
+                    'أجرة كابتن على رحلة من باقة',
+                    $trip->id,
+                );
+
+                $this->wallets->credit(
+                    $captainWallet,
+                    $captainShare,
+                    WalletTxnType::Payout,
+                    'أرباح رحلة',
+                    $trip->id,
+                );
+
+                $this->debts->settleFromBalance($captainWallet);
+            } elseif ($method === PaymentMethod::Cash) {
                 // The captain has the whole fare in hand, so the platform is owed its
                 // commission. Taken from their balance where it covers it, and recorded
                 // as debt where it does not — see CaptainDebtService, which credits the
@@ -236,6 +294,23 @@ class RideBillingService extends BaseService
 
             $passenger->forceFill([
                 'fare_fils' => $fare,
+                /*
+                 * Still the tariff commission on a subscription seat, deliberately.
+                 *
+                 * It is what the seat was WORTH, which keeps `gross_fare = commission +
+                 * captain_share + discount` true for every row and keeps the tariff
+                 * auditable per seat. It is not money that arrived per-ride — that
+                 * arrived once, when the plan was sold — and `FinancialReportService`
+                 * already models exactly that by excluding subscription-funded
+                 * commission from `ride_commission_fils` and counting plan sales
+                 * separately.
+                 *
+                 * The double count was never in this column. It was in the LEDGER: the
+                 * platform wallet was credited this commission as though it had been
+                 * collected, on top of the plan price. Removing that credit (see the
+                 * subscription branch above) fixes the money without falsifying the
+                 * accounting row.
+                 */
                 'commission_fils' => max(0, $commission - $discount),
                 'captain_share_fils' => $captainShare,
                 'coupon_discount_fils' => $discount > 0 ? $discount : null,

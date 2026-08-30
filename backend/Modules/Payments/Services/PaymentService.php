@@ -530,9 +530,35 @@ class PaymentService extends BaseService
         }
 
         $subscription = Subscription::find($request->payable_id);
-        if ($subscription) {
-            $this->subscriptions->activate($subscription);
+        if (! $subscription) {
+            return;
         }
+
+        /*
+         * The treasury receives the plan price — the leg this method did not have.
+         *
+         * Activating the subscription was the whole of it, so a plan bought over CliQ
+         * put NOTHING into the ledger: money arrived in the bank and no account
+         * recorded it. Then every ride on that plan debited the treasury (see the
+         * subscription branch of `RideBillingService`), draining a balance the sale had
+         * never funded — so a CliQ subscriber's rides were paid for out of other
+         * people's commission until the treasury refused, at which point boarding
+         * started failing for a student who had paid.
+         *
+         * Credited BEFORE activation, so the plan is never usable ahead of the money
+         * that backs it. Amount is `amount_fils + discount_fils`, matching
+         * `fulfilWalletTopup`: a coupon on a plan purchase is the platform choosing to
+         * receive less, and the rides still have to be funded at the full price.
+         */
+        $this->wallets->credit(
+            $this->wallets->platform(),
+            $request->amount_fils + (int) $request->discount_fils,
+            WalletTxnType::SubscriptionSale,
+            'بيع باقة عبر CliQ',
+            $request->number,
+        );
+
+        $this->subscriptions->activate($subscription);
     }
 
     /**

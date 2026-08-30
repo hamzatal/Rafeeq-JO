@@ -45,7 +45,13 @@ class StudentTripController extends Controller
 
     public function book(BookTripRequest $request, Trip $trip): JsonResponse
     {
-        $passenger = $this->service->book($request->user(), $trip, $request->input('pickup_point_id'));
+        $passenger = $this->service->book(
+            $request->user(),
+            $trip,
+            $request->input('pickup_point_id'),
+            $request->paymentMethod(),
+            $request->input('coupon_code'),
+        );
 
         return $this->created(new TripPassengerResource($passenger), 'تم حجز مقعدك. احتفظ بكود الصعود.');
     }

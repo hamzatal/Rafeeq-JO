@@ -53,7 +53,16 @@ class SubscriptionService extends BaseService
             'status' => SubscriptionStatus::Active,
             'starts_at' => $start,
             'ends_at' => $start->copy()->addDays($plan->duration_days),
-            'remaining_rides' => $subscription->remaining_rides ?? $plan->rides_count,
+            /*
+             * `remaining_rides` is stamped from the plan at `subscribe()` time, so this
+             * normally just keeps it. A zero means the row was created without going
+             * through `subscribe()` — fall back to the plan rather than activating an
+             * entitlement to nothing, which is what `?? $plan->rides_count` used to do
+             * for NULL before the column became NOT NULL.
+             */
+            'remaining_rides' => $subscription->remaining_rides > 0
+                ? $subscription->remaining_rides
+                : $plan->rides_count,
         ])->save();
 
         $this->audit->log('subscription.activated', auditable: $subscription);
@@ -109,6 +118,28 @@ class SubscriptionService extends BaseService
                 $subscription->id,
             );
 
+            /*
+             * And the treasury RECEIVES it.
+             *
+             * This debit used to stand alone: the student's balance went down and no
+             * account went up, so the plan price left the ledger. Money was destroyed at
+             * purchase and then minted again at every ride (see the subscription branch
+             * of `RideBillingService::chargeForBoarding`), and because the two errors
+             * pointed in opposite directions no single balance looked wrong.
+             *
+             * The treasury is where the plan price has to sit, because the platform is
+             * now holding money it owes rides against — every subscription seat is paid
+             * for out of this credit. `PlanSolvency` is what guarantees the credit is
+             * large enough to cover the rides the plan promises.
+             */
+            $this->wallets->credit(
+                $this->wallets->platform(),
+                $price,
+                WalletTxnType::SubscriptionSale,
+                'بيع باقة',
+                $subscription->id,
+            );
+
             $activated = $this->activate($locked);
             $this->audit->log('subscription.paid_wallet', $student, auditable: $activated, changes: ['amount_fils' => $price]);
 
@@ -144,12 +175,12 @@ class SubscriptionService extends BaseService
             if (! $locked || ! $locked->isUsable()) {
                 return false;
             }
-            if ($locked->remaining_rides !== null) {
-                if ($locked->remaining_rides < 1) {
-                    return false;
-                }
-                $locked->decrement('remaining_rides');
-            }
+
+            // No `!== null` branch any more: an unlimited plan used to skip the
+            // decrement entirely, so `isUsable()` could never become false and the
+            // plan funded rides forever. Every plan is bounded now — see the
+            // 2026_09_03 migration and PlanSolvency.
+            $locked->decrement('remaining_rides');
 
             return true;
         });
@@ -160,7 +191,7 @@ class SubscriptionService extends BaseService
     {
         $this->transaction(function () use ($subscription) {
             $locked = Subscription::whereKey($subscription->id)->lockForUpdate()->first();
-            if ($locked && $locked->remaining_rides !== null) {
+            if ($locked) {
                 $locked->increment('remaining_rides');
             }
         });

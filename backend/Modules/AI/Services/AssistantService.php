@@ -259,7 +259,7 @@ class AssistantService extends BaseService
                 ->select('subscription_plans.name', 'subscriptions.remaining_rides', 'subscriptions.ends_at')
                 ->first();
             if ($sub) {
-                $rides = $sub->remaining_rides === null ? 'غير محدود' : $sub->remaining_rides;
+                $rides = (int) $sub->remaining_rides;
                 $lines[] = "اشتراك فعّال: {$sub->name} (رحلات متبقية: {$rides})";
             } else {
                 $lines[] = 'لا يوجد اشتراك فعّال حالياً.';

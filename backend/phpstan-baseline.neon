@@ -415,12 +415,6 @@ parameters:
 			path: Modules/Payments/Services/PaymentService.php
 
 		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Payments\\Models\\PaymentRequest\:\:\$discount_fils\.$#'
-			identifier: property.notFound
-			count: 2
-			path: Modules/Payments/Services/PaymentService.php
-
-		-
 			message: '#^Method Rafeeq\\Modules\\Payments\\Services\\PaymentService\:\:submitProof\(\) should return Rafeeq\\Modules\\Payments\\Models\\Payment but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
 			identifier: return.type
 			count: 1
