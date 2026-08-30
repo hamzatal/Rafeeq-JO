@@ -112,6 +112,7 @@ export { NotificationsInbox } from './screens/NotificationsInbox';
 export type { NotificationsInboxProps } from './screens/NotificationsInbox';
 export { PermissionsGate } from './screens/PermissionsGate';
 export type { PermissionsGateProps } from './screens/PermissionsGate';
+export { LOGO_MARK } from './assets';
 export { WelcomeScreen } from './screens/WelcomeScreen';
 export type { WelcomeScreenProps } from './screens/WelcomeScreen';
 

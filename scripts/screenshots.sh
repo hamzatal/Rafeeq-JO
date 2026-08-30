@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 #
-# Regenerate docs/design/screenshots/ from the code on this commit.
+# Regenerate docs/design/screenshots/ from the code on this commit — ALL THREE apps.
+#
+#   ./scripts/screenshots.sh            # everything
+#   ./scripts/screenshots.sh student    # one app (admin | student | driver)
 #
 # ── What this does, and why every step is here ────────────────────────────────
 #
@@ -49,6 +52,8 @@ CHROME="${CHROME:-/opt/playwright/chromium-1232/chrome-linux64/chrome}"
 
 API_PORT=8000
 WEB_PORT=3000
+STUDENT_PORT=4001
+DRIVER_PORT=4002
 CDP_PORT=9222
 
 # Defined once, then used BOTH for the exports below and for the generated env file,
@@ -169,6 +174,34 @@ npx next start -p "$WEB_PORT" >"$RUN_DIR/next.log" 2>&1 &
 PIDS+=($!)
 wait_for "http://127.0.0.1:$WEB_PORT/login" "dashboard" "$RUN_DIR/next.log"
 
+# ── 3b · the two Expo apps, exported to web ──────────────────────────────────
+#
+# `--dev` is load-bearing, not laziness. `resolveApiBaseUrl` REFUSES a plain-http URL
+# in a release bundle — deliberately, because iOS App Transport Security would reject
+# it in review (packages/shared/src/utils/apiBase.ts:56). A release export would
+# therefore throw at startup against a local API, and there is no TLS here to offer it
+# (no openssl in this image). `--dev` sets `__DEV__`, which is the documented switch
+# for exactly this case: "developing locally using a non-https server".
+export_app() { # dir, out, port, label
+  local app_dir="$1" out="$2" port="$3" label="$4"
+  echo "==> exporting $label to web"
+  rm -rf "$out"
+  ( cd "$REPO_ROOT/frontend/$app_dir" \
+    && EXPO_PUBLIC_API_URL="http://127.0.0.1:$API_PORT" \
+       npx expo export -p web --dev --output-dir "$out" ) >"$RUN_DIR/$app_dir.log" 2>&1 \
+    || { tail -30 "$RUN_DIR/$app_dir.log"; exit 1; }
+
+  # `web.output: "single"` in app.json means client-side routing, so a plain static
+  # server would 404 every route but the first.
+  node "$REPO_ROOT/frontend/scripts/serve-static.mjs" "$out" "$port" \
+    >"$RUN_DIR/$app_dir-serve.log" 2>&1 &
+  PIDS+=($!)
+  wait_for "http://127.0.0.1:$port/" "$label" "$RUN_DIR/$app_dir-serve.log"
+}
+
+export_app student-app "$RUN_DIR/web/student" "$STUDENT_PORT" "student app"
+export_app driver-app  "$RUN_DIR/web/driver"  "$DRIVER_PORT"  "driver app"
+
 # ── 4 · browser ──────────────────────────────────────────────────────────────
 rm -rf "$RUN_DIR/chrome"
 "$CHROME" \
@@ -180,7 +213,11 @@ wait_for "http://127.0.0.1:$CDP_PORT/json/version" "chrome" "$RUN_DIR/chrome.log
 
 # ── 5 · capture ──────────────────────────────────────────────────────────────
 cd "$REPO_ROOT/frontend"
-DASHBOARD_URL="http://127.0.0.1:$WEB_PORT" CDP_URL="http://127.0.0.1:$CDP_PORT" \
-  node scripts/capture-screenshots.mjs
+API_URL="http://127.0.0.1:$API_PORT" \
+DASHBOARD_URL="http://127.0.0.1:$WEB_PORT" \
+STUDENT_URL="http://127.0.0.1:$STUDENT_PORT" \
+DRIVER_URL="http://127.0.0.1:$DRIVER_PORT" \
+CDP_URL="http://127.0.0.1:$CDP_PORT" \
+  node scripts/capture-screenshots.mjs "$@"
 
 echo "==> done"
