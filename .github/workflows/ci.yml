@@ -279,3 +279,31 @@ jobs:
       # `react-native/index.js`. Only a real build finds that class of defect.
       - name: Build admin dashboard
         run: npm run build --workspace=admin-dashboard
+
+      # The step above states the principle — only a real build finds a bundler
+      # failure — and then applied it to one of the three front-ends. The two apps had
+      # no build step at all, and that gap was not hypothetical.
+      #
+      # Phase 7 consolidated the logo into `packages/ui/assets/r-logo.png` and DELETED
+      # `student-app/assets/r-logo.png` and `driver-app/assets/r-logo.png`, but left
+      # both `welcome.tsx` files calling `require('../../assets/r-logo.png')`:
+      #
+      #     Unable to resolve module ../../assets/r-logo.png
+      #
+      # `welcome` is the entry of the auth flow, so NEITHER APP COULD BUNDLE AT ALL —
+      # and it sat on main through phases 8 and 9 with CI green, because `tsc` does not
+      # verify the path inside a `require()` of an image and nothing here ever asked
+      # Metro to resolve one. A web export is the cheapest way to make it ask: it walks
+      # the same module graph and the same asset registry as an EAS build.
+      - name: Bundle the Expo apps (Metro resolves every import and asset)
+        env:
+          # Bundling never executes app code, so this is only here to keep
+          # `resolveApiBaseUrl` honest about what a release build is handed: an https
+          # URL. It refuses plain http in a release bundle on purpose.
+          EXPO_PUBLIC_API_URL: https://api.rafeeq.invalid
+        run: |
+          for app in student-app driver-app; do
+            echo "::group::bundling $app"
+            (cd "$app" && npx expo export -p web --output-dir "$RUNNER_TEMP/export-$app")
+            echo "::endgroup::"
+          done

@@ -18,10 +18,19 @@ import { Button } from '../components/Button';
 import { Text } from '../components/Text';
 import { useI18n } from '../runtime/i18n';
 import { useTheme, type AppTheme } from '../theme';
+import { LOGO_MARK } from '../assets';
 
 export interface WelcomeScreenProps {
-  /** Each app bundles its own asset, so the source has to come from the app. */
-  logo: ImageSourcePropType;
+  /**
+   * Defaults to the shared mark, which is the only thing either app ever passed.
+   *
+   * It used to be required, with the comment "each app bundles its own asset" — but
+   * phase 7 moved the asset INTO this package and deleted both app copies, leaving
+   * two `require()`s pointing at deleted files and neither app able to bundle. The
+   * default removes the possibility: there is one asset, and it lives beside the
+   * component that draws it. Still overridable for a white-label build.
+   */
+  logo?: ImageSourcePropType;
   /**
    * A pill beside the wordmark, e.g. «كابتن».
    *
@@ -36,7 +45,13 @@ export interface WelcomeScreenProps {
   onLogin: () => void;
 }
 
-export function WelcomeScreen({ logo, badge, taglineKey, onRegister, onLogin }: WelcomeScreenProps) {
+export function WelcomeScreen({
+  logo = LOGO_MARK,
+  badge,
+  taglineKey,
+  onRegister,
+  onLogin,
+}: WelcomeScreenProps) {
   const { t } = useI18n();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
