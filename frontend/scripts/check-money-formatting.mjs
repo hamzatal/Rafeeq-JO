@@ -145,6 +145,31 @@ const ALLOW_LINE = [
  */
 const COMMENT = /^\s*(\/\/|\/\*|\*|\{\/\*)/;
 
+/**
+ * Blank the BODY of every comment, keeping the newlines so line numbers stay true.
+ *
+ * `COMMENT` above only recognises a line that STARTS with a comment marker, which is
+ * every line of a `*`-prefixed docblock but NOT the interior of a JSX block comment:
+ *
+ *     {/* +
+ *       ...the two money cards read «0.000 د.أ JOD»...     ← no marker, so scanned
+ *     * + /}
+ *
+ * So a comment explaining a hardcoded currency bug was itself reported as one — which
+ * is a false positive that costs a red build and teaches the next person to describe
+ * the defect vaguely, or not at all. A gate that punishes documentation gets worked
+ * around. Blanking rather than deleting keeps every reported line number honest.
+ */
+function stripComments(source) {
+  return (
+    source
+      // /* … */ and {/* … */}, across lines.
+      .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+      // Trailing // …, but not the // in a URL.
+      .replace(/(^|[^:])\/\/[^\n]*/g, (m, before) => before + ' '.repeat(m.length - before.length))
+  );
+}
+
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     if (SKIP_DIRS.has(name)) continue;
@@ -160,7 +185,7 @@ for (const file of walk(ROOT)) {
   const rel = relative(ROOT, file);
   if (ALLOW_FILES.some((a) => rel === a || a.endsWith(rel))) continue;
 
-  const lines = readFileSync(file, 'utf8').split('\n');
+  const lines = stripComments(readFileSync(file, 'utf8')).split('\n');
   lines.forEach((line, i) => {
     // Comments may describe the defect. `COMMENT` also covers a JSX `{/* … */}`
     // block, which the previous pattern missed — so a JSX comment explaining why a
