@@ -11,6 +11,7 @@ use Rafeeq\Core\Services\BaseService;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Matching\Data\PeakWindows;
 use Rafeeq\Modules\RideRequests\Models\RideRequest;
+use Rafeeq\Modules\Trips\Data\TripCode;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Zones\Services\ZonePricingService;
@@ -512,15 +513,19 @@ class MatchingService extends BaseService
     }
 
     /**
-     * Draw a 4-digit code unique within the codes already assigned in this trip
-     * (passed by reference so boarding and drop-off codes never collide).
+     * Draw a code unique within the codes already assigned in this trip (passed by
+     * reference so boarding and drop-off codes never collide).
+     *
+     * The length lives in `TripCode`, not here. This drew 4 digits while
+     * `TripService::uniqueTripCode` drew 4 and the request accepted 4 to 8 — three
+     * places to change and no reason they would stay in step.
      *
      * @param  array<int, string>  $used
      */
     private function uniqueCode(array &$used): string
     {
         do {
-            $code = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+            $code = TripCode::draw();
         } while (in_array($code, $used, true));
 
         $used[] = $code;

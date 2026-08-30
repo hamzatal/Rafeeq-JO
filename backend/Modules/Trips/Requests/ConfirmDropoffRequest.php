@@ -3,6 +3,7 @@
 namespace Rafeeq\Modules\Trips\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Rafeeq\Modules\Trips\Data\TripCode;
 
 class ConfirmDropoffRequest extends FormRequest
 {
@@ -14,7 +15,7 @@ class ConfirmDropoffRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => ['required', 'string', 'regex:/^\d{4,8}$/'],
+            'code' => TripCode::rule(),
         ];
     }
 }
