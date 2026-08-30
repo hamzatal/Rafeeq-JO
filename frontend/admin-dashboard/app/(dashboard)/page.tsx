@@ -9,6 +9,7 @@ import { useAuth } from '../../src/lib/auth';
 import { useT } from '../../src/lib/i18n';
 import { Skeleton, StatCardsSkeleton } from '../../src/components/Skeleton';
 import { Icon } from '../../src/components/Icon';
+import { Num } from '../../src/components/Num';
 
 /*
  * Money goes through the shared formatter. It used to be:
@@ -27,20 +28,45 @@ const monthStart = () => {
 };
 const today = () => new Date().toISOString().slice(0, 10);
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   A KPI card, and the two things that used to be wrong with it.
+
+   ── The progress bar was fabricated ────────────────────────────────────────
+
+   `bar` held 0.75, 0.8, 0.6 and 0.3 — four constants typed by hand, with no input
+   from the report they sat beside. It was also never RENDERED, so the dashboard
+   carried invented progress values that nobody could even see. The approved reference
+   (`docs/design/v2/06-admin-1`) does want a bar under each figure, and it wants
+   «74% من هدف اليوم» — but this API returns no target and no previous period, so that
+   exact caption cannot be computed. Inventing it is what the old constants did.
+
+   `share` therefore carries a MEASURED ratio together with the name of the
+   denominator it was measured against, and the caption states that denominator. A bar
+   with nothing real to divide by is omitted rather than filled in.
+
+   ── The trend pill pointed up regardless ───────────────────────────────────
+
+   Every card rendered a `trending-up` arrow beside `trend`, and `trend` was never a
+   trend: «منذ بداية الشهر» is a period, «عمولة رحلات + بيع اشتراكات» is a composition,
+   and «لا يوجد حالياً» — no open disputes — was shown under an arrow meaning growth.
+   A rising arrow next to "none right now" is not decoration; it is a wrong reading of
+   the number it is attached to. Removed.
+   ═══════════════════════════════════════════════════════════════════════════ */
 interface Kpi {
   label: string;
   value: string;
   icon: string;
-  trend?: string;
-  bar: number; // 0..1
+  /** A measured ratio, and the denominator it is a share of. Omitted when none exists. */
+  share?: { ratio: number; ofLabel: string };
   danger?: boolean;
 }
 
 function KpiCard({ k }: { k: Kpi }) {
+  const percent = k.share ? Math.round(Math.min(1, Math.max(0, k.share.ratio)) * 100) : 0;
+
   return (
     <div className={`kpi-card p-6 flex flex-col justify-between ${k.danger ? 'border-danger/40' : ''}`}>
       <div className="flex justify-between items-start mb-4">
-        {/* Icon tile (right) */}
         <div
           className={`w-12 h-12 rounded-lg flex items-center justify-center ${
             k.danger ? 'bg-danger/10 text-danger' : 'bg-brand-100 text-primary'
@@ -48,29 +74,36 @@ function KpiCard({ k }: { k: Kpi }) {
         >
           <Icon name={k.icon} size={22} />
         </div>
-        {/* Trend pill (left) */}
-        {k.trend && (
-          <span
-            className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-              k.danger ? 'bg-danger/10 text-danger' : 'bg-brand-100/40 text-primary-dark'
-            }`}
-          >
-            <Icon name={k.danger ? 'triangle-alert' : 'trending-up'} size={14} />
-            {k.trend}
-          </span>
-        )}
       </div>
       <div>
         <p className="muted-text text-sm mb-1">{k.label}</p>
         {/*
           There was a `unit` slot printing "JOD" beside the value, and `formatJod`
-          already returns the amount WITH «د.أ» — so the two money cards read
-          «0.000 د.أ JOD»: the same currency twice, in two scripts, on the first screen
-          of the product. The unit belongs to the formatter, which is also the only
-          thing that gets the bidi isolation right. (Its `mr-1` was a physical margin
-          in an RTL app, so it was the wrong side in English too.)
+          already returns the amount WITH the dinar mark — so the two money cards showed
+          the same currency twice, in two scripts, on the first screen of the product.
+          The unit belongs to the formatter, which is also the only thing that gets the
+          bidi isolation right.
         */}
         <div className={`stat-number ${k.danger ? 'text-danger' : ''}`}>{k.value}</div>
+
+        {k.share && (
+          <div className="mt-3">
+            {/*
+              `aria-hidden` on the bar, because the caption below already states the
+              same ratio in words — announcing a progressbar as well would read the
+              figure twice, and this is decoration for a number that is already there.
+            */}
+            <div aria-hidden="true" className="h-1.5 rounded-full bg-line overflow-hidden">
+              <div
+                className={`h-full rounded-full ${k.danger ? 'bg-danger' : 'bg-primary'}`}
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted">
+              <Num percent={percent} /> {k.share.ofLabel}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -105,13 +138,26 @@ export default function CommandCenter() {
     [disputes],
   );
 
+  /*
+   * Every `share` below divides two numbers this report actually returned. There is no
+   * target and no previous period in `FinancialReport`, so «% من هدف اليوم» and
+   * «% عن أمس» from the reference cannot be computed here — and are therefore absent
+   * rather than approximated. A card with no honest denominator gets no bar.
+   */
+  const gross = report?.gross_fare_fils ?? 0;
+  const ridesTotal = report?.rides_count ?? 0;
+  const subscriptionRides = report?.by_funding?.subscription?.rides_count ?? 0;
+  const openTotal = disputes.length;
+
   const kpis: Kpi[] = [
     {
       label: t('home.kpi.rides'),
-      value: (report?.rides_count ?? 0).toLocaleString(locale),
+      value: (ridesTotal).toLocaleString(locale),
       icon: 'car',
-      trend: t('home.trend.sinceMonth'),
-      bar: 0.75,
+      // How many of the month's paid seats were covered by a plan rather than paid per ride.
+      ...(ridesTotal > 0
+        ? { share: { ratio: subscriptionRides / ridesTotal, ofLabel: t('home.share.onSubscription') } }
+        : {}),
     },
     {
       label: t('home.kpi.commission'),
@@ -119,22 +165,26 @@ export default function CommandCenter() {
       // commission booked on subscription-covered seats.
       value: jod(report?.platform_revenue_fils ?? 0),
       icon: 'wallet',
-      trend: t('home.trend.netCommission'),
-      bar: 0.8,
+      ...(gross > 0
+        ? { share: { ratio: (report?.platform_revenue_fils ?? 0) / gross, ofLabel: t('home.share.ofGross') } }
+        : {}),
     },
     {
       label: t('home.kpi.gross'),
-      value: jod(report?.gross_fare_fils ?? 0),
+      value: jod(gross),
       icon: 'banknote',
-      trend: t('home.trend.grossValue'),
-      bar: 0.6,
+      // The captains' cut of that same gross — the other side of the figure above.
+      ...(gross > 0
+        ? { share: { ratio: (report?.captain_earnings_fils ?? 0) / gross, ofLabel: t('home.share.captainCut') } }
+        : {}),
     },
     {
       label: t('home.kpi.disputes'),
       value: String(criticalOpen),
       icon: 'triangle-alert',
-      trend: criticalOpen > 0 ? t('home.trend.needsReview') : t('home.trend.none'),
-      bar: criticalOpen > 0 ? 0.3 : 0.05,
+      ...(openTotal > 0
+        ? { share: { ratio: criticalOpen / openTotal, ofLabel: t('home.share.ofOpenDisputes') } }
+        : {}),
       danger: criticalOpen > 0,
     },
   ];

@@ -230,15 +230,19 @@ const DICT: Dict = {
   'home.welcome': { ar: 'أهلاً', en: 'Welcome' },
   'home.subtitle': { ar: 'مراقبة الأداء والمقاييس الرئيسية لحظياً.', en: 'Real-time performance & key metrics.' },
   'home.lastUpdate': { ar: 'آخر تحديث', en: 'Last updated' },
+
+  /*
+   * The denominator each KPI bar was measured against. Naming it in the caption is the
+   * difference between «74%» (of what?) and a figure a reader can check.
+   */
+  'home.share.onSubscription': { ar: 'بمقاعد اشتراك', en: 'on subscription seats' },
+  'home.share.ofGross': { ar: 'من إجمالي الأجور', en: 'of gross fares' },
+  'home.share.captainCut': { ar: 'حصّة الكباتن منها', en: "captains' cut of it" },
+  'home.share.ofOpenDisputes': { ar: 'من النزاعات المفتوحة', en: 'of open disputes' },
   'home.kpi.rides': { ar: 'الرحلات المدفوعة (الشهر)', en: 'Paid rides (month)' },
   'home.kpi.commission': { ar: 'إيراد المنصّة', en: 'Platform revenue' },
   'home.kpi.gross': { ar: 'إجمالي الأجور المحصّلة', en: 'Total fares collected' },
   'home.kpi.disputes': { ar: 'نزاعات مفتوحة عالية الخطورة', en: 'High-risk open disputes' },
-  'home.trend.sinceMonth': { ar: 'منذ بداية الشهر', en: 'Since start of month' },
-  'home.trend.netCommission': { ar: 'عمولة رحلات + بيع اشتراكات', en: 'Ride commission + plan sales' },
-  'home.trend.grossValue': { ar: 'إجمالي قيمة الرحلات', en: 'Gross ride value' },
-  'home.trend.needsReview': { ar: 'تتطلب مراجعة فورية', en: 'Needs immediate review' },
-  'home.trend.none': { ar: 'لا يوجد حالياً', en: 'None right now' },
   'home.commissionByZone': { ar: 'عمولة المنصة حسب المنطقة', en: 'Platform commission by zone' },
   'home.fullReports': { ar: 'التقارير الكاملة', en: 'Full reports' },
   'home.noData': { ar: 'لا توجد بيانات للفترة الحالية', en: 'No data for the current period' },
