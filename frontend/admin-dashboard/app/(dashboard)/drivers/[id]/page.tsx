@@ -6,6 +6,7 @@ import type { DriverProfile } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import { api } from '../../../../src/lib/api';
 import { DriverStatusBadge } from '../../../../src/components/DriverStatusBadge';
+import { Phone } from '../../../../src/components/Phone';
 
 export default function DriverReview() {
   const { id } = useParams<{ id: string }>();
@@ -63,7 +64,7 @@ export default function DriverReview() {
       <div className="card flex items-center justify-between">
         <div>
           <div className="text-xl font-bold surface-text">{driver.user?.full_name}</div>
-          <div className="text-sm muted-text">{driver.user?.phone}</div>
+          <div className="text-sm muted-text"><Phone value={driver.user?.phone} /></div>
         </div>
         <DriverStatusBadge status={driver.status} />
       </div>

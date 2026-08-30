@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { LoadError } from '../../../src/components/LoadError';
+import { Phone } from '../../../src/components/Phone';
 import { useT } from '../../../src/lib/i18n';
 
 export default function ProfilePage() {
@@ -78,7 +79,7 @@ export default function ProfilePage() {
     <div>
       <h1 className="text-2xl font-bold surface-text mb-1">{t('profile.title')}</h1>
       {loadError ? <LoadError onRetry={() => window.location.reload()} /> : null}
-      <p className="text-sm text-muted mb-6">{user?.phone}</p>
+      <p className="text-sm text-muted mb-6"><Phone value={user?.phone} /></p>
 
       <div className="grid gap-6 xl:grid-cols-2 items-start">
       {/* Account details */}
@@ -95,7 +96,7 @@ export default function ProfilePage() {
           </label>
           <label className="block">
             <span className="text-xs text-muted">{t('profile.phone')}</span>
-            <input className="input mt-1 opacity-60" value={user?.phone ?? ''} disabled />
+            <input className="input mt-1 opacity-60" dir="ltr" value={user?.phone ?? ''} disabled />
           </label>
         </div>
         <div className="flex items-center gap-3 mt-4">

@@ -7,6 +7,7 @@ import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { LoadError } from '../../../src/components/LoadError';
+import { Phone } from '../../../src/components/Phone';
 
 const jod = (fils: number) => formatJod(fils);
 
@@ -113,7 +114,7 @@ export default function WithdrawalsPage() {
                 <tr key={p.id} className="row-line align-top">
                   <td className="p-3 surface-text">
                     <div className="font-medium">{p.captain?.name ?? '—'}</div>
-                    <div className="text-xs text-muted">{p.captain?.phone ?? ''}</div>
+                    <div className="text-xs text-muted"><Phone value={p.captain?.phone} fallback="" /></div>
                   </td>
                   <td className="p-3 font-bold surface-text">{jod(p.amount_fils)}</td>
                   <td className="p-3 text-muted">{p.destination ?? '—'}</td>

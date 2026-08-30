@@ -7,6 +7,7 @@ import type { DriverProfile } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { LoadError } from '../../../src/components/LoadError';
 import { DriverStatusBadge } from '../../../src/components/DriverStatusBadge';
+import { Phone } from '../../../src/components/Phone';
 
 const FILTERS = [
   { value: '', label: 'الكل' },
@@ -111,7 +112,7 @@ export default function DriversPage() {
               {drivers.map((d) => (
                 <tr key={d.id} className="row-line">
                   <td className="p-3 font-medium surface-text">{d.user?.full_name ?? '—'}</td>
-                  <td className="p-3 text-muted">{d.user?.phone ?? '—'}</td>
+                  <td className="p-3 text-muted"><Phone value={d.user?.phone} /></td>
                   <td className="p-3"><DriverStatusBadge status={d.status} /></td>
                   {/* `{d.rating_avg?.toFixed(1)} ★` rendered a bare star with no
                       number for every captain who has not been rated yet: the optional
