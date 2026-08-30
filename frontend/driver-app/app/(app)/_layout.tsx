@@ -34,6 +34,7 @@ export default function AppLayout() {
       <Tabs.Screen name="settings" options={{ title: t('settings.title'), tabBarIcon: tab('settings') }} />
 
       {/* Secondary screens — reachable via navigation, hidden from the tab bar */}
+      <Tabs.Screen name="notifications" options={{ href: null }} />
       <Tabs.Screen name="offers" options={{ href: null }} />
       <Tabs.Screen name="documents" options={{ href: null }} />
       <Tabs.Screen name="vehicle" options={{ href: null }} />

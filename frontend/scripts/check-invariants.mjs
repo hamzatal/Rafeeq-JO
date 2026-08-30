@@ -189,27 +189,104 @@ function gate(id, why, findings) {
   );
 }
 
-/* ── 5. The two apps share no duplicated file ────────────────────────────────
+/* ── 5. The two apps share no duplicated screen ──────────────────────────────
  *
  * Nine files were byte-identical across the two `src/` trees — 1,128 lines,
  * including a 510-line `LiveMap` twice. The cost was not the bytes: it was that
  * nothing compared them, so both tab bars broke the same approved decision in two
  * different ways and neither was right.
+ *
+ * ── Both ways this check used to be blind ───────────────────────────────────
+ *
+ * It compared BYTES, under `src/` ONLY. So it reported zero while eight pairs of
+ * route files sat under `app/`, and it would have kept reporting zero if they had
+ * been reformatted:
+ *
+ *   app/_layout.tsx        115 + 109 lines whose only difference was WHITESPACE
+ *   (app)/chat.tsx         161 + 161, byte-identical
+ *   (onboarding)/permissions.tsx  169 + 168, two differing lines
+ *   (auth)/login.tsx       107 + 109, and the two had already drifted into
+ *                          validating a phone number differently
+ *
+ * Byte equality is the wrong test because the interesting case is the NEAR-copy:
+ * that is where the two versions have started to disagree, and disagreement is the
+ * actual defect. So this now compares under `app/` too, and on similarity.
+ *
+ * ── What an identical file is ALLOWED to be ─────────────────────────────────
+ *
+ * After extraction, several files are identical and correctly so:
+ *
+ *   • both `(auth)/forgot-password.tsx` are the same ten lines, because nothing is
+ *     left to differ — they delegate to one shared screen,
+ *   • both `app/_layout.tsx` are the same 38 lines, and every `../src/…` import in
+ *     them resolves to a DIFFERENT module,
+ *   • both `src/i18n.tsx` bind the shared provider to their own prefs store, which
+ *     is the one thing a package cannot import for itself.
+ *
+ * Those are the fix, not the problem. What separates them from a duplicated screen
+ * is that they carry no implementation — and the cheapest reliable proxy for
+ * implementation is `StyleSheet.create`. A screen has styles; a binding does not.
+ *
+ * A duplicated screen with no styles would slip through, which is the known cost of
+ * the proxy. It is a much smaller cost than the alternative: a gate that fires on
+ * every correct delegation is a gate that gets an exceptions list, and then the
+ * exceptions list is where the next real duplicate hides.
  * ─────────────────────────────────────────────────────────────────────────── */
 {
+  const MIN_LINES = 25;
+  const SIMILARITY = 0.85;
   const findings = [];
-  const student = resolve(ROOT, 'student-app/src');
-  for (const file of walk(student)) {
-    const twin = resolve(ROOT, 'driver-app/src', relative(student, file));
-    try {
-      if (readFileSync(file, 'utf8') === readFileSync(twin, 'utf8')) {
-        findings.push(`${relative(ROOT, file)} === ${relative(ROOT, twin)}`);
+
+  /** Fraction of the smaller file's non-trivial lines that appear in the larger. */
+  const similarity = (a, b) => {
+    const trim = (src) =>
+      src
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.length > 3);
+    const [x, y] = [trim(a), trim(b)];
+    if (x.length === 0 || y.length === 0) return 0;
+    const pool = new Map();
+    for (const line of y) pool.set(line, (pool.get(line) ?? 0) + 1);
+    let shared = 0;
+    for (const line of x) {
+      const left = pool.get(line) ?? 0;
+      if (left > 0) {
+        shared += 1;
+        pool.set(line, left - 1);
       }
-    } catch {
-      /* no twin — which is the normal case now */
+    }
+
+    return shared / Math.min(x.length, y.length);
+  };
+
+  for (const tree of ['src', 'app']) {
+    const base = resolve(ROOT, 'student-app', tree);
+    for (const file of walk(base)) {
+      const twin = resolve(ROOT, 'driver-app', tree, relative(base, file));
+      let a, b;
+      try {
+        a = readFileSync(file, 'utf8');
+        b = readFileSync(twin, 'utf8');
+      } catch {
+        continue; /* no twin — the normal case */
+      }
+      if (a.split('\n').length < MIN_LINES && b.split('\n').length < MIN_LINES) continue;
+      // No styles means no screen — see the note above.
+      if (!a.includes('StyleSheet.create(') && !b.includes('StyleSheet.create(')) continue;
+      const ratio = similarity(a, b);
+      if (ratio >= SIMILARITY) {
+        findings.push(
+          `${relative(ROOT, file)} ≈ ${relative(ROOT, twin)}  (${Math.round(ratio * 100)}% identical)`,
+        );
+      }
     }
   }
-  gate('duplicated-app-file', 'this file is identical in both apps. Move it to packages/ui and pass the difference in as an argument.', findings);
+  gate(
+    'duplicated-app-file',
+    `these two files are ≥${SIMILARITY * 100}% the same. Move the screen to packages/ui/src/screens and pass the difference in as an argument — a near-copy is where the two apps quietly stop agreeing.`,
+    findings,
+  );
 }
 
 /* ── 6. A fetch that can fail has a failure branch ───────────────────────────

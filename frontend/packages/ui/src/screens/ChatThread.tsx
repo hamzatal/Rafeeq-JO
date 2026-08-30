@@ -29,9 +29,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { ChatMessage } from '@rafeeq/shared';
 import { RafeeqApiError } from '@rafeeq/api-client';
 import type { RafeeqApi } from '@rafeeq/api-client';
-import { Banner } from './Banner';
-import { Icon } from './Icon';
-import { Text } from './Text';
+import { Banner } from '../components/Banner';
+import { Icon } from '../components/Icon';
+import { Text } from '../components/Text';
 import { useI18n } from '../runtime/i18n';
 import { useTheme, type AppTheme } from '../theme';
 

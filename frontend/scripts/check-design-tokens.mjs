@@ -144,7 +144,7 @@ const gates = [];
   }
   gates.push({
     id: 'raw-hex',
-    budget: 27,
+    budget: 26,
     count: hits.length,
     hits,
     why: 'a hex in a screen is a colour that cannot be changed from one place',
@@ -171,7 +171,7 @@ const gates = [];
   }
   gates.push({
     id: 'raw-font-size',
-    budget: 238,
+    budget: 188,
     count: hits.length,
     hits,
     why: 'a pixel literal is a type decision made in isolation — 21 different sizes across two apps',

@@ -75,8 +75,45 @@ export { TabBar } from './components/TabBar';
 export type { TabBarProps } from './components/TabBar';
 
 /* ── surfaces ─────────────────────────────────────────────────────────────── */
-export { ChatThread } from './components/ChatThread';
 export { Badge, Card, ListRow, ScreenHeader, SectionTitle, StatCard } from './components/surfaces';
+
+/* ═══════════════════════ screens ═══════════════════════════════════════════
+   Whole screen bodies, shared by the two apps.
+
+   The third layer, and a distinct one: `components/` are parts a screen is built
+   from, `runtime/` reaches native APIs, and these are entire screens whose only
+   per-app differences are passed in as arguments. Each one replaced a pair of
+   near-identical route files:
+
+     AppRoot                115 + 109, and the only difference was WHITESPACE
+     ChatThread             161 + 161, BYTE-IDENTICAL
+     NotificationsInbox     270 + 0 — the captain app had five bells and no inbox
+     IntroCarousel          135 + 131, 12 differing lines, 9 of them comments
+     PermissionsGate        169 + 168, 2 differing lines (which body copy)
+     WelcomeScreen           58 +  64, a badge pill and a tagline key
+     LoginScreen            107 + 109, and the two had already drifted into
+                                       validating a phone number differently
+     ForgotPasswordScreen    85 +  86, same drift
+
+   They take callbacks rather than importing an app's store or router, because a
+   shared file reaching for an app singleton is what forced the copy in the first
+   place — and the `layer-violation` gate forbids it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+export { AppRoot } from './screens/AppRoot';
+export type { AppRootProps } from './screens/AppRoot';
+export { ChatThread } from './screens/ChatThread';
+export { ForgotPasswordScreen } from './screens/ForgotPasswordScreen';
+export type { ForgotPasswordScreenProps } from './screens/ForgotPasswordScreen';
+export { IntroCarousel } from './screens/IntroCarousel';
+export type { IntroCarouselProps, IntroSlide } from './screens/IntroCarousel';
+export { LoginScreen } from './screens/LoginScreen';
+export type { LoginScreenProps } from './screens/LoginScreen';
+export { NotificationsInbox } from './screens/NotificationsInbox';
+export type { NotificationsInboxProps } from './screens/NotificationsInbox';
+export { PermissionsGate } from './screens/PermissionsGate';
+export type { PermissionsGateProps } from './screens/PermissionsGate';
+export { WelcomeScreen } from './screens/WelcomeScreen';
+export type { WelcomeScreenProps } from './screens/WelcomeScreen';
 
 /* ── list states ──────────────────────────────────────────────────────────── */
 export {
