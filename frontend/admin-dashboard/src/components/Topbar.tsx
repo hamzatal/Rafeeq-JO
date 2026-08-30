@@ -8,6 +8,7 @@ import { Tooltip } from './Tooltip';
 import { api } from '../lib/api';
 import { Icon } from './Icon';
 import { CommandPalette } from './CommandPalette';
+import { SystemHealth } from './SystemHealth';
 
 export function Topbar() {
   const { locale, setLocale } = usePrefs();
@@ -80,6 +81,8 @@ export function Topbar() {
       <CommandPalette />
 
       <div className="flex items-center gap-2">
+        <SystemHealth />
+
         {/* Notifications */}
         <div className="relative" ref={panelRef}>
           <Tooltip label={t('shell.notifications')}>

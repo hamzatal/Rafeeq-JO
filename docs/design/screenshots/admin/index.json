@@ -9,168 +9,168 @@
     "slug": "01-dashboard",
     "path": "/",
     "title": "لوحة القيادة",
-    "bytes": 118446
+    "bytes": 113669
   },
   {
     "slug": "02-ride-requests",
     "path": "/ride-requests",
     "title": "الطلبات الحيّة",
-    "bytes": 61209
+    "bytes": 62842
   },
   {
     "slug": "03-trips",
     "path": "/trips",
     "title": "الرحلات",
-    "bytes": 85854
+    "bytes": 87283
   },
   {
     "slug": "04-insights",
     "path": "/insights",
     "title": "الرؤى والتحليلات",
-    "bytes": 146045
+    "bytes": 147512
   },
   {
     "slug": "05-drivers",
     "path": "/drivers",
     "title": "الكباتن والتوثيق",
-    "bytes": 101640
+    "bytes": 103095
   },
   {
     "slug": "06-users",
     "path": "/users",
     "title": "المستخدمون",
-    "bytes": 154547
+    "bytes": 156107
   },
   {
     "slug": "07-geography-zones",
     "path": "/geography?tab=zones",
     "title": "الجغرافيا — المناطق",
-    "bytes": 129622
+    "bytes": 131244
   },
   {
     "slug": "08-geography-prices",
     "path": "/geography?tab=prices",
     "title": "الجغرافيا — أسعار المناطق",
-    "bytes": 158664
+    "bytes": 160239
   },
   {
     "slug": "09-geography-routes",
     "path": "/geography?tab=routes",
     "title": "الجغرافيا — المسارات",
-    "bytes": 82451
+    "bytes": 84056
   },
   {
     "slug": "10-geography-universities",
     "path": "/geography?tab=universities",
     "title": "الجغرافيا — الجامعات",
-    "bytes": 123853
+    "bytes": 125448
   },
   {
     "slug": "11-payments",
     "path": "/payments",
     "title": "المدفوعات",
-    "bytes": 62868
+    "bytes": 64491
   },
   {
     "slug": "12-withdrawals",
     "path": "/withdrawals",
     "title": "السحوبات",
-    "bytes": 64515
+    "bytes": 66151
   },
   {
     "slug": "13-pricing-tariff",
     "path": "/pricing?tab=tariff",
     "title": "التسعير — التعرفة والعمولة",
-    "bytes": 133306
+    "bytes": 134894
   },
   {
     "slug": "14-pricing-plans",
     "path": "/pricing?tab=plans",
     "title": "التسعير — الباقات",
-    "bytes": 104930
+    "bytes": 106518
   },
   {
     "slug": "15-pricing-subscriptions",
     "path": "/pricing?tab=subscriptions",
     "title": "التسعير — الاشتراكات",
-    "bytes": 112485
+    "bytes": 114114
   },
   {
     "slug": "16-pricing-coupons",
     "path": "/pricing?tab=coupons",
     "title": "التسعير — الكوبونات",
-    "bytes": 126500
+    "bytes": 128340
   },
   {
     "slug": "17-reports",
     "path": "/reports",
     "title": "التقارير المالية",
-    "bytes": 121659
+    "bytes": 123251
   },
   {
     "slug": "18-safety",
     "path": "/safety",
     "title": "السلامة و SOS",
-    "bytes": 69414
+    "bytes": 70963
   },
   {
     "slug": "19-support-tickets",
     "path": "/support?tab=tickets",
     "title": "الدعم — التذاكر",
-    "bytes": 69937
+    "bytes": 71479
   },
   {
     "slug": "20-support-complaints",
     "path": "/support?tab=complaints",
     "title": "الدعم — الشكاوى",
-    "bytes": 121334
+    "bytes": 122916
   },
   {
     "slug": "21-disputes",
     "path": "/disputes",
     "title": "التنازعات",
-    "bytes": 70868
+    "bytes": 72422
   },
   {
     "slug": "22-security-sessions",
     "path": "/security?tab=sessions",
     "title": "الأمان — الجلسات والمصادقة",
-    "bytes": 86310
+    "bytes": 87940
   },
   {
     "slug": "23-security-audit",
     "path": "/security?tab=audit",
     "title": "الأمان — سجلّ التدقيق",
-    "bytes": 96328
+    "bytes": 97842
   },
   {
     "slug": "24-settings-staff",
     "path": "/settings?tab=staff",
     "title": "الإعدادات — الموظفون والأدوار",
-    "bytes": 81658
+    "bytes": 83232
   },
   {
     "slug": "25-settings-cliq",
     "path": "/settings?tab=cliq",
     "title": "الإعدادات — إعداد CliQ",
-    "bytes": 90280
+    "bytes": 91899
   },
   {
     "slug": "26-settings-broadcast",
     "path": "/settings?tab=broadcast",
     "title": "الإعدادات — الإشعارات والبثّ",
-    "bytes": 126632
+    "bytes": 128270
   },
   {
     "slug": "27-settings-ads",
     "path": "/settings?tab=ads",
     "title": "الإعدادات — الإعلانات",
-    "bytes": 82726
+    "bytes": 84416
   },
   {
     "slug": "28-profile",
     "path": "/profile",
     "title": "ملفّي",
-    "bytes": 79391
+    "bytes": 81004
   }
 ]
