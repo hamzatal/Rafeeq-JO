@@ -86,8 +86,15 @@ aside { scrollbar-color: rgba(18,47,107,0.22) transparent; }
   table th { font-variant-numeric: tabular-nums; }
 
   /* Sidebar nav items — muted text, brand-tinted active state */
+  /*
+   * `py-2`, not `py-3`. Sixteen destinations plus four group headings, the brand and
+   * the user footer have to fit 960px — a common laptop viewport — because a sidebar
+   * that scrolls hides whole destinations: at py-3 «الأمان والتدقيق» and «الإعدادات
+   * والموظفون» sat below the fold, and a nav item you have to scroll to find is one
+   * the approved four-group layout was meant to stop needing.
+   */
   .nav-item {
-    @apply flex items-center gap-3 mx-2 my-0.5 px-4 py-3 rounded-lg text-sm font-medium text-muted hover:text-primary hover:bg-brand-100 transition-colors;
+    @apply flex items-center gap-3 mx-2 my-0.5 px-4 py-2 rounded-lg text-sm font-medium text-muted hover:text-primary hover:bg-brand-100 transition-colors;
   }
   .nav-item-active {
     @apply text-primary-dark bg-brand-100 hover:bg-brand-100 hover:text-primary-dark font-bold;

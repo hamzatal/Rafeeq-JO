@@ -30,7 +30,6 @@ const today = () => new Date().toISOString().slice(0, 10);
 interface Kpi {
   label: string;
   value: string;
-  unit?: string;
   icon: string;
   trend?: string;
   bar: number; // 0..1
@@ -63,10 +62,15 @@ function KpiCard({ k }: { k: Kpi }) {
       </div>
       <div>
         <p className="muted-text text-sm mb-1">{k.label}</p>
-        <div className={`stat-number ${k.danger ? 'text-danger' : ''}`}>
-          {k.value}
-          {k.unit && <span className="text-base font-bold mr-1 align-baseline muted-text">{k.unit}</span>}
-        </div>
+        {/*
+          There was a `unit` slot printing "JOD" beside the value, and `formatJod`
+          already returns the amount WITH «د.أ» — so the two money cards read
+          «0.000 د.أ JOD»: the same currency twice, in two scripts, on the first screen
+          of the product. The unit belongs to the formatter, which is also the only
+          thing that gets the bidi isolation right. (Its `mr-1` was a physical margin
+          in an RTL app, so it was the wrong side in English too.)
+        */}
+        <div className={`stat-number ${k.danger ? 'text-danger' : ''}`}>{k.value}</div>
       </div>
     </div>
   );
@@ -114,7 +118,6 @@ export default function CommandCenter() {
       // platform_revenue_fils, not commission_fils: the latter double-counts
       // commission booked on subscription-covered seats.
       value: jod(report?.platform_revenue_fils ?? 0),
-      unit: 'JOD',
       icon: 'wallet',
       trend: t('home.trend.netCommission'),
       bar: 0.8,
@@ -122,7 +125,6 @@ export default function CommandCenter() {
     {
       label: t('home.kpi.gross'),
       value: jod(report?.gross_fare_fils ?? 0),
-      unit: 'JOD',
       icon: 'banknote',
       trend: t('home.trend.grossValue'),
       bar: 0.6,

@@ -8,7 +8,7 @@
 صحيحة يوم إضافتها فقط، أمّا هذه فيمكن إعادة توليدها بعد أي تغيير — وأي صورة قديمة تظهر
 فوراً في `git status`.
 
-| التطبيق | عدد الشاشات | المقاس |
+| التطبيق | عدد الصور | المقاس |
 |---|---|---|
 | لوحة الإدارة | 29 | 1440×960 |
 | تطبيق الطالب | 20 | 390×844 |
@@ -37,189 +37,195 @@
 
 ---
 
-# ١ · لوحة الإدارة
+# ١ · لوحة الإدارة — بعد المرحلة 10.1
 
-> ⚠️ **هذا هو التصميم القديم، وهو مقصود في هذه اللحظة.** التصميم المعتمد في
-> `docs/design/v2/06-admin-1/2/3` هو **18 صفحة و4 مجموعات**، والحالي **28 صفحة و6
-> مجموعات**. التحويل بينهما هو **المرحلة 10** في `docs/ROADMAP.md` ولم تُنفَّذ بعد.
-> هذه الصور هي خطّ الأساس الذي ستُقاس عليه المرحلة 10.
+**١٦ وجهة في ٤ مجموعات** مطابقةً لـ`docs/design/v2/06-admin-1`، بعد أن كانت ٢٨ صفحة في
+٦ مجموعات. **لم تُحذف أي ميزة:** ثلاث عشرة صفحة صارت **تبويبات** داخل خمس وجهات، وكل
+رابط قديم يُحوَّل إلى تبويبه (تحقّقتُ من الثلاثة عشر كلّها تُرجع 307 إلى الوجهة الصحيحة).
+
+| المجموعة | الوجهات |
+|---|---|
+| العمليات | لوحة القيادة · الطلبات الحيّة · الرحلات · الرؤى والتحليلات |
+| الشبكة | الكباتن · المستخدمون · الجغرافيا والمسارات *(٤ تبويبات)* |
+| المالية | المدفوعات · السحوبات · التسعير والخطط *(٤ تبويبات)* · التقارير |
+| الثقة والنظام | السلامة و SOS · الدعم والشكاوى *(٢)* · التنازعات · الأمان والتدقيق *(٢)* · الإعدادات والموظفون *(٤)* |
 
 | الشاشة | المسار |
 |---|---|
 | [تسجيل الدخول](#login) | `/login` |
-| [لوحة القيادة](#dashboard) | `/` |
-| [الطلبات الحيّة](#ride-requests) | `/ride-requests` |
-| [الرحلات](#trips) | `/trips` |
-| [الكباتن والتوثيق](#drivers) | `/drivers` |
-| [المستخدمون](#users) | `/users` |
-| [المدفوعات](#payments) | `/payments` |
-| [السحوبات](#withdrawals) | `/withdrawals` |
-| [التقارير المالية](#reports) | `/reports` |
-| [التعرفة والتسعير](#pricing) | `/pricing` |
-| [مصفوفة أسعار المناطق](#zone-prices) | `/zone-prices` |
-| [الباقات](#plans) | `/plans` |
-| [الاشتراكات](#subscriptions) | `/subscriptions` |
-| [الكوبونات](#coupons) | `/coupons` |
-| [المسارات](#routes) | `/routes` |
-| [المناطق](#zones) | `/zones` |
-| [الجامعات](#universities) | `/universities` |
-| [السلامة و SOS](#safety) | `/safety` |
-| [التنازعات](#disputes) | `/disputes` |
-| [الشكاوى](#complaints) | `/complaints` |
-| [الدعم](#support) | `/support` |
-| [الإشعارات والبثّ](#notifications) | `/notifications` |
-| [الإعلانات](#ads) | `/ads` |
-| [إعداد CliQ](#cliq) | `/cliq` |
-| [الأمن](#security) | `/security` |
-| [سجلّ التدقيق](#audit) | `/audit` |
-| [المدراء والأدوار](#admins) | `/admins` |
-| [التحليلات](#insights) | `/insights` |
-| [ملفّي](#profile) | `/profile` |
+| [لوحة القيادة](#01-dashboard) | `/` |
+| [الطلبات الحيّة](#02-ride-requests) | `/ride-requests` |
+| [الرحلات](#03-trips) | `/trips` |
+| [الرؤى والتحليلات](#04-insights) | `/insights` |
+| [الكباتن والتوثيق](#05-drivers) | `/drivers` |
+| [المستخدمون](#06-users) | `/users` |
+| [الجغرافيا — المناطق](#07-geography-zones) | `/geography?tab=zones` |
+| [الجغرافيا — أسعار المناطق](#08-geography-prices) | `/geography?tab=prices` |
+| [الجغرافيا — المسارات](#09-geography-routes) | `/geography?tab=routes` |
+| [الجغرافيا — الجامعات](#10-geography-universities) | `/geography?tab=universities` |
+| [المدفوعات](#11-payments) | `/payments` |
+| [السحوبات](#12-withdrawals) | `/withdrawals` |
+| [التسعير — التعرفة والعمولة](#13-pricing-tariff) | `/pricing?tab=tariff` |
+| [التسعير — الباقات](#14-pricing-plans) | `/pricing?tab=plans` |
+| [التسعير — الاشتراكات](#15-pricing-subscriptions) | `/pricing?tab=subscriptions` |
+| [التسعير — الكوبونات](#16-pricing-coupons) | `/pricing?tab=coupons` |
+| [التقارير المالية](#17-reports) | `/reports` |
+| [السلامة و SOS](#18-safety) | `/safety` |
+| [الدعم — التذاكر](#19-support-tickets) | `/support?tab=tickets` |
+| [الدعم — الشكاوى](#20-support-complaints) | `/support?tab=complaints` |
+| [التنازعات](#21-disputes) | `/disputes` |
+| [الأمان — الجلسات والمصادقة](#22-security-sessions) | `/security?tab=sessions` |
+| [الأمان — سجلّ التدقيق](#23-security-audit) | `/security?tab=audit` |
+| [الإعدادات — الموظفون والأدوار](#24-settings-staff) | `/settings?tab=staff` |
+| [الإعدادات — إعداد CliQ](#25-settings-cliq) | `/settings?tab=cliq` |
+| [الإعدادات — الإشعارات والبثّ](#26-settings-broadcast) | `/settings?tab=broadcast` |
+| [الإعدادات — الإعلانات](#27-settings-ads) | `/settings?tab=ads` |
+| [ملفّي](#28-profile) | `/profile` |
 
 <a id="login"></a>
 **تسجيل الدخول** — `/login`
 
 ![تسجيل الدخول](design/screenshots/admin/login.png)
 
-<a id="dashboard"></a>
+<a id="01-dashboard"></a>
 **لوحة القيادة** — `/`
 
-![لوحة القيادة](design/screenshots/admin/dashboard.png)
+![لوحة القيادة](design/screenshots/admin/01-dashboard.png)
 
-<a id="ride-requests"></a>
+<a id="02-ride-requests"></a>
 **الطلبات الحيّة** — `/ride-requests`
 
-![الطلبات الحيّة](design/screenshots/admin/ride-requests.png)
+![الطلبات الحيّة](design/screenshots/admin/02-ride-requests.png)
 
-<a id="trips"></a>
+<a id="03-trips"></a>
 **الرحلات** — `/trips`
 
-![الرحلات](design/screenshots/admin/trips.png)
+![الرحلات](design/screenshots/admin/03-trips.png)
 
-<a id="drivers"></a>
+<a id="04-insights"></a>
+**الرؤى والتحليلات** — `/insights`
+
+![الرؤى والتحليلات](design/screenshots/admin/04-insights.png)
+
+<a id="05-drivers"></a>
 **الكباتن والتوثيق** — `/drivers`
 
-![الكباتن والتوثيق](design/screenshots/admin/drivers.png)
+![الكباتن والتوثيق](design/screenshots/admin/05-drivers.png)
 
-<a id="users"></a>
+<a id="06-users"></a>
 **المستخدمون** — `/users`
 
-![المستخدمون](design/screenshots/admin/users.png)
+![المستخدمون](design/screenshots/admin/06-users.png)
 
-<a id="payments"></a>
+<a id="07-geography-zones"></a>
+**الجغرافيا — المناطق** — `/geography?tab=zones`
+
+![الجغرافيا — المناطق](design/screenshots/admin/07-geography-zones.png)
+
+<a id="08-geography-prices"></a>
+**الجغرافيا — أسعار المناطق** — `/geography?tab=prices`
+
+![الجغرافيا — أسعار المناطق](design/screenshots/admin/08-geography-prices.png)
+
+<a id="09-geography-routes"></a>
+**الجغرافيا — المسارات** — `/geography?tab=routes`
+
+![الجغرافيا — المسارات](design/screenshots/admin/09-geography-routes.png)
+
+<a id="10-geography-universities"></a>
+**الجغرافيا — الجامعات** — `/geography?tab=universities`
+
+![الجغرافيا — الجامعات](design/screenshots/admin/10-geography-universities.png)
+
+<a id="11-payments"></a>
 **المدفوعات** — `/payments`
 
-![المدفوعات](design/screenshots/admin/payments.png)
+![المدفوعات](design/screenshots/admin/11-payments.png)
 
-<a id="withdrawals"></a>
+<a id="12-withdrawals"></a>
 **السحوبات** — `/withdrawals`
 
-![السحوبات](design/screenshots/admin/withdrawals.png)
+![السحوبات](design/screenshots/admin/12-withdrawals.png)
 
-<a id="reports"></a>
+<a id="13-pricing-tariff"></a>
+**التسعير — التعرفة والعمولة** — `/pricing?tab=tariff`
+
+![التسعير — التعرفة والعمولة](design/screenshots/admin/13-pricing-tariff.png)
+
+<a id="14-pricing-plans"></a>
+**التسعير — الباقات** — `/pricing?tab=plans`
+
+![التسعير — الباقات](design/screenshots/admin/14-pricing-plans.png)
+
+<a id="15-pricing-subscriptions"></a>
+**التسعير — الاشتراكات** — `/pricing?tab=subscriptions`
+
+![التسعير — الاشتراكات](design/screenshots/admin/15-pricing-subscriptions.png)
+
+<a id="16-pricing-coupons"></a>
+**التسعير — الكوبونات** — `/pricing?tab=coupons`
+
+![التسعير — الكوبونات](design/screenshots/admin/16-pricing-coupons.png)
+
+<a id="17-reports"></a>
 **التقارير المالية** — `/reports`
 
-![التقارير المالية](design/screenshots/admin/reports.png)
+![التقارير المالية](design/screenshots/admin/17-reports.png)
 
-<a id="pricing"></a>
-**التعرفة والتسعير** — `/pricing`
-
-![التعرفة والتسعير](design/screenshots/admin/pricing.png)
-
-<a id="zone-prices"></a>
-**مصفوفة أسعار المناطق** — `/zone-prices`
-
-![مصفوفة أسعار المناطق](design/screenshots/admin/zone-prices.png)
-
-<a id="plans"></a>
-**الباقات** — `/plans`
-
-![الباقات](design/screenshots/admin/plans.png)
-
-<a id="subscriptions"></a>
-**الاشتراكات** — `/subscriptions`
-
-![الاشتراكات](design/screenshots/admin/subscriptions.png)
-
-<a id="coupons"></a>
-**الكوبونات** — `/coupons`
-
-![الكوبونات](design/screenshots/admin/coupons.png)
-
-<a id="routes"></a>
-**المسارات** — `/routes`
-
-![المسارات](design/screenshots/admin/routes.png)
-
-<a id="zones"></a>
-**المناطق** — `/zones`
-
-![المناطق](design/screenshots/admin/zones.png)
-
-<a id="universities"></a>
-**الجامعات** — `/universities`
-
-![الجامعات](design/screenshots/admin/universities.png)
-
-<a id="safety"></a>
+<a id="18-safety"></a>
 **السلامة و SOS** — `/safety`
 
-![السلامة و SOS](design/screenshots/admin/safety.png)
+![السلامة و SOS](design/screenshots/admin/18-safety.png)
 
-<a id="disputes"></a>
+<a id="19-support-tickets"></a>
+**الدعم — التذاكر** — `/support?tab=tickets`
+
+![الدعم — التذاكر](design/screenshots/admin/19-support-tickets.png)
+
+<a id="20-support-complaints"></a>
+**الدعم — الشكاوى** — `/support?tab=complaints`
+
+![الدعم — الشكاوى](design/screenshots/admin/20-support-complaints.png)
+
+<a id="21-disputes"></a>
 **التنازعات** — `/disputes`
 
-![التنازعات](design/screenshots/admin/disputes.png)
+![التنازعات](design/screenshots/admin/21-disputes.png)
 
-<a id="complaints"></a>
-**الشكاوى** — `/complaints`
+<a id="22-security-sessions"></a>
+**الأمان — الجلسات والمصادقة** — `/security?tab=sessions`
 
-![الشكاوى](design/screenshots/admin/complaints.png)
+![الأمان — الجلسات والمصادقة](design/screenshots/admin/22-security-sessions.png)
 
-<a id="support"></a>
-**الدعم** — `/support`
+<a id="23-security-audit"></a>
+**الأمان — سجلّ التدقيق** — `/security?tab=audit`
 
-![الدعم](design/screenshots/admin/support.png)
+![الأمان — سجلّ التدقيق](design/screenshots/admin/23-security-audit.png)
 
-<a id="notifications"></a>
-**الإشعارات والبثّ** — `/notifications`
+<a id="24-settings-staff"></a>
+**الإعدادات — الموظفون والأدوار** — `/settings?tab=staff`
 
-![الإشعارات والبثّ](design/screenshots/admin/notifications.png)
+![الإعدادات — الموظفون والأدوار](design/screenshots/admin/24-settings-staff.png)
 
-<a id="ads"></a>
-**الإعلانات** — `/ads`
+<a id="25-settings-cliq"></a>
+**الإعدادات — إعداد CliQ** — `/settings?tab=cliq`
 
-![الإعلانات](design/screenshots/admin/ads.png)
+![الإعدادات — إعداد CliQ](design/screenshots/admin/25-settings-cliq.png)
 
-<a id="cliq"></a>
-**إعداد CliQ** — `/cliq`
+<a id="26-settings-broadcast"></a>
+**الإعدادات — الإشعارات والبثّ** — `/settings?tab=broadcast`
 
-![إعداد CliQ](design/screenshots/admin/cliq.png)
+![الإعدادات — الإشعارات والبثّ](design/screenshots/admin/26-settings-broadcast.png)
 
-<a id="security"></a>
-**الأمن** — `/security`
+<a id="27-settings-ads"></a>
+**الإعدادات — الإعلانات** — `/settings?tab=ads`
 
-![الأمن](design/screenshots/admin/security.png)
+![الإعدادات — الإعلانات](design/screenshots/admin/27-settings-ads.png)
 
-<a id="audit"></a>
-**سجلّ التدقيق** — `/audit`
-
-![سجلّ التدقيق](design/screenshots/admin/audit.png)
-
-<a id="admins"></a>
-**المدراء والأدوار** — `/admins`
-
-![المدراء والأدوار](design/screenshots/admin/admins.png)
-
-<a id="insights"></a>
-**التحليلات** — `/insights`
-
-![التحليلات](design/screenshots/admin/insights.png)
-
-<a id="profile"></a>
+<a id="28-profile"></a>
 **ملفّي** — `/profile`
 
-![ملفّي](design/screenshots/admin/profile.png)
+![ملفّي](design/screenshots/admin/28-profile.png)
 
 
 ---
@@ -452,13 +458,10 @@
 
 ## ملاحظات صادقة عمّا تراه في الصور
 
-كل بند منها شيء ستلاحظه بنفسك، ومن الأفضل أن تعرف سببه بدل أن تظنّه خللاً:
-
 1. **مؤشّرات المالية في اللوحة أصفار، وبعض الجداول فارغة.** سلوك **صحيح** على بيانات
    الـ seeder لا خلل في اللوحة: `DemoSeeder` يُنشئ رحلات واشتراكات وكوبونات وشكاوى،
    لكنّه **لا يُنشئ** صفوفاً في `payments` ولا `wallet_transactions` ولا `routes`
-   (تحقّقتُ: ٠ في كلٍّ منها). فمؤشّر «الرحلات المدفوعة» = ٠ لأنّه لا يوجد دفع مُسجَّل.
-   الرحلات موجودة فعلاً: ٥ رحلات منها ٢ مكتملة.
+   (تحقّقتُ: ٠ في كلٍّ منها). الرحلات موجودة فعلاً: ٥ منها ٢ مكتملة.
 
 2. **بيانات التطبيقين حقيقيّة ومختارة بعناية.** الطالب المصوَّر هو الفهرس ١ لا ٠، لأن
    `$i % 7 === 0` يجعل الطالب ٠ **موقوفاً** فيرفض الـ API دخوله؛ والفهرس ١ له اشتراك
@@ -473,6 +476,11 @@
    الثابت مرّة واحدة في الأعلى فيبقى تحته عمود فارغ — أي صورة لعلّة تخطيط غير موجودة.
 
 5. **بقايا خاصّة بالويب في التطبيقين.** الخريطة في شاشة الطالب الرئيسيّة لا تملأ العرض
-   بالكامل، وnص بديل داخل حقل مبلغ CliQ يتجاوز حدّ الحقل. الشاشتان تُبنيان على
+   بالكامل، ونصّ بديل داخل حقل مبلغ CliQ يتجاوز حدّ الحقل. الشاشتان تُبنيان على
    `react-native-web` وهو يُترجم إلى CSS لا إلى Yoga، فهذه فروق تخطيط ويب لا تمثّل
    بالضرورة ما يظهر على هاتف. التحقّق من التخطيط الأصلي هو مهمّة **11.9 (Maestro)**.
+
+6. **ما زال أمام لوحة الإدارة بقيّة المرحلة 10.** أُنجزت **10.1** (الشلّ والملاحة). أمّا
+   **10.2** (الصفحات الأربع الحاكمة بمؤشّراتها وأشرطة تقدّمها ولوحة «يحتاج إجراءً»)
+   و**10.3** و**10.4** و**10.5** فلم تُنفَّذ بعد — فبطاقات المؤشّرات في لوحة القيادة
+   ما زالت تحمل شارة اتّجاه صاعد بجوار نصٍّ ليس نسبة، وهذا ما تُصلحه 10.2.
