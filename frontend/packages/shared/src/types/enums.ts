@@ -35,6 +35,26 @@ export type SubscriptionType = 'weekly' | 'monthly' | 'term';
 
 export type SubscriptionStatus = 'pending' | 'active' | 'expired' | 'cancelled';
 
-export type TripStatus = 'scheduled' | 'started' | 'completed' | 'cancelled';
+/**
+ * `pending_driver` was missing, and it is the state a POOLED trip spends most of
+ * its life in.
+ *
+ * `Shared\Enums\TripStatus` has had the case since the matcher started forming cars
+ * before a captain accepted them («بانتظار كابتن»). This union did not, so the value
+ * arrived over the wire, TypeScript typed it as one of the other four, and any client
+ * comparison against it was a "no overlap" error waiting for someone to write it —
+ * or worse, an `if` that silently never ran.
+ */
+export type TripStatus = 'pending_driver' | 'scheduled' | 'started' | 'completed' | 'cancelled';
 
 export type TripPassengerStatus = 'booked' | 'onboard' | 'dropped' | 'no_show' | 'cancelled';
+
+/**
+ * How a rider pays. Chosen BEFORE a captain is matched.
+ *
+ * The backend enum and its validation rule have existed since the ride-request
+ * endpoint did; this type did not, so the client had no way to name the field and
+ * every request defaulted to `wallet`. A captain who cannot take cash today needs to
+ * see it on the offer and decline knowingly, rather than find out at the pickup.
+ */
+export type PaymentMethod = 'wallet' | 'cash';

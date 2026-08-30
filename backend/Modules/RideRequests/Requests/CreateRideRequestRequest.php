@@ -28,6 +28,19 @@ class CreateRideRequestRequest extends FormRequest
             // able to decline knowingly rather than discover it at pickup.
             'payment_method' => ['sometimes', Rule::in(PaymentMethod::values())],
             'type' => ['sometimes', Rule::in(RideType::values())],
+            /*
+             * The whole car instead of a seat in it.
+             *
+             * A rider's choice, made here rather than after matching, because the
+             * matcher must never pool a solo request — and because the captain sees it
+             * on the offer: a whole-car run pays differently and carries one passenger
+             * by construction.
+             *
+             * Whether the corridor HAS an approved whole-car price is checked in the
+             * service, not here: it depends on the resolved pickup zone, which needs
+             * the coordinates this request is still validating.
+             */
+            'is_solo' => ['sometimes', 'boolean'],
             'direction' => ['sometimes', Rule::in(RideDirection::values())],
             'notes' => ['nullable', 'string', 'max:255'],
             'coupon_code' => ['nullable', 'string', 'max:40'],

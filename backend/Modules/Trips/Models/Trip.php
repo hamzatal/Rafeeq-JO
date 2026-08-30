@@ -2,6 +2,7 @@
 
 namespace Rafeeq\Modules\Trips\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,6 +34,9 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property Carbon|null $started_at
  * @property Carbon|null $ended_at
  * @property int $capacity
+ * @property bool $is_solo A whole-car booking: one passenger by construction, and its own fare.
+ * @property-read DriverProfile|null $driver
+ * @property-read Vehicle|null $vehicle
  */
 class Trip extends Model
 {
@@ -40,7 +44,7 @@ class Trip extends Model
 
     protected $fillable = [
         'route_id', 'driver_id', 'vehicle_id', 'zone_id', 'university_id', 'type', 'direction',
-        'is_express', 'fare_fils', 'base_fare_fils', 'express_fee_fils', 'surge_multiplier',
+        'is_express', 'is_solo', 'fare_fils', 'base_fare_fils', 'express_fee_fils', 'surge_multiplier',
         'scheduled_at', 'status', 'started_at', 'ended_at', 'capacity',
     ];
 
@@ -48,6 +52,7 @@ class Trip extends Model
     {
         return [
             'status' => TripStatus::class,
+            'is_solo' => 'boolean',
             'direction' => RideDirection::class,
             'scheduled_at' => 'datetime',
             'started_at' => 'datetime',
@@ -102,7 +107,37 @@ class Trip extends Model
     public function bookedCount(): int
     {
         return $this->passengers()
-            ->whereIn('status', ['booked', 'onboard'])
+            ->whereIn('status', self::RIDING)
             ->count();
+    }
+
+    /** The two passenger statuses that occupy a seat. */
+    public const RIDING = ['booked', 'onboard'];
+
+    /**
+     * Eager-load `passengers_count` as SEATS TAKEN — not rows written.
+     *
+     * ── The bug this replaces ───────────────────────────────────────────────
+     *
+     * Four call sites used a plain `withCount('passengers')`, which counts cancelled
+     * and no-show rows. `TripResource` then reads that number twice:
+     *
+     *   • `booked_count`, so a trip four students booked and three cancelled reported
+     *     4 of 4 taken and disappeared from `trips/available` with three empty seats.
+     *   • `pricing.riders`, and therefore `expected_captain_earnings_fils` — the
+     *     number a captain reads on an incoming OFFER to decide whether to accept it.
+     *     Cancelled riders were inflating his expected pay.
+     *
+     * Worse, the same field meant something DIFFERENT when the relation was not
+     * counted, because the resource's fallback (`bookedCount`, above) does filter by
+     * status. One name, two meanings, depending on the endpoint.
+     *
+     * The filter lives here so there is exactly one definition of "taken".
+     */
+    public function scopeWithRiderCount(Builder $query): Builder
+    {
+        return $query->withCount([
+            'passengers as passengers_count' => fn ($q) => $q->whereIn('status', self::RIDING),
+        ]);
     }
 }

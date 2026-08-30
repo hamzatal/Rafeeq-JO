@@ -19,6 +19,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string|null $national_id
  * @property float $rating_avg
  * @property int $total_trips
+ * @property int $rating_count
+ * @property-read User|null $user
  */
 class DriverProfile extends Model
 {

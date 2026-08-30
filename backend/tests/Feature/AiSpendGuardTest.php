@@ -42,7 +42,6 @@ class AiSpendGuardTest extends TestCase
     {
         return [
             'assistant turn' => ['POST', 'api/v1/assistant/send'],
-            'smart suggestions headline' => ['GET', 'api/v1/assistant/suggestions'],
             'admin insights narrative' => ['GET', 'api/v1/admin/ai/insights'],
             'single-account risk narrative' => ['GET', 'api/v1/admin/ai/risks/{userId}'],
         ];

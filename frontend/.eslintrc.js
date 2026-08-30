@@ -24,11 +24,16 @@
 /**
  * Screens that still import `Text` from `react-native`.
  *
- * This is a RATCHET, not an exemption. These 45 files carry the 351 remaining raw
- * `fontSize:` values, and migrating them means rewriting every `<Text>` on every
+ * This is a RATCHET, not an exemption. The list started at 45 files carrying 351 raw
+ * `fontSize:` values, because migrating them means rewriting every `<Text>` on every
  * screen — which is precisely what phases 8, 9 and 10 do against the approved
- * mockups. Doing it here would be an unreviewed visual change to the whole product
- * in the same commit that extracts the component library.
+ * mockups. Doing it in phase 7 would have been an unreviewed visual change to the
+ * whole product in the same commit that extracted the component library.
+ *
+ * Phase 8 took it to 35: six student screens were rewritten onto the shared `Text`
+ * (`home`, `trips`, `wallet`, `settings`, `emergency`, `ride-request`) and four
+ * entries went away with the files (`lost-found`, `rewards`, `payments`,
+ * `SmartSuggestions`). Phase 9 owns the captain app, phase 10 the dashboard.
  *
  * The list may only SHRINK. A NEW file is blocked because it is not on the list,
  * which is the property that matters: today's debt is frozen, tomorrow's is
@@ -39,18 +44,9 @@ const GRANDFATHERED_RAW_TEXT = [
   'student-app/app/(app)/assistant.tsx',
   'student-app/app/(app)/chat.tsx',
   'student-app/app/(app)/checkout.tsx',
-  'student-app/app/(app)/emergency.tsx',
-  'student-app/app/(app)/home.tsx',
-  'student-app/app/(app)/lost-found.tsx',
   'student-app/app/(app)/notifications.tsx',
-  'student-app/app/(app)/payments.tsx',
-  'student-app/app/(app)/rewards.tsx',
-  'student-app/app/(app)/ride-request.tsx',
-  'student-app/app/(app)/settings.tsx',
   'student-app/app/(app)/subscriptions.tsx',
   'student-app/app/(app)/support.tsx',
-  'student-app/app/(app)/trips.tsx',
-  'student-app/app/(app)/wallet.tsx',
   'student-app/app/(auth)/forgot-password.tsx',
   'student-app/app/(auth)/login.tsx',
   'student-app/app/(auth)/otp.tsx',
@@ -59,7 +55,6 @@ const GRANDFATHERED_RAW_TEXT = [
   'student-app/app/(onboarding)/intro.tsx',
   'student-app/app/(onboarding)/permissions.tsx',
   'student-app/app/(onboarding)/profile-setup.tsx',
-  'student-app/src/components/SmartSuggestions.tsx',
   'driver-app/app/(app)/chat.tsx',
   'driver-app/app/(app)/dashboard.tsx',
   'driver-app/app/(app)/documents.tsx',

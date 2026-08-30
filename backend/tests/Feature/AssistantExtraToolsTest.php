@@ -4,12 +4,9 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Rafeeq\Modules\AI\Tools\AssistantToolRegistry;
-use Rafeeq\Modules\AI\Tools\FileLostItemTool;
-use Rafeeq\Modules\AI\Tools\MyLostReportsTool;
 use Rafeeq\Modules\AI\Tools\SubscriptionPlansTool;
 use Rafeeq\Modules\AI\Tools\SubscriptionStatusTool;
 use Rafeeq\Modules\Auth\Models\User;
-use Rafeeq\Modules\LostFound\Models\LostFoundItem;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Models\SubscriptionPlan;
 use Rafeeq\Shared\Enums\SubscriptionStatus;
@@ -36,9 +33,7 @@ class AssistantExtraToolsTest extends TestCase
             ->pluck('function.name')->all();
 
         $this->assertContains('list_subscription_plans', $names);
-        $this->assertContains('report_lost_item', $names);
         $this->assertContains('get_subscription_status', $names);
-        $this->assertContains('list_my_lost_reports', $names);
     }
 
     public function test_subscription_status_reports_no_active_subscription(): void
@@ -68,18 +63,6 @@ class AssistantExtraToolsTest extends TestCase
         $this->assertSame(150, $out['remaining_rides']);
     }
 
-    public function test_my_lost_reports_lists_the_students_reports(): void
-    {
-        $user = $this->student();
-        app(FileLostItemTool::class)->run($user, ['type' => 'lost', 'title' => 'مظلة زرقاء']);
-
-        $out = app(MyLostReportsTool::class)->run($user, []);
-
-        $this->assertTrue($out['ok']);
-        $this->assertSame(1, $out['count']);
-        $this->assertSame('مظلة زرقاء', $out['reports'][0]['title']);
-    }
-
     public function test_list_subscription_plans_returns_active_plans_only(): void
     {
         SubscriptionPlan::create([
@@ -97,31 +80,5 @@ class AssistantExtraToolsTest extends TestCase
         $this->assertCount(1, $out['plans']);
         $this->assertSame('باقة شهرية', $out['plans'][0]['name']);
         $this->assertSame(25.0, $out['plans'][0]['price_jod']);
-    }
-
-    public function test_report_lost_item_creates_a_report(): void
-    {
-        $user = $this->student();
-
-        $out = app(FileLostItemTool::class)->run($user, [
-            'type' => 'lost',
-            'title' => 'حقيبة ظهر سوداء',
-            'location' => 'الجامعة الأردنية',
-        ]);
-
-        $this->assertTrue($out['ok']);
-        $this->assertArrayHasKey('candidate_matches', $out);
-
-        $item = LostFoundItem::where('reporter_id', $user->id)->first();
-        $this->assertNotNull($item);
-        $this->assertSame('lost', $item->type);
-        $this->assertSame('حقيبة ظهر سوداء', $item->title);
-    }
-
-    public function test_report_lost_item_rejects_invalid_type(): void
-    {
-        $out = app(FileLostItemTool::class)->run($this->student(), ['type' => 'nonsense', 'title' => 'x']);
-
-        $this->assertFalse($out['ok']);
     }
 }

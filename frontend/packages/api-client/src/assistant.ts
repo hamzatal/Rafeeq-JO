@@ -7,7 +7,6 @@ import {
   type ApiSuccess,
   type AssistantReply,
   type RiskScore,
-  type SmartSuggestions,
 } from '@rafeeq/shared';
 import { unwrap } from './client';
 
@@ -33,11 +32,6 @@ export class AssistantApi {
     return unwrap(data);
   }
 
-  /** Context-aware ride suggestions for the student home screen. */
-  async suggestions(): Promise<SmartSuggestions> {
-    const { data } = await this.http.get<ApiSuccess<SmartSuggestions>>(ENDPOINTS.assistant.suggestions);
-    return unwrap(data);
-  }
 
   // Admin
   async insights(): Promise<AdminInsights> {

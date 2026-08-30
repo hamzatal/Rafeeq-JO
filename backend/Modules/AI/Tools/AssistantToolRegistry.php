@@ -18,11 +18,17 @@ class AssistantToolRegistry
         TopupInstructionsTool $topup,
         CreateSupportTicketTool $ticket,
         SubscriptionPlansTool $plans,
-        FileLostItemTool $lostItem,
         SubscriptionStatusTool $subStatus,
-        MyLostReportsTool $myReports,
     ) {
-        foreach ([$topup, $ticket, $plans, $lostItem, $subStatus, $myReports] as $tool) {
+        /*
+         * Four tools, not six.
+         *
+         * `FileLostItemTool` and `MyLostReportsTool` went with the LostFound module.
+         * They were also the only two WRITING tools the assistant had besides
+         * `CreateSupportTicketTool`, which is a reduction in the blast radius flagged
+         * by AUDIT finding A.6: a model deciding to create a row on its own.
+         */
+        foreach ([$topup, $ticket, $plans, $subStatus] as $tool) {
             $this->tools[$tool->name()] = $tool;
         }
     }

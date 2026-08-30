@@ -14,7 +14,6 @@ export const ar = {
     loading: 'جارٍ التحميل...',
     error: 'حدث خطأ',
     success: 'تم بنجاح',
-    soon: 'قريباً',
     unlimited: 'غير محدود',
     viewAll: 'عرض الكل',
     loadFailed: 'تعذّر تحميل البيانات. تحقّق من اتصالك وحاول مجدداً.',
@@ -181,51 +180,68 @@ export const ar = {
     logout: 'تسجيل الخروج',
     testCode: 'كود التجربة',
   },
+  /*
+   * ── What came out of this block ────────────────────────────────────────
+   *
+   * Sixteen keys that nothing rendered: `allServices` · `moreServices` · `services`
+   * · `activeSubscription` · `noActiveSub` · `subscribeNow` · `remainingRides` ·
+   * `endsIn` · `recentTrips` · `tripFallback` · `viewAll` · `addPlace` · `locating`
+   * · `askAi` · `askAiHint` · `points` · `level` · `nextDiscount` — leftovers from a
+   * services-grid home screen that no longer exists. A dead translation is not
+   * harmless: it is the shape of a feature, so the next person builds the screen
+   * around the string instead of around the data.
+   *
+   * `minutesShort` and `nearbyCaptain` went with the fabricated «٣ دقائق» badge and
+   * the invented nearest-captain marker. There is no captain-proximity endpoint in
+   * this API, so neither string had anything true to say.
+   */
   home: {
     title: 'الرئيسية',
-    hello: 'أهلاً 👋',
-    allServices: 'كل الخدمات',
-    subscriptions: 'الاشتراكات',
-    trips: 'الرحلات',
-    rideRequest: 'اطلب رحلة',
-    payments: 'المدفوعات',
-    notifications: 'الإشعارات',
-    lostFound: 'المفقودات',
-    rewards: 'النقاط',
-    support: 'الدعم',
+    trips: 'رحلاتي',
     wallet: 'المحفظة',
-    assistant: 'مساعد رفيق',
-    emergency: 'الطوارئ',
-    whereTo: 'إلى أين الوجهة اليوم؟',
-    minutesShort: 'دقيقة',
+    hello: 'أهلاً',
+    goodMorning: 'صباح الخير',
+    goodAfternoon: 'مساء الخير',
+    goodEvening: 'مساء الخير',
     requestRideCta: 'اطلب رحلتك الآن',
-    nearby: 'موقعك الحالي',
-    locating: 'جارٍ تحديد موقعك...',
-    activeSubscription: 'اشتراكك الفعّال',
-    viewAll: 'عرض الكل',
-    noActiveSub: 'لا يوجد اشتراك فعّال — اشترك ووفّر',
-    subscribeNow: 'اشترك الآن',
-    remainingRides: 'الرحلات المتبقية',
-    endsIn: 'تنتهي في',
-    recentTrips: 'رحلاتك الأخيرة',
-    tripFallback: 'رحلة',
-    moreServices: 'خدمات أخرى',
-    labelHome: 'المنزل',
+
+    /* ── Idle: the map plus one sheet ── */
+    whereTo: 'إلى أين؟',
+    searchDestination: 'ابحث عن وجهة',
+    frequentDestinations: 'وجهات متكرّرة',
+    noDestinations: 'احفظ بيتك وجامعتك، وبعدها الطلب نقرة واحدة',
+    addDestination: 'أضف وجهة',
+    labelHome: 'البيت',
     labelUniversity: 'الجامعة',
     labelWork: 'العمل',
     labelOther: 'وجهة',
-    addPlace: 'أضف وجهة',
-    services: 'الخدمات',
-    goodMorning: 'صباح الخير!',
-    goodAfternoon: 'مساء الخير!',
-    goodEvening: 'مساء الخير!',
-    searchDestination: 'ابحث عن وجهة...',
-    points: 'نقاط رفيق',
-    level: 'المستوى',
-    nextDiscount: 'الخصم القادم',
-    nearbyCaptain: 'كابتن قريب',
-    askAi: 'اسأل رفيق AI',
-    askAiHint: 'مساعدك الذكي لكل ما تحتاجه في الحرم الجامعي.',
+    nearby: 'موقعك الحالي',
+    askAi: 'اسأل رفيق',
+
+    /* ── Live: the same screen, once a ride exists ── */
+    liveTrip: 'رحلتك الجارية',
+    stepRequested: 'تم الطلب',
+    stepAccepted: 'قُبلت',
+    stepComing: 'الكابتن قادم',
+    stepOnboard: 'في الطريق',
+    stepArrived: 'وصلت',
+    grouping: 'بنجمّعك مع طلاب منطقتك',
+    awaitingCaptain: 'بندوّر على كابتن قريب منك',
+    captainDistance: 'الكابتن على بعد',
+    noCaptainLocation: 'لسا ما وصلنا موقع الكابتن',
+    plate: 'اللوحة',
+    call: 'اتصال',
+    message: 'رسالة',
+    boardingCode: 'رمز الصعود',
+    boardingCodeHint: 'أعطه للكابتن',
+    dropoffCode: 'رمز النزول',
+    dropoffCodeHint: 'أعطه للكابتن عند الوصول',
+    /* Kilometres and metres, because the only honest number we hold is a distance.
+       An ETA needs traffic and a route; a straight line between two real
+       coordinates is a distance and nothing more, so that is what it says. */
+    km: 'كم',
+    metre: 'م',
+    sos: 'استغاثة',
   },
   profile: {
     title: 'الملف الشخصي',
@@ -234,12 +250,12 @@ export const ar = {
   },
   settings: {
     title: 'الإعدادات',
-    appearance: 'المظهر',
-    language: 'اللغة',
-    theme: 'الوضع',
-    light: 'فاتح',
-    dark: 'داكن',
-    system: 'حسب النظام',
+    /*
+     * `appearance` · `theme` · `light` · `dark` · `system` came out with dark mode
+     * (decision 7). `about` and `version` never had a row. A translation with no call
+     * site is the shape of a feature, so the next person builds the screen around the
+     * string instead of around the data.
+     */
     arabic: 'العربية',
     english: 'English',
     account: 'الحساب',
@@ -254,8 +270,6 @@ export const ar = {
     supportCenter: 'مركز الدعم',
     contactUs: 'اتصل بنا',
     faq: 'الأسئلة الشائعة',
-    reportLost: 'الإبلاغ عن مفقودات',
-    aiPowered: 'مدعوم بالذكاء الاصطناعي',
     legal: 'قانوني',
     privacy: 'سياسة الخصوصية',
     terms: 'الشروط والأحكام',
@@ -264,6 +278,27 @@ export const ar = {
     supportDesc: 'فريقنا متاح على مدار الساعة للإجابة على استفساراتك وتقديم المساعدة الفورية.',
     chatWithUs: 'تحدث معنا',
     avgResponse: 'متوسط وقت الرد: أقل من دقيقة',
+
+    /*
+     * ── Account deletion ─────────────────────────────────────────────────
+     *
+     * `DELETE /api/v1/profile` has existed since the Users module did, backed by
+     * `AccountErasureService` — which anonymises the identifying columns rather than
+     * dropping rows, so the financial ledger stays auditable. There was no client
+     * method for it and no row on any screen, in either app.
+     *
+     * That is not only a gap: both app stores REQUIRE an in-app path to delete an
+     * account for any app that lets you create one. It was a submission blocker.
+     */
+    deleteAccount: 'حذف الحساب',
+    deleteAccountDesc: 'إزالة بياناتك الشخصية نهائياً',
+    deleteConfirmTitle: 'حذف حسابك نهائياً؟',
+    deleteConfirmMsg: 'سنحذف اسمك ورقمك وعناوينك المحفوظة نهائياً ولا يمكن استرجاعها. تبقى سجلات الرحلات والفواتير بصيغة مجهولة الهوية للأسباب المحاسبية والقانونية.',
+    deleteConfirm: 'احذف حسابي',
+    deleted: 'تم حذف حسابك.',
+    deleteFailed: 'تعذّر حذف الحساب. تواصل مع الدعم.',
+    logoutConfirmTitle: 'تسجيل الخروج؟',
+    logoutConfirmMsg: 'ستحتاج لرقمك ورمز تحقّق جديد للدخول مرة أخرى.',
   },
   driver: {
     dashboard: 'يومي',
@@ -389,6 +424,7 @@ export const ar = {
   },
   subscriptions: {
     title: 'الاشتراكات',
+    subtitle: 'خطّك الشهري ورحلاتك المتبقية',
     mine: 'اشتراكاتي',
     available: 'الخطط المتاحة',
     none: 'لا توجد خطط متاحة حالياً',
@@ -467,7 +503,14 @@ export const ar = {
     rebook: 'إعادة الحجز',
     downloadInvoice: 'تحميل الفاتورة',
     originLabel: 'نقطة الانطلاق',
+    destinationLabel: 'الوجهة',
     noHistory: 'لا يوجد سجل رحلات بعد',
+    openLive: 'افتح الرحلة الحيّة',
+    cancelBooking: 'إلغاء الحجز',
+    cancelBookingTitle: 'إلغاء حجزك؟',
+    cancelBookingMsg: 'سنُحرّر المبلغ المحجوز من محفظتك، ويعود مقعدك للطلاب الآخرين.',
+    bookingCancelled: 'تم إلغاء الحجز وتحرير المبلغ المحجوز.',
+    captainFallback: 'الكابتن',
   },
   wallet: {
     title: 'المحفظة',
@@ -479,7 +522,11 @@ export const ar = {
     transactions: 'الحركات',
     noTransactions: 'لا توجد حركات بعد',
     cliqTitle: 'طلب دفع عبر كليك',
-    cliqHowTo: 'تعرف على طريقة الاستخدام',
+    cliqHowTo: 'كيف يعمل الشحن؟',
+    /* The link that said «تعرف على طريقة الاستخدام» had no `onPress`. Either the
+       explanation exists or the link should not, so here is the explanation. */
+    cliqHowToBody: 'أنشئ طلب شحن بالمبلغ الذي تريده، فنعطيك اسم المستفيد ورقماً مرجعياً. حوّل المبلغ من تطبيق بنكك عبر CliQ واكتب الرقم المرجعي في خانة الملاحظات، ثم ارفع صورة الإشعار. يُقيَّد الرصيد بعد مراجعة بشرية للإشعار — لا يُضاف تلقائياً.',
+    history: 'سجل الشحنات',
     enterAmount: 'أدخل المبلغ المطلوب',
     createLink: 'إنشاء رابط دفع',
     alias: 'الاسم المستعار (CliQ)',
@@ -589,14 +636,37 @@ export const ar = {
     direction: 'الاتجاه',
     toUniversity: 'إلى الجامعة',
     fromUniversity: 'من الجامعة',
-    chooseClass: 'اختر فئة السيارة',
-    classEconomical: 'رفيق اقتصادي',
-    classFamily: 'رفيق عائلي',
-    classPlus: 'رفيق بلس',
-    seats: 'ركاب',
-    minutes: 'دقائق',
+    /*
+     * TWO products, both with an approved price — not three vehicle classes.
+     *
+     * The three classes («اقتصادي» · «عائلي» · «بلس») were not a product. Two of them
+     * returned the SAME fare from the API because the tariff does not vary by seat
+     * count, and each carried a hardcoded ETA — 5, 8 and 4 minutes — that nothing
+     * computed. A rider chose between two identical prices on the strength of an
+     * invented number.
+     *
+     * What the tariff actually holds, per corridor, is a seat price and a whole-car
+     * price. That is the choice, and phase 5 built it deliberately: showing both is
+     * what makes the pooling wait acceptable, because the alternative has a printed
+     * price next to it.
+     */
+    chooseProduct: 'اختر نوع رحلتك',
+    shared: 'مشتركة',
+    sharedHint: 'مقعدك في سيارة مع طلاب من منطقتك',
+    sharedWait: 'بنجمّعك مع طلاب منطقتك — ممكن تنتظر دقائق',
+    solo: 'منفردة',
+    soloHint: 'السيارة كاملة لك وحدك',
+    soloNoWait: 'بتنطلق بلا انتظار تجميع',
+    soloUnavailable: 'المنفردة غير متاحة على هذا المسار بعد',
+    perSeat: 'للمقعد',
+    wholeCar: 'للسيارة كاملة',
+    express: 'مستعجلة',
+    expressHint: 'أولوية بلا انتظار — برسم إضافي',
     paymentMethod: 'طريقة الدفع',
     walletPay: 'محفظة رفيق',
+    walletHint: 'يُخصم من رصيدك عند انتهاء الرحلة',
+    cashPay: 'نقداً للكابتن',
+    cashHint: 'تدفع للكابتن عند الوصول',
     confirmRide: 'تأكيد الطلب',
   },
   rating: {
@@ -634,40 +704,6 @@ export const ar = {
     redeemToWallet: 'استبدال برصيد المحفظة',
     redeemOption: 'نقطة = د.أ',
   },
-  lostFound: {
-    title: 'المفقودات',
-    none: 'لا توجد بلاغات',
-    report: 'إبلاغ',
-    lost: 'مفقود',
-    found: 'موجود',
-    itemTitle: 'العنوان',
-    description: 'الوصف',
-    location: 'الموقع',
-    reported: 'تم نشر البلاغ.',
-    failed: 'تعذّر النشر',
-    browse: 'تصفّح',
-    mine: 'بلاغاتي',
-    smartTitle: 'المفقودات الذكية',
-    smartSubtitle: 'نظام ذكي للتعرف على الأشياء المفقودة باستخدام الذكاء الاصطناعي لربط المفقودات بأصحابها بسرعة وأمان.',
-    lostTab: 'أضعت شيئاً',
-    foundTab: 'وجدت شيئاً',
-    itemNameHint: 'مثال: حقيبة ظهر سوداء، مفاتيح سيارة...',
-    locationLabel: 'الموقع التقريبي',
-    locationHint: 'أين تعتقد أنك فقدته؟',
-    dateTime: 'الوقت والتاريخ',
-    descLabel: 'وصف تفصيلي',
-    descHint: 'اذكر أي علامات مميزة، ألوان، أو محتويات...',
-    imageOptional: 'صورة (اختياري، يساعد في التعرف الذكي)',
-    uploadHint: 'انقر لرفع صورة أو اسحبها هنا',
-    uploadTypes: 'PNG, JPG حتى 5MB',
-    submitReport: 'إرسال البلاغ',
-    activeReports: 'بلاغاتي النشطة',
-    active: 'نشط',
-    viewFull: 'عرض السجل الكامل',
-    statusSearching: 'جاري البحث',
-    statusMatched: 'محتمل تطابق',
-    statusResolved: 'تم الحل',
-  },
   assistant: {
     title: 'مساعد رفيق',
     placeholder: 'اكتب سؤالك...',
@@ -688,8 +724,24 @@ export const ar = {
     sosTitle: 'زر الطوارئ',
     sosHint: 'سيتم تنبيه فريق السلامة وإرسال رسالة لجهات اتصالك مع موقعك.',
     sosButton: 'تفعيل الطوارئ',
+    sosConfirmTitle: 'إرسال نداء استغاثة؟',
+    sosConfirmMsg: 'سيصل فريق السلامة موقعك ورحلتك الحالية فوراً، وسيتم تنبيه جهات اتصالك الموثوقة.',
+    sosConfirm: 'أرسل الآن',
+    /*
+     * A ride-hailing app is not an ambulance, and saying so is not a disclaimer for
+     * lawyers — it is the difference between a student who calls 911 and a student
+     * who waits for us. `docs/design/SCREENS.md` requires it on this screen.
+     */
+    notNineOneOne: 'رفيق ليس بديلاً عن الطوارئ الرسمية',
+    notNineOneOneHint: 'إذا كان هناك خطر على حياتك أو إصابة، اتصل بـ 911 أولاً. نداء رفيق ينبّه فريق السلامة وجهات اتصالك، ولا يُرسل إسعافاً ولا شرطة.',
+    callNineOneOne: 'اتصل بـ 911',
     confirmSend: 'تأكيد الإرسال',
     sending: 'جارٍ الإرسال...',
+    deleteConfirmTitle: 'حذف جهة الاتصال؟',
+    deleteConfirmMsg: 'لن يتم تنبيهه عند الطوارئ بعد الحذف.',
+    deleted: 'تم حذف جهة الاتصال.',
+    deleteFailed: 'تعذّر الحذف. حاول مرة أخرى.',
+    primarySet: 'تم التعيين كجهة أساسية.',
     sosSent: 'تم إرسال نداء الطوارئ. سيتم التواصل معك فوراً.',
     sosFailed: 'تعذّر إرسال النداء. حاول مرة أخرى أو اتصل مباشرة.',
     callPrimary: 'اتصال بـ',

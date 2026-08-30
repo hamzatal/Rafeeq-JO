@@ -91,12 +91,6 @@ parameters:
 			path: Modules/Chat/Resources/ChatMessageResource.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Chat/Services/ChatService.php
-
-		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\Chat\\Models\\ChatMessage\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 2
@@ -290,12 +284,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverProfileResource\:\:\$liveness_verified_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Drivers/Resources/DriverProfileResource.php
-
-		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\Drivers\\Resources\\DriverProfileResource\:\:\$rating_count\.$#'
 			identifier: property.notFound
 			count: 1
 			path: Modules/Drivers/Resources/DriverProfileResource.php
@@ -541,12 +529,6 @@ parameters:
 			path: Modules/Ratings/Resources/RatingResource.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: Modules/Ratings/Services/RatingService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$action\.$#'
 			identifier: property.notFound
 			count: 1
@@ -781,12 +763,6 @@ parameters:
 			path: Modules/Safety/Controllers/SafetyAdminController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Safety/Controllers/SosController.php
-
-		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\Safety\\Models\\SosIncident\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 2
@@ -827,12 +803,6 @@ parameters:
 			identifier: notIdentical.alwaysTrue
 			count: 2
 			path: Modules/Safety/Services/EmergencyContactService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Safety/Services/GpsFraudService.php
 
 		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\Trips\\Models\\TripPassenger\:\:\$pickup_lat\.$#'
@@ -991,12 +961,6 @@ parameters:
 			path: Modules/Trips/Resources/TripResource.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Trips/Services/RideBillingService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 2
@@ -1018,12 +982,6 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscription_id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: Modules/Trips/Services/TripService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 2
 			path: Modules/Trips/Services/TripService.php
 
 		-
@@ -1061,12 +1019,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: Modules/Trips/Services/TripService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/Trips/Support/TripChannelPolicy.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'

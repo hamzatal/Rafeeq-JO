@@ -33,6 +33,27 @@ class TripPassengerResource extends JsonResource
             // Drop-off code is issued once the student is onboard; shown only to
             // the owner to read out to the captain on arrival.
             'dropoff_code' => $isOwner ? $this->dropoff_code : null,
+
+            /*
+             * ── The trip itself, which this resource never sent ─────────────────
+             *
+             * `StudentTripController::mine` has eager-loaded `trip.route` since it was
+             * written, and this resource dropped it on the floor. So every consumer of
+             * `GET /trips/mine` received a passenger row with no trip attached, and the
+             * student app — which reads `p.trip?.route?.name`, `p.trip?.scheduled_at`
+             * and `p.trip?.pricing?.fare_fils` — rendered the fallback for all three.
+             * Every past ride was titled «رحلة» with a dash for its fare.
+             *
+             * Worse than the blank labels: `trips.tsx` subscribed to live tracking with
+             * `mine.filter((p) => p.trip)`, which selected NOTHING. The tracker on that
+             * screen could never have received a position, for any trip, ever. It looked
+             * finished, it typechecked, and it was wired to a field the API did not send.
+             *
+             * `whenLoaded` keeps it opt-in, so the captain's passenger manifest — which
+             * serialises this resource from the other direction — does not recurse back
+             * into `TripResource` and re-serialise its own passengers.
+             */
+            'trip' => $this->whenLoaded('trip', fn () => new TripResource($this->trip)),
         ];
     }
 }

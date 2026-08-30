@@ -18,7 +18,7 @@ class AdminTripController extends Controller
     {
         $query = Trip::query()
             ->with('route')
-            ->withCount('passengers')
+            ->withRiderCount()
             ->orderByDesc('scheduled_at');
 
         if ($status = $request->query('status')) {
