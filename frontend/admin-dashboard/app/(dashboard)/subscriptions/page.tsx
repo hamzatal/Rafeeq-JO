@@ -78,7 +78,7 @@ export default function SubscriptionsPage() {
                       {s.status_label}
                     </span>
                   </td>
-                  <td className="p-3 text-muted">{s.remaining_rides ?? t('subscriptions.unlimited')}</td>
+                  <td className="p-3 text-muted tabular-nums">{s.remaining_rides}</td>
                   <td className="p-3 text-muted font-mono">{s.ends_at ? new Date(s.ends_at).toLocaleDateString(locale) : '—'}</td>
                   <td className="p-3 text-left">
                     {s.status === 'pending' && (

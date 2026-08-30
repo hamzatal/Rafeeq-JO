@@ -123,10 +123,16 @@ export interface SubscriptionPlan {
   type_label: string;
   price_fils: number;
   price_jod: number;
-  rides_count: number | null;
-  unlimited: boolean;
+  /** Never null: every plan is bounded. See PlanSolvency on the backend. */
+  rides_count: number;
   duration_days: number;
   is_active: boolean;
+  /**
+   * What one ride on this plan costs, so it can be compared against the fare the
+   * student is already looking at. Replaces `unlimited`, which described a product
+   * that could not be priced.
+   */
+  price_per_ride_fils: number;
 }
 
 export interface Subscription {
@@ -139,7 +145,7 @@ export interface Subscription {
   usable: boolean;
   starts_at: string | null;
   ends_at: string | null;
-  remaining_rides: number | null;
+  remaining_rides: number;
   plan?: SubscriptionPlan;
 }
 
@@ -154,6 +160,12 @@ export interface TripPassenger {
   student_name: string | null;
   status: TripPassengerStatus;
   status_label: string;
+  /**
+   * How this seat is paid for. A plan wins over the payment method, because the
+   * method stops meaning anything once a plan is covering the fare — same
+   * precedence the financial report uses.
+   */
+  funding: 'subscription' | 'wallet' | 'cash';
   boarded_at: string | null;
   dropoff_confirmed_at: string | null;
   boarding_code: string | null;

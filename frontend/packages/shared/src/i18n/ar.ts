@@ -12,7 +12,6 @@ export const ar = {
     loadMore: 'تحميل المزيد',
     loading: 'جارٍ التحميل...',
     error: 'حدث خطأ',
-    unlimited: 'غير محدود',
     loadFailed: 'تعذّر تحميل البيانات. تحقّق من اتصالك وحاول مجدداً.',
 
     /*
@@ -397,6 +396,11 @@ export const ar = {
     endsAt: 'ينتهي',
     dayUnit: 'يوم',
     currency: 'د.أ',
+    perRide: 'للرحلة',
+    noPlanTitle: 'بدون باقة — ادفع لكل رحلة',
+    noPlanBody: 'احجز أي رحلة وادفع أجرتها من محفظتك أو نقداً للكابتن. بلا التزام وبلا مدة.',
+    noPlanCta: 'ابحث عن رحلة',
+    planIsOptional: 'الباقة توفير، لا شرط. تقدر تحجز بدونها في أي وقت.',
   },
   checkout: {
     title: 'الاشتراك والدفع',

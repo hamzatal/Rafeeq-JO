@@ -31,7 +31,7 @@ export type OtpPurpose =
   | 'payment'
   | 'change_phone';
 
-export type SubscriptionType = 'weekly' | 'monthly' | 'term';
+export type SubscriptionType = 'daily' | 'weekly' | 'monthly' | 'term';
 
 export type SubscriptionStatus = 'pending' | 'active' | 'expired' | 'cancelled';
 
