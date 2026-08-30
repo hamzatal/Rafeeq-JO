@@ -1,0 +1,176 @@
+[
+  {
+    "slug": "login",
+    "path": "/login",
+    "title": "تسجيل الدخول",
+    "bytes": 1510626
+  },
+  {
+    "slug": "dashboard",
+    "path": "/",
+    "title": "لوحة القيادة",
+    "bytes": 112911
+  },
+  {
+    "slug": "ride-requests",
+    "path": "/ride-requests",
+    "title": "الطلبات الحيّة",
+    "bytes": 54155
+  },
+  {
+    "slug": "trips",
+    "path": "/trips",
+    "title": "الرحلات",
+    "bytes": 80510
+  },
+  {
+    "slug": "drivers",
+    "path": "/drivers",
+    "title": "الكباتن والتوثيق",
+    "bytes": 95046
+  },
+  {
+    "slug": "users",
+    "path": "/users",
+    "title": "المستخدمون",
+    "bytes": 147966
+  },
+  {
+    "slug": "payments",
+    "path": "/payments",
+    "title": "المدفوعات",
+    "bytes": 55968
+  },
+  {
+    "slug": "withdrawals",
+    "path": "/withdrawals",
+    "title": "السحوبات",
+    "bytes": 59009
+  },
+  {
+    "slug": "reports",
+    "path": "/reports",
+    "title": "التقارير المالية",
+    "bytes": 116137
+  },
+  {
+    "slug": "pricing",
+    "path": "/pricing",
+    "title": "التعرفة والتسعير",
+    "bytes": 114793
+  },
+  {
+    "slug": "zone-prices",
+    "path": "/zone-prices",
+    "title": "مصفوفة أسعار المناطق",
+    "bytes": 151983
+  },
+  {
+    "slug": "plans",
+    "path": "/plans",
+    "title": "الباقات",
+    "bytes": 86544
+  },
+  {
+    "slug": "subscriptions",
+    "path": "/subscriptions",
+    "title": "الاشتراكات",
+    "bytes": 94014
+  },
+  {
+    "slug": "coupons",
+    "path": "/coupons",
+    "title": "الكوبونات",
+    "bytes": 107807
+  },
+  {
+    "slug": "routes",
+    "path": "/routes",
+    "title": "المسارات",
+    "bytes": 62511
+  },
+  {
+    "slug": "zones",
+    "path": "/zones",
+    "title": "المناطق",
+    "bytes": 108198
+  },
+  {
+    "slug": "universities",
+    "path": "/universities",
+    "title": "الجامعات",
+    "bytes": 118988
+  },
+  {
+    "slug": "safety",
+    "path": "/safety",
+    "title": "السلامة و SOS",
+    "bytes": 62382
+  },
+  {
+    "slug": "disputes",
+    "path": "/disputes",
+    "title": "التنازعات",
+    "bytes": 63479
+  },
+  {
+    "slug": "complaints",
+    "path": "/complaints",
+    "title": "الشكاوى",
+    "bytes": 106012
+  },
+  {
+    "slug": "support",
+    "path": "/support",
+    "title": "الدعم",
+    "bytes": 53874
+  },
+  {
+    "slug": "notifications",
+    "path": "/notifications",
+    "title": "الإشعارات والبثّ",
+    "bytes": 105273
+  },
+  {
+    "slug": "ads",
+    "path": "/ads",
+    "title": "الإعلانات",
+    "bytes": 61768
+  },
+  {
+    "slug": "cliq",
+    "path": "/cliq",
+    "title": "إعداد CliQ",
+    "bytes": 69004
+  },
+  {
+    "slug": "security",
+    "path": "/security",
+    "title": "الأمن",
+    "bytes": 68437
+  },
+  {
+    "slug": "audit",
+    "path": "/audit",
+    "title": "سجلّ التدقيق",
+    "bytes": 78323
+  },
+  {
+    "slug": "admins",
+    "path": "/admins",
+    "title": "المدراء والأدوار",
+    "bytes": 60032
+  },
+  {
+    "slug": "insights",
+    "path": "/insights",
+    "title": "التحليلات",
+    "bytes": 138801
+  },
+  {
+    "slug": "profile",
+    "path": "/profile",
+    "title": "ملفّي",
+    "bytes": 72861
+  }
+]
