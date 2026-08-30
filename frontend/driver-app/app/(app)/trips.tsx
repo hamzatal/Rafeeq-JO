@@ -63,18 +63,16 @@ export default function DriverTrips() {
       <View style={s.header}>
         <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
         <Text style={s.brand}>رفيق</Text>
-        {/*
-          A View, not a Pressable.
-        
-          This was a `<Pressable>` with NO `onPress` — five of them across the captain app.
-          A screen reader announced "button" and activating it did nothing, and a sighted
-          user tapped a bell that never opened anything, because the captain app has no
-          notifications screen to open. Phase 9 either adds that screen or drops the bell;
-          until then it is chrome and says so.
-        */}
-        <View style={s.headerBtn}>
+        {/* A Pressable again, because there is finally an inbox behind it. */}
+        <Pressable
+          onPress={() => router.push('/(app)/notifications')}
+          accessibilityRole="button"
+          accessibilityLabel={t('notifications.title')}
+          hitSlop={8}
+          style={s.headerBtn}
+        >
           <Icon name="bell" size={24} color={theme.colors.primary} />
-        </View>
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>{t('driver.myTrips')}</Text>

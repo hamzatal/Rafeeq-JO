@@ -27,10 +27,14 @@ const ROUTES: Record<string, string> = {
   dropoff_confirmed: '/(app)/trips',
   trip_completed: '/(app)/earnings',
   payment_approved: '/(app)/earnings',
-  payment_rejected: '/(app)/invoices',
-  payment_under_review: '/(app)/invoices',
+  /* Was '/(app)/invoices', which is now a section of the one money screen. These
+     two taps were the ONLY way to reach that screen — nothing in either app linked
+     to it — so repointing them is what keeps a rejected top-up reachable at all. */
+  payment_rejected: '/(app)/earnings',
+  payment_under_review: '/(app)/earnings',
   wallet_credited: '/(app)/earnings',
-  account_frozen: '/(app)/settings',
+  /* Was '/(app)/settings', merged into '/(app)/account'. */
+  account_frozen: '/(app)/account',
   general: '/(app)/dashboard',
 };
 

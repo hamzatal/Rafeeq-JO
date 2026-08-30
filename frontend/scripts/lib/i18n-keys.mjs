@@ -158,12 +158,13 @@ export function dictionaryKeys(source = readFileSync(DICTIONARY, 'utf8')) {
 }
 
 /**
- * Every dotted path the consuming code mentions, mapped to where it was seen.
+ * Scan the consuming trees, collecting key-shaped strings that `pattern` matches.
  *
  * @param {Set<string>} namespaces top-level namespaces, from `dictionaryKeys()`
+ * @param {RegExp} pattern must capture the dotted path in group 1
  * @returns {Map<string, string[]>} key → `file:line` sites, repo-relative
  */
-export function referencedKeys(namespaces) {
+function scan(namespaces, pattern) {
   /** @type {Map<string, string[]>} */
   const refs = new Map();
 
@@ -173,7 +174,7 @@ export function referencedKeys(namespaces) {
       if (file.includes(`${join('src', 'i18n')}${'/'}`) || file.includes('/src/i18n/')) continue;
 
       const src = readFileSync(file, 'utf8');
-      for (const m of src.matchAll(/['"`]([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+)['"`]/g)) {
+      for (const m of src.matchAll(pattern)) {
         const key = m[1];
         const segments = key.split('.');
         if (!namespaces.has(segments[0])) continue;
@@ -187,6 +188,36 @@ export function referencedKeys(namespaces) {
   }
 
   return refs;
+}
+
+/**
+ * Every dotted path the consuming code MENTIONS anywhere — in a call, a lookup table,
+ * a variable, or a comment.
+ *
+ * Used by the dead-key direction, where over-collecting is the safe error: it can
+ * leave a genuinely dead key in the dictionary (harmless) and can never delete a live
+ * one (a user-visible lie).
+ */
+export function referencedKeys(namespaces) {
+  return scan(namespaces, /['"`]([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+)['"`]/g);
+}
+
+/**
+ * Every dotted path the code actually ASKS `t()` for.
+ *
+ * Narrower than `referencedKeys` on purpose, and the asymmetry is the point. The
+ * broad scan matched `'payments.mine'` inside a comment about an API method and
+ * `'wallet.available_fils'` inside a comment about a field, and reported both as
+ * missing translations — a gate failing on prose is a gate that gets switched off.
+ *
+ * So the two directions err in opposite, safe ways:
+ *
+ *   dead:    over-collect  → at worst keeps a dead key
+ *   missing: under-collect → at worst misses one that is built dynamically,
+ *                            which the DYNAMIC_* lists already cover
+ */
+export function requestedKeys(namespaces) {
+  return scan(namespaces, /\bt\(\s*['"`]([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)+)['"`]/g);
 }
 
 /** True when `key` is addressed by a computed namespace or a computed suffix. */
@@ -211,7 +242,7 @@ export function missingKeys() {
   const { leaves, namespaces, containers } = dictionaryKeys();
   const found = [];
 
-  for (const [key, sites] of referencedKeys(namespaces)) {
+  for (const [key, sites] of requestedKeys(namespaces)) {
     if (leaves.has(key) || containers.has(key) || isDynamic(key)) continue;
     found.push({ key, sites });
   }

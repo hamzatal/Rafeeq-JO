@@ -64,6 +64,15 @@ export class DriverApi {
     return unwrap(data);
   }
 
+  async updateVehicle(id: string, payload: VehiclePayload): Promise<Vehicle> {
+    const { data } = await this.http.patch<ApiSuccess<Vehicle>>(ENDPOINTS.driver.vehicle(id), payload);
+    return unwrap(data);
+  }
+
+  async deleteVehicle(id: string): Promise<void> {
+    await this.http.delete(ENDPOINTS.driver.vehicle(id));
+  }
+
   /**
    * Ping the captain's live location to the backend (safety / availability).
    * Best-effort: callers should ignore failures so it never breaks the UI.

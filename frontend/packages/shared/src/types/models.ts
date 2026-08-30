@@ -268,11 +268,36 @@ export interface Wallet {
   /** balance − held. THIS is what a spend is checked against. */
   available_fils: number;
   available_jod: number;
+  /**
+   * Outstanding cash commission. Zero for a student.
+   *
+   * A captain past `max_captain_debt_fils` stops receiving trips, and until now no
+   * endpoint reported the number that ceiling is measured against.
+   */
+  debt_fils: number;
   currency: string;
 }
 
+/**
+ * Every case of the backend's `WalletTxnType`.
+ *
+ * This listed six of eleven. `reward_redemption`, `subscription_payment`,
+ * `guarantee` and the two subscription-treasury legs were all absent, so a ledger row
+ * of any of those types was a value the type said could not exist — and
+ * `txnVisual(tx.type)` narrowing over it typechecked while being wrong.
+ */
 export type WalletTxnType =
-  | 'topup' | 'ride_payment' | 'refund' | 'commission' | 'payout' | 'adjustment';
+  | 'topup'
+  | 'ride_payment'
+  | 'refund'
+  | 'commission'
+  | 'payout'
+  | 'reward_redemption'
+  | 'subscription_payment'
+  | 'subscription_sale'
+  | 'subscription_ride'
+  | 'guarantee'
+  | 'adjustment';
 
 export interface WalletTransaction {
   id: string;
@@ -664,7 +689,17 @@ export interface DriverPerformance {
   next_tier_label: string | null;
   points_to_next: number;
   progress_percent: number;
+  /** Withdrawable balance. Cumulative, and survives a withdrawal. */
   available_earnings_fils: number;
+  /**
+   * Earned TODAY — a window, not a balance.
+   *
+   * The dashboard rendered `available_earnings_fils` under «أرباح اليوم», so a captain
+   * who withdrew yesterday saw zero and one who had not withdrawn all week saw a
+   * week's work as one day's.
+   */
+  today_earnings_fils: number;
+  today_trips: number;
   rating: number;
   total_trips: number;
 }

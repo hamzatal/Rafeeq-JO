@@ -8,7 +8,7 @@
  * `lucide-react-native` exports ~1777 individual components and no lookup
  * map. `import * as Lucide` then indexing it works, but Metro does not tree-shake a
  * namespace import — so the whole library would ship in the app bundle to render the
- * 90 icons this product actually uses.
+ * 89 icons this product actually uses.
  *
  * Generating the list also makes a bad name a COMPILE error instead of a blank space.
  * The old Feather wrapper typed its name as `keyof typeof Feather.glyphMap`, which
@@ -37,7 +37,6 @@ import {
   Calendar,
   Camera,
   Car,
-  ChartColumn,
   Check,
   ChevronDown,
   ChevronLeft,
@@ -63,6 +62,7 @@ import {
   EyeOff,
   FileText,
   Funnel,
+  Gauge,
   Gift,
   Globe,
   GraduationCap,
@@ -94,7 +94,6 @@ import {
   RefreshCw,
   Search,
   Send,
-  Settings,
   Shield,
   SlidersHorizontal,
   Smartphone,
@@ -130,7 +129,6 @@ export const ICON_REGISTRY = {
   'calendar': Calendar,
   'camera': Camera,
   'car': Car,
-  'chart-column': ChartColumn,
   'check': Check,
   'chevron-down': ChevronDown,
   'chevron-left': ChevronLeft,
@@ -156,6 +154,7 @@ export const ICON_REGISTRY = {
   'eye-off': EyeOff,
   'file-text': FileText,
   'funnel': Funnel,
+  'gauge': Gauge,
   'gift': Gift,
   'globe': Globe,
   'graduation-cap': GraduationCap,
@@ -187,7 +186,6 @@ export const ICON_REGISTRY = {
   'refresh-cw': RefreshCw,
   'search': Search,
   'send': Send,
-  'settings': Settings,
   'shield': Shield,
   'sliders-horizontal': SlidersHorizontal,
   'smartphone': Smartphone,

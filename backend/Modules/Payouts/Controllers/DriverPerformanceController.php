@@ -40,6 +40,7 @@ class DriverPerformanceController extends Controller
         $account = $this->rewards->account($user);
         $wallet = $this->wallets->forUser($user);
         $profile = DriverProfile::where('user_id', $user->id)->first();
+        $today = $this->earnings->summary($user)['totals'];
 
         $lifetime = (int) $account->lifetime_points;
         $tier = $account->tier ?? RewardTier::Bronze;
@@ -60,6 +61,23 @@ class DriverPerformanceController extends Controller
             'points_to_next' => $nextTier === null ? 0 : max(0, $nextThreshold - $lifetime),
             'progress_percent' => $progress,
             'available_earnings_fils' => $this->wallets->availableBalance($wallet),
+
+            /*
+             * TODAY, sent separately — because the dashboard was rendering
+             * `available_earnings_fils` under the label «أرباح اليوم».
+             *
+             * Those are different quantities and the difference is not subtle: a captain
+             * who withdrew yesterday saw today's earnings as zero, and one who had not
+             * withdrawn all week saw a week's work reported as one day's. The balance is
+             * cumulative and survives withdrawal; today's earnings are a window.
+             *
+             * `EarningsService::summary` already computed both, on an endpoint the
+             * dashboard did not call. Sending them here costs one query and removes the
+             * temptation to reach for whichever number is already in scope.
+             */
+            'today_earnings_fils' => $today['today_fils'],
+            'today_trips' => $today['today_trips'],
+
             'rating' => (float) ($profile->rating_avg ?? 0),
             'total_trips' => (int) ($profile->total_trips ?? 0),
         ]);

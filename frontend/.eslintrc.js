@@ -50,19 +50,7 @@ const GRANDFATHERED_RAW_TEXT = [
   'student-app/app/(auth)/register.tsx',
   'student-app/app/(onboarding)/profile-setup.tsx',
   'driver-app/app/(app)/dashboard.tsx',
-  'driver-app/app/(app)/documents.tsx',
-  'driver-app/app/(app)/earnings-detail.tsx',
-  'driver-app/app/(app)/earnings.tsx',
-  'driver-app/app/(app)/invoices.tsx',
-  'driver-app/app/(app)/offers.tsx',
-  'driver-app/app/(app)/profile.tsx',
-  'driver-app/app/(app)/settings.tsx',
-  /* `[id]` is a glob character class, so it must be escaped or the file is
-     silently NOT matched — which is how this one error survived the first run. */
-  'driver-app/app/(app)/trip/*.tsx',
   'driver-app/app/(app)/trips.tsx',
-  'driver-app/app/(app)/vehicle.tsx',
-  'driver-app/app/(app)/withdraw.tsx',
   'driver-app/app/(auth)/otp.tsx',
   'driver-app/app/(auth)/register.tsx',
 ];
