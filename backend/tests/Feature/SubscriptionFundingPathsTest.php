@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
 use Rafeeq\Core\Support\Clock;
 use Rafeeq\Modules\Auth\Models\User;
@@ -239,10 +240,17 @@ class SubscriptionFundingPathsTest extends TestCase
      */
     public function test_every_seeded_plan_can_pay_the_captains_it_promises(): void
     {
-        // DemoSeeder refuses without DEMO_SEED_PASSWORD — it has no default since the
-        // published literal was removed from it. Provide one for this test only.
-        putenv('DEMO_SEED_PASSWORD=test-seed-password');
-        $_ENV['DEMO_SEED_PASSWORD'] = 'test-seed-password';
+        /*
+         * DemoSeeder refuses without `DEMO_SEED_PASSWORD` — it has no default since the
+         * published literal was removed from it.
+         *
+         * Set through `Env::getRepository()`, which is what `env()` actually reads.
+         * `putenv()` plus `$_ENV` happened to work locally and did NOT work on CI: once
+         * Dotenv has loaded, its repository is the source `env()` consults, and a bare
+         * `putenv` is invisible to it. A test that passes on one machine because of how
+         * that machine's environment was populated is not a test.
+         */
+        Env::getRepository()->set('DEMO_SEED_PASSWORD', 'test-only-seed-password');
 
         $this->seed(DemoSeeder::class);
 
