@@ -77,6 +77,10 @@ export const ENDPOINTS = {
     documents: '/driver/documents',
     submit: '/driver/submit',
     vehicles: '/driver/vehicles',
+    /* PATCH and DELETE have existed on the backend since the Drivers module did.
+       Nothing in either app could reach them, so a mistyped plate was permanent —
+       and a trip will not start with a car whose plate is not the authorised one. */
+    vehicle: (id: string) => `/driver/vehicles/${id}`,
     performance: '/driver/performance',
     earningsSummary: '/driver/earnings-summary',
     withdrawals: '/driver/wallet/withdrawals',
@@ -229,6 +233,18 @@ export const ENDPOINTS = {
  * is deliberate and is why neither number should be a literal at a call site.
  */
 export const OTP_LENGTH = 6;
+
+/**
+ * Digits in a trip boarding / drop-off code. Mirrors `TripCode::LENGTH`.
+ *
+ * Its own constant, and not `OTP_LENGTH`, because the two are different things that
+ * happen to be the same number today: one is an SMS login code, the other is what a
+ * student reads out to a captain. Reusing `OTP_LENGTH` would mean changing the login
+ * code length silently changes the boarding code length — and the captain's input had
+ * already drifted to `maxLength 6` with a four-dash placeholder and a `>= 4` guard
+ * precisely because nothing owned this number.
+ */
+export const TRIP_CODE_LENGTH = 6;
 
 /**
  * The captain tier ladder, in order.

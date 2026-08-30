@@ -46,7 +46,7 @@ class SubscriptionStatusTool implements AssistantTool
             'active' => true,
             'plan' => $sub->plan?->name,
             'status' => $sub->status->value,
-            'remaining_rides' => $sub->remaining_rides === null ? 'غير محدود' : $sub->remaining_rides,
+            'remaining_rides' => (int) $sub->remaining_rides,
             'ends_at' => $sub->ends_at?->toDateString(),
             'usable' => $sub->isUsable(),
         ];

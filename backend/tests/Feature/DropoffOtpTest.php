@@ -14,12 +14,14 @@ use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Services\TripService;
 use Rafeeq\Modules\Universities\Models\University;
+use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\SubscriptionStatus;
 use Rafeeq\Shared\Enums\SubscriptionType;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
+use Rafeeq\Shared\Enums\WalletTxnType;
 use Tests\TestCase;
 
 /**
@@ -86,6 +88,22 @@ class DropoffOtpTest extends TestCase
             'ends_at' => now()->addDays(29),
             'remaining_rides' => 30,
         ]);
+
+        /*
+         * The plan was paid for, so the treasury is holding the money.
+         *
+         * A subscription seat pays the captain OUT OF the plan price (see the
+         * subscription branch of `RideBillingService::chargeForBoarding`), and the
+         * treasury cannot be overdrawn. This fixture used to create an active
+         * subscription with no payment behind it anywhere, which was only survivable
+         * while a plan ride minted the captain's share out of nothing — so boarding
+         * here would now, correctly, refuse.
+         *
+         * Credited directly rather than through `payWithWallet` because these tests are
+         * about the drop-off OTP, not about how a plan is bought.
+         */
+        $wallets = app(WalletService::class);
+        $wallets->credit($wallets->platform(), $plan->price_fils, WalletTxnType::SubscriptionSale, 'بيع باقة');
 
         return [$student, $sub];
     }

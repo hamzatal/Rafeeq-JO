@@ -27,6 +27,32 @@ enum WalletTxnType: string
      */
     case Guarantee = 'guarantee';
 
+    /**
+     * The two sides of a prepaid plan — and the hole they were opened to close.
+     *
+     * A subscription used to be money that appeared and disappeared:
+     *
+     *   • buying one DEBITED the student and credited nobody, so the plan price
+     *     left the ledger entirely — `payWithWallet` destroyed it,
+     *   • riding on one CREDITED the captain their share and credited the platform
+     *     its commission with nothing debited anywhere, so every subscription seat
+     *     minted the whole fare out of nothing.
+     *
+     * With the demo plans that was 7 000 fils destroyed and 12 × 1 500 = 18 000
+     * created per weekly subscriber: 11 000 fils of unbacked balance a captain
+     * could then withdraw over CliQ as real money. `LedgerZeroSumTest` asserted
+     * conservation for a wallet ride and a cash ride, and no test covered this path,
+     * so the books balanced everywhere anyone was looking.
+     *
+     * `SubscriptionSale` is the treasury RECEIVING the plan price. `SubscriptionRide`
+     * is the treasury PAYING a captain out of it. Distinct types rather than
+     * `Topup`/`Payout` because the question they answer — "is the prepaid liability
+     * still covered?" — is `sum(SubscriptionSale) - sum(SubscriptionRide)`, and that
+     * is only answerable if the two legs are countable on their own.
+     */
+    case SubscriptionSale = 'subscription_sale';
+    case SubscriptionRide = 'subscription_ride';
+
     public function labelAr(): string
     {
         return match ($this) {
@@ -37,6 +63,8 @@ enum WalletTxnType: string
             self::Payout => 'تحويل للكابتن',
             self::RewardRedemption => 'استبدال نقاط',
             self::SubscriptionPayment => 'دفع اشتراك',
+            self::SubscriptionSale => 'بيع باقة',
+            self::SubscriptionRide => 'رحلة من باقة',
             self::Adjustment => 'تسوية',
             self::Guarantee => 'ضمان الحدّ الأدنى',
         };
@@ -52,6 +80,8 @@ enum WalletTxnType: string
             self::Payout => 'Captain payout',
             self::RewardRedemption => 'Points redemption',
             self::SubscriptionPayment => 'Subscription payment',
+            self::SubscriptionSale => 'Plan sale',
+            self::SubscriptionRide => 'Plan ride',
             self::Adjustment => 'Adjustment',
             self::Guarantee => 'Minimum guarantee',
         };

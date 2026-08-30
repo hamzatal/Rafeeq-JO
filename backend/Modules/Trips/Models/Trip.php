@@ -34,6 +34,8 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property Carbon|null $started_at
  * @property Carbon|null $ended_at
  * @property int $capacity
+ * @property int $code_attempts Wrong confirmation codes this trip has absorbed.
+ *                              Reset by the next successful confirmation; see TripCode::MAX_ATTEMPTS.
  * @property bool $is_solo A whole-car booking: one passenger by construction, and its own fare.
  * @property-read DriverProfile|null $driver
  * @property-read Vehicle|null $vehicle
@@ -45,13 +47,14 @@ class Trip extends Model
     protected $fillable = [
         'route_id', 'driver_id', 'vehicle_id', 'zone_id', 'university_id', 'type', 'direction',
         'is_express', 'is_solo', 'fare_fils', 'base_fare_fils', 'express_fee_fils', 'surge_multiplier',
-        'scheduled_at', 'status', 'started_at', 'ended_at', 'capacity',
+        'scheduled_at', 'status', 'started_at', 'ended_at', 'capacity', 'code_attempts',
     ];
 
     protected function casts(): array
     {
         return [
             'status' => TripStatus::class,
+            'code_attempts' => 'integer',
             'is_solo' => 'boolean',
             'direction' => RideDirection::class,
             'scheduled_at' => 'datetime',

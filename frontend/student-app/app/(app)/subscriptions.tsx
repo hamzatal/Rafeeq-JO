@@ -43,7 +43,7 @@ export default function Subscriptions() {
         planId: p.id,
         name: p.name,
         priceFils: String(p.price_fils),
-        includes: p.unlimited ? t('common.unlimited') : `${p.rides_count} ${t('subscriptions.rideWord')}`,
+        includes: `${p.rides_count} ${t('subscriptions.rideWord')}`,
       },
     });
   };
@@ -52,6 +52,38 @@ export default function Subscriptions() {
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>{t('subscriptions.title')}</Text>
+        <Text style={s.optional}>{t('subscriptions.planIsOptional')}</Text>
+
+        {/*
+          Paying per ride is an OPTION on this screen, not the absence of one.
+
+          Booking used to require an active plan on the route, so this screen was the
+          turnstile and «no plan» was simply the state of not being allowed in. That
+          rule is gone (see `TripService::book`), which means the honest thing is to
+          put the alternative on the same screen, in the same shape as the plans, so a
+          student who needs three rides can see that buying a week is not the only door.
+
+          It sits ABOVE the plans deliberately: it is the default, and the plans are
+          the upsell.
+        */}
+        <Pressable
+          onPress={() => router.push('/(app)/home')}
+          accessibilityRole="button"
+          accessibilityLabel={t('subscriptions.noPlanCta')}
+          style={({ pressed }) => [s.noPlanCard, pressed && { opacity: 0.9 }]}
+        >
+          <View style={s.noPlanHead}>
+            <View style={s.noPlanIcon}>
+              <Icon name="credit-card" size={20} color={theme.colors.primary} />
+            </View>
+            <Text style={s.noPlanTitle}>{t('subscriptions.noPlanTitle')}</Text>
+          </View>
+          <Text style={s.noPlanBody}>{t('subscriptions.noPlanBody')}</Text>
+          <View style={s.noPlanCta}>
+            <Text style={s.noPlanCtaText}>{t('subscriptions.noPlanCta')}</Text>
+            <Icon name="chevron-left" size={16} color={theme.colors.primary} />
+          </View>
+        </Pressable>
 
         {subs.length > 0 && (
           <>
@@ -73,7 +105,7 @@ export default function Subscriptions() {
                 <View style={s.premiumStats}>
                   <View style={{ flex: 1 }}>
                     <Text style={s.pStatLabel}>{t('subscriptions.rideUnit')}</Text>
-                    <Num style={s.pStatValue} value={sub.remaining_rides === null ? '∞' : sub.remaining_rides} />
+                    <Num style={s.pStatValue} value={sub.remaining_rides} />
                   </View>
                   <View style={s.pDivider} />
                   <View style={{ flex: 1 }}>
@@ -112,11 +144,20 @@ export default function Subscriptions() {
                   </View>
                   <View style={s.metaTag}>
                     <Icon name="navigation" size={12} color={theme.colors.textSecondary} />
-                    <Text style={s.metaTagText}>{p.unlimited ? t('common.unlimited') : `${p.rides_count} ${t('subscriptions.rideWord')}`}</Text>
+                    <Text style={s.metaTagText}>{p.rides_count} {t('subscriptions.rideWord')}</Text>
                   </View>
                   <View style={s.metaTag}>
                     <Icon name="calendar" size={12} color={theme.colors.textSecondary} />
                     <Text style={s.metaTagText}>{p.duration_days} {t('subscriptions.dayUnit')}</Text>
+                  </View>
+                  {/* The number that makes a plan comparable to the fare on the ride
+                      card. «23 dinars for 12 rides» is not a comparison anyone can do
+                      in their head; «1.375 per ride» is. */}
+                  <View style={[s.metaTag, s.metaTagAccent]}>
+                    <Icon name="tag" size={12} color={theme.colors.primary} />
+                    <Text style={[s.metaTagText, s.metaTagTextAccent]}>
+                      {bareJod(p.price_per_ride_fils)} {t('subscriptions.currency')} {t('subscriptions.perRide')}
+                    </Text>
                   </View>
                 </View>
                 <Pressable
@@ -167,6 +208,17 @@ const makeStyles = (t: AppTheme) =>
     planMetaRow: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: 8, marginBottom: t.spacing.md },
     metaTag: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, backgroundColor: t.colors.background, paddingHorizontal: 8, paddingVertical: 4, borderRadius: t.radius.pill },
     metaTagText: { fontFamily: t.fontFamily.medium, fontSize: 11, color: t.colors.textSecondary },
+    metaTagAccent: { backgroundColor: t.colors.primarySoft },
+    metaTagTextAccent: { color: t.colors.primary },
     subBtn: { backgroundColor: t.colors.primary, height: 46, borderRadius: t.radius.card, alignItems: 'center', justifyContent: 'center' },
+
+    optional: { ...t.type.body, color: t.colors.textSecondary, textAlign: 'right', marginBottom: t.spacing.base },
+    noPlanCard: { backgroundColor: t.colors.card, borderRadius: t.radius.sheet, borderWidth: 1, borderColor: t.colors.primarySoft, borderStyle: 'dashed', padding: t.spacing.base, marginBottom: t.spacing.lg },
+    noPlanHead: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md },
+    noPlanIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: t.colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    noPlanTitle: { ...t.type.titleMd, flex: 1, color: t.colors.text, textAlign: 'right' },
+    noPlanBody: { ...t.type.body, color: t.colors.textSecondary, textAlign: 'right', marginTop: t.spacing.sm },
+    noPlanCta: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4, alignSelf: 'flex-end', marginTop: t.spacing.sm },
+    noPlanCtaText: { ...t.type.body, fontFamily: t.fontFamily.bold, color: t.colors.primary },
     subBtnText: { fontFamily: t.fontFamily.bold, fontSize: 15, color: t.colors.onPrimary },
   });

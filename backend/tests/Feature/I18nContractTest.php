@@ -5,14 +5,38 @@ namespace Tests\Feature;
 use Tests\TestCase;
 
 /**
- * Living i18n completeness guard (Phase 5 — integration health).
+ * The ar/en dictionaries agree with each other, and the admin dictionary has every
+ * key the admin asks for.
  *
- * A `t('some.key')` that points at a missing translation silently renders the
- * raw key in the UI (a visible bug). TypeScript can't catch it because `t()`
- * takes an arbitrary string. This test parses the shared/admin translation
- * dictionaries and every `t('literal')` usage across the apps, then asserts:
- *   1. the shared ar/en key sets are identical (no half-translated key), and
- *   2. every statically-used key actually exists.
+ * ── What used to live here, and why it does not any more ──────────────────────
+ *
+ * This class also owned two checks over the MOBILE dictionary — "every key the apps
+ * use exists" and "no key is unread". Both are now gates in
+ * `frontend/scripts/check-invariants.mjs`, over a shared collector in
+ * `frontend/scripts/lib/i18n-keys.mjs`.
+ *
+ * That move is not tidying. The unread check as written here is what deleted 42 LIVE
+ * translation keys. Every one of them was reached through a lookup table:
+ *
+ *     const statusMeta = { pending: { key: 'driver.statusPending', … } };
+ *     …
+ *     t(meta.key)
+ *
+ * `usedIn()` matches `t('literal')` and a template-literal prefix, and neither shape
+ * is that one — so it called them dead. The apps then shipped with
+ * `payments.receiptHeading` printed as the title of the PDF receipt and
+ * `common.crashTitle` as the heading of the crash screen. Nothing failed, because
+ * `t()` returns the key itself on a miss.
+ *
+ * The deeper fault was having TWO implementations of one question. "Is this key dead?"
+ * and "is this key missing?" are exact complements, and they were answered by
+ * different code, in different languages, with different notions of what counts as a
+ * reference — so they could disagree, and did. There is now one collector and the two
+ * gates are its two directions, which makes disagreement unrepresentable rather than
+ * merely unlikely.
+ *
+ * What remains here is what that gate does not cover: ar/en parity, and the admin
+ * dashboard's own flat dictionary.
  *
  * Skips gracefully when the frontend workspace is not checked out.
  */
@@ -172,24 +196,6 @@ class I18nContractTest extends TestCase
         $this->assertSame([], $missingInAr, 'keys in en missing from ar: '.implode(', ', $missingInAr));
     }
 
-    public function test_mobile_apps_only_use_existing_translation_keys(): void
-    {
-        $arPath = $this->fe('packages/shared/src/i18n/ar.ts');
-        if (! is_file($arPath)) {
-            $this->markTestSkipped('frontend workspace not present');
-        }
-
-        $ar = $this->parseNested(file_get_contents($arPath));
-        $files = array_merge($this->sources($this->fe('student-app/app')), $this->sources($this->fe('student-app/src')), $this->sources($this->fe('driver-app/app')), $this->sources($this->fe('driver-app/src')));
-        [$used, $prefixes] = $this->usedIn($files);
-        $this->assertNotEmpty($used, 'expected to find t() usages');
-
-        $missing = array_keys(array_diff_key($used, $ar));
-        $this->assertSame([], $missing, "mobile t('key') referencing missing translations:\n".implode("\n", $missing));
-
-        $this->assertNamespacesExist($prefixes, $ar, 'mobile');
-    }
-
     public function test_admin_only_uses_existing_translation_keys(): void
     {
         $i18n = $this->fe('admin-dashboard/src/lib/i18n.ts');
@@ -207,68 +213,5 @@ class I18nContractTest extends TestCase
         $this->assertSame([], $missing, "admin t('key') referencing missing translations:\n".implode("\n", $missing));
 
         $this->assertNamespacesExist($prefixes, $defined, 'admin');
-    }
-
-    /**
-     * No translation without a reader.
-     *
-     * ── Why an UNUSED key is worth failing a build over ─────────────────────
-     *
-     * A dead translation is not inert: it is the SHAPE OF A FEATURE. `rewards.*` carried
-     * eleven keys describing a points screen that does not exist, `payout.*` eight for a
-     * payout screen the captain app never built, `performance.*` seven more. The next
-     * person to touch that area builds around the strings instead of around the data —
-     * which is how the dictionary came to hold 152 dead keys out of 660 while every
-     * other gate was green.
-     *
-     * ── Why an allow-list rather than cleverness ────────────────────────────
-     *
-     * A key reached only through `t(`ns.${x}`)` cannot be proven used, and guessing
-     * would either miss real dead keys or fail on live ones. Naming the dynamic
-     * namespaces explicitly makes the exception auditable: the list is short, every
-     * entry has a call site, and adding to it is a decision someone has to write down.
-     */
-    public function test_no_shared_translation_is_unread(): void
-    {
-        $arPath = $this->fe('packages/shared/src/i18n/ar.ts');
-        if (! is_file($arPath)) {
-            $this->markTestSkipped('frontend workspace not present');
-        }
-
-        /** Namespaces whose leaves are addressed as `t(`ns.${value}`)`. */
-        $dynamic = [
-            'emergency.relation',   // emergency.tsx — the relation chips
-            'home.good',            // home.tsx — greetingKey()
-            'home.label',           // home.tsx / ride-request.tsx — saved-address labels
-            'push',                 // packages/ui/runtime/push.ts — Android channel names
-            'a11y',                 // composed labels, e.g. `${t('a11y.rateStars')} ${n}`
-        ];
-
-        $ar = $this->parseNested(file_get_contents($arPath));
-        $files = array_merge(
-            $this->sources($this->fe('student-app')),
-            $this->sources($this->fe('driver-app')),
-            $this->sources($this->fe('packages')),
-        );
-        [$used, $prefixes] = $this->usedIn($files);
-
-        $unread = [];
-        foreach (array_keys($ar) as $key) {
-            if (isset($used[$key])) {
-                continue;
-            }
-            foreach (array_merge($dynamic, array_keys($prefixes)) as $prefix) {
-                if (str_starts_with($key, $prefix)) {
-                    continue 2;
-                }
-            }
-            $unread[] = $key;
-        }
-
-        $this->assertSame(
-            [],
-            $unread,
-            count($unread)." translation key(s) nothing reads. Delete them, or wire the screen they describe:\n".implode("\n", $unread),
-        );
     }
 }

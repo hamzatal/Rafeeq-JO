@@ -55,7 +55,7 @@ class SubscriptionPlansTool implements AssistantTool
                 'name' => $p->name,
                 'type' => $p->type->value,
                 'price_jod' => round($p->price_fils / 1000, 2),
-                'rides' => $p->rides_count === null ? 'غير محدود' : $p->rides_count,
+                'rides' => (int) $p->rides_count,
                 'duration_days' => $p->duration_days,
             ])->all(),
         ];

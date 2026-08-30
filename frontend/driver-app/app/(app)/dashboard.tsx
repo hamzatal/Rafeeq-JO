@@ -11,12 +11,24 @@ import { useAuth } from '../../src/store/auth';
 import { useAvailability } from '../../src/store/availability';
 import { api } from '../../src/lib/api';
 
-const statusMeta: Record<DriverStatus, { key: string; tone: 'warning' | 'primary' | 'success' | 'danger' }> = {
-  pending: { key: 'driver.statusPending', tone: 'warning' },
-  under_review: { key: 'driver.statusUnderReview', tone: 'primary' },
-  approved: { key: 'driver.statusApproved', tone: 'success' },
-  rejected: { key: 'driver.statusRejected', tone: 'danger' },
-  suspended: { key: 'driver.statusSuspended', tone: 'danger' },
+/*
+ * TONE only. The LABEL comes from the API.
+ *
+ * This table used to carry a translation key per status, and four of the five keys
+ * did not exist in the dictionary — so an unapproved captain's badge read
+ * «driver.statusPending», because `t()` returns the key when it cannot resolve one.
+ * They were among the 42 keys a dead-key sweep deleted, and nothing failed.
+ *
+ * `DriverProfileResource` has always sent `status_label`, localised server-side by
+ * `SetLocale`. Reading that instead means the label cannot drift from the status, and
+ * there is no key here to delete.
+ */
+const statusTone: Record<DriverStatus, 'warning' | 'primary' | 'success' | 'danger'> = {
+  pending: 'warning',
+  under_review: 'primary',
+  approved: 'success',
+  rejected: 'danger',
+  suspended: 'danger',
 };
 
 export default function Dashboard() {
@@ -40,7 +52,7 @@ export default function Dashboard() {
   const [loc, setLoc] = useState<{ lat: number; lng: number } | null>(null);
 
   const status = driver?.status ?? 'pending';
-  const meta = statusMeta[status];
+  const tone = statusTone[status];
   const canSubmit = status === 'pending' || status === 'rejected';
   const approved = status === 'approved';
 
@@ -86,18 +98,16 @@ export default function Dashboard() {
         <View style={s.avatar}><Text style={s.avatarText}>{initial}</Text></View>
         <Text style={s.brand}>رفيق</Text>
       </View>
-      {/*
-        A View, not a Pressable.
-
-        This was a `<Pressable>` with NO `onPress` — five of them across the captain
-        app. A screen reader announced "button" and activating it did nothing, and a
-        sighted user tapped a bell that never opened anything, because the captain app
-        has no notifications screen to open. Phase 9 either adds that screen or drops
-        the bell; until then it is chrome and says so.
-      */}
-      <View style={s.headerBtn}>
+      {/* A Pressable again, because there is finally an inbox behind it. */}
+      <Pressable
+        onPress={() => router.push('/(app)/notifications')}
+        accessibilityRole="button"
+        accessibilityLabel={t('notifications.title')}
+        hitSlop={8}
+        style={s.headerBtn}
+      >
         <Icon name="bell" size={24} color={theme.colors.primary} />
-      </View>
+      </Pressable>
     </View>
   );
 
@@ -115,8 +125,11 @@ export default function Dashboard() {
           {header}
           {/* Floating status card: online toggle + live stats */}
           <View style={[s.statusCard, online && s.statusCardOn]}>
+            {/* Full width and 60 tall: this is the control the whole screen exists
+                for, and it was a 40pt system switch beside two lines of text. */}
             <View style={s.onlineRow}>
               <Switch
+                style={s.switchScale}
                 value={online}
                 onValueChange={(v) => void setOnline(v)}
                 trackColor={{ true: theme.colors.accent, false: theme.colors.border }}
@@ -130,23 +143,31 @@ export default function Dashboard() {
                 <Text style={s.onlineHint} numberOfLines={1}>{online ? t('driver.onlineHint') : t('driver.offlineHint')}</Text>
               </View>
             </View>
-            <View style={s.statsRow}>
-              <View style={s.stat}>
-                <Text style={s.statVal}>{perf ? jod(perf.available_earnings_fils) : '—'}</Text>
-                <Text style={s.statLbl}>{t('driver.todayEarnings')}</Text>
-              </View>
-              <View style={s.statDivider} />
-              <View style={s.stat}>
+            {/*
+              ONE hero number, and it says what it is.
+
+              This was three equal cells at the same size, so nothing was the answer to
+              «how did today go?». Worse, the first cell rendered
+              `perf.available_earnings_fils` — the withdrawable BALANCE — under the label
+              «أرباح اليوم». A captain who withdrew yesterday saw today's earnings drop to
+              zero, and a captain who had not withdrawn in a week saw a week's work
+              reported as one day's.
+
+              Today's earnings are now `today_earnings_fils`, and the rating and trip
+              count are a secondary line beneath — which is what they are.
+            */}
+            <View style={s.heroWrap}>
+              <Text style={s.heroLabel}>{t('driver.todayEarnings')}</Text>
+              <Text style={s.heroValue}>{perf ? jod(perf.today_earnings_fils) : '—'}</Text>
+              <View style={s.heroMetaRow}>
                 <View style={s.statInline}>
                   <Icon name="star" size={13} color={theme.colors.accent} />
-                  <Text style={s.statVal}>{perf?.rating?.toFixed(1) ?? driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
+                  <Text style={s.statLbl}>{perf?.rating?.toFixed(1) ?? driver?.rating_avg?.toFixed(1) ?? '—'}</Text>
                 </View>
-                <Text style={s.statLbl}>{t('driver.myRating')}</Text>
-              </View>
-              <View style={s.statDivider} />
-              <View style={s.stat}>
-                <Text style={s.statVal}>{perf?.total_trips ?? driver?.total_trips ?? 0}</Text>
-                <Text style={s.statLbl}>{t('driver.myTrips')}</Text>
+                <Text style={s.statLbl}>·</Text>
+                <Text style={s.statLbl}>
+                  {perf?.today_trips ?? 0} {t('driver.tripsShort')}
+                </Text>
               </View>
             </View>
           </View>
@@ -182,7 +203,7 @@ export default function Dashboard() {
         {header}
         <View style={s.statusRow}>
           <Text style={s.dashName} numberOfLines={1}>{user?.full_name ?? t('driver.dashboard')}</Text>
-          <Badge label={t(meta.key)} tone={meta.tone} />
+          <Badge label={driver?.status_label ?? ''} tone={tone} />
         </View>
 
         {status === 'rejected' && driver?.review_note ? <Banner message={driver.review_note} variant="error" /> : null}
@@ -190,8 +211,15 @@ export default function Dashboard() {
 
         <SectionTitle title={t('driver.documents')} />
         <Card style={{ padding: 6 }}>
-          <ListRow icon="file-text" title={t('driver.documents')} subtitle={`${driver?.documents?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/documents')} />
-          <ListRow icon="truck" title={t('driver.vehicle')} subtitle={`${driver?.vehicles?.length ?? 0}`} trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />} onPress={() => router.push('/(app)/vehicle')} />
+          {/* One row, because documents and the vehicle are one task — see
+              (app)/vehicle-docs.tsx, where the vehicle was already step 4 of 4. */}
+          <ListRow
+            icon="file-text"
+            title={t('driver.vehicleAndDocs')}
+            subtitle={`${(driver?.documents?.length ?? 0) + (driver?.vehicles?.length ?? 0)} / 4`}
+            trailing={<Icon name="chevron-left" size={18} color={theme.colors.muted} />}
+            onPress={() => router.push('/(app)/vehicle-docs')}
+          />
         </Card>
 
         {canSubmit ? <Button title={t('driver.submitReview')} onPress={onSubmit} loading={submitting} style={s.submit} /> : null}
@@ -218,13 +246,19 @@ const makeStyles = (t: AppTheme) =>
     overlayTop: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, gap: 12 },
     statusCard: { backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: t.colors.border, gap: 14, ...t.shadow.md },
     statusCardOn: { borderColor: t.colors.accent },
-    onlineRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md },
+    onlineRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, minHeight: 60 },
     onlineTitleRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
     dot: { width: 10, height: 10, borderRadius: 5 },
     onlineTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.text, textAlign: 'right' },
     onlineHint: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary, textAlign: 'right', marginTop: 2 },
 
 
+    onlineRowTall: { minHeight: 60 },
+    switchScale: { transform: [{ scaleX: 1.15 }, { scaleY: 1.15 }] },
+    heroWrap: { alignItems: 'center', paddingTop: 14, gap: 2, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.colors.hairline },
+    heroLabel: { ...t.type.label, color: t.colors.textSecondary },
+    heroValue: { ...t.type.displayMd, color: t.colors.primary },
+    heroMetaRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
     statsRow: { flexDirection: 'row-reverse', alignItems: 'center', paddingTop: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.colors.hairline },
     stat: { flex: 1, alignItems: 'center', gap: 3 },
     statInline: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },

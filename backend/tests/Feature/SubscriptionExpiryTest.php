@@ -37,7 +37,7 @@ class SubscriptionExpiryTest extends TestCase
         $uni = University::create(['name_ar' => 'ج', 'name_en' => 'U', 'code' => 'UJ', 'city' => 'Amman', 'is_active' => true]);
         $this->plan = SubscriptionPlan::create([
             'university_id' => $uni->id, 'name' => 'Monthly', 'type' => 'monthly',
-            'price_fils' => 20000, 'duration_days' => 30, 'is_active' => true,
+            'price_fils' => 20000, 'rides_count' => 20, 'duration_days' => 30, 'is_active' => true,
         ]);
     }
 

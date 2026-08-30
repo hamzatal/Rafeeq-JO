@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════════════════════════
-   Structural invariants — the four things phase 7 established that a future
-   commit could quietly undo.
+   Structural invariants — what a future commit could quietly undo.
+
 
    These are all HARD ZEROS, unlike the budgets in `check-design-tokens.mjs`.
    That difference is deliberate: a budget exists when the debt is real and being
@@ -16,6 +16,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { localeMismatches, missingKeys, unreadKeys } from './lib/i18n-keys.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SKIP = new Set(['node_modules', '.expo', '.next', 'dist', 'build', 'android', 'ios']);
@@ -188,27 +189,104 @@ function gate(id, why, findings) {
   );
 }
 
-/* ── 5. The two apps share no duplicated file ────────────────────────────────
+/* ── 5. The two apps share no duplicated screen ──────────────────────────────
  *
  * Nine files were byte-identical across the two `src/` trees — 1,128 lines,
  * including a 510-line `LiveMap` twice. The cost was not the bytes: it was that
  * nothing compared them, so both tab bars broke the same approved decision in two
  * different ways and neither was right.
+ *
+ * ── Both ways this check used to be blind ───────────────────────────────────
+ *
+ * It compared BYTES, under `src/` ONLY. So it reported zero while eight pairs of
+ * route files sat under `app/`, and it would have kept reporting zero if they had
+ * been reformatted:
+ *
+ *   app/_layout.tsx        115 + 109 lines whose only difference was WHITESPACE
+ *   (app)/chat.tsx         161 + 161, byte-identical
+ *   (onboarding)/permissions.tsx  169 + 168, two differing lines
+ *   (auth)/login.tsx       107 + 109, and the two had already drifted into
+ *                          validating a phone number differently
+ *
+ * Byte equality is the wrong test because the interesting case is the NEAR-copy:
+ * that is where the two versions have started to disagree, and disagreement is the
+ * actual defect. So this now compares under `app/` too, and on similarity.
+ *
+ * ── What an identical file is ALLOWED to be ─────────────────────────────────
+ *
+ * After extraction, several files are identical and correctly so:
+ *
+ *   • both `(auth)/forgot-password.tsx` are the same ten lines, because nothing is
+ *     left to differ — they delegate to one shared screen,
+ *   • both `app/_layout.tsx` are the same 38 lines, and every `../src/…` import in
+ *     them resolves to a DIFFERENT module,
+ *   • both `src/i18n.tsx` bind the shared provider to their own prefs store, which
+ *     is the one thing a package cannot import for itself.
+ *
+ * Those are the fix, not the problem. What separates them from a duplicated screen
+ * is that they carry no implementation — and the cheapest reliable proxy for
+ * implementation is `StyleSheet.create`. A screen has styles; a binding does not.
+ *
+ * A duplicated screen with no styles would slip through, which is the known cost of
+ * the proxy. It is a much smaller cost than the alternative: a gate that fires on
+ * every correct delegation is a gate that gets an exceptions list, and then the
+ * exceptions list is where the next real duplicate hides.
  * ─────────────────────────────────────────────────────────────────────────── */
 {
+  const MIN_LINES = 25;
+  const SIMILARITY = 0.85;
   const findings = [];
-  const student = resolve(ROOT, 'student-app/src');
-  for (const file of walk(student)) {
-    const twin = resolve(ROOT, 'driver-app/src', relative(student, file));
-    try {
-      if (readFileSync(file, 'utf8') === readFileSync(twin, 'utf8')) {
-        findings.push(`${relative(ROOT, file)} === ${relative(ROOT, twin)}`);
+
+  /** Fraction of the smaller file's non-trivial lines that appear in the larger. */
+  const similarity = (a, b) => {
+    const trim = (src) =>
+      src
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.length > 3);
+    const [x, y] = [trim(a), trim(b)];
+    if (x.length === 0 || y.length === 0) return 0;
+    const pool = new Map();
+    for (const line of y) pool.set(line, (pool.get(line) ?? 0) + 1);
+    let shared = 0;
+    for (const line of x) {
+      const left = pool.get(line) ?? 0;
+      if (left > 0) {
+        shared += 1;
+        pool.set(line, left - 1);
       }
-    } catch {
-      /* no twin — which is the normal case now */
+    }
+
+    return shared / Math.min(x.length, y.length);
+  };
+
+  for (const tree of ['src', 'app']) {
+    const base = resolve(ROOT, 'student-app', tree);
+    for (const file of walk(base)) {
+      const twin = resolve(ROOT, 'driver-app', tree, relative(base, file));
+      let a, b;
+      try {
+        a = readFileSync(file, 'utf8');
+        b = readFileSync(twin, 'utf8');
+      } catch {
+        continue; /* no twin — the normal case */
+      }
+      if (a.split('\n').length < MIN_LINES && b.split('\n').length < MIN_LINES) continue;
+      // No styles means no screen — see the note above.
+      if (!a.includes('StyleSheet.create(') && !b.includes('StyleSheet.create(')) continue;
+      const ratio = similarity(a, b);
+      if (ratio >= SIMILARITY) {
+        findings.push(
+          `${relative(ROOT, file)} ≈ ${relative(ROOT, twin)}  (${Math.round(ratio * 100)}% identical)`,
+        );
+      }
     }
   }
-  gate('duplicated-app-file', 'this file is identical in both apps. Move it to packages/ui and pass the difference in as an argument.', findings);
+  gate(
+    'duplicated-app-file',
+    `these two files are ≥${SIMILARITY * 100}% the same. Move the screen to packages/ui/src/screens and pass the difference in as an argument — a near-copy is where the two apps quietly stop agreeing.`,
+    findings,
+  );
 }
 
 /* ── 6. A fetch that can fail has a failure branch ───────────────────────────
@@ -327,6 +405,70 @@ function gate(id, why, findings) {
     }
   }
   gate('table-without-caption', 'add <caption className="sr-only">{…}</caption> as the table\'s first child so it has a name.', findings);
+}
+
+/* ── 9. Every translation key the apps ask for actually exists ───────────────
+ *
+ * `t()` returns the KEY when it cannot resolve one (`i18n/index.ts`), so a missing
+ * key is not a crash and not a type error — it is a screen calmly showing
+ * `driver.statusPending` to a captain. Nothing failed when phase 8.9 deleted 42
+ * live keys: the receipt PDF printed `payments.receiptHeading` as its title and
+ * the crash screen was headed `common.crashTitle`.
+ *
+ * All 42 were reached through a lookup table (`{ key: 'driver.statusPending' }`)
+ * rather than a literal `t('…')`, which is exactly what the dead-key detector
+ * could not see. This gate and that detector now share one collector — see
+ * `scripts/lib/i18n-keys.mjs` — so "dead" and "missing" are inverses by
+ * construction instead of by coincidence.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  const findings = missingKeys().map(
+    ({ key, sites }) => `${key}  ← ${sites.slice(0, 2).join(', ')}${sites.length > 2 ? ` (+${sites.length - 2})` : ''}`,
+  );
+  gate(
+    'missing-translation-key',
+    'the apps ask for these and ar.ts does not have them, so t() renders the key itself. Add them to BOTH ar.ts and en.ts, or stop referencing them.',
+    findings,
+  );
+}
+
+/* ── 10. And no key nothing asks for ────────────────────────────────────────
+ *
+ * The other half of gate 9, and the reason it is here rather than in a one-off
+ * script: the 188-key deletion was performed by a script that was RUN and never
+ * committed, so the judgement it encoded could not be reviewed, re-run, or
+ * corrected — it just landed. A dead key is cheap on its own; a dead key nobody
+ * can re-detect is how the dictionary drifts from the app in both directions.
+ *
+ * A dead translation is also the SHAPE of a feature. Sixteen keys describing a
+ * services-grid home screen outlived the screen, and the next person builds
+ * around the string instead of around the data.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  gate(
+    'dead-translation-key',
+    'nothing reads these. Delete them from ar.ts and en.ts, or wire them up — a key kept "for later" is a feature that looks half-built.',
+    unreadKeys(),
+  );
+}
+
+/* ── 11. The two dictionaries carry the same keys ────────────────────────────
+ *
+ * `en.ts` is typed as `Translations` derived from `ar.ts`, so a key missing from
+ * `en.ts` is a compile error — but an EXTRA key in `en.ts` is not, and that asymmetry
+ * is how a locale quietly grows a phantom.
+ *
+ * Parity was asserted only by `I18nContractTest`, which lives in the BACKEND CI job
+ * and skips when the frontend tree is not checked out. Splitting one contract across
+ * two runners with two skip conditions is a milder version of the fault that caused
+ * the 42-key incident: two implementations of one question.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  gate(
+    'locale-key-mismatch',
+    'ar.ts and en.ts must carry exactly the same keys. Add the missing side, or delete the extra one.',
+    localeMismatches(),
+  );
 }
 
 /* ── report ─────────────────────────────────────────────────────────────────── */

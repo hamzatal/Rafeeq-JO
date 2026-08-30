@@ -4,6 +4,7 @@ namespace Rafeeq\Modules\Drivers\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Rafeeq\Shared\Traits\HasUuid;
 
 /**
@@ -20,6 +21,12 @@ use Rafeeq\Shared\Traits\HasUuid;
 class Vehicle extends Model
 {
     use HasUuid;
+
+    /*
+     * Soft, because `trips.vehicle_id` is `nullOnDelete` and which car served a ride is
+     * evidence a dispute needs. See the 2026_09_03_000200 migration.
+     */
+    use SoftDeletes;
 
     protected $fillable = [
         'driver_id', 'make', 'model', 'year', 'color',

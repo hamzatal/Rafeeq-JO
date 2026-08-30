@@ -19,6 +19,10 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string|null $payable_id
  * @property PaymentPurpose $purpose
  * @property int $amount_fils
+ * @property int $discount_fils A coupon applied to this purchase: the student
+ *                              transfers `amount_fils` and is credited `amount_fils + discount_fils`.
+ *                              Added by 2024_02_05, never declared here — so every read of it was a
+ *                              baselined phpstan error rather than a typed property.
  * @property string $currency
  * @property string $method
  * @property PaymentStatus $status

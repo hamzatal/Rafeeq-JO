@@ -149,7 +149,7 @@ class FinancialReportTest extends TestCase
         $uni = University::first();
         $plan = SubscriptionPlan::create([
             'university_id' => $uni->id, 'name' => 'Monthly', 'type' => 'monthly',
-            'price_fils' => $priceFils, 'duration_days' => 30, 'is_active' => true,
+            'price_fils' => $priceFils, 'rides_count' => 20, 'duration_days' => 30, 'is_active' => true,
         ]);
 
         $sub = Subscription::create([

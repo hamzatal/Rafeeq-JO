@@ -27,6 +27,23 @@ class TripPassengerResource extends JsonResource
             'student_name' => $this->whenLoaded('student', fn () => $this->student?->full_name),
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
+
+            /*
+             * How this seat is being paid for — the one thing the student needs to know
+             * back from `POST /trips/{trip}/book` and could not get.
+             *
+             * Booking no longer requires a plan, so the answer is no longer implied by
+             * the endpoint you called: the same request produces a plan-funded seat for a
+             * subscriber and a wallet or cash seat for everyone else. Without this the app
+             * would have to re-fetch `/v1/subscriptions` and re-derive the decision the
+             * server just made, and the two could disagree.
+             *
+             * Same precedence as `FinancialReportService::FUNDING`: a plan wins over the
+             * payment method, because the method stops meaning anything once a plan is
+             * covering the fare.
+             */
+            'funding' => $this->subscription_id !== null ? 'subscription' : $this->payment_method->value,
+
             'boarded_at' => $this->boarded_at?->toIso8601String(),
             'dropoff_confirmed_at' => $this->dropoff_confirmed_at?->toIso8601String(),
             'boarding_code' => $isOwner ? $this->boarding_code : null,

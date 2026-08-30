@@ -14,7 +14,7 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property string $name
  * @property SubscriptionType $type
  * @property int $price_fils
- * @property int|null $rides_count
+ * @property int $rides_count
  * @property int $duration_days
  * @property bool $is_active
  */

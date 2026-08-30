@@ -18,6 +18,7 @@ use Rafeeq\Modules\Safety\Services\FraudService;
 use Rafeeq\Modules\Safety\Services\GpsFraudService;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Services\SubscriptionService;
+use Rafeeq\Modules\Trips\Data\TripCode;
 use Rafeeq\Modules\Trips\Events\TripLocationUpdated;
 use Rafeeq\Modules\Trips\Events\TripStatusChanged;
 use Rafeeq\Modules\Trips\Models\Trip;
@@ -25,7 +26,9 @@ use Rafeeq\Modules\Trips\Models\TripPassenger;
 use Rafeeq\Modules\Trips\Models\TripTracking;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\NotificationType;
+use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\RideRequestStatus;
+use Rafeeq\Shared\Enums\RiskSeverity;
 use Rafeeq\Shared\Enums\TripPassengerStatus;
 use Rafeeq\Shared\Enums\TripStatus;
 
@@ -407,14 +410,66 @@ class TripService extends BaseService
         });
     }
 
-    /** Student books a seat. Requires a usable subscription for the route. */
-    public function book(User $student, Trip $trip, ?string $pickupPointId = null): TripPassenger
+    /**
+     * The student's plan that can pay for a seat on this route, if any.
+     *
+     * `scopeActiveForRoute` narrows on the two indexed columns; `isUsable()` is the
+     * single definition of usable (not expired, rides left). Keeping the second half
+     * in PHP rather than duplicating it in SQL is what stops the two from drifting —
+     * a scope that filtered `ends_at` itself would have to agree with `isUsable()`
+     * forever, and the day it stopped agreeing a lapsed plan would fund a ride.
+     */
+    public function coveringSubscription(User $student, ?string $routeId): ?Subscription
     {
+        return Subscription::activeForRoute($student->id, $routeId)
+            ->get()
+            ->first(fn (Subscription $s) => $s->isUsable());
+    }
+
+    /**
+     * Student books a seat. A subscription funds it if they have one; otherwise they
+     * pay per ride.
+     *
+     * ── Why the subscription requirement is gone ─────────────────────────────────
+     *
+     * This used to throw `NO_ACTIVE_SUBSCRIPTION` without a usable plan on the route,
+     * and `MatchingService` — the other way into the very same car — never checked at
+     * all. So the two entrances disagreed about whether prepayment was mandatory, and
+     * every pooled seat the matcher created was pay-per-ride while every directly
+     * booked seat had to be prepaid.
+     *
+     * The stricter door was the wrong one. A student who needs three rides before an
+     * exam cannot be told to buy a week, and a plan whose only purpose is to unlock
+     * the button is not a product, it is a toll. A plan is a DISCOUNT on volume the
+     * student has already committed to — it competes with paying per ride rather than
+     * gating it.
+     *
+     * ── What that required downstream, and what was already there ────────────────
+     *
+     * Almost everything already handled `subscription_id === null`, because the
+     * matching path has always produced exactly that: `placeFareHolds()` reserves the
+     * fare for null-subscription seats, `RideBillingService` debits the student for
+     * them, and `FinancialReportService` classes them as wallet or cash. The one gap
+     * was that `book()` wrote NEITHER `payment_method` NOR `coupon_code`, so a seat
+     * created here silently defaulted to wallet in billing and could never be cash.
+     * Both are accepted and persisted now, exactly as `MatchingService` does.
+     *
+     * The method is recorded even when a plan covers the seat: if the plan lapses
+     * between booking and boarding, `confirmBoarding()` detaches it and bills the
+     * fare, and it should bill it the way the student chose rather than assume wallet.
+     */
+    public function book(
+        User $student,
+        Trip $trip,
+        ?string $pickupPointId = null,
+        PaymentMethod $method = PaymentMethod::Wallet,
+        ?string $couponCode = null,
+    ): TripPassenger {
         // Every check that decides whether a seat exists has to run inside the
         // transaction that takes it, against a locked trip row. Previously the
         // capacity check sat outside, so two students could pass it on the same
         // last seat and both insert — overbooking a car.
-        return $this->transaction(function () use ($student, $trip, $pickupPointId) {
+        return $this->transaction(function () use ($student, $trip, $pickupPointId, $method, $couponCode) {
             $locked = Trip::whereKey($trip->id)->lockForUpdate()->firstOrFail();
 
             if ($locked->status !== TripStatus::Scheduled) {
@@ -427,18 +482,16 @@ class TripService extends BaseService
                 throw new BusinessRuleException('أنت محجوز بالفعل على هذه الرحلة.', 'ALREADY_BOOKED');
             }
 
-            $subscription = Subscription::activeForRoute($student->id, $locked->route_id)->get()
-                ->first(fn (Subscription $s) => $s->isUsable());
-
-            if (! $subscription) {
-                throw new BusinessRuleException('تحتاج اشتراكاً فعّالاً على هذا المسار.', 'NO_ACTIVE_SUBSCRIPTION');
-            }
+            // Use a plan if one covers this route. Not having one is not an error.
+            $subscription = $this->coveringSubscription($student, $locked->route_id);
 
             $passenger = $locked->passengers()->create([
                 'student_id' => $student->id,
-                'subscription_id' => $subscription->id,
+                'subscription_id' => $subscription?->id,
                 'pickup_point_id' => $pickupPointId,
                 'status' => TripPassengerStatus::Booked,
+                'payment_method' => $method,
+                'coupon_code' => $couponCode,
                 'boarding_code' => $this->uniqueTripCode($locked, 'boarding_code'),
             ]);
 
@@ -454,8 +507,14 @@ class TripService extends BaseService
         if ($trip->status !== TripStatus::Started) {
             throw new BusinessRuleException('ابدأ الرحلة أولاً.', 'TRIP_NOT_STARTED');
         }
+        $this->assertCodeAttemptsLeft($trip);
 
-        return $this->transaction(function () use ($trip, $code) {
+        /*
+         * A miss returns NULL from the transaction and is recorded after it, not
+         * inside it. Throwing from within rolled the audit row back along with
+         * everything else, so no code rejection was ever actually persisted.
+         */
+        $passenger = $this->transaction(function () use ($trip, $code) {
             // Locked inside the transaction: the read and the status flip have to be
             // one step, or two concurrent confirmations of the same code both see
             // `Booked` and both charge the fare.
@@ -466,11 +525,22 @@ class TripService extends BaseService
                 ->first();
 
             if (! $passenger) {
-                // Audited: a wrong code is how a guessing sweep looks, and a sweep is
-                // only detectable if each miss is recorded.
-                $this->audit->log('trip.boarding_code_rejected', auditable: $trip);
+                /*
+                 * A code that IS real but whose passenger has moved on is not a guess.
+                 *
+                 * The status filter above makes a re-submitted correct code — a double
+                 * tap, or a retry after a request that succeeded and timed out on the way
+                 * back — indistinguishable from a wrong one. It would consume an attempt,
+                 * write a rejection audit row, and on the tenth raise a HIGH-severity
+                 * fraud flag against an honest captain and lock code entry for the rest of
+                 * the trip. Answer idempotently instead.
+                 */
+                $already = $trip->passengers()->where('boarding_code', $code)->first();
+                if ($already) {
+                    return $already;
+                }
 
-                throw new BusinessRuleException('كود صعود غير صحيح.', 'INVALID_BOARDING_CODE');
+                return null;
             }
 
             // Issue the drop-off OTP now: the student receives it on boarding and
@@ -483,6 +553,10 @@ class TripService extends BaseService
                 'boarded_at' => now(),
                 'dropoff_code' => $dropoffCode,
             ])->save();
+
+            // The right code clears the miss counter: ten wrong ones only mean
+            // something if nothing correct happened in between.
+            Trip::whereKey($trip->id)->where('code_attempts', '>', 0)->update(['code_attempts' => 0]);
 
             // A subscription that lapsed between booking and boarding must not strand
             // the rider. Detach it and let billing charge the wallet instead.
@@ -516,6 +590,14 @@ class TripService extends BaseService
 
             return $passenger;
         });
+
+        if (! $passenger) {
+            // A wrong code is how a guessing sweep looks, and a sweep is only
+            // detectable if each miss is recorded — which means recording it out here.
+            $this->rejectCode($trip, 'boarding');
+        }
+
+        return $passenger;
     }
 
     /**
@@ -528,8 +610,10 @@ class TripService extends BaseService
         if ($trip->status !== TripStatus::Started) {
             throw new BusinessRuleException('الرحلة ليست جارية.', 'TRIP_NOT_STARTED');
         }
+        $this->assertCodeAttemptsLeft($trip);
 
-        return $this->transaction(function () use ($trip, $code) {
+        // Same as boarding: a miss leaves the transaction before it is recorded.
+        $passenger = $this->transaction(function () use ($trip, $code) {
             // Locked, same reason as boarding: the read and the status flip must be
             // one step so one drop-off cannot be confirmed twice.
             $passenger = $trip->passengers()
@@ -539,17 +623,24 @@ class TripService extends BaseService
                 ->first();
 
             if (! $passenger) {
-                // Audited: this is the code whose confirmation the dispute centre
-                // treats as the rider's own word, so every miss has to be on record.
-                $this->audit->log('trip.dropoff_code_rejected', auditable: $trip);
+                // Same as boarding: a real code for an already-dropped rider is a retry,
+                // not a guess, and must not spend an attempt or accuse the captain.
+                $already = $trip->passengers()->where('dropoff_code', $code)->first();
+                if ($already) {
+                    return $already;
+                }
 
-                throw new BusinessRuleException('كود إنزال غير صحيح.', 'INVALID_DROPOFF_CODE');
+                return null;
             }
 
             $passenger->forceFill([
                 'status' => TripPassengerStatus::Dropped,
                 'dropoff_confirmed_at' => now(),
             ])->save();
+
+            // The right code clears the miss counter: ten wrong ones only mean
+            // something if nothing correct happened in between.
+            Trip::whereKey($trip->id)->where('code_attempts', '>', 0)->update(['code_attempts' => 0]);
 
             $this->audit->log('trip.dropped', auditable: $passenger);
 
@@ -574,6 +665,14 @@ class TripService extends BaseService
 
             return $passenger;
         });
+
+        if (! $passenger) {
+            // This is the code the dispute centre treats as the rider's own word, so
+            // every miss has to survive on record.
+            $this->rejectCode($trip, 'dropoff');
+        }
+
+        return $passenger;
     }
 
     public function pushLocation(Trip $trip, float $lat, float $lng, ?float $speed = null): TripTracking
@@ -606,9 +705,88 @@ class TripService extends BaseService
     private function uniqueTripCode(Trip $trip, string $column): string
     {
         do {
-            $code = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+            $code = TripCode::draw();
         } while ($trip->passengers()->where($column, $code)->exists());
 
         return $code;
+    }
+
+    /**
+     * Refuse code entry outright once this trip has absorbed too many wrong ones.
+     *
+     * Checked BEFORE the lookup, so a correct code cannot walk past the cap — which is
+     * the whole point of a cap. Reaching it means ten misses with nothing right in
+     * between, because the counter is cleared by every successful confirmation.
+     */
+    private function assertCodeAttemptsLeft(Trip $trip): void
+    {
+        if ((int) $trip->code_attempts >= TripCode::MAX_ATTEMPTS) {
+            throw new BusinessRuleException(
+                'محاولات كثيرة بكود غير صحيح. افتح «مشكلة في الرحلة» ليتابعها فريق الدعم.',
+                'TOO_MANY_CODE_ATTEMPTS',
+            );
+        }
+    }
+
+    /**
+     * A wrong code: record it, count it, and raise a flag when counting is enough.
+     *
+     * ── This must run OUTSIDE the transaction, and that is a bug fix ────────────
+     *
+     * The rejection used to be audited from inside `confirmBoarding`'s transaction and
+     * then thrown from the same place — so the throw rolled the audit row back with
+     * everything else. The comment beside it said «a sweep is only detectable if each
+     * miss is recorded», and not one miss had ever been recorded: every
+     * `trip.boarding_code_rejected` row was written and immediately discarded.
+     *
+     * So the callers now let the transaction END on a miss (returning null) and call
+     * this afterwards, where the write commits and the exception is the last thing
+     * that happens.
+     *
+     * ── Why counting, when there is already a rate limit ────────────────────────
+     *
+     * `throttle:trip-code` allows 6 attempts a minute per captain and trip, which
+     * bounds the RATE and not the TOTAL. Across a 30-minute trip that is ~180 guesses
+     * — against the old 4-digit code, a 1.8% chance of confirming a drop-off for a
+     * rider who never got out.
+     *
+     * @param  'boarding'|'dropoff'  $kind
+     */
+    private function rejectCode(Trip $trip, string $kind): never
+    {
+        /*
+         * Atomic, because everything else in this file locks and this did not.
+         *
+         * It was `read $trip->code_attempts` then `update(+1)`, so two misses arriving
+         * together both read N and both wrote N+1: one attempt spent for two made, and
+         * two audit rows claiming the same count. `book()` takes the trip under
+         * `lockForUpdate` for exactly this reason, and `throttle:trip-code` allows six a
+         * minute per trip — ample concurrency for it to matter.
+         */
+        Trip::whereKey($trip->id)->increment('code_attempts');
+        $attempts = (int) (Trip::whereKey($trip->id)->value('code_attempts') ?? 0);
+
+        $this->audit->log("trip.{$kind}_code_rejected", auditable: $trip, changes: ['attempts' => $attempts]);
+
+        if ($attempts >= TripCode::MAX_ATTEMPTS) {
+            $trip->loadMissing('driver');
+            $this->fraud->flag(
+                $trip->driver?->user_id,
+                'trip_code_guessing',
+                RiskSeverity::High,
+                "رفض {$attempts} كود تأكيد على الرحلة نفسها.",
+                ['trip_id' => $trip->id, 'attempts' => $attempts, 'kind' => $kind],
+            );
+
+            throw new BusinessRuleException(
+                'محاولات كثيرة بكود غير صحيح. افتح «مشكلة في الرحلة» ليتابعها فريق الدعم.',
+                'TOO_MANY_CODE_ATTEMPTS',
+            );
+        }
+
+        throw new BusinessRuleException(
+            $kind === 'boarding' ? 'كود صعود غير صحيح.' : 'كود إنزال غير صحيح.',
+            $kind === 'boarding' ? 'INVALID_BOARDING_CODE' : 'INVALID_DROPOFF_CODE',
+        );
     }
 }

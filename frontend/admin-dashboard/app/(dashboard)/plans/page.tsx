@@ -10,7 +10,7 @@ import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 
 const EMPTY = { name: '', type: 'monthly' as SubscriptionType, price_jod: '', rides_count: '', duration_days: '30' };
-const TYPES: SubscriptionType[] = ['weekly', 'monthly', 'term'];
+const TYPES: SubscriptionType[] = ['daily', 'weekly', 'monthly', 'term'];
 
 export default function PlansPage() {
   const { t } = useT();
@@ -35,7 +35,16 @@ export default function PlansPage() {
 
   const add = async () => {
     setError(null);
-    if (!form.name || !form.price_jod) {
+    /*
+       `rides_count` is required now, and that is the whole point of the change.
+
+       It used to be optional, and an empty box meant «unlimited» — an unbounded
+       liability sold for a fixed sum. A student riding twice a day for a month on the
+       top band costs 84 000 fils to serve; the شهرية plan sold that for 25 000. The
+       backend refuses a null count outright (`PlanSolvency`), so leaving the field
+       optional here only moved the failure to a 422 the operator had to decode.
+    */
+    if (!form.name || !form.price_jod || !form.rides_count) {
       setError(t('plans.required'));
       return;
     }
@@ -45,7 +54,7 @@ export default function PlansPage() {
         name: form.name,
         type: form.type,
         price_fils: Math.round(parseFloat(form.price_jod) * 1000),
-        rides_count: form.rides_count ? parseInt(form.rides_count, 10) : null,
+        rides_count: parseInt(form.rides_count, 10),
         duration_days: parseInt(form.duration_days, 10) || 30,
       });
       setForm({ ...EMPTY });
@@ -85,7 +94,7 @@ export default function PlansPage() {
             ))}
           </select>
           <input className="input" type="number" placeholder={t('plans.pricePh')} value={form.price_jod} onChange={(e) => setForm({ ...form, price_jod: e.target.value })} />
-          <input className="input" type="number" placeholder={t('plans.ridesPh')} value={form.rides_count} onChange={(e) => setForm({ ...form, rides_count: e.target.value })} />
+          <input className="input" type="number" min={1} required placeholder={t('plans.ridesPh')} value={form.rides_count} onChange={(e) => setForm({ ...form, rides_count: e.target.value })} />
           <input className="input" type="number" placeholder={t('plans.durationPh')} value={form.duration_days} onChange={(e) => setForm({ ...form, duration_days: e.target.value })} />
         </div>
         <button disabled={busy} onClick={add} className="btn-primary mt-3">{t('plans.addBtn')}</button>
@@ -118,7 +127,7 @@ export default function PlansPage() {
                   <td className="p-3 font-medium surface-text">{p.name}</td>
                   <td className="p-3 text-muted">{p.type_label}</td>
                   <td className="p-3 text-muted">{formatJod(p.price_fils)}</td>
-                  <td className="p-3 text-muted">{p.unlimited ? t('plans.unlimited') : p.rides_count}</td>
+                  <td className="p-3 text-muted tabular-nums">{p.rides_count}</td>
                   <td className="p-3 text-muted">{p.duration_days} {t('plans.daysUnit')}</td>
                   <td className="p-3">
                     <button onClick={() => toggle(p)} className={`badge ${p.is_active ? 'bg-green-100 text-success' : 'bg-slate-100 text-muted'}`}>

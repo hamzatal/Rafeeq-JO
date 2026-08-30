@@ -11,9 +11,11 @@ use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Drivers\Models\Vehicle;
 use Rafeeq\Modules\Notifications\Models\Notification;
 use Rafeeq\Modules\Rewards\Models\RewardAccount;
+use Rafeeq\Modules\Routes\Models\Route;
 use Rafeeq\Modules\Students\Models\StudentProfile;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Models\SubscriptionPlan;
+use Rafeeq\Modules\Subscriptions\Services\PlanSolvency;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Wallet\Models\Wallet;
@@ -95,23 +97,71 @@ class DemoSeeder extends Seeder
         $this->command?->info('DemoSeeder: '.count($students).' students, '.count($drivers).' captains, plus subscriptions/coupons/complaints/notifications/trips.');
     }
 
-    /** @return SubscriptionPlan[] */
+    /**
+     * Four plans, priced from the tariff rather than made up.
+     *
+     * ── What the old numbers were ────────────────────────────────────────────────
+     *
+     *     أسبوعية    7 000 fils · 12 rides
+     *     شهرية     25 000 fils · UNLIMITED
+     *     فصلية    120 000 fils · UNLIMITED
+     *
+     * Twelve mid-band rides cost the platform 12 × 1 275 = 15 300 fils in captain
+     * payouts and were sold for 7 000. The two unlimited plans had no bound at all.
+     * Every one of them would now be rejected by `PlanSolvency`, which is the point:
+     * the seeder was the only place plan prices existed, so these fabricated numbers
+     * were the de-facto product.
+     *
+     * ── How a price is derived now ───────────────────────────────────────────────
+     *
+     * Three quantities, all from the tariff:
+     *
+     *     floor = rides × captain_share      what the platform must pay out
+     *     room  = rides × commission         the most it can discount (its own margin)
+     *     price = floor + (1 − giveaway) × room
+     *
+     * `giveaway` is the share of our commission handed to the student, and it rises
+     * with the length of the commitment — which is what a volume discount IS. The
+     * result is floored to the nearest 250 fils (a quarter dinar, the same memorable
+     * step the `Tariff` solo prices use) and then clamped back up to `floor`, so
+     * rounding can never make a plan insolvent.
+     *
+     * Route-scoped where a route exists, because a plan priced against a real corridor
+     * can offer a real saving. A global plan has to cover the priciest band in the
+     * tariff, which makes it a poor deal for anyone on a short route — see
+     * `PlanSolvency::rideFareFils`.
+     */
     private function seedPlans($unis): array
     {
-        $uniId = $unis->first()?->id;
+        $solvency = app(PlanSolvency::class);
+        $uni = $unis->first();
+        $route = $uni ? Route::where('university_id', $uni->id)->where('is_active', true)->first() : null;
+
+        $fare = $solvency->rideFareFils($route?->id);
+        $costPerRide = $solvency->costPerRideFils($route?->id);
+        $commissionPerRide = $fare - $costPerRide;
+
         $defs = [
-            ['name' => 'باقة أسبوعية', 'type' => SubscriptionType::Weekly, 'price' => 7000, 'rides' => 12, 'days' => 7],
-            ['name' => 'باقة شهرية', 'type' => SubscriptionType::Monthly, 'price' => 25000, 'rides' => null, 'days' => 30],
-            ['name' => 'باقة الفصل الدراسي', 'type' => SubscriptionType::Term, 'price' => 120000, 'rides' => null, 'days' => 120],
+            ['name' => 'باقة يومية', 'type' => SubscriptionType::Daily, 'rides' => 2, 'days' => 1, 'giveaway' => 0.25],
+            ['name' => 'باقة أسبوعية', 'type' => SubscriptionType::Weekly, 'rides' => 12, 'days' => 7, 'giveaway' => 0.50],
+            ['name' => 'باقة شهرية', 'type' => SubscriptionType::Monthly, 'rides' => 44, 'days' => 30, 'giveaway' => 0.70],
+            ['name' => 'باقة الفصل الدراسي', 'type' => SubscriptionType::Term, 'rides' => 120, 'days' => 120, 'giveaway' => 0.85],
         ];
+
         $plans = [];
         foreach ($defs as $d) {
+            $floor = $costPerRide * $d['rides'];
+            $room = $commissionPerRide * $d['rides'];
+            $asked = $floor + (int) round((1 - $d['giveaway']) * $room);
+            $price = max($floor, intdiv($asked, 250) * 250);
+
             $plans[] = SubscriptionPlan::firstOrCreate(
                 ['name' => $d['name']],
                 [
-                    'university_id' => $uniId,
+                    'university_id' => $uni?->id,
+                    'route_id' => $route?->id,
                     'type' => $d['type'],
-                    'price_fils' => $d['price'],
+                    'price_fils' => $price,
                     'rides_count' => $d['rides'],
                     'duration_days' => $d['days'],
                     'is_active' => true,

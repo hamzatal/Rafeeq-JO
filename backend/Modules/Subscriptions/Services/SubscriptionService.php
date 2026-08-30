@@ -39,8 +39,24 @@ class SubscriptionService extends BaseService
         return $subscription->load('plan');
     }
 
-    /** Activate a subscription (called after payment is approved). */
-    public function activate(Subscription $subscription): Subscription
+    /**
+     * Activate a subscription. Called after payment is approved.
+     *
+     * ── `fundTreasury` is not optional bookkeeping ──────────────────────────────
+     *
+     * Every ride on a plan DEBITS the treasury for the captain's share
+     * (`RideBillingService`), so a plan that was activated without its price arriving
+     * serves those rides out of commission earned from unrelated riders — until the
+     * treasury cannot cover one and `debit()` refuses. That failure then lands on a
+     * student whose plan is perfectly valid, at boarding, in a car.
+     *
+     * `payWithWallet` and `PaymentService::fulfilSubscription` credit it themselves, so
+     * they pass `false`. Admin activation (`SubscriptionController::activate`) is the
+     * path that had no credit at all: a comped or manually-activated plan was a
+     * liability with nothing behind it. It funds the treasury here, which is honest —
+     * the platform really is standing behind that plan itself.
+     */
+    public function activate(Subscription $subscription, bool $fundTreasury = true): Subscription
     {
         if ($subscription->status === SubscriptionStatus::Active) {
             return $subscription;
@@ -49,11 +65,36 @@ class SubscriptionService extends BaseService
         $plan = $subscription->plan;
         $start = now();
 
+        if ($fundTreasury) {
+            $this->wallets->credit(
+                $this->wallets->platform(),
+                (int) $plan->price_fils,
+                WalletTxnType::SubscriptionSale,
+                'تفعيل باقة من الإدارة',
+                $subscription->id,
+            );
+        }
+
         $subscription->forceFill([
             'status' => SubscriptionStatus::Active,
             'starts_at' => $start,
             'ends_at' => $start->copy()->addDays($plan->duration_days),
-            'remaining_rides' => $subscription->remaining_rides ?? $plan->rides_count,
+            /*
+             * A fresh period gets a fresh count, capped at the plan.
+             *
+             * This kept `remaining_rides` whenever it was positive, which is right for
+             * the ordinary case (stamped at `subscribe()` time and untouched). It was
+             * wrong for RE-activation: an expired or cancelled plan with rides left came
+             * back with the leftovers AND a brand-new `ends_at`, so churn could stack
+             * periods. And `restoreRide` increments unconditionally, so the stored count
+             * can legitimately exceed what the plan sells.
+             *
+             * `min` makes the plan the ceiling either way; the `> 0` fallback still
+             * covers a row created without going through `subscribe()`.
+             */
+            'remaining_rides' => $subscription->remaining_rides > 0
+                ? min((int) $subscription->remaining_rides, (int) $plan->rides_count)
+                : (int) $plan->rides_count,
         ])->save();
 
         $this->audit->log('subscription.activated', auditable: $subscription);
@@ -109,7 +150,30 @@ class SubscriptionService extends BaseService
                 $subscription->id,
             );
 
-            $activated = $this->activate($locked);
+            /*
+             * And the treasury RECEIVES it.
+             *
+             * This debit used to stand alone: the student's balance went down and no
+             * account went up, so the plan price left the ledger. Money was destroyed at
+             * purchase and then minted again at every ride (see the subscription branch
+             * of `RideBillingService::chargeForBoarding`), and because the two errors
+             * pointed in opposite directions no single balance looked wrong.
+             *
+             * The treasury is where the plan price has to sit, because the platform is
+             * now holding money it owes rides against — every subscription seat is paid
+             * for out of this credit. `PlanSolvency` is what guarantees the credit is
+             * large enough to cover the rides the plan promises.
+             */
+            $this->wallets->credit(
+                $this->wallets->platform(),
+                $price,
+                WalletTxnType::SubscriptionSale,
+                'بيع باقة',
+                $subscription->id,
+            );
+
+            // Already credited above — see `activate`'s `$fundTreasury`.
+            $activated = $this->activate($locked, fundTreasury: false);
             $this->audit->log('subscription.paid_wallet', $student, auditable: $activated, changes: ['amount_fils' => $price]);
 
             return $activated;
@@ -144,12 +208,12 @@ class SubscriptionService extends BaseService
             if (! $locked || ! $locked->isUsable()) {
                 return false;
             }
-            if ($locked->remaining_rides !== null) {
-                if ($locked->remaining_rides < 1) {
-                    return false;
-                }
-                $locked->decrement('remaining_rides');
-            }
+
+            // No `!== null` branch any more: an unlimited plan used to skip the
+            // decrement entirely, so `isUsable()` could never become false and the
+            // plan funded rides forever. Every plan is bounded now — see the
+            // 2026_09_03 migration and PlanSolvency.
+            $locked->decrement('remaining_rides');
 
             return true;
         });
@@ -160,9 +224,24 @@ class SubscriptionService extends BaseService
     {
         $this->transaction(function () use ($subscription) {
             $locked = Subscription::whereKey($subscription->id)->lockForUpdate()->first();
-            if ($locked && $locked->remaining_rides !== null) {
-                $locked->increment('remaining_rides');
+            if (! $locked) {
+                return;
             }
+
+            /*
+             * Capped at what the plan sells.
+             *
+             * The `!== null` guard removed here was about unlimited plans, not about a
+             * ceiling — so cancel/re-book churn could push `remaining_rides` above
+             * `plan->rides_count` and the student would end up with rides the treasury
+             * was never funded for.
+             */
+            $ceiling = (int) ($locked->plan->rides_count ?? 0);
+            if ($ceiling > 0 && (int) $locked->remaining_rides >= $ceiling) {
+                return;
+            }
+
+            $locked->increment('remaining_rides');
         });
     }
 }

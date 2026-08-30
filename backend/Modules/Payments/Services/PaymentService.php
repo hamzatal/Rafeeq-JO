@@ -23,6 +23,7 @@ use Rafeeq\Modules\Payments\Models\PaymentRequest;
 use Rafeeq\Modules\Settings\Services\SettingService;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Services\SubscriptionService;
+use Rafeeq\Modules\Wallet\Services\CaptainDebtService;
 use Rafeeq\Modules\Wallet\Services\WalletService;
 use Rafeeq\Shared\Enums\CouponScope;
 use Rafeeq\Shared\Enums\NotificationType;
@@ -63,6 +64,7 @@ class PaymentService extends BaseService
         private readonly SubscriptionService $subscriptions,
         private readonly NotificationService $notifications,
         private readonly CouponService $coupons,
+        private readonly CaptainDebtService $debts,
     ) {}
 
     /**
@@ -514,13 +516,31 @@ class PaymentService extends BaseService
 
         // Wallet is credited with the ORIGINAL amount (paid + discount), so a
         // wallet-top-up coupon acts as a bonus (pay less, receive full credit).
+        $wallet = $this->wallets->forUser($user);
         $this->wallets->credit(
-            $this->wallets->forUser($user),
+            $wallet,
             $request->amount_fils + (int) $request->discount_fils,
             WalletTxnType::Topup,
             'شحن المحفظة عبر CliQ',
             $request->number,
         );
+
+        /*
+         * And settle any cash commission owed, which is the whole reason a CAPTAIN
+         * tops up.
+         *
+         * `CaptainDebtService::settleFromBalance` was called from exactly two places,
+         * both inside ride billing — so a top-up did nothing to the debt. That closed a
+         * loop with no exit: `assertMayGoOnline` refuses to bring a captain online over
+         * `captain_debt_ceiling_fils`, settling required a cashless ride credit, and
+         * getting a ride required being online. Its own docblock says «on a top-up, or
+         * on earnings from a cashless trip», and the message the blocked captain sees
+         * says «اشحن رصيدك أو نفّذ رحلات بالمحفظة لتسويتها». Both were describing this
+         * call, which did not exist.
+         *
+         * A no-op for a student: `settleFromBalance` returns 0 when there is no debt.
+         */
+        $this->debts->settleFromBalance($wallet->fresh());
     }
 
     private function fulfilSubscription(PaymentRequest $request): void
@@ -530,9 +550,36 @@ class PaymentService extends BaseService
         }
 
         $subscription = Subscription::find($request->payable_id);
-        if ($subscription) {
-            $this->subscriptions->activate($subscription);
+        if (! $subscription) {
+            return;
         }
+
+        /*
+         * The treasury receives the plan price — the leg this method did not have.
+         *
+         * Activating the subscription was the whole of it, so a plan bought over CliQ
+         * put NOTHING into the ledger: money arrived in the bank and no account
+         * recorded it. Then every ride on that plan debited the treasury (see the
+         * subscription branch of `RideBillingService`), draining a balance the sale had
+         * never funded — so a CliQ subscriber's rides were paid for out of other
+         * people's commission until the treasury refused, at which point boarding
+         * started failing for a student who had paid.
+         *
+         * Credited BEFORE activation, so the plan is never usable ahead of the money
+         * that backs it. Amount is `amount_fils + discount_fils`, matching
+         * `fulfilWalletTopup`: a coupon on a plan purchase is the platform choosing to
+         * receive less, and the rides still have to be funded at the full price.
+         */
+        $this->wallets->credit(
+            $this->wallets->platform(),
+            $request->amount_fils + (int) $request->discount_fils,
+            WalletTxnType::SubscriptionSale,
+            'بيع باقة عبر CliQ',
+            $request->number,
+        );
+
+        // Credited immediately above — see `SubscriptionService::activate`.
+        $this->subscriptions->activate($subscription, fundTreasury: false);
     }
 
     /**

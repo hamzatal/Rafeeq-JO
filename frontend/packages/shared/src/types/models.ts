@@ -123,10 +123,16 @@ export interface SubscriptionPlan {
   type_label: string;
   price_fils: number;
   price_jod: number;
-  rides_count: number | null;
-  unlimited: boolean;
+  /** Never null: every plan is bounded. See PlanSolvency on the backend. */
+  rides_count: number;
   duration_days: number;
   is_active: boolean;
+  /**
+   * What one ride on this plan costs, so it can be compared against the fare the
+   * student is already looking at. Replaces `unlimited`, which described a product
+   * that could not be priced.
+   */
+  price_per_ride_fils: number;
 }
 
 export interface Subscription {
@@ -139,7 +145,7 @@ export interface Subscription {
   usable: boolean;
   starts_at: string | null;
   ends_at: string | null;
-  remaining_rides: number | null;
+  remaining_rides: number;
   plan?: SubscriptionPlan;
 }
 
@@ -154,6 +160,12 @@ export interface TripPassenger {
   student_name: string | null;
   status: TripPassengerStatus;
   status_label: string;
+  /**
+   * How this seat is paid for. A plan wins over the payment method, because the
+   * method stops meaning anything once a plan is covering the fare — same
+   * precedence the financial report uses.
+   */
+  funding: 'subscription' | 'wallet' | 'cash';
   boarded_at: string | null;
   dropoff_confirmed_at: string | null;
   boarding_code: string | null;
@@ -256,11 +268,36 @@ export interface Wallet {
   /** balance − held. THIS is what a spend is checked against. */
   available_fils: number;
   available_jod: number;
+  /**
+   * Outstanding cash commission. Zero for a student.
+   *
+   * A captain past `max_captain_debt_fils` stops receiving trips, and until now no
+   * endpoint reported the number that ceiling is measured against.
+   */
+  debt_fils: number;
   currency: string;
 }
 
+/**
+ * Every case of the backend's `WalletTxnType`.
+ *
+ * This listed six of eleven. `reward_redemption`, `subscription_payment`,
+ * `guarantee` and the two subscription-treasury legs were all absent, so a ledger row
+ * of any of those types was a value the type said could not exist — and
+ * `txnVisual(tx.type)` narrowing over it typechecked while being wrong.
+ */
 export type WalletTxnType =
-  | 'topup' | 'ride_payment' | 'refund' | 'commission' | 'payout' | 'adjustment';
+  | 'topup'
+  | 'ride_payment'
+  | 'refund'
+  | 'commission'
+  | 'payout'
+  | 'reward_redemption'
+  | 'subscription_payment'
+  | 'subscription_sale'
+  | 'subscription_ride'
+  | 'guarantee'
+  | 'adjustment';
 
 export interface WalletTransaction {
   id: string;
@@ -652,7 +689,17 @@ export interface DriverPerformance {
   next_tier_label: string | null;
   points_to_next: number;
   progress_percent: number;
+  /** Withdrawable balance. Cumulative, and survives a withdrawal. */
   available_earnings_fils: number;
+  /**
+   * Earned TODAY — a window, not a balance.
+   *
+   * The dashboard rendered `available_earnings_fils` under «أرباح اليوم», so a captain
+   * who withdrew yesterday saw zero and one who had not withdrawn all week saw a
+   * week's work as one day's.
+   */
+  today_earnings_fils: number;
+  today_trips: number;
   rating: number;
   total_trips: number;
 }
