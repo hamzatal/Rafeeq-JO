@@ -1,0 +1,58 @@
+{
+  /* ═══════════════════════════════════════════════════════════════════════════
+     The compiler settings every workspace shares.
+
+     ── Why this file exists ───────────────────────────────────────────────────
+
+     There were seven `tsconfig.json` files and no common ancestor, so `strict: true`
+     was written seven times and everything BEYOND strict was written zero times. Two
+     settings in particular were off everywhere, and each one explains a class of bug
+     that reached production in this repo:
+
+       • `noUncheckedIndexedAccess` — `arr[0]` was typed `T`, not `T | undefined`.
+         That is how a bar-chart bucket, a passenger row and a translation group could
+         each be read straight off an index and dereferenced with no branch. One of the
+         defects the phase-8.9 sweep found by hand — «undefined ★» rendered on screen —
+         was exactly this shape, and the compiler had been told not to look.
+
+       • `noUnusedLocals` / `noUnusedParameters` — this is why 40+ dead exports, five
+         dead `ENDPOINTS` paths and a dead `useAuth` import in `welcome.tsx` could
+         accumulate while `npm run typecheck` stayed green for months. A dead import is
+         not merely untidy: it is the residue of a feature that was removed halfway.
+
+     ── Why they were off, and why that is not a reason to leave them off ──────
+
+     Turning them on is a wide change — it touched 60+ files. That is the argument for
+     doing it in its own commit, which is what this is, and not an argument for never
+     doing it: the cost of enabling them only grows with the amount of code written
+     while they are off.
+
+     `exactOptionalPropertyTypes` is deliberately NOT enabled. It distinguishes
+     `{ a?: number }` from `{ a: number | undefined }`, which is a real distinction and
+     a genuine improvement — but almost every violation in this repo is a prop spread
+     into a React component, and the fix is mechanical noise (`...(x ? { a: x } : {})`)
+     rather than a caught defect. It buys tidiness at the cost of readability at the
+     call site, which is the wrong trade for a codebase whose call sites are the
+     product.
+     ═══════════════════════════════════════════════════════════════════════════ */
+  "compilerOptions": {
+    "strict": true,
+
+    /* An index read can miss. Say so. */
+    "noUncheckedIndexedAccess": true,
+
+    /* Dead code is the residue of a half-removed feature, not untidiness. */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    /* A `switch` that forgets a case is a bug the compiler can see. */
+    "noFallthroughCasesInSwitch": true,
+
+    /* A function typed to return a value must return one on every path. */
+    "noImplicitReturns": true,
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

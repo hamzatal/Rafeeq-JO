@@ -99,7 +99,7 @@ describe('createSession — bootstrap', () => {
     await new Promise((r) => setTimeout(r, 0));
 
     expect(onAuthenticated).not.toHaveBeenCalled();
-    expect(storage.get()).resolves.toBe('tok');
+    await expect(storage.get()).resolves.toBe('tok');
   });
 });
 

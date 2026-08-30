@@ -49,7 +49,14 @@ export function TabBar({ state, descriptors, navigation, centerRoute }: TabBarPr
   return (
     <View style={[s.wrap, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {state.routes.map((route) => {
-        const { options } = descriptors[route.key];
+        /*
+         * A route with no descriptor cannot be drawn — reading `.options` off it threw.
+         * Reachable when a `<Tabs.Screen>` is removed while the bar is mounted, which is
+         * exactly what phase 9 did to five of them.
+         */
+        const descriptor = descriptors[route.key];
+        if (!descriptor) return null;
+        const { options } = descriptor;
         const focused = state.routes[state.index]?.key === route.key;
         const label = (options.title ?? route.name) as string;
         const isCenter = centerRoute !== undefined && route.name === centerRoute;

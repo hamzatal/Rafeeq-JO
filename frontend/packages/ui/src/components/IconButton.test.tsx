@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Pressable } from 'react-native';
 import { IconButton, LabelledPressable, TOUCH_TARGET } from './IconButton';
-import { flatStyle, render } from '../test/render';
+import { first, flatStyle, render } from '../test/render';
 
 function pressableOf(element: React.ReactElement) {
-  return render(element).root.findAllByType(Pressable)[0];
+  return first(render(element).root.findAllByType(Pressable), 'Pressable');
 }
 
 describe('IconButton', () => {

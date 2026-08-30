@@ -20,7 +20,20 @@ const FORWARD_RESPONSE_HEADERS = ['content-type', 'content-disposition', 'cache-
 async function forward(req: NextRequest, path: string[]) {
   const token = readToken();
   const search = req.nextUrl.search;
-  const url = `${upstreamBase()}/api/${path.map(encodeURIComponent).join('/')}${search}`;
+  /*
+   | The captured path is the COMPLETE upstream path — it already begins `api/v1`,
+   | because the shared client builds its own baseURL as `<base>/api/<API_VERSION>`
+   | (packages/api-client/src/client.ts:114) and the base it is given here is
+   | `/api/proxy`. So the browser asks for `/api/proxy/api/v1/auth/me`.
+   |
+   | This used to prepend `/api/` as well, which produced `<upstream>/api/api/v1/…`
+   | and a 404 on EVERY authenticated request. That failure was invisible in the test
+   | suite, which mocks the client, and self-concealing in the browser: `AuthProvider`
+   | treats a failed `auth.me()` as a dead session and calls `session.logout()`, so
+   | the cookie was deleted and the only symptom was an instant bounce back to
+   | /login — indistinguishable from bad credentials. Nothing in the dashboard worked.
+   */
+  const url = `${upstreamBase()}/${path.map(encodeURIComponent).join('/')}${search}`;
 
   const headers = new Headers();
   for (const name of FORWARD_REQUEST_HEADERS) {

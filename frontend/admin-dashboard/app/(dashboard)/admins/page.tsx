@@ -6,6 +6,7 @@ import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { Icon } from '../../../src/components/Icon';
+import { Phone } from '../../../src/components/Phone';
 
 type StaffRole = { name: string; label_ar: string; label_en: string };
 
@@ -77,7 +78,7 @@ export default function AdminsPage() {
               {staff.map((u) => (
                 <tr key={u.id} className="row-line">
                   <td className="p-3 font-medium surface-text">{u.full_name}</td>
-                  <td className="p-3 text-muted">{u.phone}</td>
+                  <td className="p-3 text-muted"><Phone value={u.phone} /></td>
                   <td className="p-3 text-muted">{roleLabel(u.roles?.[0])}</td>
                   <td className="p-3 text-muted">{u.status_label}</td>
                   <td className="p-3 text-end">

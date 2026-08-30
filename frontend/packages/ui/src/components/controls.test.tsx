@@ -5,7 +5,7 @@ import { alpha, colors } from '@rafeeq/tokens';
 import { Banner } from './Banner';
 import { Button } from './Button';
 import { Input } from './Input';
-import { flatStyle, render } from '../test/render';
+import { first, flatStyle, render } from '../test/render';
 
 describe('Banner', () => {
   it('renders nothing without a message, so a caller can pass state directly', () => {
@@ -20,10 +20,13 @@ describe('Banner', () => {
    * the call site and a typo looks exactly like a decision.
    */
   it('tints from alpha(), at one opacity', () => {
-    const box = render(<Banner message="خطأ" />).root.findAll(
-      (n: ReactTestInstance) => Boolean(n.props?.accessibilityLiveRegion),
-      { deep: true },
-    )[0];
+    const box = first(
+      render(<Banner message="خطأ" />).root.findAll(
+        (n: ReactTestInstance) => Boolean(n.props?.accessibilityLiveRegion),
+        { deep: true },
+      ),
+      'live region',
+    );
 
     expect(flatStyle(box.props.style).backgroundColor).toBe(alpha(colors.danger, 0.1));
   });
@@ -54,21 +57,21 @@ describe('Button', () => {
    */
   it('offers exactly the five variants the product uses', () => {
     for (const variant of variants) {
-      const p = render(<Button title="x" onPress={() => {}} variant={variant} />).root.findAllByType(Pressable)[0];
+      const p = first(render(<Button title="x" onPress={() => {}} variant={variant} />).root.findAllByType(Pressable), 'Pressable');
 
       expect(flatStyle(p.props.style).backgroundColor ?? 'transparent', variant).toBeTruthy();
     }
   });
 
   it('uses the token control height for the small size', () => {
-    const md = render(<Button title="x" onPress={() => {}} size="md" />).root.findAllByType(Pressable)[0];
+    const md = first(render(<Button title="x" onPress={() => {}} size="md" />).root.findAllByType(Pressable), 'Pressable');
 
     expect(flatStyle(md.props.style).height).toBe(46);
   });
 
   it('never goes below the 44 touch target', () => {
     for (const size of ['md', 'lg'] as const) {
-      const p = render(<Button title="x" onPress={() => {}} size={size} />).root.findAllByType(Pressable)[0];
+      const p = first(render(<Button title="x" onPress={() => {}} size={size} />).root.findAllByType(Pressable), 'Pressable');
       const s = flatStyle(p.props.style);
 
       expect(Math.max(Number(s.height), Number(s.minHeight ?? 0)), size).toBeGreaterThanOrEqual(44);
@@ -81,7 +84,7 @@ describe('Button', () => {
    * is waiting to hear that their tap registered.
    */
   it('reports busy and keeps its name while loading', () => {
-    const p = render(<Button title="ادفع" onPress={() => {}} loading />).root.findAllByType(Pressable)[0];
+    const p = first(render(<Button title="ادفع" onPress={() => {}} loading />).root.findAllByType(Pressable), 'Pressable');
 
     expect(p.props.accessibilityState).toEqual({ disabled: true, busy: true });
     expect(p.props.accessibilityLabel).toBe('ادفع');
@@ -90,7 +93,7 @@ describe('Button', () => {
 
   it('does not fire while loading', () => {
     const onPress = vi.fn();
-    const p = render(<Button title="x" onPress={onPress} loading />).root.findAllByType(Pressable)[0];
+    const p = first(render(<Button title="x" onPress={onPress} loading />).root.findAllByType(Pressable), 'Pressable');
 
     expect(p.props.disabled).toBe(true);
   });
@@ -103,14 +106,14 @@ describe('Input', () => {
    * validation message, so a rejected form was silent.
    */
   it('gives the field its label as an accessible name', () => {
-    const field = render(<Input label="رقم الهاتف" />).root.findAllByType(TextInput)[0];
+    const field = first(render(<Input label="رقم الهاتف" />).root.findAllByType(TextInput), 'TextInput');
 
     expect(field.props.accessibilityLabel).toBe('رقم الهاتف');
   });
 
   it('marks the field invalid and points at the message', () => {
     const r = render(<Input label="رقم الهاتف" error="رقم غير صحيح" />);
-    const field = r.root.findAllByType(TextInput)[0];
+    const field = first(r.root.findAllByType(TextInput), 'TextInput');
 
     expect(field.props['aria-invalid']).toBe(true);
     expect(field.props['aria-errormessage']).toBeTruthy();
@@ -118,7 +121,7 @@ describe('Input', () => {
   });
 
   it('is not invalid without an error', () => {
-    const field = render(<Input label="رقم الهاتف" />).root.findAllByType(TextInput)[0];
+    const field = first(render(<Input label="رقم الهاتف" />).root.findAllByType(TextInput), 'TextInput');
 
     expect(field.props['aria-invalid']).toBe(false);
     expect(field.props['aria-errormessage']).toBeUndefined();
@@ -131,7 +134,7 @@ describe('Input', () => {
    */
   it('has no onDark escape hatch', () => {
     expect('onDark' in ({} as Record<string, unknown>)).toBe(false);
-    const field = render(<Input label="x" />).root.findAllByType(TextInput)[0];
+    const field = first(render(<Input label="x" />).root.findAllByType(TextInput), 'TextInput');
 
     expect(field.props.placeholderTextColor).toBe(colors.muted);
   });

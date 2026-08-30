@@ -6,6 +6,7 @@ import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { LoadError } from '../../../src/components/LoadError';
+import { Phone } from '../../../src/components/Phone';
 
 const SEVERITY_CLASS: Record<string, string> = {
   low: 'bg-background text-muted',
@@ -139,7 +140,7 @@ export default function DisputesPage() {
                   >
                     <td className="p-3 surface-text">
                       <div className="font-medium">{d.subject.name ?? '—'}</div>
-                      <div className="text-xs text-muted">{d.subject.phone}</div>
+                      <div className="text-xs text-muted"><Phone value={d.subject.phone} /></div>
                     </td>
                     <td className="p-3 text-muted">{d.type}</td>
                     <td className="p-3">
@@ -163,7 +164,7 @@ export default function DisputesPage() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="text-lg font-bold surface-text">{detail.dispute.subject.name}</div>
-                  <div className="text-xs text-muted">{detail.dispute.subject.phone} · {detail.dispute.subject.type}</div>
+                  <div className="text-xs text-muted"><Phone value={detail.dispute.subject.phone} /> · {detail.dispute.subject.type}</div>
                 </div>
                 <span className={`badge ${SEVERITY_CLASS[detail.dispute.severity] ?? ''}`}>
                   {detail.dispute.severity_label}

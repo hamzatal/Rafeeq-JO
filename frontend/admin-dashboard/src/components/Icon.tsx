@@ -71,8 +71,13 @@ export function Icon({ name, size = ICON_SIZE, className, strokeWidth = ICON_STR
    * survived review. A question mark is obviously wrong.
    */
   if (!Glyph) {
-    const Fallback = (icons as Record<string, React.ComponentType<{ size?: number; className?: string }>>)
+    const Fallback = (icons as Record<string, React.ComponentType<{ size?: number; className?: string }> | undefined>)
       .CircleQuestionMark;
+
+    // And if even the fallback is missing, say so in text rather than crashing the page
+    // on `<undefined />`. Lucide renames glyphs — `help-circle` became
+    // `circle-question-mark` — so this is the same class of miss one level up.
+    if (!Fallback) return <span className={className} aria-hidden="true">?</span>;
 
     return <Fallback size={size} className={className} />;
   }
