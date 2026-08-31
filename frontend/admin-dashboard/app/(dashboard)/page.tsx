@@ -3,333 +3,425 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { formatJod } from '@rafeeq/shared';
-import type { FinancialReport, Dispute } from '@rafeeq/shared';
+import type { AdminInsights, FinancialReport, Trip, Zone } from '@rafeeq/shared';
 import { api } from '../../src/lib/api';
 import { useT } from '../../src/lib/i18n';
-import { Skeleton, StatCardsSkeleton } from '../../src/components/Skeleton';
 import { Icon } from '../../src/components/Icon';
 import { Num } from '../../src/components/Num';
+import { Pill } from '../../src/components/Pill';
+import { Panel } from '../../src/components/Panel';
+import { KpiCard, type KpiTone } from '../../src/components/KpiCard';
 import { NavPageHeader } from '../../src/components/NavPageHeader';
+import { Skeleton, StatCardsSkeleton } from '../../src/components/Skeleton';
+import { LoadError } from '../../src/components/LoadError';
+import { downloadBlob, stamp } from '../../src/lib/download';
 
-/*
- * Money goes through the shared formatter. It used to be:
- *   const jod = (fils) => `${(fils / 1000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
- * which dropped ALL THREE decimals off the platform's own revenue — 1,234,999 fils
- * rendered as "1,235", a full dinar high — and produced a bare Latin numeral with no
- * bidi isolation inside an RTL page, so the digits could reorder against the label.
- *
- * It slipped past `check:money` because that gate only looked for `.toFixed(2)` and a
- * hand-written «د.أ». A rule for it has been added.
- */
-const jod = (fils: number) => formatJod(fils);
+/* ═══════════════════════════════════════════════════════════════════════════
+   لوحة القيادة — «ما يحتاج إجراءً في المقدّمة، لا مؤشّرات للزينة»
+
+   That sentence is the caption of screen 33 in `docs/design/src/06-admin-1.html`, and it
+   is the whole brief. What stood here before did the opposite: four KPI cards, a
+   commission-by-zone chart, a quick-links grid and a disputes table — none of which tell
+   an operator what to DO when they sit down.
+
+   The reference composition, which this now follows exactly:
+
+     · header with the day, and two actions
+     · four KPI cards, each with a bar and a caption naming its denominator
+     · `.a2` — a 1.5fr / 1fr split
+         left   the live trips table
+         right  «يحتاج إجراءً» over «أعلى المناطق طلباً»
+
+   ── Where the reference numbers could not be honoured ──────────────────────
+
+   Its third card is «كباتن متصلون 48 / 126». There is no online-presence count anywhere
+   in this API — no heartbeat, no session table for captains. So rather than print a
+   number that looks live and is not, this card reports the same underlying question the
+   reference is asking (is there enough supply?) with the figures that DO exist:
+   approved captains against all captains.
+
+   Everything else is measured: the bars divide two values from the same response, and
+   every «يحتاج إجراءً» row is a count the API returned. A row whose count is zero is not
+   rendered — a panel titled "needs action" listing four things that need none is how an
+   operator learns to stop reading it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 const monthStart = () => {
   const d = new Date();
+
   return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
 };
 const today = () => new Date().toISOString().slice(0, 10);
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   A KPI card, and the two things that used to be wrong with it.
+const jod = (fils: number) => formatJod(fils);
 
-   ── The progress bar was fabricated ────────────────────────────────────────
-
-   `bar` held 0.75, 0.8, 0.6 and 0.3 — four constants typed by hand, with no input
-   from the report they sat beside. It was also never RENDERED, so the dashboard
-   carried invented progress values that nobody could even see. The approved reference
-   (`docs/design/v2/06-admin-1`) does want a bar under each figure, and it wants
-   «74% من هدف اليوم» — but this API returns no target and no previous period, so that
-   exact caption cannot be computed. Inventing it is what the old constants did.
-
-   `share` therefore carries a MEASURED ratio together with the name of the
-   denominator it was measured against, and the caption states that denominator. A bar
-   with nothing real to divide by is omitted rather than filled in.
-
-   ── The trend pill pointed up regardless ───────────────────────────────────
-
-   Every card rendered a `trending-up` arrow beside `trend`, and `trend` was never a
-   trend: «منذ بداية الشهر» is a period, «عمولة رحلات + بيع اشتراكات» is a composition,
-   and «لا يوجد حالياً» — no open disputes — was shown under an arrow meaning growth.
-   A rising arrow next to "none right now" is not decoration; it is a wrong reading of
-   the number it is attached to. Removed.
-   ═══════════════════════════════════════════════════════════════════════════ */
-interface Kpi {
-  label: string;
-  value: string;
+/** One row of «يحتاج إجراءً». */
+interface ActionRow {
   icon: string;
-  /** A measured ratio, and the denominator it is a share of. Omitted when none exists. */
-  share?: { ratio: number; ofLabel: string };
-  danger?: boolean;
+  tone: 'bad' | 'warn' | 'info';
+  title: string;
+  hint: string;
+  pill: string;
+  href: string;
+  count: number;
 }
 
-function KpiCard({ k }: { k: Kpi }) {
-  const percent = k.share ? Math.round(Math.min(1, Math.max(0, k.share.ratio)) * 100) : 0;
+const ROW_TILE: Record<ActionRow['tone'], string> = {
+  bad: 'bg-danger/10 text-danger',
+  warn: 'bg-warning-soft text-warning',
+  info: 'bg-brand-50 text-primary',
+};
 
-  return (
-    <div className={`kpi-card p-6 flex flex-col justify-between ${k.danger ? 'border-danger/40' : ''}`}>
-      <div className="flex justify-between items-start mb-4">
-        <div
-          className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-            k.danger ? 'bg-danger/10 text-danger' : 'bg-brand-100 text-primary'
-          }`}
-        >
-          <Icon name={k.icon} size={22} />
-        </div>
-      </div>
-      <div>
-        <p className="muted-text text-sm mb-1">{k.label}</p>
-        {/*
-          There was a `unit` slot printing "JOD" beside the value, and `formatJod`
-          already returns the amount WITH the dinar mark — so the two money cards showed
-          the same currency twice, in two scripts, on the first screen of the product.
-          The unit belongs to the formatter, which is also the only thing that gets the
-          bidi isolation right.
-        */}
-        <div className={`stat-number ${k.danger ? 'text-danger' : ''}`}>{k.value}</div>
-
-        {k.share && (
-          <div className="mt-3">
-            {/*
-              `aria-hidden` on the bar, because the caption below already states the
-              same ratio in words — announcing a progressbar as well would read the
-              figure twice, and this is decoration for a number that is already there.
-            */}
-            <div aria-hidden="true" className="h-1.5 rounded-full bg-line overflow-hidden">
-              <div
-                className={`h-full rounded-full ${k.danger ? 'bg-danger' : 'bg-primary'}`}
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-            <p className="mt-1.5 text-xs text-muted">
-              <Num percent={percent} /> {k.share.ofLabel}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+const ROW_PILL: Record<ActionRow['tone'], 'urgent' | 'open' | 'progress'> = {
+  bad: 'urgent',
+  warn: 'open',
+  info: 'progress',
+};
 
 export default function CommandCenter() {
   const { t, locale } = useT();
-  const [report, setReport] = useState<FinancialReport | null>(null);
-  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [month, setMonth] = useState<FinancialReport | null>(null);
+  const [day, setDay] = useState<FinancialReport | null>(null);
+  const [insights, setInsights] = useState<AdminInsights | null>(null);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    let active = true;
-    (async () => {
-      const [rep, disp] = await Promise.allSettled([
+    let alive = true;
+
+    const load = async () => {
+      setLoading(true);
+      setFailed(false);
+
+      const [m, d, ins, tr, zn] = await Promise.allSettled([
         api.reports.financial({ from: monthStart(), to: today() }),
-        api.disputes.list({ status: 'open' }),
+        api.reports.financial({ from: today(), to: today() }),
+        api.assistant.insights(),
+        api.admin.listTrips({ per_page: 7 }),
+        api.zones.list(),
       ]);
-      if (!active) return;
-      if (rep.status === 'fulfilled') setReport(rep.value);
-      if (disp.status === 'fulfilled') setDisputes(disp.value);
+      if (!alive) return;
+
+      if (m.status === 'fulfilled') setMonth(m.value);
+      if (d.status === 'fulfilled') setDay(d.value);
+      if (ins.status === 'fulfilled') setInsights(ins.value);
+      if (tr.status === 'fulfilled') setTrips(tr.value.items);
+      if (zn.status === 'fulfilled') setZones(zn.value);
+
+      // Every panel failing is a broken screen; one failing is a partial one, and the
+      // panels say so individually.
+      setFailed([m, d, ins, tr].every((r) => r.status === 'rejected'));
       setLoading(false);
-    })();
+    };
+
+    void load();
+
     return () => {
-      active = false;
+      alive = false;
     };
   }, []);
 
-  const criticalOpen = useMemo(
-    () => disputes.filter((d) => d.severity === 'critical' || d.severity === 'high').length,
-    [disputes],
-  );
+  const metrics = insights?.metrics;
 
-  /*
-   * Every `share` below divides two numbers this report actually returned. There is no
-   * target and no previous period in `FinancialReport`, so «% من هدف اليوم» and
-   * «% عن أمس» from the reference cannot be computed here — and are therefore absent
-   * rather than approximated. A card with no honest denominator gets no bar.
-   */
-  const gross = report?.gross_fare_fils ?? 0;
-  const ridesTotal = report?.rides_count ?? 0;
-  const subscriptionRides = report?.by_funding?.subscription?.rides_count ?? 0;
-  const openTotal = disputes.length;
+  /* ── KPIs ──────────────────────────────────────────────────────────────── */
+  const kpis = useMemo(() => {
+    const dayGross = day?.gross_fare_fils ?? 0;
+    const dayRevenue = day?.platform_revenue_fils ?? 0;
+    const tripsMonth = metrics?.trips.this_month ?? 0;
+    const tripsDone = metrics?.trips.completed ?? 0;
+    const captains = metrics?.users.drivers ?? 0;
+    const approved = metrics?.drivers.approved ?? 0;
+    const pendingPayments = metrics?.safety.pending_payments ?? 0;
 
-  const kpis: Kpi[] = [
-    {
-      label: t('home.kpi.rides'),
-      value: (ridesTotal).toLocaleString(locale),
-      icon: 'car',
-      // How many of the month's paid seats were covered by a plan rather than paid per ride.
-      ...(ridesTotal > 0
-        ? { share: { ratio: subscriptionRides / ridesTotal, ofLabel: t('home.share.onSubscription') } }
-        : {}),
-    },
-    {
-      label: t('home.kpi.commission'),
-      // platform_revenue_fils, not commission_fils: the latter double-counts
-      // commission booked on subscription-covered seats.
-      value: jod(report?.platform_revenue_fils ?? 0),
-      icon: 'wallet',
-      ...(gross > 0
-        ? { share: { ratio: (report?.platform_revenue_fils ?? 0) / gross, ofLabel: t('home.share.ofGross') } }
-        : {}),
-    },
-    {
-      label: t('home.kpi.gross'),
-      value: jod(gross),
-      icon: 'banknote',
-      // The captains' cut of that same gross — the other side of the figure above.
-      ...(gross > 0
-        ? { share: { ratio: (report?.captain_earnings_fils ?? 0) / gross, ofLabel: t('home.share.captainCut') } }
-        : {}),
-    },
-    {
-      label: t('home.kpi.disputes'),
-      value: String(criticalOpen),
-      icon: 'triangle-alert',
-      ...(openTotal > 0
-        ? { share: { ratio: criticalOpen / openTotal, ofLabel: t('home.share.ofOpenDisputes') } }
-        : {}),
-      danger: criticalOpen > 0,
-    },
-  ];
+    const out: (KpiCardProps & { key: string; plain: string })[] = [
+      {
+        key: 'revenue',
+        plain: jod(dayRevenue),
+        label: t('home.kpi.dayRevenue'),
+        value: jod(dayRevenue),
+        ...(dayGross > 0
+          ? { share: dayRevenue / dayGross, caption: t('home.share.ofGross'), tone: 'good' as KpiTone }
+          : { caption: t('home.noneToday'), tone: 'neutral' as KpiTone }),
+      },
+      {
+        key: 'trips',
+        plain: String(tripsDone),
+        label: t('home.kpi.completedTrips'),
+        value: <Num value={tripsDone} />,
+        ...(tripsMonth > 0
+          ? { share: tripsDone / tripsMonth, caption: t('home.share.ofMonthTrips'), tone: 'neutral' as KpiTone }
+          : { caption: t('home.noneThisMonth'), tone: 'neutral' as KpiTone }),
+      },
+      {
+        key: 'captains',
+        plain: `${approved} / ${captains}`,
+        // The reference asks «كباتن متصلون»; this API has no presence signal, so the
+        // same question is answered with approved-against-total. See the file header.
+        label: t('home.kpi.approvedCaptains'),
+        value: (
+          <>
+            <Num value={approved} /> / <Num value={captains} />
+          </>
+        ),
+        ...(captains > 0
+          ? {
+              share: approved / captains,
+              caption: t('home.share.ofAllCaptains'),
+              tone: (approved / captains < 0.5 ? 'warn' : 'good') as KpiTone,
+            }
+          : {}),
+      },
+      {
+        key: 'payments',
+        plain: String(pendingPayments),
+        label: t('home.kpi.pendingPayments'),
+        value: <Num value={pendingPayments} />,
+        // No total-payments figure exists to divide by, so no bar — only the fact.
+        caption: pendingPayments > 0 ? t('home.needsReviewNow') : t('home.allReviewed'),
+        tone: (pendingPayments > 0 ? 'bad' : 'good') as KpiTone,
+      },
+    ];
 
-  const maxZone = Math.max(1, ...(report?.by_zone ?? []).map((z) => z.ride_commission_fils));
+    return out;
+  }, [day, metrics, t]);
+
+  /* ── «يحتاج إجراءً» — only what actually does ──────────────────────────── */
+  const actions = useMemo<ActionRow[]>(() => {
+    if (!metrics) return [];
+
+    return (
+      [
+        {
+          icon: 'shield',
+          tone: 'bad',
+          title: t('home.action.riskFlags'),
+          hint: t('home.action.riskFlagsHint'),
+          pill: t('home.pill.urgent'),
+          href: '/safety',
+          count: metrics.safety.unresolved_risk_flags,
+        },
+        {
+          icon: 'banknote',
+          tone: 'warn',
+          title: t('home.action.payments'),
+          hint: t('home.action.paymentsHint'),
+          pill: t('home.pill.review'),
+          href: '/payments',
+          count: metrics.safety.pending_payments,
+        },
+        {
+          icon: 'car-front',
+          tone: 'info',
+          title: t('home.action.drivers'),
+          hint: t('home.action.driversHint'),
+          pill: t('home.pill.verify'),
+          href: '/drivers',
+          count: metrics.drivers.pending_review,
+        },
+        {
+          icon: 'gavel',
+          tone: 'warn',
+          title: t('home.action.disputes'),
+          hint: t('home.action.disputesHint'),
+          pill: t('home.pill.resolve'),
+          href: '/disputes',
+          count: metrics.safety.open_disputes,
+        },
+      ] as ActionRow[]
+    ).filter((row) => row.count > 0);
+  }, [metrics, t]);
+
+  /* ── «أعلى المناطق طلباً» — by_zone, named and ranked ──────────────────── */
+  const topZones = useMemo(() => {
+    const rows = (month?.by_zone ?? [])
+      .filter((z) => z.rides_count > 0)
+      .sort((a, b) => b.rides_count - a.rides_count)
+      .slice(0, 4);
+    const max = Math.max(1, ...rows.map((z) => z.rides_count));
+
+    return rows.map((z) => ({
+      id: z.zone_id ?? 'none',
+      name: zones.find((zone) => zone.id === z.zone_id)?.name_ar ?? t('home.general'),
+      rides: z.rides_count,
+      share: z.rides_count / max,
+    }));
+  }, [month, zones, t]);
+
+  const exportCsv = () => {
+    /*
+     * A BOM, and quotes around every cell.
+     *
+     * Excel reads a BOM-less UTF-8 CSV as the system codepage, which turns every Arabic
+     * label into mojibake — and this file exists so an operator can open it. The quoting
+     * matters for the same practical reason: `formatJod` returns bidi isolate characters
+     * and a label may contain a comma.
+     */
+    const rows: string[][] = [
+      [t('home.csvMetric'), t('home.csvValue')],
+      ...kpis.map((k) => [k.label, k.plain]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(',')).join('\r\n');
+
+    downloadBlob(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }), `dashboard-${stamp()}.csv`);
+  };
+
+  if (failed) return <LoadError onRetry={() => window.location.reload()} />;
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      {/*
-        The reference header (docs/design/v2/06-admin-1) states the DAY and when the
-        figures were last refreshed, because every number below is scoped to a period —
-        a dashboard that does not say "as of when" invites an operator to act on a stale
-        screen. The greeting moved out: the sidebar footer already says who is signed in.
-      */}
+    <div className="space-y-4">
       <NavPageHeader
         href="/"
-        stat={`${t('home.lastUpdate')}: ${new Date().toLocaleString(locale)}`}
+        stat={new Date().toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+        actions={
+          <>
+            <button onClick={exportCsv} className="btn-outline h-[34px] px-[13px] text-xs">
+              {t('home.exportCsv')}
+            </button>
+            <Link href="/ride-requests" className="btn-primary h-[34px] px-[13px] text-xs">
+              {t('rideRequests.runMatching')}
+            </Link>
+          </>
+        }
       />
 
-      {/* KPI row */}
+      {/* `.akpis{grid-template-columns:repeat(4,1fr);gap:11px}` */}
       {loading ? (
         <StatCardsSkeleton />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-          {kpis.map((k) => (
-            <KpiCard key={k.label} k={k} />
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[11px]">
+          {kpis.map(({ key, plain: _plain, ...kpi }) => (
+            <KpiCard key={key} {...kpi} />
           ))}
         </div>
       )}
 
-      {/* Bento: revenue-by-zone chart + quick links */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chart */}
-        <div className="lg:col-span-2 card p-0 overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-line flex justify-between items-center">
-            <h3 className="font-bold text-ink flex items-center gap-2">
-              <Icon name="activity" size={20} className="text-primary-dark" />
-              {t('home.commissionByZone')}
-            </h3>
-            <Link href="/reports" className="text-sm text-primary-dark hover:underline">
-              {t('home.fullReports')}
-            </Link>
-          </div>
-          <div className="p-5 flex-1 min-h-[280px]">
-            {loading ? (
-              <Skeleton className="h-[240px] w-full" />
-            ) : (report?.by_zone?.length ?? 0) === 0 ? (
-              <div className="h-full flex items-center justify-center text-muted">{t('home.noData')}</div>
-            ) : (
-              <div className="flex items-end gap-3 h-[260px]">
-                {report!.by_zone.slice(0, 8).map((z, i) => (
-                  <div key={z.zone_id ?? i} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
-                    <div className="text-[11px] font-mono text-muted">{jod(z.ride_commission_fils)}</div>
-                    <div
-                      className="w-full rounded-t-md bg-gradient-to-t from-primary to-primary-dark min-h-[6px] transition-all"
-                      style={{ height: `${(z.ride_commission_fils / maxZone) * 100}%` }}
-                    />
-                    <div className="text-[10px] text-muted truncate w-full text-center">
-                      {z.zone_id ? z.zone_id.slice(0, 6) : t('home.general')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Quick links / module summary */}
-        <div className="card flex flex-col">
-          <h3 className="font-bold text-ink mb-4">{t('home.quickAccess')}</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { href: '/disputes', label: t('nav.disputes'), icon: 'gavel' },
-              { href: '/withdrawals', label: t('nav.withdrawals'), icon: 'wallet' },
-              { href: '/drivers', label: t('nav.drivers'), icon: 'car-front' },
-              { href: '/zones', label: t('nav.zones'), icon: 'map' },
-              { href: '/reports', label: t('nav.reports'), icon: 'activity' },
-              { href: '/safety', label: t('nav.safety'), icon: 'shield' },
-            ].map((q) => (
-              <Link
-                key={q.href}
-                href={q.href}
-                className="flex flex-col items-center justify-center gap-2 rounded-xl border border-line bg-background hover:bg-primary/5 hover:border-primary/40 transition-colors py-4"
-              >
-                <Icon name={q.icon} className="text-primary-dark" />
-                <span className="text-xs font-semibold surface-text">{q.label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent open disputes */}
-      <div className="card p-0 overflow-hidden">
-        <div className="px-5 py-4 border-b border-line flex justify-between items-center">
-          <h3 className="font-bold text-ink flex items-center gap-2">
-            <Icon name="gavel" size={20} className="text-danger" />
-            {t('home.recentDisputes')}
-          </h3>
-          <Link href="/disputes" className="text-sm text-primary-dark hover:underline">
-            {t('common.viewAll')}
-          </Link>
-        </div>
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="p-4 space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-9 w-full" />
-              ))}
-            </div>
-          ) : disputes.length === 0 ? (
-            <div className="p-6 text-center text-muted">{t('home.noDisputes')}</div>
-          ) : (
-            <table className="data-table">
-            <caption className="sr-only">{t('home.title')}</caption>
-              <thead>
+      {/* `.a2{grid-template-columns:1.5fr 1fr;gap:14px}` */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-[14px] items-start">
+        <Panel>
+          <table className="data-table">
+            <caption className="sr-only">{t('nav.trips')}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t('home.col.trip')}</th>
+                <th scope="col">{t('home.col.captain')}</th>
+                <th scope="col">{t('home.col.seats')}</th>
+                <th scope="col">{t('home.col.fare')}</th>
+                <th scope="col">{t('home.col.status')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={5}>
+                      <Skeleton className="h-5 w-full" />
+                    </td>
+                  </tr>
+                ))
+              ) : trips.length === 0 ? (
                 <tr>
-                  <th scope="col">{t('home.account')}</th>
-                  <th scope="col">{t('home.type')}</th>
-                  <th scope="col">{t('home.severity')}</th>
-                  <th scope="col">{t('home.riskScore')}</th>
+                  <td colSpan={5} className="text-center text-muted py-6">
+                    {t('trips.none')}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {disputes.slice(0, 6).map((d) => (
-                  <tr key={d.id}>
-                    <td className="font-medium">{d.subject.name ?? '—'}</td>
-                    <td className="text-muted">{d.type}</td>
+              ) : (
+                trips.map((trip) => (
+                  <tr key={trip.id}>
+                    <td className="font-medium surface-text">{trip.route?.name ?? t('trips.poolTrip')}</td>
+                    <td className="text-muted">{trip.captain?.name ?? '—'}</td>
+                    <td className="text-muted">
+                      <Num range={[trip.booked_count ?? 0, trip.capacity]} />
+                    </td>
+                    <td>{trip.pricing ? jod(trip.pricing.fare_fils) : '—'}</td>
                     <td>
-                      <span
-                        className={
-                          d.severity === 'critical' || d.severity === 'high' ? 'pill-danger' : 'pill-warning'
+                      <Pill
+                        tone={
+                          trip.status === 'completed'
+                            ? 'done'
+                            : trip.status === 'cancelled'
+                              ? 'urgent'
+                              : trip.status === 'started'
+                                ? 'open'
+                                : 'progress'
                         }
                       >
-                        {d.severity_label}
-                      </span>
+                        {trip.status_label}
+                      </Pill>
                     </td>
-                    <td className="font-mono">{d.risk_score ?? '—'}</td>
                   </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </Panel>
+
+        <div className="flex flex-col gap-[14px]">
+          <Panel title={t('home.needsAction')}>
+            {loading ? (
+              <div className="px-[14px] py-3 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-full" />
                 ))}
-              </tbody>
-            </table>
-          )}
+              </div>
+            ) : actions.length === 0 ? (
+              <div className="px-[14px] py-6 flex items-center gap-2 text-sm text-success">
+                <Icon name="check" size={16} />
+                {t('home.nothingNeedsAction')}
+              </div>
+            ) : (
+              actions.map((row) => (
+                <Link
+                  key={row.href}
+                  href={row.href}
+                  className="flex items-center gap-2.5 px-[14px] py-[9px] border-t border-neutral-100 hover:bg-primary/5 transition-colors"
+                >
+                  <div className={`w-[30px] h-[30px] rounded-[9px] grid place-items-center shrink-0 ${ROW_TILE[row.tone]}`}>
+                    <Icon name={row.icon} size={15} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-bold surface-text truncate">
+                      <Num value={row.count} /> {row.title}
+                    </div>
+                    <div className="text-[11px] text-neutral-500 truncate">{row.hint}</div>
+                  </div>
+                  <Pill tone={ROW_PILL[row.tone]}>{row.pill}</Pill>
+                </Link>
+              ))
+            )}
+          </Panel>
+
+          <Panel title={t('home.topZones')} padded>
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-6 w-full" />
+                ))}
+              </div>
+            ) : topZones.length === 0 ? (
+              <p className="text-sm text-muted py-2">{t('home.noData')}</p>
+            ) : (
+              topZones.map((zone) => (
+                <div key={zone.id} className="mb-[11px] last:mb-0">
+                  <div className="flex items-center mb-1">
+                    <span className="text-xs surface-text">{zone.name}</span>
+                    <span className="ms-auto text-xs text-neutral-600">
+                      <Num value={zone.rides} />
+                    </span>
+                  </div>
+                  <div aria-hidden="true" className="h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${Math.round(zone.share * 100)}%` }} />
+                  </div>
+                </div>
+              ))
+            )}
+          </Panel>
         </div>
       </div>
     </div>
   );
 }
+
+/** Local alias so the KPI array can carry a `key` alongside the component's props. */
+type KpiCardProps = React.ComponentProps<typeof KpiCard>;
