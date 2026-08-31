@@ -9,37 +9,37 @@
     "slug": "02-permissions",
     "path": "/permissions",
     "title": "الأذونات",
-    "bytes": 79373
+    "bytes": 90277
   },
   {
     "slug": "03-welcome",
     "path": "/welcome",
     "title": "ابدأ",
-    "bytes": 63265
+    "bytes": 61439
   },
   {
     "slug": "04-login",
     "path": "/login",
     "title": "تسجيل الدخول",
-    "bytes": 73885
+    "bytes": 80583
   },
   {
     "slug": "05-register",
     "path": "/register",
     "title": "إنشاء حساب كابتن",
-    "bytes": 81560
+    "bytes": 64402
   },
   {
     "slug": "06-otp",
     "path": "/otp",
     "title": "رمز التحقق",
-    "bytes": 46609
+    "bytes": 41110
   },
   {
     "slug": "07-forgot-password",
     "path": "/forgot-password",
     "title": "استعادة كلمة المرور",
-    "bytes": 77613
+    "bytes": 72297
   },
   {
     "slug": "10-dashboard",
@@ -57,13 +57,13 @@
     "slug": "12-trips",
     "path": "/trips",
     "title": "رحلاتي",
-    "bytes": 83983
+    "bytes": 85152
   },
   {
     "slug": "13-earnings",
     "path": "/earnings",
     "title": "الأرباح",
-    "bytes": 76563
+    "bytes": 86134
   },
   {
     "slug": "14-vehicle-docs",
@@ -81,12 +81,12 @@
     "slug": "16-chat",
     "path": "/chat",
     "title": "المحادثة",
-    "bytes": 38101
+    "bytes": 46914
   },
   {
     "slug": "17-account",
     "path": "/account",
     "title": "حسابي",
-    "bytes": 111483
+    "bytes": 120128
   }
 ]

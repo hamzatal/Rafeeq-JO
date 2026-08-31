@@ -45,6 +45,10 @@
 /* ── raw ramp ─────────────────────────────────────────────────────────────── */
 export { alpha, brand, live, neutral, RETIRED, status } from './color';
 
+// The identity mark, as geometry both renderers draw from — see brand.ts.
+export { BRAND_MARK, BRAND_MARK_INK, brandMarkColors, brandMarkSvg } from './brand';
+export type { BrandMarkOptions } from './brand';
+
 /* ── type ─────────────────────────────────────────────────────────────────── */
 export { fontFamily, fontStack, fontStackList, fontWeight, legacyText, rnType, type } from './type';
 export type { TypeRole } from './type';

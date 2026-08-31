@@ -15,43 +15,43 @@
     "slug": "03-welcome",
     "path": "/welcome",
     "title": "ابدأ",
-    "bytes": 60196
+    "bytes": 46392
   },
   {
     "slug": "04-login",
     "path": "/login",
     "title": "تسجيل الدخول",
-    "bytes": 75611
+    "bytes": 70271
   },
   {
     "slug": "05-register",
     "path": "/register",
     "title": "إنشاء حساب",
-    "bytes": 61254
+    "bytes": 55967
   },
   {
     "slug": "06-otp",
     "path": "/otp",
     "title": "رمز التحقق",
-    "bytes": 44606
+    "bytes": 39226
   },
   {
     "slug": "07-forgot-password",
     "path": "/forgot-password",
     "title": "استعادة كلمة المرور",
-    "bytes": 65475
+    "bytes": 60149
   },
   {
     "slug": "10-home",
     "path": "/home",
     "title": "الرئيسية",
-    "bytes": 276600
+    "bytes": 276831
   },
   {
     "slug": "11-ride-request",
     "path": "/ride-request",
     "title": "طلب رحلة",
-    "bytes": 442244
+    "bytes": 433278
   },
   {
     "slug": "12-checkout",
@@ -63,7 +63,7 @@
     "slug": "13-trips",
     "path": "/trips",
     "title": "رحلاتي",
-    "bytes": 66022
+    "bytes": 66157
   },
   {
     "slug": "14-wallet",
@@ -75,7 +75,7 @@
     "slug": "15-subscriptions",
     "path": "/subscriptions",
     "title": "الاشتراكات",
-    "bytes": 113315
+    "bytes": 111446
   },
   {
     "slug": "16-addresses",
@@ -87,7 +87,7 @@
     "slug": "17-notifications",
     "path": "/notifications",
     "title": "الإشعارات",
-    "bytes": 103540
+    "bytes": 96989
   },
   {
     "slug": "18-chat",
@@ -99,7 +99,7 @@
     "slug": "19-assistant",
     "path": "/assistant",
     "title": "المساعد الذكي",
-    "bytes": 69888
+    "bytes": 69881
   },
   {
     "slug": "20-support",
