@@ -231,6 +231,45 @@ const DICT: Dict = {
   'home.subtitle': { ar: 'مراقبة الأداء والمقاييس الرئيسية لحظياً.', en: 'Real-time performance & key metrics.' },
   'home.lastUpdate': { ar: 'آخر تحديث', en: 'Last updated' },
 
+  // لوحة القيادة — the composition of screen 33 in docs/design/src/06-admin-1.html
+  'home.kpi.dayRevenue': { ar: 'إيراد اليوم', en: 'Revenue today' },
+  'home.kpi.completedTrips': { ar: 'رحلات مكتملة', en: 'Completed trips' },
+  'home.kpi.approvedCaptains': { ar: 'كباتن معتمدون', en: 'Approved captains' },
+  'home.kpi.pendingPayments': { ar: 'شحنات بانتظار المراجعة', en: 'Top-ups awaiting review' },
+  'home.share.ofMonthTrips': { ar: 'من رحلات الشهر', en: 'of this month’s trips' },
+  'home.share.ofAllCaptains': { ar: 'من إجمالي الكباتن', en: 'of all captains' },
+  'home.noneToday': { ar: 'لا إيراد مُسجَّل اليوم', en: 'No revenue recorded today' },
+  'home.noneThisMonth': { ar: 'لا رحلات هذا الشهر', en: 'No trips this month' },
+  'home.needsReviewNow': { ar: 'تحتاج مراجعة الآن', en: 'Need review now' },
+  'home.allReviewed': { ar: 'لا شيء معلّق', en: 'Nothing pending' },
+  'home.exportCsv': { ar: 'تصدير CSV', en: 'Export CSV' },
+  'home.csvMetric': { ar: 'المؤشّر', en: 'Metric' },
+  'home.csvValue': { ar: 'القيمة', en: 'Value' },
+
+  'home.needsAction': { ar: 'يحتاج إجراءً', en: 'Needs action' },
+  'home.nothingNeedsAction': { ar: 'لا شيء يحتاج إجراءً الآن', en: 'Nothing needs action right now' },
+  'home.topZones': { ar: 'أعلى المناطق طلباً', en: 'Busiest zones' },
+
+  'home.action.riskFlags': { ar: 'إشارة خطر غير محلولة', en: 'unresolved risk flags' },
+  'home.action.riskFlagsHint': { ar: 'مركز السلامة و SOS', en: 'Safety & SOS centre' },
+  'home.action.payments': { ar: 'شحنة بانتظار المراجعة', en: 'top-ups awaiting review' },
+  'home.action.paymentsHint': { ar: 'إيصالات CliQ', en: 'CliQ receipts' },
+  'home.action.drivers': { ar: 'كابتن بانتظار التوثيق', en: 'captains awaiting verification' },
+  'home.action.driversHint': { ar: 'الوثائق مرفوعة', en: 'Documents uploaded' },
+  'home.action.disputes': { ar: 'نزاع مفتوح', en: 'open disputes' },
+  'home.action.disputesHint': { ar: 'بانتظار قرار', en: 'Awaiting a decision' },
+
+  'home.pill.urgent': { ar: 'عاجل', en: 'Urgent' },
+  'home.pill.review': { ar: 'مراجعة', en: 'Review' },
+  'home.pill.verify': { ar: 'توثيق', en: 'Verify' },
+  'home.pill.resolve': { ar: 'حلّ', en: 'Resolve' },
+
+  'home.col.trip': { ar: 'الرحلة', en: 'Trip' },
+  'home.col.captain': { ar: 'الكابتن', en: 'Captain' },
+  'home.col.seats': { ar: 'المقاعد', en: 'Seats' },
+  'home.col.fare': { ar: 'الأجرة', en: 'Fare' },
+  'home.col.status': { ar: 'الحالة', en: 'Status' },
+
   /*
    * The denominator each KPI bar was measured against. Naming it in the caption is the
    * difference between «74%» (of what?) and a figure a reader can check.
