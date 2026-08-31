@@ -77,7 +77,9 @@ export function Topbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 h-16 bg-surface/90 backdrop-blur border-b border-line flex items-center justify-between px-6">
+    /* `.atop{height:52px;background:#fff;padding:0 20px}` — 52, not 64, and an opaque
+       surface rather than a blurred translucent one: the reference has no glass. */
+    <header className="sticky top-0 z-40 h-[52px] bg-surface border-b border-line flex items-center justify-between px-5">
       <CommandPalette />
 
       <div className="flex items-center gap-2">

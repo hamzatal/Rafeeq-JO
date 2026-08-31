@@ -193,11 +193,13 @@ export function CommandPalette() {
       {/* The trigger in the topbar. Looks like a field, opens the dialog. */}
       <button
         onClick={() => setOpen(true)}
-        className="hidden sm:flex items-center gap-2 h-10 w-96 max-w-[42vw] px-3 rounded-lg border border-line bg-background text-muted hover:border-primary/50 transition-colors"
+        /* `.asrch{max-width:340px;height:34px;border-radius:9px;border:1px solid var(--n300)}` */
+        className="hidden sm:flex items-center gap-2 h-[34px] w-full max-w-[340px] px-[11px] rounded-[9px] border border-neutral-300 bg-surface text-muted hover:border-primary/50 transition-colors"
       >
-        <Icon name="search" size={18} className="shrink-0" />
-        <span className="flex-1 text-start text-sm truncate">{t('palette.open')}</span>
-        <kbd className="text-[10px] font-bold px-1.5 py-0.5 rounded border border-line bg-surface text-muted">
+        <Icon name="search" size={15} className="shrink-0" />
+        <span className="flex-1 text-start text-[13px] truncate">{t('palette.open')}</span>
+        {/* `.akbd{font:600 10px;background:var(--n100);border-radius:5px;padding:1px 6px}` */}
+        <kbd className="text-[10px] font-semibold px-1.5 py-px rounded-[5px] bg-neutral-100 text-neutral-600">
           {shortcut}
         </kbd>
       </button>

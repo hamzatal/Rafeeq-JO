@@ -32,6 +32,15 @@ import { Num } from './Num';
    marker from the text it marks the moment the dashboard is read in English.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/**
+ * Which queues are drawn HOT rather than warm.
+ *
+ * From the reference: SOS and payment review are red because a delay there is a person
+ * stranded or money held; captain verification and payouts are amber because they are
+ * slow work, not emergencies.
+ */
+const HOT = new Set(['/safety', '/payments']);
+
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -42,13 +51,22 @@ export function Sidebar() {
   const badges = useBadges();
 
   return (
-    <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-surface text-ink flex flex-col z-50 border-e border-line">
+    /* 216px, from `.admin aside{width:216px}` — not 256. Forty pixels of the content
+       area were being spent on a column that the reference fits in less. */
+    <aside className="fixed inset-y-0 start-0 h-screen w-[216px] shrink-0 bg-surface text-ink flex flex-col z-50 border-e border-line">
       {/* Brand */}
-      <div className="px-5 py-4 flex items-center gap-3 border-b border-line">
-        <LogoMark size={40} />
-        <div className="min-w-0">
-          <div className="text-lg font-bold font-display text-primary leading-tight">رفيق</div>
-          <div className="text-[11px] text-muted truncate">{t('brand.tagline')}</div>
+      {/*
+        `.abrand{padding:13px 15px}` with `.amk{width:32px;height:32px;border-radius:9px;
+        background:var(--b600)}` holding a 22px WHITE mark. The mark is not bare here — it
+        sits in a brand tile, which is what makes it read at 32px against a white column.
+      */}
+      <div className="px-[15px] py-[13px] flex items-center gap-[9px] border-b border-line">
+        <div className="w-8 h-8 rounded-[9px] bg-primary grid place-items-center shrink-0">
+          <LogoMark size={22} onDark />
+        </div>
+        <div className="min-w-0 leading-none">
+          <div className="text-[15px] font-bold font-display surface-text">رفيق</div>
+          <div className="text-[10px] text-muted truncate mt-0.5">{t('brand.tagline')}</div>
         </div>
       </div>
 
@@ -60,8 +78,9 @@ export function Sidebar() {
           if (items.length === 0) return null;
 
           return (
-            <div key={group.titleKey} className="mb-4">
-              <div className="px-5 mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted/70">
+            <div key={group.titleKey}>
+              {/* `.agrp{font:700 9px; letter-spacing:.12em; color:var(--n400); padding:0 16px; margin:12px 0 4px}` */}
+              <div className="px-4 mt-3 mb-1 text-[9px] font-bold tracking-[0.12em] text-neutral-400">
                 {t(group.titleKey)}
               </div>
               {items.map((item) => {
@@ -73,20 +92,16 @@ export function Sidebar() {
                     href={item.href}
                     title={t(item.hintKey)}
                     aria-current={active ? 'page' : undefined}
-                    className={`nav-item relative ${active ? 'nav-item-active' : ''}`}
+                    className={`nav-item ${active ? 'nav-item-active shadow-[inset_3px_0_0_theme(colors.primary)]' : ''}`}
                   >
-                    {active && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute start-0 inset-y-1 w-[3px] rounded-e bg-primary"
-                      />
-                    )}
+                    {/* `.anav.on{box-shadow:inset 3px 0 0 var(--b600)}` — an inset shadow on the
+                        leading edge, which flips with `dir` and needs no extra element. */}
                     {/*
                       Lucide is a stroke set with no fill axis, so emphasis is carried
                       by a heavier stroke — 2.25 against the 1.75 default, which reads
                       at 20px without changing the glyph's silhouette.
                     */}
-                    <Icon name={item.icon} size={20} strokeWidth={active ? 2.25 : undefined} />
+                    <Icon name={item.icon} size={17} strokeWidth={active ? 2.25 : 1.9} />
                     <span className="truncate flex-1">{t(item.labelKey)}</span>
                     {/*
                       Only where the API can actually answer — see lib/badges. A count of
@@ -94,9 +109,20 @@ export function Sidebar() {
                       absent count, which means unknown.
                     */}
                     {badges[item.href] === undefined ? null : (
+                      /*
+                        Three states, as the sheet defines them: `.an` grey for a count of
+                        zero, `.an.hot` solid red for something breaching, `.an.wrm`
+                        amber-soft for a queue that merely needs attention. The sheet marks
+                        SOS and payments hot, captains and withdrawals warm — severity, not
+                        size, so a big-but-healthy number does not shout.
+                      */
                       <span
-                        className={`shrink-0 min-w-[20px] px-1.5 py-0.5 rounded-full text-[10px] font-bold text-center ${
-                          (badges[item.href] ?? 0) > 0 ? 'bg-danger text-white' : 'bg-neutral-200 text-muted'
+                        className={`shrink-0 min-w-[18px] px-1.5 py-px rounded-full text-[10px] font-bold text-center leading-[1.5] ${
+                          (badges[item.href] ?? 0) === 0
+                            ? 'bg-neutral-100 text-neutral-600'
+                            : HOT.has(item.href)
+                              ? 'bg-danger text-white'
+                              : 'bg-warning-soft text-warning'
                         }`}
                       >
                         <Num value={badges[item.href] ?? 0} />
@@ -111,25 +137,25 @@ export function Sidebar() {
       </nav>
 
       {/* User — where the approved sidebar puts the signed-in operator. */}
-      <div className="p-3 border-t border-line">
+      <div className="p-[9px] border-t border-line">
         <Link
           href={PROFILE.href}
           title={t(PROFILE.hintKey)}
           className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-background transition-colors"
         >
-          <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold shrink-0">
+          <div className="w-[30px] h-[30px] rounded-full bg-primary text-white flex items-center justify-center font-bold text-[13px] shrink-0">
             {user?.full_name?.charAt(0) ?? 'A'}
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-semibold truncate text-ink">{user?.full_name}</div>
-            <div className="text-[11px] text-muted truncate">{user?.roles?.[0] ?? t('shell.staff')}</div>
+            <div className="text-[11.5px] font-semibold truncate text-ink">{user?.full_name}</div>
+            <div className="text-[10px] text-muted truncate">{user?.roles?.[0] ?? t('shell.staff')}</div>
           </div>
         </Link>
         <button
           onClick={logout}
-          className="mt-1 w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-danger hover:bg-danger/10 transition-colors"
+          className="mt-1 w-full flex items-center gap-2 rounded-[9px] px-[10px] py-[7px] text-xs text-danger hover:bg-danger/10 transition-colors"
         >
-          <Icon name="log-out" size={20} />
+          <Icon name="log-out" size={16} />
           {t('shell.logout')}
         </button>
       </div>
