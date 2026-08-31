@@ -45,13 +45,13 @@
     "slug": "10-home",
     "path": "/home",
     "title": "الرئيسية",
-    "bytes": 276831
+    "bytes": 289944
   },
   {
     "slug": "11-ride-request",
     "path": "/ride-request",
     "title": "طلب رحلة",
-    "bytes": 433278
+    "bytes": 387548
   },
   {
     "slug": "12-checkout",
@@ -87,7 +87,7 @@
     "slug": "17-notifications",
     "path": "/notifications",
     "title": "الإشعارات",
-    "bytes": 96989
+    "bytes": 96627
   },
   {
     "slug": "18-chat",
@@ -99,13 +99,13 @@
     "slug": "19-assistant",
     "path": "/assistant",
     "title": "المساعد الذكي",
-    "bytes": 69881
+    "bytes": 69887
   },
   {
     "slug": "20-support",
     "path": "/support",
     "title": "الدعم",
-    "bytes": 37382
+    "bytes": 28837
   },
   {
     "slug": "21-emergency",

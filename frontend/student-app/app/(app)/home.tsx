@@ -746,7 +746,17 @@ const makeStyles = (t: AppTheme) =>
     bellDot: { position: 'absolute', top: 11, end: 11, width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.danger },
 
     sheet: {
-      position: 'absolute', start: 0, end: 0, bottom: 92, maxHeight: '62%',
+      /*
+       * `bottom: 0`, not 92.
+       *
+       * The 92 was a hand-measured guess at the tab bar's height, but `TabBar` is not
+       * absolutely positioned — it takes its own space in the layout, so a tab screen's
+       * viewport ALREADY excludes it. Offsetting by 92 on top of that left a 92px strip
+       * of the full-screen map visible between the sheet and the bar: a second band of
+       * map under the sheet, which reads as a rendering fault. The approved screen
+       * (docs/design/v2/03-student-ride, شاشة 10) has the sheet meeting the bar.
+       */
+      position: 'absolute', start: 0, end: 0, bottom: 0, maxHeight: '62%',
       backgroundColor: t.colors.surface, borderTopStartRadius: t.radius.sheet, borderTopEndRadius: t.radius.sheet,
       paddingHorizontal: t.spacing.lg, paddingBottom: t.spacing.lg,
       shadowColor: brand[900], shadowOpacity: 0.12, shadowRadius: 24, shadowOffset: { width: 0, height: -8 }, elevation: 16,

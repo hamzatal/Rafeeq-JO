@@ -9,19 +9,19 @@
     "slug": "02-permissions",
     "path": "/permissions",
     "title": "الأذونات",
-    "bytes": 90277
+    "bytes": 79373
   },
   {
     "slug": "03-welcome",
     "path": "/welcome",
     "title": "ابدأ",
-    "bytes": 61439
+    "bytes": 49592
   },
   {
     "slug": "04-login",
     "path": "/login",
     "title": "تسجيل الدخول",
-    "bytes": 80583
+    "bytes": 68545
   },
   {
     "slug": "05-register",
@@ -39,13 +39,13 @@
     "slug": "07-forgot-password",
     "path": "/forgot-password",
     "title": "استعادة كلمة المرور",
-    "bytes": 72297
+    "bytes": 60149
   },
   {
     "slug": "10-dashboard",
     "path": "/dashboard",
     "title": "لوحة الكابتن",
-    "bytes": 1059398
+    "bytes": 910919
   },
   {
     "slug": "11-offers",
@@ -63,7 +63,7 @@
     "slug": "13-earnings",
     "path": "/earnings",
     "title": "الأرباح",
-    "bytes": 86134
+    "bytes": 76563
   },
   {
     "slug": "14-vehicle-docs",
@@ -81,12 +81,12 @@
     "slug": "16-chat",
     "path": "/chat",
     "title": "المحادثة",
-    "bytes": 46914
+    "bytes": 38101
   },
   {
     "slug": "17-account",
     "path": "/account",
     "title": "حسابي",
-    "bytes": 120128
+    "bytes": 111483
   }
 ]

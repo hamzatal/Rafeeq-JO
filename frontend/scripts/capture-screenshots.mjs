@@ -300,7 +300,36 @@ async function goto(cdp, url, settle) {
   await sleep(settle);
 }
 
+/**
+ * Remove Expo's development overlay before shooting.
+ *
+ * The two apps are exported with `--dev` (see scripts/screenshots.sh for why: a release
+ * bundle REFUSES a plain-http API URL, deliberately). A dev bundle ships
+ * `@expo/metro-runtime`, which looks for a Metro dev server that is not there and paints
+ * «Refreshing… Don't see your changes? Reload the app» across the bottom of the screen —
+ * directly over the tab bar in every screenshot.
+ *
+ * It is a bundler artefact, not product UI, so hiding it makes the image MORE truthful
+ * rather than less. Matched on its own copy instead of a class name, because the class is
+ * generated and changes between Expo releases.
+ */
+async function hideDevOverlay(cdp) {
+  await cdp.eval(`(() => {
+    const NEEDLES = ['Don\\u2019t see your changes', "Don't see your changes", 'Refreshing'];
+    for (const el of Array.from(document.body.querySelectorAll('div'))) {
+      const style = getComputedStyle(el);
+      if (style.position !== 'fixed' && style.position !== 'absolute') continue;
+      const text = el.textContent || '';
+      if (NEEDLES.some((n) => text.includes(n)) && text.length < 120) {
+        el.style.display = 'none';
+      }
+    }
+    return true;
+  })()`);
+}
+
 async function shoot(cdp, dir, slug) {
+  await hideDevOverlay(cdp).catch(() => {});
   const { data } = await cdp.send('Page.captureScreenshot', { format: 'png' });
   const buffer = Buffer.from(data, 'base64');
   writeFileSync(resolve(dir, `${slug}.png`), buffer);

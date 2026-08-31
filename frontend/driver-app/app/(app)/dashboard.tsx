@@ -266,7 +266,9 @@ const makeStyles = (t: AppTheme) =>
     statLbl: { fontFamily: t.fontFamily.regular, fontSize: 12, color: t.colors.textSecondary },
     statDivider: { width: StyleSheet.hairlineWidth, height: 34, backgroundColor: t.colors.border },
 
-    bottomWrap: { position: 'absolute', left: 0, right: 0, bottom: 92, paddingHorizontal: 20 },
+    // `bottom: 0` — the same 92px phantom gap the student sheet had. `TabBar` occupies
+    // layout space, so a tab screen's viewport already stops above it.
+    bottomWrap: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20 },
     offersCard: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.md, backgroundColor: t.colors.primary, borderRadius: 16, padding: 16, ...t.shadow.lg },
     offersIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
     offersTitle: { fontFamily: t.fontFamily.bold, fontSize: 16, color: t.colors.onPrimary, textAlign: 'right' },
