@@ -29,10 +29,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <BadgeProvider>
       <div className="min-h-screen bg-background">
         <Sidebar />
-        {/* sidebar is fixed (w-64) on the leading side; offset main with logical margin so it flips with dir */}
-        <div className="ms-64 min-h-screen flex flex-col">
+        {/* The sidebar is fixed at 216px (`.admin aside{width:216px}`); the offset is a
+            LOGICAL margin so it flips with `dir` rather than pinning to the left. */}
+        <div className="ms-[216px] min-h-screen flex flex-col">
           <Topbar />
-          <main className="flex-1 p-6 lg:p-8">{children}</main>
+          {/* `.acont{padding:18px 20px}` — the reference is tighter than `p-6 lg:p-8`, and
+              on a 1280 canvas those extra 12–24px are a table column. */}
+          <main className="flex-1 px-5 py-[18px]">{children}</main>
         </div>
       </div>
     </BadgeProvider>

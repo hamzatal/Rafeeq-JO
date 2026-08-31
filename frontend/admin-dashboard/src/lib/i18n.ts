@@ -80,7 +80,7 @@ const DICT: Dict = {
   'ads.placement.driver_home': { ar: 'رئيسية الكابتن', en: 'Driver home' },
   'ads.preview': { ar: 'معاينة', en: 'Preview' },
   'nav.safety': { ar: 'السلامة و SOS', en: 'Safety & SOS' },
-  'nav.disputes': { ar: 'التنازعات', en: 'Disputes' },
+  'nav.disputes': { ar: 'النزاعات', en: 'Disputes' },
   'nav.support': { ar: 'الدعم', en: 'Support' },
   'nav.complaints': { ar: 'الشكاوى', en: 'Complaints' },
   'nav.security': { ar: 'الأمان (MFA)', en: 'Security (MFA)' },

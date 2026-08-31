@@ -69,9 +69,12 @@ aside { scrollbar-color: rgba(18,47,107,0.22) transparent; }
    * action. Grey lets the blue mean "do this".
    */
   .data-table thead { @apply bg-neutral-50 border-b border-line; }
-  .data-table th { @apply py-3.5 px-4 font-semibold text-xs tracking-wider text-muted; }
-  .data-table tbody tr { @apply border-t border-line even:bg-background/60 hover:bg-primary/5 transition-colors; }
-  .data-table td { @apply py-3 px-4 text-ink; }
+  /* `.admin thead th` — `font:700 10px; letter-spacing:.04em; padding:9px 14px`. */
+  .data-table th { @apply py-[9px] px-[14px] font-bold text-[10px] tracking-[0.04em] text-neutral-700; }
+  /* `tbody tr:nth-child(even){background:var(--n25)}` — a 2% tint, not `background/60`. */
+  .data-table tbody tr { @apply border-t border-neutral-100 even:bg-neutral-25 hover:bg-primary/5 transition-colors; }
+  /* `tbody td` — `padding:9px 14px; font-size:12px`. */
+  .data-table td { @apply py-[9px] px-[14px] text-xs text-ink; }
   .table-head { @apply bg-neutral-50 text-muted border-b border-line; }
   .row-line { @apply border-t border-line; }
 
@@ -93,16 +96,21 @@ aside { scrollbar-color: rgba(18,47,107,0.22) transparent; }
 
   /* Sidebar nav items — muted text, brand-tinted active state */
   /*
-   * `py-2`, not `py-3`. Sixteen destinations plus four group headings, the brand and
-   * the user footer have to fit 960px — a common laptop viewport — because a sidebar
-   * that scrolls hides whole destinations: at py-3 «الأمان والتدقيق» and «الإعدادات
-   * والموظفون» sat below the fold, and a nav item you have to scroll to find is one
-   * the approved four-group layout was meant to stop needing.
+   * Measured from the approved sheet, not chosen.
+   *
+   * `docs/design/src/06-admin-1.html` defines `.anav` as `gap:9px; margin:1px 7px;
+   * padding:7px 10px; border-radius:9px; font:500 12px` — and `09-density.html` records
+   * WHY: the whole admin surface was densified «استجابةً لملاحظة العناصر كبيرة». What
+   * this file had instead (`text-sm`, `py-2 px-4`, `mx-2 my-0.5`, `gap-3`, `rounded-lg`)
+   * was the pre-density scale, which is most of why the built dashboard read as a
+   * different product from the reference: every row was ~40% taller than drawn.
    */
   .nav-item {
-    @apply flex items-center gap-3 mx-2 my-0.5 px-4 py-2 rounded-lg text-sm font-medium text-muted hover:text-primary hover:bg-brand-100 transition-colors;
+    @apply flex items-center gap-[9px] mx-[7px] my-px px-[10px] py-[7px] rounded-[9px] text-xs font-medium text-neutral-700 hover:text-primary hover:bg-brand-50 transition-colors;
   }
+  /* `.anav.on` — `background:var(--b50); color:var(--b700); font-weight:700`. It was
+     `brand-100`, a step too dark, which made the active row compete with the badges. */
   .nav-item-active {
-    @apply text-primary-dark bg-brand-100 hover:bg-brand-100 hover:text-primary-dark font-bold;
+    @apply text-primary-dark bg-brand-50 hover:bg-brand-50 hover:text-primary-dark font-bold;
   }
 }
