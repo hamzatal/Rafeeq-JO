@@ -8,6 +8,7 @@ import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { downloadBlob, stamp } from '../../../src/lib/download';
 import { Icon } from '../../../src/components/Icon';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 const jod = (fils: number) => formatJod(fils);
 
@@ -64,7 +65,7 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <h1 className="page-title mb-4">{t('nav.reports')}</h1>
+      <NavPageHeader href="/reports" />
 
       <div className="card mb-5 flex flex-wrap items-end gap-3">
         <div>

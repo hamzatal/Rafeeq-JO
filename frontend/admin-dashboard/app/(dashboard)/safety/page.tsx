@@ -5,6 +5,7 @@ import type { RiskScore } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 const LEVEL_CLASS: Record<string, string> = {
   low: 'bg-white text-muted border-line',
@@ -28,8 +29,7 @@ export default function SafetyPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-1">{t('safety.title')}</h1>
-      <p className="muted-text mb-4">{t('safety.subtitle')}</p>
+      <NavPageHeader href="/safety" />
 
       <div className="card p-0 overflow-hidden">
         {loading ? (

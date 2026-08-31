@@ -5,6 +5,7 @@ import type { User } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { LoadError } from '../../../src/components/LoadError';
 import { Phone } from '../../../src/components/Phone';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 import { useT } from '../../../src/lib/i18n';
 
 export default function ProfilePage() {
@@ -77,7 +78,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-1">{t('profile.title')}</h1>
+      <NavPageHeader href="/profile" />
       {loadError ? <LoadError onRetry={() => window.location.reload()} /> : null}
       <p className="text-sm text-muted mb-6"><Phone value={user?.phone} /></p>
 

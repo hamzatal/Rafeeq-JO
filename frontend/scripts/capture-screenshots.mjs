@@ -148,7 +148,8 @@ const TARGETS = [
     ],
     private: [
       ['10-home', '/home', 'الرئيسية'],
-      ['11-ride-request', '/ride-request', 'طلب رحلة'],
+      // The query is resolved at capture time — see pricedCorridor().
+      ['11-ride-request', '/ride-request', 'طلب رحلة', 'corridor'],
       ['12-checkout', '/checkout', 'الدفع'],
       ['13-trips', '/trips', 'رحلاتي'],
       ['14-wallet', '/wallet', 'المحفظة'],
@@ -364,6 +365,77 @@ async function diagnose(cdp) {
   return lines.join('\n');
 }
 
+/** A GET against the API with a rider's token. */
+async function apiGet(path, token) {
+  const res = await fetch(`${API}/api/v1/${path}`, {
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+  });
+  const json = await res.json().catch(() => ({}));
+
+  return json.data ?? json;
+}
+
+/**
+ * Find a (zone → university) corridor the tariff actually prices, and return the query
+ * `ride-request` needs to quote it.
+ *
+ * ── Why this is probed and not hardcoded ───────────────────────────────────
+ *
+ * Deep-linking to `/ride-request` with no params was capturing the screen in its
+ * no-destination state: both fares rendered as «—» and «تأكيد الطلب» was disabled, which
+ * looked like a broken price list rather than a screen waiting for input. The approved
+ * sheet (شاشة 12) shows it quoting a real corridor, so the screenshot should too.
+ *
+ * The ids cannot be written down: `migrate:fresh --seed` mints new UUIDs every run. And
+ * the first zone × the first university is NOT necessarily priced — the seeder prices
+ * corridors into اليرموك only, so a naive pick quotes nothing. So this asks `/estimate`
+ * until one answers with a fare, which also proves the corridor is real rather than
+ * assuming it.
+ */
+async function pricedCorridor(token) {
+  const [zones, universities] = await Promise.all([
+    apiGet('zones', token),
+    apiGet('universities', token),
+  ]);
+
+  for (const university of universities) {
+    for (const zone of zones) {
+      if (zone.center_lat == null || zone.center_lng == null) continue;
+
+      const res = await fetch(`${API}/api/v1/ride-requests/estimate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          type: 'scheduled',
+          riders: 1,
+          pickup_lat: zone.center_lat,
+          pickup_lng: zone.center_lng,
+          university_id: university.id,
+        }),
+      });
+      if (!res.ok) continue;
+
+      const quote = (await res.json().catch(() => ({})))?.data ?? {};
+      if (!Number.isFinite(quote.fare_fils) || quote.fare_fils <= 0) continue;
+
+      console.log(
+        `  · corridor ${zone.name_ar} → ${university.name_ar}: ${(quote.fare_fils / 1000).toFixed(3)} د.أ`,
+      );
+
+      return (
+        `?pickup_lat=${zone.center_lat}&pickup_lng=${zone.center_lng}` +
+        `&university_id=${encodeURIComponent(university.id)}`
+      );
+    }
+  }
+
+  throw new Error('no priced corridor — DemoSeeder should have priced at least one');
+}
+
 /** A bearer token straight from the API, for the apps that can hold one in JS. */
 async function apiToken(phone) {
   const res = await fetch(`${API}/api/v1/auth/login`, {
@@ -427,6 +499,7 @@ async function signInDashboard(cdp) {
 /** Give an Expo web app a session by writing the key its own storage layer reads. */
 async function signInApp(cdp, target) {
   const token = await apiToken(target.login.phone);
+  target.token = token;
   await cdp.eval(
     `localStorage.setItem(${JSON.stringify(target.storageKey)}, ${JSON.stringify(token)})`,
   );
@@ -444,8 +517,13 @@ async function captureTarget(cdp, target) {
 
   const written = [];
 
-  const capture = async ([slug, path, title], phase) => {
-    await goto(cdp, `${target.base}${path}`, target.settle);
+  const capture = async ([slug, path, title, needs], phase) => {
+    /*
+     * `needs: 'corridor'` means the screen is meaningless without a destination the
+     * tariff prices — it renders «—» for both fares and a disabled button otherwise.
+     */
+    const query = needs === 'corridor' ? await pricedCorridor(target.token) : '';
+    await goto(cdp, `${target.base}${path}${query}`, target.settle);
 
     const landed = await cdp.eval('location.pathname');
     // A private page bounces when the session was not accepted. Without this the run

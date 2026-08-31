@@ -7,6 +7,8 @@ import { useT } from '../lib/i18n';
 import { LogoMark } from './Logo';
 import { Icon } from './Icon';
 import { NAV, PROFILE, activeHref } from '../lib/nav';
+import { useBadges } from '../lib/badges';
+import { Num } from './Num';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE SIDEBAR — four groups, sixteen destinations, one source.
@@ -37,6 +39,7 @@ export function Sidebar() {
 
   const isAdmin = (user?.roles ?? []).includes('admin');
   const current = activeHref(pathname);
+  const badges = useBadges();
 
   return (
     <aside className="fixed inset-y-0 start-0 h-screen w-64 shrink-0 bg-surface text-ink flex flex-col z-50 border-e border-line">
@@ -84,7 +87,21 @@ export function Sidebar() {
                       at 20px without changing the glyph's silhouette.
                     */}
                     <Icon name={item.icon} size={20} strokeWidth={active ? 2.25 : undefined} />
-                    <span className="truncate">{t(item.labelKey)}</span>
+                    <span className="truncate flex-1">{t(item.labelKey)}</span>
+                    {/*
+                      Only where the API can actually answer — see lib/badges. A count of
+                      zero still renders: «0 بانتظار المراجعة» is real news, unlike an
+                      absent count, which means unknown.
+                    */}
+                    {badges[item.href] === undefined ? null : (
+                      <span
+                        className={`shrink-0 min-w-[20px] px-1.5 py-0.5 rounded-full text-[10px] font-bold text-center ${
+                          (badges[item.href] ?? 0) > 0 ? 'bg-danger text-white' : 'bg-neutral-200 text-muted'
+                        }`}
+                      >
+                        <Num value={badges[item.href] ?? 0} />
+                      </span>
+                    )}
                   </Link>
                 );
               })}

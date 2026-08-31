@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { formatJod } from '@rafeeq/shared';
 import type { FinancialReport, Dispute } from '@rafeeq/shared';
 import { api } from '../../src/lib/api';
-import { useAuth } from '../../src/lib/auth';
 import { useT } from '../../src/lib/i18n';
 import { Skeleton, StatCardsSkeleton } from '../../src/components/Skeleton';
 import { Icon } from '../../src/components/Icon';
 import { Num } from '../../src/components/Num';
+import { NavPageHeader } from '../../src/components/NavPageHeader';
 
 /*
  * Money goes through the shared formatter. It used to be:
@@ -110,7 +110,6 @@ function KpiCard({ k }: { k: Kpi }) {
 }
 
 export default function CommandCenter() {
-  const { user } = useAuth();
   const { t, locale } = useT();
   const [report, setReport] = useState<FinancialReport | null>(null);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -194,13 +193,16 @@ export default function CommandCenter() {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex flex-wrap justify-between items-end gap-3">
-        <div>
-          <h1 className="page-title">{t('home.title')}</h1>
-          <p className="muted-text mt-1">{t('home.welcome')} {user?.full_name} — {t('home.subtitle')}</p>
-        </div>
-        <div className="text-xs font-mono text-muted">{t('home.lastUpdate')}: {new Date().toLocaleString(locale)}</div>
-      </div>
+      {/*
+        The reference header (docs/design/v2/06-admin-1) states the DAY and when the
+        figures were last refreshed, because every number below is scoped to a period —
+        a dashboard that does not say "as of when" invites an operator to act on a stale
+        screen. The greeting moved out: the sidebar footer already says who is signed in.
+      */}
+      <NavPageHeader
+        href="/"
+        stat={`${t('home.lastUpdate')}: ${new Date().toLocaleString(locale)}`}
+      />
 
       {/* KPI row */}
       {loading ? (

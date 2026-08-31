@@ -6,6 +6,9 @@ import type { PaymentRequest } from '@rafeeq/shared';
 import { ENDPOINTS } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { LoadError } from '../../../src/components/LoadError';
+import { Num } from '../../../src/components/Num';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
+import { Pill } from '../../../src/components/Pill';
 
 const STATUSES = [
   { value: '', label: 'قيد المراجعة' },
@@ -81,7 +84,10 @@ export default function PaymentsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-4">المدفوعات</h1>
+      <NavPageHeader
+        href="/payments"
+        stat={loading ? undefined : <><Num value={items.length} /> طلب شحن</>}
+      />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {STATUSES.map((st) => (
@@ -131,7 +137,7 @@ export default function PaymentsPage() {
                     <td className="p-3 text-muted">{ai !== null ? `${ai}%` : '—'}</td>
                     <td className="p-3">
                       {flags.length === 0 ? (
-                        <span className="text-success text-xs">✓ نظيف</span>
+                        <Pill tone="done" icon="check">نظيف</Pill>
                       ) : (
                         <div className="flex flex-col gap-1">
                           {flags.map((f) => (

@@ -8,6 +8,8 @@ import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { Tooltip } from '../../../src/components/Tooltip';
+import { Num } from '../../../src/components/Num';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 export default function RideRequestsPage() {
   const { t } = useT();
@@ -47,14 +49,17 @@ export default function RideRequestsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold surface-text">{t('nav.rideRequests')}</h1>
-        <Tooltip label={t('rideRequests.matchingHint')} side="start">
-          <button onClick={runMatching} disabled={matching} className="btn-primary px-4 py-2 text-sm">
-            {matching ? '...' : t('rideRequests.runMatching')}
-          </button>
-        </Tooltip>
-      </div>
+      <NavPageHeader
+        href="/ride-requests"
+        stat={loading ? undefined : <><Num value={items.length} /> طلب في الطابور</>}
+        actions={
+          <Tooltip label={t('rideRequests.matchingHint')} side="start">
+            <button onClick={runMatching} disabled={matching} className="btn-primary px-4 py-2 text-sm">
+              {matching ? '...' : t('rideRequests.runMatching')}
+            </button>
+          </Tooltip>
+        }
+      />
       {msg && <div className="card mb-4 text-sm text-primary">{msg}</div>}
 
       <div className="card p-0 overflow-hidden">

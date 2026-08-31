@@ -8,6 +8,9 @@ import { api } from '../../../src/lib/api';
 import { LoadError } from '../../../src/components/LoadError';
 import { DriverStatusBadge } from '../../../src/components/DriverStatusBadge';
 import { Phone } from '../../../src/components/Phone';
+import { Num } from '../../../src/components/Num';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
+import { Icon } from '../../../src/components/Icon';
 
 const FILTERS = [
   { value: '', label: 'الكل' },
@@ -69,7 +72,10 @@ export default function DriversPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-4">الكباتن</h1>
+      <NavPageHeader
+        href="/drivers"
+        stat={loading ? undefined : <><Num value={drivers.length} /> كابتن</>}
+      />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {FILTERS.map((f) => (
@@ -119,7 +125,14 @@ export default function DriversPage() {
                       chain yields undefined, React prints nothing, and the ` ★` stays.
                       The two cells above already used `?? '—'`. */}
                   <td className="p-3 text-muted tabular-nums">
-                    {d.rating_avg != null ? `${Number(d.rating_avg).toFixed(1)} ★` : '—'}
+                    {d.rating_avg != null ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Icon name="star" size={14} className="text-live" />
+                        <Num value={Number(d.rating_avg).toFixed(1)} />
+                      </span>
+                    ) : (
+                      '—'
+                    )}
                   </td>
                   <td className="p-3 text-left">
                     <Link href={`/drivers/${d.id}`} className="text-primary font-medium hover:underline">

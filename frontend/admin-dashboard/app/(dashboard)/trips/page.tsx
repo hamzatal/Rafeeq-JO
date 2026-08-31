@@ -6,6 +6,8 @@ import { api } from '../../../src/lib/api';
 import { LoadError } from '../../../src/components/LoadError';
 import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
+import { Num } from '../../../src/components/Num';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 const STATUSES = ['', 'pending', 'scheduled', 'started', 'completed', 'cancelled'];
 
@@ -36,14 +38,22 @@ export default function TripsPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 className="text-2xl font-bold surface-text">{t('nav.trips')}</h1>
-        <select className="input max-w-[200px]" value={status} onChange={(e) => setStatus(e.target.value)}>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>{t(`trips.status.${s || 'all'}`)}</option>
-          ))}
-        </select>
-      </div>
+      <NavPageHeader
+        href="/trips"
+        stat={loading ? undefined : <><Num value={items.length} /> رحلة</>}
+        actions={
+          <select
+            className="input max-w-[200px]"
+            aria-label={t('nav.trips')}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>{t(`trips.status.${s || 'all'}`)}</option>
+            ))}
+          </select>
+        }
+      />
 
       <div className="card p-0 overflow-hidden">
         {loading ? (

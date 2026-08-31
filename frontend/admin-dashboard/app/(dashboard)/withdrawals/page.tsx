@@ -8,6 +8,7 @@ import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { LoadError } from '../../../src/components/LoadError';
 import { Phone } from '../../../src/components/Phone';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 const jod = (fils: number) => formatJod(fils);
 
@@ -67,10 +68,10 @@ export default function WithdrawalsPage() {
 
   return (
     <div>
-      <h1 className="page-title mb-1">{t('nav.withdrawals')}</h1>
-      <p className="muted-text text-sm mb-4">
-        {t('withdrawals.pendingTotal')}: <span className="font-bold surface-text">{jod(pendingTotal)}</span>
-      </p>
+      <NavPageHeader
+        href="/withdrawals"
+        stat={loading ? undefined : `${t('withdrawals.pendingTotal')}: ${jod(pendingTotal)}`}
+      />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {[
