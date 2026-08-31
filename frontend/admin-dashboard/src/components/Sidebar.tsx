@@ -43,7 +43,7 @@ const HOT = new Set(['/safety', '/payments']);
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { t } = useT();
 
   const isAdmin = (user?.roles ?? []).includes('admin');
@@ -148,13 +148,12 @@ export function Sidebar() {
             <div className="text-[10px] text-muted truncate">{user?.roles?.[0] ?? t('shell.staff')}</div>
           </div>
         </Link>
-        <button
-          onClick={logout}
-          className="mt-1 w-full flex items-center gap-2 rounded-[9px] px-[10px] py-[7px] text-xs text-danger hover:bg-danger/10 transition-colors"
-        >
-          <Icon name="log-out" size={16} />
-          {t('shell.logout')}
-        </button>
+        {/*
+          No sign-out button here. The sheet's sidebar footer is the signed-in operator
+          and nothing else, and a red destructive control sitting permanently under the
+          navigation is a mis-click waiting to happen. Signing out lives on /profile,
+          which this row links to.
+        */}
       </div>
     </aside>
   );

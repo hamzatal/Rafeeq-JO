@@ -23,7 +23,15 @@ const TYPES = [
 export default function UsersPage() {
   const { t, locale } = useT();
   const [users, setUsers] = useState<User[]>([]);
-  const [type, setType] = useState('');
+  /*
+ * Opens on students, because the sidebar entry is «الطلاب».
+ *
+ * The sheet names this destination «الطلاب» while the page can list every user type. A
+ * label that names a subset of what it opens is a small lie, and the honest fix is not to
+ * rename the label away from the reference — it is to make the label TRUE by default and
+ * leave the other types one filter click away.
+ */
+const [type, setType] = useState('student');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
