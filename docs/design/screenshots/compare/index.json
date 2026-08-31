@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "33-dashboard",
+    "title": "لوحة القيادة",
+    "live": "/",
+    "sheet": "06-admin-1.html"
+  },
+  {
+    "slug": "34-ride-requests",
+    "title": "الطلبات الحيّة",
+    "live": "/ride-requests",
+    "sheet": "06-admin-1.html"
+  },
+  {
+    "slug": "35-drivers",
+    "title": "الكباتن",
+    "live": "/drivers",
+    "sheet": "06-admin-1.html"
+  },
+  {
+    "slug": "37-payments",
+    "title": "المدفوعات — شحن CliQ",
+    "live": "/payments",
+    "sheet": "06-admin-2.html"
+  },
+  {
+    "slug": "38-safety",
+    "title": "السلامة و SOS",
+    "live": "/safety",
+    "sheet": "06-admin-2.html"
+  },
+  {
+    "slug": "39-pricing",
+    "title": "التسعير والخطط",
+    "live": "/pricing?tab=tariff",
+    "sheet": "06-admin-3.html"
+  },
+  {
+    "slug": "40-support",
+    "title": "الدعم والشكاوى",
+    "live": "/support?tab=tickets",
+    "sheet": "06-admin-3.html"
+  },
+  {
+    "slug": "41-security",
+    "title": "الأمان والتدقيق",
+    "live": "/security?tab=sessions",
+    "sheet": "06-admin-3.html"
+  }
+]

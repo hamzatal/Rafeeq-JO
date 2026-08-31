@@ -224,6 +224,7 @@ const DICT: Dict = {
   'common.loading': { ar: 'جارٍ التحميل...', en: 'Loading...' },
   'common.viewAll': { ar: 'عرض الكل', en: 'View all' },
   'common.none': { ar: 'لا يوجد', en: 'None' },
+  'common.dinar': { ar: 'د.أ', en: 'JOD' },
 
   // Dashboard home
   'home.title': { ar: 'نظرة عامة على الأسطول', en: 'Fleet overview' },
@@ -267,7 +268,7 @@ const DICT: Dict = {
   'home.col.trip': { ar: 'الرحلة', en: 'Trip' },
   'home.col.captain': { ar: 'الكابتن', en: 'Captain' },
   'home.col.seats': { ar: 'المقاعد', en: 'Seats' },
-  'home.col.fare': { ar: 'الأجرة', en: 'Fare' },
+  'home.col.fareUnit': { ar: 'الأجرة (د.أ)', en: 'Fare (JOD)' },
   'home.col.status': { ar: 'الحالة', en: 'Status' },
 
   /*

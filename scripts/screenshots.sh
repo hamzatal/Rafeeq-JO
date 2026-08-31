@@ -54,6 +54,7 @@ API_PORT=8000
 WEB_PORT=3000
 STUDENT_PORT=4001
 DRIVER_PORT=4002
+SHEETS_PORT=4003
 CDP_PORT=9222
 
 # Defined once, then used BOTH for the exports below and for the generated env file,
@@ -211,6 +212,15 @@ rm -rf "$RUN_DIR/chrome"
 PIDS+=($!)
 wait_for "http://127.0.0.1:$CDP_PORT/json/version" "chrome" "$RUN_DIR/chrome.log"
 
+# ── 4b · the design sheets, served so kit.css and its fonts resolve ──────────
+# `capture-compare.mjs` re-renders the reference from the very HTML the approved PNGs
+# were made from, which is the only way to put it beside the live product at the same
+# pixel size.
+node "$REPO_ROOT/frontend/scripts/serve-static.mjs" "$REPO_ROOT/docs/design/src" "$SHEETS_PORT" \
+  >"$RUN_DIR/sheets-serve.log" 2>&1 &
+PIDS+=($!)
+wait_for "http://127.0.0.1:$SHEETS_PORT/kit.css" "design sheets" "$RUN_DIR/sheets-serve.log"
+
 # ── 5 · capture ──────────────────────────────────────────────────────────────
 cd "$REPO_ROOT/frontend"
 API_URL="http://127.0.0.1:$API_PORT" \
@@ -219,5 +229,13 @@ STUDENT_URL="http://127.0.0.1:$STUDENT_PORT" \
 DRIVER_URL="http://127.0.0.1:$DRIVER_PORT" \
 CDP_URL="http://127.0.0.1:$CDP_PORT" \
   node scripts/capture-screenshots.mjs "$@"
+
+# ── 6 · reference-vs-live pairs ──────────────────────────────────────────────
+echo "==> comparing against the design sheets"
+API_URL="http://127.0.0.1:$API_PORT" \
+DASHBOARD_URL="http://127.0.0.1:$WEB_PORT" \
+SHEETS_URL="http://127.0.0.1:$SHEETS_PORT" \
+CDP_URL="http://127.0.0.1:$CDP_PORT" \
+  node scripts/capture-compare.mjs
 
 echo "==> done"
