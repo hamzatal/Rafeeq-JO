@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, Image, StyleSheet, View } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { alpha, brand, neutral } from '@rafeeq/tokens';
 import { useReduceMotion } from '../motion';
 import { MapBackdrop } from './MapBackdrop';
+import { BrandMark } from './BrandMark';
 import { Text } from './Text';
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -102,14 +103,10 @@ export function BrandSplash({ tone, slogan, wordmark }: BrandSplashProps) {
 
       <Animated.View style={{ opacity, transform: [{ scale }], alignItems: 'center' }}>
         <View style={s.emblem}>
-          <Image
-            source={require('../../assets/r-logo.png')}
-            style={styles.logoImg}
-            resizeMode="contain"
-            /* Decorative: the wordmark below already says «رفيق». */
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-          />
+          {/* Decorative: the wordmark below already says «رفيق». */}
+          <View accessibilityElementsHidden importantForAccessibility="no">
+            <BrandMark size={56} onDark={dark} />
+          </View>
         </View>
 
         <Text role="displayMd" align="center" style={s.word}>
@@ -140,7 +137,6 @@ export function BrandSplash({ tone, slogan, wordmark }: BrandSplashProps) {
 }
 
 const styles = StyleSheet.create({
-  logoImg: { width: 56, height: 56 },
   dots: { flexDirection: 'row', gap: 8, marginTop: 40 },
   dot: { width: 6, height: 6, borderRadius: 3 },
 });

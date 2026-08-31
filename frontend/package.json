@@ -22,9 +22,10 @@
     "build:icons": "node scripts/build-icons.mjs",
     "check:icons": "node scripts/build-icons.mjs --check",
     "check:design": "node scripts/check-design-tokens.mjs",
-    "check": "npm run check:tokens && npm run check:icons && npm run check:design && npm run check:money && npm run check:invariants",
+    "check": "npm run check:tokens && npm run check:icons && npm run check:design && npm run check:identity && npm run check:money && npm run check:invariants",
     "check:invariants": "node scripts/check-invariants.mjs",
-    "typecheck": "npm run typecheck --workspace=packages/tokens && npm run typecheck --workspace=packages/shared && npm run typecheck --workspace=packages/api-client && npm run typecheck --workspace=packages/ui && npm run typecheck --workspace=student-app && npm run typecheck --workspace=driver-app && npm run typecheck --workspace=admin-dashboard"
+    "typecheck": "npm run typecheck --workspace=packages/tokens && npm run typecheck --workspace=packages/shared && npm run typecheck --workspace=packages/api-client && npm run typecheck --workspace=packages/ui && npm run typecheck --workspace=student-app && npm run typecheck --workspace=driver-app && npm run typecheck --workspace=admin-dashboard",
+    "check:identity": "node scripts/check-identity.mjs"
   },
   "engines": {
     "node": ">=20"

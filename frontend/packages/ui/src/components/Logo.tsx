@@ -1,8 +1,7 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
-
-const MARK = require('../../assets/r-logo.png');
+import { BrandMark } from './BrandMark';
 
 /**
  * The Rafeeq mark and wordmark.
@@ -14,11 +13,15 @@ const MARK = require('../../assets/r-logo.png');
  * difference — a captain is not a customer of campus transport, he provides it —
  * so it becomes an argument instead of a reason to keep two files.
  *
- * The old doc comment described «the teal "R" glyph» and a «navy wordmark». Both
- * colours belong to the identity retired in phase 4; the mark is brand blue and
- * the artwork carries its own colour. Prose is not gated by `check:design`, so a
- * comment can keep describing a brand that no longer exists — which is how a
- * reader learns the wrong system.
+ * ── The comment was fixed once; the artwork was not ───────────────────────
+ *
+ * A previous pass rewrote this docblock because it described «the teal "R" glyph» and
+ * a «navy wordmark» — colours retired in phase 4 — and settled on "the artwork carries
+ * its own colour". That sentence accepted the defect: the artwork WAS the teal R, a
+ * raster of the retired identity, and it stayed on every screen for four more phases.
+ * `check:design` cannot read a PNG, so nothing contradicted the prose.
+ *
+ * The mark is now drawn from `BRAND_MARK` — geometry, in tokens, one source.
  */
 export function Logo({
   size = 40,
@@ -34,20 +37,20 @@ export function Logo({
 }) {
   const t = useTheme();
 
+  /*
+   * Decorative when a wordmark follows, labelled when it stands alone — otherwise a
+   * screen reader announces nothing at all for a bare logo. The props sit on a
+   * wrapping View because the mark is now an SVG, not an Image.
+   */
   const mark = (
-    <Image
-      source={MARK}
-      style={{ width: size, height: size }}
-      resizeMode="contain"
-      /*
-       * Decorative when a wordmark follows, labelled when it stands alone —
-       * otherwise a screen reader announces nothing at all for a bare logo.
-       */
+    <View
       accessibilityRole="image"
       accessibilityLabel={variant === 'mark' ? wordmark : undefined}
       accessibilityElementsHidden={variant !== 'mark'}
       importantForAccessibility={variant === 'mark' ? 'yes' : 'no'}
-    />
+    >
+      <BrandMark size={size} />
+    </View>
   );
 
   if (variant === 'mark') return mark;

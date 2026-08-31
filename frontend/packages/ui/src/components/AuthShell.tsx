@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme, type AppTheme } from '../theme';
 import { Screen } from './Screen';
 import { Text } from './Text';
+import { BrandMark } from './BrandMark';
 
 /**
  * The shared surface for login / register / reset.
@@ -52,13 +53,10 @@ export function AuthShell({
           <View style={s.card}>
             <View style={s.brandRow}>
               <View style={s.mark}>
-                <Image
-                  source={require('../../assets/r-logo.png')}
-                  style={s.markLogo}
-                  resizeMode="contain"
-                  accessibilityElementsHidden
-                  importantForAccessibility="no"
-                />
+                {/* Drawn from BRAND_MARK; decorative, the wordmark beside it speaks. */}
+                <View accessibilityElementsHidden importantForAccessibility="no">
+                  <BrandMark size={44} />
+                </View>
               </View>
               {tag ? (
                 <View style={s.tag}>
@@ -130,7 +128,6 @@ const makeStyles = (t: AppTheme) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    markLogo: { width: 44, height: 44 },
     tag: {
       backgroundColor: t.colors.accentSoft,
       borderRadius: t.radius.pill,

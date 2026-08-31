@@ -11,26 +11,16 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 import { useMemo } from 'react';
-import { Image, Pressable, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Button } from '../components/Button';
 import { Text } from '../components/Text';
 import { useI18n } from '../runtime/i18n';
 import { useTheme, type AppTheme } from '../theme';
-import { LOGO_MARK } from '../assets';
+import { BrandMark } from '../components/BrandMark';
 
 export interface WelcomeScreenProps {
-  /**
-   * Defaults to the shared mark, which is the only thing either app ever passed.
-   *
-   * It used to be required, with the comment "each app bundles its own asset" — but
-   * phase 7 moved the asset INTO this package and deleted both app copies, leaving
-   * two `require()`s pointing at deleted files and neither app able to bundle. The
-   * default removes the possibility: there is one asset, and it lives beside the
-   * component that draws it. Still overridable for a white-label build.
-   */
-  logo?: ImageSourcePropType;
   /**
    * A pill beside the wordmark, e.g. «كابتن».
    *
@@ -45,13 +35,7 @@ export interface WelcomeScreenProps {
   onLogin: () => void;
 }
 
-export function WelcomeScreen({
-  logo = LOGO_MARK,
-  badge,
-  taglineKey,
-  onRegister,
-  onLogin,
-}: WelcomeScreenProps) {
+export function WelcomeScreen({ badge, taglineKey, onRegister, onLogin }: WelcomeScreenProps) {
   const { t } = useI18n();
   const theme = useTheme();
   const s = useMemo(() => makeStyles(theme), [theme]);
@@ -64,7 +48,11 @@ export function WelcomeScreen({
       <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
         <View style={s.body}>
           <View style={s.mark}>
-            <Image source={logo} style={s.markLogo} resizeMode="contain" accessibilityIgnoresInvertColors />
+            {/*
+              Drawn from `BRAND_MARK`, not loaded from a PNG. The PNG this replaced was
+              the retired cyan-and-orange Latin "R" — see BrandMark for the whole story.
+            */}
+            <BrandMark size={72} />
           </View>
           <View style={s.brandRow}>
             <Text role="displayLg" tone="primary" align="center" style={s.brand}>{t('common.appName')}</Text>
@@ -96,7 +84,6 @@ const makeStyles = (t: AppTheme) =>
     safe: { flex: 1, paddingHorizontal: t.spacing.lg },
     body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: t.spacing.md },
     mark: { width: 104, height: 104, borderRadius: 30, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: t.spacing.sm, borderWidth: 1, borderColor: t.colors.hairline, ...t.shadow.md },
-    markLogo: { width: 72, height: 72 },
     brandRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: t.spacing.sm },
     brand: { letterSpacing: 0.5 },
     tag: { backgroundColor: t.colors.accentSoft, borderRadius: t.radius.pill, paddingHorizontal: 12, paddingVertical: 5 },
