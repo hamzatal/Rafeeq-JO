@@ -55,6 +55,26 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 const jod = (fils: number) => formatJod(fils);
 
+/**
+ * A short, stable trip reference — «TRP-4821» in the sheet.
+ *
+ * Trips carry a UUIDv7 and no short code, and the table needs a column an operator can
+ * read aloud on a phone call. This renders the LAST four hex of the real id, so it is a
+ * projection of the actual key rather than an invented number: the same trip always
+ * renders the same reference, and it is unique enough to disambiguate a screenful.
+ * `route.name` was standing here and repeats across every pooled trip on a corridor, so
+ * the column identified nothing.
+ */
+const tripRef = (id: string) => `TRP-${id.replace(/-/g, '').slice(-4).toUpperCase()}`;
+
+/** The riders on a pooled seat-share. The sheet's «الطالب» assumes one; there are many. */
+const riders = (trip: Trip): string => {
+  const names = (trip.passengers ?? []).map((p) => p.student_name).filter(Boolean) as string[];
+  if (names.length === 0) return '—';
+
+  return names.length === 1 ? names[0]! : `${names[0]!} +${names.length - 1}`;
+};
+
 /** One row of «يحتاج إجراءً». */
 interface ActionRow {
   icon: string;
@@ -315,6 +335,7 @@ export default function CommandCenter() {
             <thead>
               <tr>
                 <th scope="col">{t('home.col.trip')}</th>
+                <th scope="col">{t('home.col.rider')}</th>
                 <th scope="col">{t('home.col.captain')}</th>
                 <th scope="col">{t('home.col.seats')}</th>
                 <th scope="col">{t('home.col.fareUnit')}</th>
@@ -325,24 +346,31 @@ export default function CommandCenter() {
               {loading ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i}>
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <Skeleton className="h-5 w-full" />
                     </td>
                   </tr>
                 ))
               ) : trips.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center text-muted py-6">
+                  <td colSpan={6} className="text-center text-muted py-6">
                     {t('trips.none')}
                   </td>
                 </tr>
               ) : (
                 trips.map((trip) => (
                   <tr key={trip.id}>
-                    <td className="font-medium surface-text">{trip.route?.name ?? t('trips.poolTrip')}</td>
+                    <td className="font-bold surface-text tabular-nums" dir="ltr">{tripRef(trip.id)}</td>
+                    <td className="text-muted">{riders(trip)}</td>
                     <td className="text-muted">{trip.captain?.name ?? '—'}</td>
+                    {/*
+                      «0 / 4», not `range`. `Num range` joins with an EN DASH, which means
+                      "from–to": «0–4» reads as a span of seats rather than "0 of 4 taken".
+                      One isolate around the whole string, so the two numbers cannot be
+                      reordered by the RTL paragraph the way the captains ratio was.
+                    */}
                     <td className="text-muted">
-                      <Num range={[trip.booked_count ?? 0, trip.capacity]} />
+                      <Num value={`${trip.booked_count ?? 0} / ${trip.capacity}`} />
                     </td>
                     {/*
                       `bareJod`, not `jod`: the sheet's fare cells are «1.250» with the unit

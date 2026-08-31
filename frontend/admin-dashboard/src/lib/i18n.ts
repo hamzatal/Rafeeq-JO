@@ -37,7 +37,7 @@ const DICT: Dict = {
   'nav.subscriptions': { ar: 'الاشتراكات', en: 'Subscriptions' },
   'nav.trips': { ar: 'الرحلات', en: 'Trips' },
   'nav.drivers': { ar: 'الكباتن', en: 'Captains' },
-  'nav.users': { ar: 'المستخدمون', en: 'Users' },
+  'nav.users': { ar: 'الطلاب', en: 'Students' },
   'nav.payments': { ar: 'المدفوعات', en: 'Payments' },
   'nav.coupons': { ar: 'الكوبونات', en: 'Coupons' },
   'nav.withdrawals': { ar: 'السحوبات', en: 'Withdrawals' },
@@ -120,7 +120,7 @@ const DICT: Dict = {
   'nav.hint.trips': { ar: 'مراقبة الرحلات الجارية والمكتملة', en: 'Live and completed trips' },
   'nav.hint.insights': { ar: 'تحليلات ورؤى مولّدة بالذكاء الاصطناعي', en: 'AI-generated analysis and recommendations' },
   'nav.hint.drivers': { ar: 'التوثيق هو عنق الزجاجة', en: 'Verification is the bottleneck' },
-  'nav.hint.users': { ar: 'كل المستخدمين وشحن المحافظ', en: 'Every user, and wallet top-ups' },
+  'nav.hint.users': { ar: 'الطلاب افتراضياً · وكل الأنواع بالمُرشِّح · وشحن المحافظ', en: 'Students by default · every type via the filter · and wallet top-ups' },
   'nav.hint.geography': { ar: 'المناطق وأسعارها والمسارات والجامعات — إعداد المسار في مكان واحد', en: 'Zones, their prices, routes and universities — one corridor setup' },
   'nav.hint.payments': { ar: 'مراجعة شحنات CliQ وتدقيق الاحتيال', en: 'CliQ top-up review and fraud checks' },
   'nav.hint.withdrawals': { ar: 'طلبات سحب أرباح الكباتن', en: 'Captain payout requests' },
@@ -266,6 +266,7 @@ const DICT: Dict = {
   'home.pill.resolve': { ar: 'حلّ', en: 'Resolve' },
 
   'home.col.trip': { ar: 'الرحلة', en: 'Trip' },
+  'home.col.rider': { ar: 'الطالب', en: 'Rider' },
   'home.col.captain': { ar: 'الكابتن', en: 'Captain' },
   'home.col.seats': { ar: 'المقاعد', en: 'Seats' },
   'home.col.fareUnit': { ar: 'الأجرة (د.أ)', en: 'Fare (JOD)' },
@@ -458,7 +459,7 @@ const DICT: Dict = {
   },
 
   // Ride requests
-  'rideRequests.runMatching': { ar: 'تشغيل التجميع', en: 'Run matching' },
+  'rideRequests.runMatching': { ar: 'تشغيل المطابقة', en: 'Run matching' },
   'rideRequests.matchingHint': {
     ar: 'يجمّع طلبات الرحلات المعلّقة في نفس المنطقة/الجامعة ضمن رحلات مشتركة ويسندها للكباتن المتاحين.',
     en: 'Groups pending ride requests in the same zone/university into shared trips and assigns them to available captains.',

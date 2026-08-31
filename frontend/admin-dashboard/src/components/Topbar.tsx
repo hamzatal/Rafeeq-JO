@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AppNotification } from '@rafeeq/shared';
-import { usePrefs } from '../lib/prefs';
 import { useT } from '../lib/i18n';
 import { Tooltip } from './Tooltip';
 import { api } from '../lib/api';
@@ -11,7 +10,6 @@ import { CommandPalette } from './CommandPalette';
 import { SystemHealth } from './SystemHealth';
 
 export function Topbar() {
-  const { locale, setLocale } = usePrefs();
   const { t } = useT();
 
   const [unread, setUnread] = useState(0);
@@ -130,15 +128,11 @@ export function Topbar() {
           )}
         </div>
 
-        {/* Language */}
-        <Tooltip label={t('shell.language')}>
-          <button
-            onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
-            className="h-10 px-3 rounded-lg border border-line text-sm font-semibold surface-text hover:bg-background transition-colors"
-          >
-            {locale === 'ar' ? 'EN' : 'ع'}
-          </button>
-        </Tooltip>
+        {/*
+          A 1px rule before the bell — `<div style="width:1px;height:22px;background:
+          var(--n200)">` in the sheet. It separates the status read-out from the action.
+        */}
+        <div aria-hidden="true" className="w-px h-[22px] bg-line" />
       </div>
     </header>
   );
