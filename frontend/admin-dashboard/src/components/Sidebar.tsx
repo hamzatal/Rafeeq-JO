@@ -108,21 +108,18 @@ export function Sidebar() {
                       zero still renders: «0 بانتظار المراجعة» is real news, unlike an
                       absent count, which means unknown.
                     */}
-                    {badges[item.href] === undefined ? null : (
+                    {!badges[item.href] ? null : (
                       /*
-                        Three states, as the sheet defines them: `.an` grey for a count of
-                        zero, `.an.hot` solid red for something breaching, `.an.wrm`
-                        amber-soft for a queue that merely needs attention. The sheet marks
-                        SOS and payments hot, captains and withdrawals warm — severity, not
-                        size, so a big-but-healthy number does not shout.
+                        A badge means WORK IS WAITING, so zero renders nothing at all — the
+                        sheet carries no zero badges, and three grey «0» chips down the
+                        column are noise that dilutes the counts that do matter.
+                        `.an.hot` (solid red) for SOS and payments, `.an.wrm` (amber-soft)
+                        for captains and payouts: severity, not size, so a large-but-healthy
+                        number does not shout.
                       */
                       <span
                         className={`shrink-0 min-w-[18px] px-1.5 py-px rounded-full text-[10px] font-bold text-center leading-[1.5] ${
-                          (badges[item.href] ?? 0) === 0
-                            ? 'bg-neutral-100 text-neutral-600'
-                            : HOT.has(item.href)
-                              ? 'bg-danger text-white'
-                              : 'bg-warning-soft text-warning'
+                          HOT.has(item.href) ? 'bg-danger text-white' : 'bg-warning-soft text-warning'
                         }`}
                       >
                         <Num value={badges[item.href] ?? 0} />

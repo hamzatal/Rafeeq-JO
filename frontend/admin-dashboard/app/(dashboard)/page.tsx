@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { formatJod } from '@rafeeq/shared';
+import { bareJod, formatJod } from '@rafeeq/shared';
 import type { AdminInsights, FinancialReport, Trip, Zone } from '@rafeeq/shared';
 import { api } from '../../src/lib/api';
 import { useT } from '../../src/lib/i18n';
@@ -140,7 +140,10 @@ export default function CommandCenter() {
         key: 'revenue',
         plain: jod(dayRevenue),
         label: t('home.kpi.dayRevenue'),
-        value: jod(dayRevenue),
+        /* `t-display` number beside a `t-label` unit — the sheet keeps them separate so
+           the figure is the thing you read and «د.أ» merely qualifies it. */
+        value: bareJod(dayRevenue),
+        unit: t('common.dinar'),
         ...(dayGross > 0
           ? { share: dayRevenue / dayGross, caption: t('home.share.ofGross'), tone: 'good' as KpiTone }
           : { caption: t('home.noneToday'), tone: 'neutral' as KpiTone }),
@@ -160,11 +163,18 @@ export default function CommandCenter() {
         // The reference asks «كباتن متصلون»; this API has no presence signal, so the
         // same question is answered with approved-against-total. See the file header.
         label: t('home.kpi.approvedCaptains'),
-        value: (
-          <>
-            <Num value={approved} /> / <Num value={captains} />
-          </>
-        ),
+        /*
+         * ONE isolated run, not two.
+         *
+         * `<Num>{approved}</Num> / <Num>{captains}</Num>` isolates each number
+         * separately and leaves the slash bidi-neutral between them — so the paragraph's
+         * RTL direction ordered the two RUNS right-to-left and «3 / 6» rendered as
+         * «6 / 3». A ratio displayed backwards is not a cosmetic problem: it said three
+         * captains out of six were approved as six out of three. Passing the whole
+         * string through `value` wraps it in a single isolate, which is what the sheet
+         * does too (`unicode-bidi:isolate` on «48 / 126»).
+         */
+        value: <Num value={`${approved} / ${captains}`} />,
         ...(captains > 0
           ? {
               share: approved / captains,
@@ -307,7 +317,7 @@ export default function CommandCenter() {
                 <th scope="col">{t('home.col.trip')}</th>
                 <th scope="col">{t('home.col.captain')}</th>
                 <th scope="col">{t('home.col.seats')}</th>
-                <th scope="col">{t('home.col.fare')}</th>
+                <th scope="col">{t('home.col.fareUnit')}</th>
                 <th scope="col">{t('home.col.status')}</th>
               </tr>
             </thead>
@@ -334,7 +344,12 @@ export default function CommandCenter() {
                     <td className="text-muted">
                       <Num range={[trip.booked_count ?? 0, trip.capacity]} />
                     </td>
-                    <td>{trip.pricing ? jod(trip.pricing.fare_fils) : '—'}</td>
+                    {/*
+                      `bareJod`, not `jod`: the sheet's fare cells are «1.250» with the unit
+                      carried ONCE by the column header. Repeating «د.أ» down seven rows is
+                      noise in the column an operator scans fastest.
+                    */}
+                    <td>{trip.pricing ? bareJod(trip.pricing.fare_fils) : '—'}</td>
                     <td>
                       <Pill
                         tone={

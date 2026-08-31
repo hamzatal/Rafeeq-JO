@@ -9,109 +9,109 @@
     "slug": "01-dashboard",
     "path": "/",
     "title": "لوحة القيادة",
-    "bytes": 105461
+    "bytes": 103076
   },
   {
     "slug": "02-ride-requests",
     "path": "/ride-requests",
     "title": "الطلبات الحيّة",
-    "bytes": 61541
+    "bytes": 60216
   },
   {
     "slug": "03-trips",
     "path": "/trips",
     "title": "الرحلات",
-    "bytes": 83743
+    "bytes": 82953
   },
   {
     "slug": "04-insights",
     "path": "/insights",
     "title": "الرؤى والتحليلات",
-    "bytes": 140953
+    "bytes": 139366
   },
   {
     "slug": "05-drivers",
     "path": "/drivers",
     "title": "الكباتن والتوثيق",
-    "bytes": 101997
+    "bytes": 100765
   },
   {
     "slug": "06-users",
     "path": "/users",
     "title": "المستخدمون",
-    "bytes": 154641
+    "bytes": 153080
   },
   {
     "slug": "07-geography-zones",
     "path": "/geography?tab=zones",
     "title": "الجغرافيا — المناطق",
-    "bytes": 126210
+    "bytes": 124906
   },
   {
     "slug": "08-geography-prices",
     "path": "/geography?tab=prices",
     "title": "الجغرافيا — أسعار المناطق",
-    "bytes": 155697
+    "bytes": 154399
   },
   {
     "slug": "09-geography-routes",
     "path": "/geography?tab=routes",
     "title": "الجغرافيا — المسارات",
-    "bytes": 78277
+    "bytes": 76992
   },
   {
     "slug": "10-geography-universities",
     "path": "/geography?tab=universities",
     "title": "الجغرافيا — الجامعات",
-    "bytes": 121354
+    "bytes": 120085
   },
   {
     "slug": "11-payments",
     "path": "/payments",
     "title": "المدفوعات",
-    "bytes": 62939
+    "bytes": 61632
   },
   {
     "slug": "12-withdrawals",
     "path": "/withdrawals",
     "title": "السحوبات",
-    "bytes": 61997
+    "bytes": 60662
   },
   {
     "slug": "13-pricing-tariff",
     "path": "/pricing?tab=tariff",
     "title": "التسعير — التعرفة والعمولة",
-    "bytes": 129134
+    "bytes": 127865
   },
   {
     "slug": "14-pricing-plans",
     "path": "/pricing?tab=plans",
     "title": "التسعير — الباقات",
-    "bytes": 100308
+    "bytes": 99028
   },
   {
     "slug": "15-pricing-subscriptions",
     "path": "/pricing?tab=subscriptions",
     "title": "التسعير — الاشتراكات",
-    "bytes": 109509
+    "bytes": 108095
   },
   {
     "slug": "16-pricing-coupons",
     "path": "/pricing?tab=coupons",
     "title": "التسعير — الكوبونات",
-    "bytes": 123412
+    "bytes": 122057
   },
   {
     "slug": "17-reports",
     "path": "/reports",
     "title": "التقارير المالية",
-    "bytes": 118130
+    "bytes": 116839
   },
   {
     "slug": "18-safety",
     "path": "/safety",
     "title": "السلامة و SOS",
-    "bytes": 57795
+    "bytes": 56416
   },
   {
     "slug": "19-support-tickets",
@@ -141,7 +141,7 @@
     "slug": "23-security-audit",
     "path": "/security?tab=audit",
     "title": "الأمان — سجلّ التدقيق",
-    "bytes": 90326
+    "bytes": 90420
   },
   {
     "slug": "24-settings-staff",
@@ -171,6 +171,6 @@
     "slug": "28-profile",
     "path": "/profile",
     "title": "ملفّي",
-    "bytes": 77512
+    "bytes": 76246
   }
 ]
