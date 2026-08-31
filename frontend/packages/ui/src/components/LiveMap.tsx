@@ -1,6 +1,6 @@
 import { createElement, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
-import { brand } from '@rafeeq/tokens';
+import { brand, neutral } from '@rafeeq/tokens';
 import { useTheme, type AppTheme } from '../theme';
 import { useI18n } from '../runtime/i18n';
 import { getMapsKey } from '../runtime/appConfig';
@@ -292,6 +292,7 @@ function buildGoogleHtml(
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
   html,body,#map{height:100%;margin:0;background:#eef3f0}
+  /* The pale basemap of the approved screens. Only the TILES are filtered — the pane
 </style></head><body><div id="map"></div>
 <script>
   var COL = ${col};
@@ -407,14 +408,43 @@ function buildLeafletHtml(
   const c = JSON.stringify(center);
   const col = JSON.stringify(colors);
 
-  // Free OpenStreetMap tiles (no key required, ToS-compliant).
+  /*
+   * The approved screens (docs/design/v2/03-student-ride) put a PALE map under the
+   * sheet — near-white blocks, light roads — so the blue route and the amber captain
+   * badge are the only saturated things on it. Default OSM raster paints motorways
+   * orange and trunk roads red, which out-shouts both and makes the one thing the rider
+   * is looking for the hardest thing to see.
+   *
+   * The pale look is applied HERE with a filter rather than by switching provider.
+   * CARTO Positron is the obvious candidate and it now refuses keyless traffic — it
+   * serves tiles stamped "API KEY REQUIRED", which is worse than saturated. Every other
+   * light basemap (Stadia, Mapbox, Thunderforest) wants a key too. Desaturating OSM
+   * needs no account, no key, and no third party that can change its terms under us.
+   */
   const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  /*
+   * Attribution is not optional.
+   *
+   * `attributionControl` was false while the comment above claimed "ToS-compliant". The
+   * OSM licence REQUIRES visible credit, so the map was shipping in breach of the
+   * licence of the data it drew. Rendered small and low-contrast: it satisfies the
+   * licence without competing with the route.
+   */
+  const attribution = '© OpenStreetMap';
 
   return `<!DOCTYPE html><html><head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   html,body,#map{height:100%;margin:0;background:#eef3f0}
+  /* Attribution is a licence requirement, so it renders — small and low-contrast, so it
+     does not compete with the route. */
+  .leaflet-control-attribution{font:400 9px sans-serif;background:rgba(255,255,255,.72);color:${neutral[500]};padding:1px 4px}
+  /* The pale basemap of the approved screens. Only the TILE pane is filtered — the panes
+     holding the route, the pins and the captain badge are siblings, so they keep full
+     saturation and stay the loudest thing on the map. */
+  .leaflet-tile-pane{filter:saturate(.38) brightness(1.05) contrast(.96)}
   .rfq-pin-wrap{position:relative;display:flex;align-items:center;justify-content:center}
   .rfq-tear{position:relative;width:30px;height:40px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
   .rfq-tear svg{display:block}
@@ -429,8 +459,8 @@ function buildLeafletHtml(
 <script>
   var COL = ${col};
   var c = ${c};
-  var map = L.map('map',{zoomControl:false,attributionControl:false}).setView([c.lat,c.lng],14);
-  L.tileLayer('${tileUrl}',{maxZoom:19,subdomains:['a','b','c']}).addTo(map);
+  var map = L.map('map',{zoomControl:false,attributionControl:true}).setView([c.lat,c.lng],14);
+  L.tileLayer('${tileUrl}',{maxZoom:19,subdomains:['a','b','c'],attribution:'${attribution}'}).addTo(map);
 
   var markers=[], routeLine=null, routeCasing=null, captainMarker=null;
 
