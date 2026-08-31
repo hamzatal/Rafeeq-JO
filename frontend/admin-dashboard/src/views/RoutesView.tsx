@@ -75,7 +75,7 @@ export function RoutesView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.routes')}</h1>
+      <h2 className="section-title">{t('nav.routes')}</h2>
 
       <div className="card mb-5">
         <h2 className="font-bold surface-text mb-3">{t('routes.add')}</h2>

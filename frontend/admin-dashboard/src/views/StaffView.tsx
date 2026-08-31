@@ -52,7 +52,7 @@ export function StaffView() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold surface-text">{t('admins.title')}</h1>
+        <h2 className="section-title">{t('admins.title')}</h2>
         <button onClick={() => setCreating(true)} className="btn-primary">
           <Icon name="user-plus" size={18} />
           {t('admins.add')}

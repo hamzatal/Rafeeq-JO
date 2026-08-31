@@ -601,12 +601,6 @@ parameters:
 			path: Modules/RideRequests/Resources/RideRequestResource.php
 
 		-
-			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Resources\\RideRequestResource\:\:\$express_fee_fils\.$#'
-			identifier: property.notFound
-			count: 1
-			path: Modules/RideRequests/Resources/RideRequestResource.php
-
-		-
 			message: '#^Access to an undefined property Rafeeq\\Modules\\RideRequests\\Resources\\RideRequestResource\:\:\$notes\.$#'
 			identifier: property.notFound
 			count: 1

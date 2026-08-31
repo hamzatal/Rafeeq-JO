@@ -152,7 +152,7 @@ export default function CommandCenter() {
     const tripsMonth = metrics?.trips.this_month ?? 0;
     const tripsDone = metrics?.trips.completed ?? 0;
     const captains = metrics?.users.drivers ?? 0;
-    const approved = metrics?.drivers.approved ?? 0;
+    const online = metrics?.drivers.online ?? 0;
     const pendingPayments = metrics?.safety.pending_payments ?? 0;
 
     const out: (KpiCardProps & { key: string; plain: string })[] = [
@@ -179,27 +179,34 @@ export default function CommandCenter() {
       },
       {
         key: 'captains',
-        plain: `${approved} / ${captains}`,
-        // The reference asks «كباتن متصلون»; this API has no presence signal, so the
-        // same question is answered with approved-against-total. See the file header.
-        label: t('home.kpi.approvedCaptains'),
+        plain: `${online} / ${captains}`,
+        /*
+         * «كباتن متصلون» — the sheet's card, now with a real signal behind it.
+         *
+         * This rendered «كباتن معتمدون» under a comment claiming the API had no presence
+         * data. It did: captains ping `POST /v1/driver/location` while on shift, and
+         * `AdminInsightsService` now counts DISTINCT captains seen in
+         * `driver_locations` inside a 15-minute window. Approved-against-total answered
+         * a different question — and one the الكباتن screen already answers better.
+         */
+        label: t('home.kpi.onlineCaptains'),
         /*
          * ONE isolated run, not two.
          *
-         * `<Num>{approved}</Num> / <Num>{captains}</Num>` isolates each number
-         * separately and leaves the slash bidi-neutral between them — so the paragraph's
-         * RTL direction ordered the two RUNS right-to-left and «3 / 6» rendered as
-         * «6 / 3». A ratio displayed backwards is not a cosmetic problem: it said three
-         * captains out of six were approved as six out of three. Passing the whole
-         * string through `value` wraps it in a single isolate, which is what the sheet
-         * does too (`unicode-bidi:isolate` on «48 / 126»).
+         * `<Num>{online}</Num> / <Num>{captains}</Num>` isolates each number separately
+         * and leaves the slash bidi-neutral between them — so the paragraph's RTL
+         * direction ordered the two RUNS right-to-left and «3 / 6» rendered as «6 / 3».
+         * A ratio displayed backwards is not a cosmetic problem: it said three captains
+         * of six were online as six of three. Passing the whole string through `value`
+         * wraps it in a single isolate, which is what the sheet does too
+         * (`unicode-bidi:isolate` on «48 / 126»).
          */
-        value: <Num value={`${approved} / ${captains}`} />,
+        value: <Num value={`${online} / ${captains}`} />,
         ...(captains > 0
           ? {
-              share: approved / captains,
-              caption: t('home.share.ofAllCaptains'),
-              tone: (approved / captains < 0.5 ? 'warn' : 'good') as KpiTone,
+              share: online / captains,
+              caption: t('home.share.onlineNow'),
+              tone: (online / captains < 0.5 ? 'warn' : 'good') as KpiTone,
             }
           : {}),
       },

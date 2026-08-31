@@ -33,6 +33,18 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     // Admin AI / fraud insights. The risk narrative is a completion per call, so an
     // admin holding down refresh is also spending money.
     Route::prefix('admin/ai')->middleware('permission:analytics.view')->group(function () {
+        /*
+         * The counts with NO completion behind them — for the sidebar badges.
+         *
+         * They used to read them out of `insights` below, which meant four integers in
+         * the dashboard shell cost a GPT call, and twenty page loads tripped
+         * `throttle:sensitive`. The resulting 429 propagated into a forced sign-out.
+         *
+         * Unthrottled deliberately: it is three `count(*)` queries, the same cost as any
+         * other list endpoint on the dashboard, and rate-limiting the shell is what
+         * caused the outage this splits apart.
+         */
+        Route::get('counts', [AiAdminController::class, 'counts']);
         Route::get('insights', [AiAdminController::class, 'insights'])->middleware('throttle:sensitive');
         Route::get('risks', [AiAdminController::class, 'risks']);
         Route::get('risks/{userId}', [AiAdminController::class, 'risk'])->middleware('throttle:sensitive');

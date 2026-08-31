@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import type { PricingSettings } from '@rafeeq/api-client';
 import { api } from '../lib/api';
 import { useT } from '../lib/i18n';
 import { Skeleton } from '../components/Skeleton';
+import { downloadCsv } from '../lib/download';
 
 type FieldKey = keyof PricingSettings;
 
@@ -92,9 +94,35 @@ export function TariffView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-1">{t('pricing.title')}</h1>
+      {/* No <h1> here: `TabbedPage` already rendered the page heading, and this view
+          was drawing a second one underneath it — the same duplicate-heading bug
+          `AuditView` and `TicketsView` had. */}
       <p className="text-sm text-muted mb-1">{t('pricing.intro')}</p>
       <p className="text-xs text-muted mb-4">{t('pricing.filsHint')}</p>
+
+      <div className="flex items-center gap-2 mb-4">
+        {/*
+          «تصدير الإعدادات» — the live tariff as a CSV.
+          Not decoration: these values are argued over in meetings away from the
+          dashboard, and the alternative is a screenshot, which is how a stale number
+          ends up in a decision.
+        */}
+        <button
+          type="button"
+          onClick={() =>
+            form &&
+            downloadCsv(
+              'tariff',
+              ['الإعداد', 'القيمة'],
+              GROUPS.flatMap((g) => g.fields.map(({ key }) => [t(`pricing.${key}`), String(form[key])])),
+            )
+          }
+          disabled={!form}
+          className="btn-outline h-[34px] px-[13px] text-xs"
+        >
+          تصدير الإعدادات
+        </button>
+      </div>
 
       {/*
         Says out loud where a seat price actually comes from. Without this, the
@@ -103,7 +131,15 @@ export function TariffView() {
       */}
       <div className="card mb-6 border-s-4 border-s-brand-500">
         <p className="text-sm surface-text font-semibold mb-1">{t('pricing.tariffNotice')}</p>
-        <p className="text-xs text-muted">{t('pricing.tariffNotice_body')}</p>
+        <p className="text-xs text-muted mb-3">{t('pricing.tariffNotice_body')}</p>
+        {/* And then REACHES it. The notice named the fare matrix without linking to it,
+            so «then nobody finds the fare matrix» stayed half-true. */}
+        <Link
+          href="/geography?tab=prices"
+          className="btn-outline h-[34px] px-[13px] text-xs inline-flex items-center"
+        >
+          عرض
+        </Link>
       </div>
 
       {loading || !form ? (

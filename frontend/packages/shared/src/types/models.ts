@@ -459,6 +459,20 @@ export interface RideRequest {
   status_label: string;
   zone?: { id: string; name_ar: string; name_en: string } | null;
   created_at?: string | null;
+  /* ── What the admin queue needs and the payload lacked ────────────────────
+     The live-request table has columns «الطالب», «إلى» and «الأجرة»; without these it
+     printed `pickup_lat.toFixed(4)` and the zone name instead. Optional because only
+     the admin index loads the relations and prices the corridor. */
+  student?: { id: string; name: string; phone: string } | null;
+  university?: { id: string; name_ar: string } | null;
+  /**
+   * The corridor's approved tariff plus any express fee, in fils.
+   *
+   * `null` on a corridor with NO approved price — a real state the queue must show as
+   * «—», matching `/estimate`, which returns `unpriced_corridor` rather than inventing a
+   * distance-based fare nobody signed off.
+   */
+  fare_fils?: number | null;
 }
 
 /**
@@ -967,7 +981,12 @@ export interface AdminInsights {
      */
     finance_available: boolean;
     users: { total: number; students: number; drivers: number; new_this_month: number };
-    drivers: { pending_review: number; approved: number };
+    /**
+     * `online` counts DISTINCT captains who pinged `driver_locations` inside
+     * `online_window_minutes` — a measured presence signal, not an estimate. The
+     * dashboard rendered «كباتن معتمدون» here for want of one.
+     */
+    drivers: { pending_review: number; approved: number; online: number; online_window_minutes: number };
     trips: { this_month: number; completed: number; cancelled: number };
     subscriptions: { active: number };
     finance: {
@@ -1028,4 +1047,47 @@ export interface CouponValidation {
 export interface RewardRedemptionOption {
   points: number;
   credit_fils: number;
+}
+
+
+/**
+ * An SOS incident as the admin safety queue sees it.
+ *
+ * `SosIncident` (the student's own view) carries only `id`, `trip_id`, `status` and
+ * `created_at` — enough for «you pressed this», useless for «who is in trouble». The
+ * admin list adds the name and the number, because the primary action on that screen is
+ * «اتصال بالطالب» and a UUID cannot be dialled.
+ */
+export interface AdminSosIncident {
+  id: string;
+  user_id: string;
+  student_name: string | null;
+  student_phone: string | null;
+  trip_id: string | null;
+  lat: number | null;
+  lng: number | null;
+  status: SosStatus;
+  note: string | null;
+  created_at: string | null;
+  resolved_at: string | null;
+}
+
+/**
+ * The security overview — screen 41's four cards.
+ *
+ * `failed_jobs` is null, not 0, when the `failed_jobs` table is absent: «0 مهام فاشلة»
+ * is a claim that the queue is healthy, and code that cannot see the queue must not
+ * make it.
+ */
+export interface SecurityOverview {
+  failed_logins_24h: number;
+  /** Accounts at or past `lockout_threshold` failures in 24h. */
+  locked_accounts: number;
+  lockout_threshold: number;
+  /** Counted over staff roles only — 2FA on an account that can approve payments. */
+  mfa_enabled: number;
+  mfa_required_total: number;
+  sensitive_actions_today: number;
+  failed_jobs: number | null;
+  last_audit_at: string | null;
 }

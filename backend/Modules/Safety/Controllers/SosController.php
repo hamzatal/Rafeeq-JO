@@ -74,9 +74,29 @@ class SosController extends Controller
     }
 
     // ── Admin ────────────────────────────────────────────────────────
+    /**
+     * The admin safety queue.
+     *
+     * ── It could not name the person it was about ─────────────────────────────
+     *
+     * This returned `user_id` and `trip_id` — two UUIDs. The screen built on it
+     * (`06-admin-3.html` 38) has columns «البلاغ · الطالب · الرحلة» and a primary action
+     * «اتصال بالطالب», none of which a UUID answers. An operator with an open incident
+     * had to copy an identifier into the users page to find out who was in trouble.
+     *
+     * So the student's name and phone are attached, and the relations are eager-loaded
+     * — 30 incidents on a page is 60 lazy queries, on the one screen where latency is
+     * measured in someone's safety.
+     *
+     * The phone is deliberately included despite being PII: the route is already gated
+     * on `safety.view`, whose own comment records that this surface exposes «open SOS
+     * incidents naming a rider and their live location». A safety desk that cannot dial
+     * the number is not a safety desk, and redacting it here would push the operator to
+     * a second screen mid-incident.
+     */
     public function index(Request $request): JsonResponse
     {
-        $query = SosIncident::query()->latest('created_at');
+        $query = SosIncident::query()->with(['user:id,full_name,phone', 'trip:id,status'])->latest('created_at');
         if ($request->boolean('open')) {
             $query->where('status', 'open');
         }
@@ -84,12 +104,15 @@ class SosController extends Controller
         return $this->ok($query->paginate($this->perPage($request, 30))->through(fn (SosIncident $i) => [
             'id' => $i->id,
             'user_id' => $i->user_id,
+            'student_name' => $i->user?->full_name,
+            'student_phone' => $i->user?->phone,
             'trip_id' => $i->trip_id,
             'lat' => $i->lat,
             'lng' => $i->lng,
             'status' => $i->status,
             'note' => $i->note,
             'created_at' => $i->created_at?->toIso8601String(),
+            'resolved_at' => $i->resolved_at?->toIso8601String(),
         ]));
     }
 

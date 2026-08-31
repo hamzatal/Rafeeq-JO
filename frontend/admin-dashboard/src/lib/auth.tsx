@@ -53,9 +53,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const me = await api.auth.me();
         setUser(me);
         setStatus('authenticated');
-      } catch {
-        await session.logout();
-        signOut();
+      } catch (e) {
+        /*
+         * ── Only a 401 means the session is dead ──────────────────────────────
+         *
+         * This caught EVERYTHING and destroyed the cookie, so any failure of this one
+         * request signed the operator out — and the failures are not hypothetical:
+         *
+         *   429  the sidebar badges were fetching `admin/ai/insights`, a GPT-backed
+         *        route under `throttle:sensitive`. Twenty page loads tripped the
+         *        limiter, the next `auth.me()` came back 429, and the dashboard logged
+         *        you out of itself. That is how this was found — the screenshot run
+         *        bounced to /login at the twenty-fifth page.
+         *   502  the proxy's own response when the API is unreachable.
+         *   500  a bad deploy upstream.
+         *
+         * None of those say the credential is invalid, and for all of them signing out
+         * is the worst available move: it discards a WORKING session and asks the
+         * operator to type a password that was never the problem.
+         *
+         * A 401 does say exactly that, and the proxy has already cleared the cookie by
+         * the time we get here (`app/api/proxy/[...path]/route.ts`), so this only has to
+         * agree with it. Anything else leaves the session intact and surfaces as an
+         * error on the page, which is recoverable by reloading.
+         */
+        if ((e as { status?: number })?.status === 401) {
+          await session.logout();
+          signOut();
+
+          return;
+        }
+
+        /* A session that exists and an identity we could not read this time. Treat it as
+           authenticated-but-unknown rather than throwing the operator out; the pages
+           each handle their own load failure and `LoadError` offers a retry. */
+        setStatus('authenticated');
       }
     })();
   }, [signOut]);

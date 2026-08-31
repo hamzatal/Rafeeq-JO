@@ -64,7 +64,7 @@ export function SessionsView() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="page-title mb-4">{t('security.title')}</h1>
+      <h2 className="section-title">{t('security.title')}</h2>
 
       {error && (
         <div className="mb-4 rounded-lg border border-danger/30 bg-red-50 px-3 py-2 text-sm text-danger">{error}</div>

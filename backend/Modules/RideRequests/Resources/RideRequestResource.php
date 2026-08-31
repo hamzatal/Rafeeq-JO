@@ -39,6 +39,22 @@ class RideRequestResource extends JsonResource
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
             'notes' => $this->notes,
+            /* The admin queue's «الطالب», «إلى», «منذ» and «الأجرة». All four were
+               missing from this payload, which is why the dashboard's live-request table
+               showed raw coordinates instead of the corridor and the rider. */
+            'student' => $this->whenLoaded('student', fn () => [
+                'id' => $this->student?->id,
+                'name' => $this->student?->full_name,
+                'phone' => $this->student?->phone,
+            ]),
+            'university' => $this->whenLoaded('university', fn () => [
+                'id' => $this->university?->id,
+                'name_ar' => $this->university?->name_ar,
+            ]),
+            /* Set by the admin index from the tariff matrix; absent elsewhere. Null on a
+               corridor with no approved price — see the comment there. */
+            'fare_fils' => $this->fare_fils,
+            'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
 }

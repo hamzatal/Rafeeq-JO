@@ -40,6 +40,32 @@ class AdminInsightsService
         ];
     }
 
+    /**
+     * The counts ALONE — no GPT call, nothing billed.
+     *
+     * ── Why this is public, and what it cost not to be ────────────────────────
+     *
+     * The dashboard's sidebar badges («الكباتن 6», «المدفوعات 23») read four integers out
+     * of `metrics`. They were getting them from `build()`, which also runs a GPT
+     * completion to produce `analysis` and `recommendations` — the route's own comment
+     * says «an admin holding down refresh is also spending money».
+     *
+     * So rendering four numbers in the shell invoked a billed language-model call, and
+     * `throttle:sensitive` (20/minute) then made it worse than expensive: a full page
+     * refresh fires one, twenty page loads trip the limiter, and the 429 that follows
+     * reached `AuthProvider`, which treated any failed `auth.me()` as a dead session and
+     * signed the operator out. Clicking through the dashboard logged you out of it.
+     *
+     * A count is not an insight. This is the same aggregate query behind a route with no
+     * completion and no spend guard.
+     *
+     * @return array<string, mixed>
+     */
+    public function counts(): array
+    {
+        return $this->metrics();
+    }
+
     /** @return array<string, mixed> */
     private function metrics(): array
     {
@@ -75,6 +101,28 @@ class AdminInsightsService
             'drivers' => [
                 'pending_review' => (int) DB::table('driver_profiles')->where('status', 'pending')->count(),
                 'approved' => (int) DB::table('driver_profiles')->where('status', 'approved')->count(),
+                /*
+                 * ── «كباتن متصلون» — a measured presence signal ────────────────────
+                 *
+                 * `docs/design/src/06-admin-1.html` screen 33 leads with this card, and
+                 * the dashboard had been rendering «كباتن معتمدون» in its place with a
+                 * comment saying no presence signal existed. One does: captains ping
+                 * `POST /v1/driver/location` while on shift, and `driver_locations` is
+                 * that stream — it is what the ghost-trip watch already reads.
+                 *
+                 * Fifteen minutes, because the app pings far more often than that and a
+                 * tighter window would flap on one dropped request in a tunnel, while a
+                 * looser one would keep counting a captain who closed the app.
+                 *
+                 * DISTINCT, because the point is how many captains are reachable, not
+                 * how many pings arrived — a single captain on a motorway produces
+                 * hundreds and would read as a full fleet.
+                 */
+                'online' => (int) DB::table('driver_locations')
+                    ->where('recorded_at', '>=', now()->subMinutes(15))
+                    ->distinct()
+                    ->count('driver_id'),
+                'online_window_minutes' => 15,
             ],
             'trips' => [
                 'this_month' => (int) DB::table('trips')->where('scheduled_at', '>=', $monthStart)->count(),

@@ -44,7 +44,7 @@
   {
     "slug": "41-security",
     "title": "الأمان والتدقيق",
-    "live": "/security?tab=sessions",
+    "live": "/security?tab=audit",
     "sheet": "06-admin-3.html"
   }
 ]

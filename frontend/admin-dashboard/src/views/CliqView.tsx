@@ -58,7 +58,7 @@ export function CliqView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-1">{t('cliq.title')}</h1>
+      <h2 className="section-title">{t('cliq.title')}</h2>
       <p className="text-sm text-muted mb-6">{t('cliq.intro')}</p>
 
       <form onSubmit={save} className="card mb-6">

@@ -4,9 +4,11 @@ import {
   type ApiSuccess,
   type Coupon,
   type DriverDocument,
+  type AdminSosIncident,
   type DriverFleetStats,
   type DriverProfile,
   type Route,
+  type SecurityOverview,
   type Subscription,
   type SubscriptionPlan,
   type Trip,
@@ -330,6 +332,31 @@ export class AdminApi {
   async auditActions(): Promise<string[]> {
     const { data } = await this.http.get<ApiSuccess<string[]>>(ENDPOINTS.admin.auditLogActions);
     return unwrap(data);
+  }
+
+  /** The four security cards above the audit trail — screen 41. */
+  async securityOverview(): Promise<SecurityOverview> {
+    const { data } = await this.http.get<ApiSuccess<SecurityOverview>>(ENDPOINTS.admin.securityOverview);
+    return unwrap(data);
+  }
+
+  /*
+   * ── The safety centre ─────────────────────────────────────────────────────
+   *
+   * These endpoints have existed on the server since the safety module shipped and had
+   * no client at all, which is how «السلامة و SOS» ended up rendering risk scores and
+   * no incidents.
+   */
+  async listSosIncidents(
+    params: { open?: boolean; page?: number; per_page?: number } = {},
+  ): Promise<{ items: AdminSosIncident[]; meta: ApiSuccess<AdminSosIncident[]>['meta'] }> {
+    const { data } = await this.http.get<ApiSuccess<AdminSosIncident[]>>(ENDPOINTS.admin.safetySos, { params });
+    return { items: data.data, meta: data.meta };
+  }
+
+  /** `acknowledged` = someone is on it; `resolved` = closed. */
+  async resolveSos(id: string, status: 'acknowledged' | 'resolved'): Promise<void> {
+    await this.http.post<ApiSuccess<null>>(ENDPOINTS.admin.safetySosResolve(id), { status });
   }
 
   /** Download the audit trail as a CSV blob (respects the same filters). */
