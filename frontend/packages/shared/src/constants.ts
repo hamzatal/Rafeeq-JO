@@ -156,6 +156,10 @@ export const ENDPOINTS = {
     conversations: '/assistant/conversations',
     messages: (id: string) => `/assistant/conversations/${id}`,
     send: '/assistant/send',
+    /** Badge counts only — three aggregate queries, no completion, no spend guard.
+        `adminInsights` below runs a GPT call and is rate-limited; the sidebar must not
+        use it to render four integers. */
+    adminCounts: '/admin/ai/counts',
     adminInsights: '/admin/ai/insights',
     adminRisks: '/admin/ai/risks',
     adminRisk: (userId: string) => `/admin/ai/risks/${userId}`,
@@ -208,6 +212,23 @@ export const ENDPOINTS = {
     auditLogs: '/admin/audit-logs',
     auditLogActions: '/admin/audit-logs/actions',
     auditLogsExport: '/admin/audit-logs/export',
+    /*
+     * ── The admin safety centre ───────────────────────────────────────────────
+     *
+     * `Modules/Safety/Routes/api.php` has served these since the safety module landed;
+     * the frontend had no constants for any of them, so the dashboard's «السلامة و SOS»
+     * page rendered AI risk SCORES and nothing else — no incidents, no way to resolve
+     * one. `docs/design/src/06-admin-3.html` annotates that screen «غير موجودة عملياً
+     * اليوم — أخطر فجوة في المشروع», and an unreferenced endpoint is exactly the shape
+     * that gap took.
+     */
+    safetySos: '/admin/safety/sos',
+    safetySosResolve: (id: string) => `/admin/safety/sos/${id}/resolve`,
+    safetyRiskFlags: '/admin/safety/risk-flags',
+    safetyRiskFlagResolve: (id: string) => `/admin/safety/risk-flags/${id}/resolve`,
+    safetyCancellations: '/admin/safety/cancellations',
+    /** The four cards above the audit trail — screen 41. */
+    securityOverview: '/admin/security/overview',
     zones: '/admin/zones',
     zone: (id: string) => `/admin/zones/${id}`,
     disputes: '/admin/disputes',

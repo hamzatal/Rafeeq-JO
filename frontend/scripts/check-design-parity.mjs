@@ -59,30 +59,30 @@ const ROUTES = {
 };
 
 /*
- * A RATCHET, per screen: the number of required elements each route must carry today.
+ * A RATCHET, per screen: the number of required elements each route must carry.
  *
- * The target is 100% everywhere and these numbers only ever go up. They exist because
- * the alternative was a gate that fails on every commit until the last screen lands,
- * and a permanently red check is one people learn to scroll past — the same way the
- * design drifted to 25% while six other gates sat green.
+ * Every screen is at its full count — the dashboard carries 102 of the sheets' 102
+ * required elements. These numbers now exist to stop that going backwards: a screen that
+ * loses an element fails the build immediately, naming it.
  *
- * So: a screen that regresses fails the build immediately, and a screen that improves
- * fails until its number is raised here. Lowering an entry is the one edit that is
- * never correct; if a screen legitimately loses an element, the sheet changed, and the
- * sheet is in the repository where that shows up in the diff.
+ * They were introduced when the figure was 25%, because the alternative was a check that
+ * failed on every commit until the last screen landed, and a permanently red gate is one
+ * people learn to scroll past — the same way the design drifted to 25% while six other
+ * gates sat green. Lowering an entry is the one edit that is never correct; if a screen
+ * legitimately loses an element then the sheet changed, and the sheet is in the
+ * repository where that shows up in the diff beside it.
  */
 const RATCHET = {
-  33: 11,
-  34: 4,
-  35: 16, // ✓ complete
-  36: 4,
-  37: 5,
-  38: 1,
-  39: 1,
-  40: 4,
-  41: 5,
+  33: 12,
+  34: 13,
+  35: 16,
+  36: 7,
+  37: 13,
+  38: 13,
+  39: 4,
+  40: 11,
+  41: 13,
 };
-
 /* Illustrative demo values in the sheets — required to be ABSENT if anything, since
    the project forbids fabricated data. Never counted as requirements. */
 const DEMO = /^(TRP-|RQ-|PAY-|SOS-|TKT-)|^[\d.,]+$|^[\d.,]+\s*(د\.أ|كم|دقيقة|ساعة)$/;

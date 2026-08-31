@@ -37,6 +37,14 @@ aside { scrollbar-color: rgba(18,47,107,0.22) transparent; }
   .btn-danger  { @apply btn bg-danger text-white hover:opacity-90; }
   .btn-success { @apply btn bg-success text-white hover:opacity-90; }
 
+  /* A SECTION heading inside a page whose title `TabbedPage`/`PageHeader` owns.
+     Sixteen tabbed views each rendered their own `<h1>` underneath the page's `<h1>`,
+     so every tabbed destination shipped two level-one headings — the second repeating
+     or contradicting the first. Screen-reader users navigating by heading landed on a
+     duplicate, and visually the two competed at the same weight. This is the one class
+     they all use now: an `<h2>`, at the sheet's section scale, not the page scale. */
+  .section-title { @apply text-[15px] font-bold surface-text; }
+
   /* Surfaces */
   .card { @apply bg-surface border border-line rounded-card p-5 shadow-card; }
   .kpi-card { @apply relative overflow-hidden bg-surface border border-line rounded-card p-5 shadow-card transition-transform duration-300 hover:-translate-y-1; }

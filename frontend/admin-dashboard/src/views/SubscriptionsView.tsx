@@ -42,7 +42,7 @@ export function SubscriptionsView() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h1 className="text-2xl font-bold surface-text">{t('nav.subscriptions')}</h1>
+        <h2 className="section-title">{t('nav.subscriptions')}</h2>
         <select className="input max-w-[200px]" value={status} onChange={(e) => setStatus(e.target.value)}>
           {STATUSES.map((s) => (
             <option key={s} value={s}>{t(`subscriptions.status.${s || 'all'}`)}</option>

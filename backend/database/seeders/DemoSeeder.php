@@ -10,22 +10,38 @@ use Rafeeq\Modules\Coupons\Models\Coupon;
 use Rafeeq\Modules\Drivers\Models\DriverProfile;
 use Rafeeq\Modules\Drivers\Models\Vehicle;
 use Rafeeq\Modules\Notifications\Models\Notification;
+use Rafeeq\Modules\Payments\Models\Payment;
+use Rafeeq\Modules\Payments\Models\PaymentRequest;
 use Rafeeq\Modules\Rewards\Models\RewardAccount;
+use Rafeeq\Modules\RideRequests\Models\RideRequest;
 use Rafeeq\Modules\Routes\Models\Route;
+use Rafeeq\Modules\Safety\Models\DriverLocation;
+use Rafeeq\Modules\Safety\Models\SosIncident;
 use Rafeeq\Modules\Students\Models\StudentProfile;
 use Rafeeq\Modules\Subscriptions\Models\Subscription;
 use Rafeeq\Modules\Subscriptions\Models\SubscriptionPlan;
 use Rafeeq\Modules\Subscriptions\Services\PlanSolvency;
+use Rafeeq\Modules\Support\Models\SupportTicket;
 use Rafeeq\Modules\Trips\Models\Trip;
 use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Wallet\Models\Wallet;
 use Rafeeq\Modules\Zones\Models\Zone;
+use Rafeeq\Modules\Zones\Models\ZoneUniversityPrice;
 use Rafeeq\Shared\Enums\ComplaintStatus;
 use Rafeeq\Shared\Enums\DriverStatus;
 use Rafeeq\Shared\Enums\Gender;
+use Rafeeq\Shared\Enums\PaymentMethod;
+use Rafeeq\Shared\Enums\PaymentPurpose;
+use Rafeeq\Shared\Enums\PaymentStatus;
+use Rafeeq\Shared\Enums\RideDirection;
+use Rafeeq\Shared\Enums\RideRequestStatus;
+use Rafeeq\Shared\Enums\RideType;
 use Rafeeq\Shared\Enums\RiskSeverity;
 use Rafeeq\Shared\Enums\SubscriptionStatus;
 use Rafeeq\Shared\Enums\SubscriptionType;
+use Rafeeq\Shared\Enums\TicketCategory;
+use Rafeeq\Shared\Enums\TicketPriority;
+use Rafeeq\Shared\Enums\TicketStatus;
 use Rafeeq\Shared\Enums\TripStatus;
 use Rafeeq\Shared\Enums\UserStatus;
 use Rafeeq\Shared\Enums\UserType;
@@ -93,8 +109,9 @@ class DemoSeeder extends Seeder
         $this->seedComplaints($students, $drivers);
         $this->seedNotifications($students, $drivers);
         $this->seedTrips($drivers, $zones, $unis);
+        $this->seedQueues($students, $drivers, $zones, $unis);
 
-        $this->command?->info('DemoSeeder: '.count($students).' students, '.count($drivers).' captains, plus subscriptions/coupons/complaints/notifications/trips.');
+        $this->command?->info('DemoSeeder: '.count($students).' students, '.count($drivers).' captains, plus subscriptions/coupons/complaints/notifications/trips and the five admin queues.');
     }
 
     /**
@@ -398,6 +415,203 @@ class DemoSeeder extends Seeder
                     'base_fare_fils' => 1500,
                     'started_at' => in_array($st, [TripStatus::Started, TripStatus::Completed], true) ? now()->subMinutes(30) : null,
                     'ended_at' => $st === TripStatus::Completed ? now()->subMinutes(5) : null,
+                ],
+            );
+        }
+    }
+
+    /**
+     * The five admin queues — live requests, CliQ top-ups, SOS, support, presence.
+     *
+     * ── Why these were missing, and why an empty queue is not neutral ──────────
+     *
+     * This seeder produced students, captains, plans, coupons, complaints, notifications
+     * and five trips — and NOTHING in `ride_requests`, `payment_requests`, `payments`,
+     * `sos_incidents`, `support_tickets` or `driver_locations`. So the demo database
+     * exercised none of the screens an operator actually works: five of the eight
+     * approved admin screens rendered «لا توجد…» over a correct but invisible table, and
+     * the committed screenshots showed empty panels. A queue with no rows cannot show
+     * whether its columns, its pills or its row actions are right.
+     *
+     * It also hid real defects. The «الأجرة» column, the «فحص AI» cell, the bidi
+     * isolation on a masked IP — none of them render at all without a row, so each was
+     * only findable by reading code rather than by looking.
+     *
+     * Everything below is DEMO data in a demo database, and this class already refuses
+     * to run against production. But the shapes are honest: statuses come from the real
+     * enums, fares from the tariff matrix, and the flags on a payment are the same
+     * strings `FraudDetection` emits — so what the screens show is what production would
+     * show, not a prettier version of it.
+     */
+    private function seedQueues(array $students, array $drivers, $zones, $unis): void
+    {
+        if (! $students || ! $drivers || $zones->isEmpty() || $unis->isEmpty()) {
+            return;
+        }
+
+        $approved = array_values(array_filter($drivers, fn ($d) => $d->status === DriverStatus::Approved));
+
+        // ── الطلبات الحيّة (34) ────────────────────────────────────────────────
+        // A queue is only interesting when its rows differ: something waiting a while,
+        // something express, something already grouped, something whole-car.
+        $requests = [
+            ['status' => RideRequestStatus::Pending, 'express' => false, 'solo' => false, 'age' => 14],
+            ['status' => RideRequestStatus::Pending, 'express' => true, 'solo' => false, 'age' => 6],
+            ['status' => RideRequestStatus::Pending, 'express' => false, 'solo' => true, 'age' => 3],
+            ['status' => RideRequestStatus::Grouped, 'express' => false, 'solo' => false, 'age' => 22],
+            ['status' => RideRequestStatus::Pending, 'express' => false, 'solo' => false, 'age' => 41],
+        ];
+        /*
+         * ── Requests sit on corridors the tariff actually prices ─────────────────
+         *
+         * The first version paired each student with `zones[i]` and their own
+         * university, and only one of five landed on a priced (zone × university) pair —
+         * so «الأجرة» read «—» four times out of five. That is the CORRECT rendering for
+         * an unpriced corridor (`/estimate` returns `unpriced_corridor` rather than
+         * inventing a distance fare), but as a demo it showed the exception as the rule
+         * and left the fare column untested.
+         *
+         * `ZoneUniversityPriceSeeder` opens four corridors at launch. Requests are placed
+         * on those, and the LAST one is left deliberately unpriced — that state is real,
+         * an operator has to be able to spot it, and a demo where it never appears hides
+         * a case worth seeing.
+         */
+        $corridors = ZoneUniversityPrice::query()->where('is_active', true)->get();
+
+        foreach ($requests as $i => $row) {
+            $student = $students[$i % count($students)];
+            $priced = $i < count($requests) - 1 ? $corridors->get($i % max($corridors->count(), 1)) : null;
+            $zone = $priced ? $zones->firstWhere('id', $priced->zone_id) : $zones->get($i % $zones->count());
+
+            RideRequest::firstOrCreate(
+                ['student_id' => $student->id, 'desired_time' => now()->addMinutes(30 + $i * 15)->startOfMinute()],
+                [
+                    'zone_id' => $zone?->id,
+                    'university_id' => $priced?->university_id
+                        ?? $student->studentProfile?->university_id
+                        ?? $unis->first()->id,
+                    'pickup_lat' => (float) ($zone?->center_lat ?? 31.95),
+                    'pickup_lng' => (float) ($zone?->center_lng ?? 35.91),
+                    'pickup_address' => $zone?->name_ar,
+                    'type' => $row['express'] ? RideType::Express : RideType::Scheduled,
+                    'direction' => RideDirection::ToUniversity,
+                    'is_express' => $row['express'],
+                    'is_solo' => $row['solo'],
+                    // Express is a real surcharge on the tariff, not a made-up number.
+                    'express_fee_fils' => $row['express'] ? (int) config('rafeeq.express_fee_fils', 500) : 0,
+                    'status' => $row['status'],
+                    'payment_method' => PaymentMethod::Wallet,
+                    'created_at' => now()->subMinutes($row['age']),
+                ],
+            );
+        }
+
+        // ── المدفوعات — شحن CliQ (37) ─────────────────────────────────────────
+        // The review queue exists for the AMBIGUOUS cases, so the demo carries them:
+        // a clean high-confidence proof, one the model was unsure about, one flagged as
+        // a duplicate reference, and one with no proof uploaded yet.
+        $topups = [
+            ['amount' => 10_000, 'status' => PaymentStatus::Submitted, 'confidence' => 96, 'flags' => [], 'ref' => 'CLIQ8842731', 'proof' => true, 'age' => 8],
+            ['amount' => 25_000, 'status' => PaymentStatus::UnderReview, 'confidence' => 54, 'flags' => [], 'ref' => 'CLIQ8842118', 'proof' => true, 'age' => 47],
+            ['amount' => 5_000, 'status' => PaymentStatus::UnderReview, 'confidence' => 71, 'flags' => ['duplicate_reference'], 'ref' => 'CLIQ8842731', 'proof' => true, 'age' => 96],
+            ['amount' => 15_000, 'status' => PaymentStatus::Pending, 'confidence' => null, 'flags' => [], 'ref' => null, 'proof' => false, 'age' => 3],
+        ];
+        foreach ($topups as $i => $row) {
+            $student = $students[$i % count($students)];
+            $request = PaymentRequest::firstOrCreate(
+                ['number' => 'PR-DEMO-'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)],
+                [
+                    'user_id' => $student->id,
+                    'purpose' => PaymentPurpose::WalletTopup,
+                    'amount_fils' => $row['amount'],
+                    'currency' => 'JOD',
+                    'method' => 'cliq',
+                    'status' => $row['status'],
+                    'expires_at' => now()->addHours(24),
+                    'created_at' => now()->subMinutes($row['age']),
+                ],
+            );
+
+            Payment::firstOrCreate(
+                ['payment_request_id' => $request->id],
+                [
+                    'method' => 'cliq',
+                    'status' => $row['status']->value,
+                    'ai_confidence' => $row['confidence'],
+                    'bank_reference' => $row['ref'],
+                    'fraud_flags' => $row['flags'] ?: null,
+                    // `proof_path` is what `has_proof` reports. No file is written: the
+                    // dashboard only asks whether one exists to enable «عرض».
+                    'proof_path' => $row['proof'] ? 'demo/proofs/'.$request->number.'.jpg' : null,
+                    'extracted' => $row['proof'] ? ['sender_name' => $student->full_name] : null,
+                    'submitted_at' => $row['proof'] ? now()->subMinutes($row['age']) : null,
+                    'created_at' => now()->subMinutes($row['age']),
+                ],
+            );
+        }
+
+        // ── السلامة و SOS (38) ────────────────────────────────────────────────
+        // One open incident, one already acknowledged, one closed — the three states the
+        // screen's row actions branch on.
+        $trip = Trip::query()->latest()->first();
+        $incidents = [
+            ['status' => 'open', 'age' => 4, 'note' => 'الكابتن سلك طريقاً غير المعتاد ولا يردّ.'],
+            ['status' => 'acknowledged', 'age' => 38, 'note' => 'شعور بعدم الأمان — تم التواصل مع الطالبة.'],
+            ['status' => 'resolved', 'age' => 260, 'note' => 'ضغط بالخطأ.'],
+        ];
+        foreach ($incidents as $i => $row) {
+            $student = $students[$i % count($students)];
+            $zone = $zones->get($i % $zones->count());
+            SosIncident::firstOrCreate(
+                ['user_id' => $student->id, 'created_at' => now()->subMinutes($row['age'])],
+                [
+                    'trip_id' => $i === 0 ? $trip?->id : null,
+                    'lat' => (float) ($zone?->center_lat ?? 31.95),
+                    'lng' => (float) ($zone?->center_lng ?? 35.91),
+                    'status' => $row['status'],
+                    'note' => $row['note'],
+                    'resolved_at' => $row['status'] === 'resolved' ? now()->subMinutes($row['age'] - 20) : null,
+                ],
+            );
+        }
+
+        // ── الدعم والشكاوى (40) ───────────────────────────────────────────────
+        $tickets = [
+            ['category' => TicketCategory::Payment, 'subject' => 'شحنتُ 25 دينار ولم تظهر في المحفظة', 'status' => TicketStatus::Open, 'priority' => TicketPriority::High, 'level' => 2, 'age' => 26],
+            ['category' => TicketCategory::Trip, 'subject' => 'الكابتن تأخّر 20 دقيقة عن موعد الالتقاط', 'status' => TicketStatus::Open, 'priority' => TicketPriority::Normal, 'level' => 1, 'age' => 55],
+            ['category' => TicketCategory::Subscription, 'subject' => 'أريد تحويل اشتراكي لمسار آخر', 'status' => TicketStatus::Pending, 'priority' => TicketPriority::Low, 'level' => 1, 'age' => 180],
+            ['category' => TicketCategory::Technical, 'subject' => 'التطبيق يُغلق عند فتح الخريطة', 'status' => TicketStatus::Escalated, 'priority' => TicketPriority::Urgent, 'level' => 3, 'age' => 12],
+        ];
+        foreach ($tickets as $i => $row) {
+            $student = $students[$i % count($students)];
+            SupportTicket::firstOrCreate(
+                ['number' => 'TK-DEMO-'.str_pad((string) ($i + 1), 4, '0', STR_PAD_LEFT)],
+                [
+                    'user_id' => $student->id,
+                    'category' => $row['category'],
+                    'subject' => $row['subject'],
+                    'status' => $row['status'],
+                    'priority' => $row['priority'],
+                    'level' => $row['level'],
+                    'created_at' => now()->subMinutes($row['age']),
+                ],
+            );
+        }
+
+        // ── «كباتن متصلون» (33) ───────────────────────────────────────────────
+        // A location ping is what presence MEANS here — `AdminInsightsService::counts()`
+        // counts distinct captains seen in the last 15 minutes. Without a single row the
+        // dashboard's card is a truthful zero that demonstrates nothing, so two of the
+        // approved captains are on shift and one pinged an hour ago (outside the window,
+        // which is what proves the window works).
+        foreach ($approved as $i => $driver) {
+            $zone = $zones->get($i % $zones->count());
+            DriverLocation::firstOrCreate(
+                ['driver_id' => $driver->id, 'recorded_at' => now()->subMinutes($i === 2 ? 64 : $i * 3 + 1)],
+                [
+                    'lat' => (float) ($zone?->center_lat ?? 31.95),
+                    'lng' => (float) ($zone?->center_lng ?? 35.91),
+                    'speed' => $i === 2 ? 0.0 : 26.5,
                 ],
             );
         }

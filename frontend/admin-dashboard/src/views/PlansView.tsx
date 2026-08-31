@@ -81,7 +81,7 @@ export function PlansView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.plans')}</h1>
+      <h2 className="section-title">{t('nav.plans')}</h2>
 
       <div className="card mb-5">
         <h2 className="font-bold surface-text mb-3">{t('plans.add')}</h2>

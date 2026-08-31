@@ -59,7 +59,11 @@ export default function DriverReview() {
 
   return (
     <div className="space-y-6">
-      <button onClick={() => router.push('/drivers')} className="text-sm muted-text hover:underline">← رجوع للكباتن</button>
+      {/* A real control, not a text link. This is the way back out of a review, and the
+          sheet gives it the same weight as every other secondary action on the screen. */}
+      <button onClick={() => router.push('/drivers')} className="btn-outline h-[34px] px-[13px] text-xs">
+        رجوع للقائمة
+      </button>
 
       <div className="card flex items-center justify-between">
         <div>
@@ -110,11 +114,46 @@ export default function DriverReview() {
         )}
       </div>
 
-      {/* Actions */}
+      {/*
+        ── The three decisions, in the sheet's order ─────────────────────────────
+        «قرار واحد واضح، ولا يمكن الاعتماد مع نقص» — screen 36's own annotation.
+
+        «طلب مستند ناقص» is the missing middle. The page offered approve / reject /
+        suspend and nothing else, so the ordinary case — a captain whose licence photo is
+        unreadable — had no move that was not a rejection. Rejecting a genuine applicant
+        over one bad scan is how a fleet stops growing, and «رفض» here is recorded against
+        the person.
+
+        It is implemented as a rejection of the DOCUMENT with a reason, which is exactly
+        what «ناقص» means and what `reviewDocument(id, false, note)` already did per row:
+        the captain keeps their application and is asked for one file again.
+      */}
       <div className="card flex flex-wrap gap-3">
-        <button disabled={busy} onClick={() => reviewDriver('approve')} className="btn-success">اعتماد الكابتن</button>
-        <button disabled={busy} onClick={() => reviewDriver('reject')} className="btn-danger">رفض</button>
-        <button disabled={busy} onClick={() => reviewDriver('suspend')} className="btn-outline">إيقاف</button>
+        <button disabled={busy} onClick={() => reviewDriver('approve')} className="btn-primary">
+          اعتماد الكابتن
+        </button>
+        <button
+          disabled={busy || (driver.documents ?? []).length === 0}
+          onClick={() => {
+            const pending = (driver.documents ?? []).find((d) => d.status !== 'approved');
+            if (!pending) {
+              setError('كل الوثائق مقبولة — لا مستند ناقص لطلبه.');
+
+              return;
+            }
+            const note = window.prompt(`ما المطلوب في «${pending.type_label}»؟`) ?? undefined;
+            if (note) run(() => api.admin.reviewDocument(pending.id, false, note));
+          }}
+          className="btn-outline"
+        >
+          طلب مستند ناقص
+        </button>
+        <button disabled={busy} onClick={() => reviewDriver('reject')} className="btn-danger">
+          رفض الطلب
+        </button>
+        <button disabled={busy} onClick={() => reviewDriver('suspend')} className="btn-outline">
+          إيقاف
+        </button>
       </div>
     </div>
   );

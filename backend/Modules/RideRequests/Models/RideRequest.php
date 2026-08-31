@@ -5,6 +5,8 @@ namespace Rafeeq\Modules\RideRequests\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Rafeeq\Modules\Auth\Models\User;
+use Rafeeq\Modules\Universities\Models\University;
 use Rafeeq\Modules\Zones\Models\Zone;
 use Rafeeq\Shared\Enums\PaymentMethod;
 use Rafeeq\Shared\Enums\RideDirection;
@@ -27,6 +29,15 @@ use Rafeeq\Shared\Traits\HasUuid;
  * @property PaymentMethod $payment_method Wallet or cash. Chosen before matching so the
  *                                         captain sees it on the offer and can decline knowingly.
  * @property Carbon $desired_time
+ * @property int $express_fee_fils
+ * @property Carbon|null $created_at
+ * @property-read User|null $student
+ * @property-read University|null $university
+ *
+ * `fare_fils` is NOT a column. The admin queue prices each corridor from the tariff
+ * matrix and hangs the result here for the resource to read — deliberately transient,
+ * because persisting it would freeze a price that has to follow the approved table.
+ * @property int|null $fare_fils
  */
 class RideRequest extends Model
 {
@@ -57,5 +68,17 @@ class RideRequest extends Model
     public function zone(): BelongsTo
     {
         return $this->belongsTo(Zone::class);
+    }
+
+    /** The rider. `student_id` was the only handle the admin queue had on a person. */
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    /** The «إلى» of the corridor — the other end is `zone`. */
+    public function university(): BelongsTo
+    {
+        return $this->belongsTo(University::class);
     }
 }

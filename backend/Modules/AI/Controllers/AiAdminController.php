@@ -24,6 +24,12 @@ class AiAdminController extends Controller
         return $this->ok($this->insights->build());
     }
 
+    /** The same metrics without the narrative — see `AdminInsightsService::counts()`. */
+    public function counts(): JsonResponse
+    {
+        return $this->ok(['metrics' => $this->insights->counts()]);
+    }
+
     /** Highest-risk accounts for the safety center. */
     public function risks(Request $request): JsonResponse
     {

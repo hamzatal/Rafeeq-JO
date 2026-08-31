@@ -105,7 +105,7 @@ export function BroadcastView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-1">{t('notify.title')}</h1>
+      <h2 className="section-title">{t('notify.title')}</h2>
       <p className="text-sm text-muted mb-6">{t('notify.intro')}</p>
 
       <div className="grid gap-6 lg:grid-cols-3 items-start">

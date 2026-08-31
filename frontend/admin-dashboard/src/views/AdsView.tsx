@@ -107,7 +107,7 @@ export function AdsView() {
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <h1 className="page-title">{t('ads.title')}</h1>
+        <h2 className="section-title">{t('ads.title')}</h2>
         <button onClick={() => { setError(null); setForm(emptyForm()); }} className="btn-primary">{t('ads.new')}</button>
       </div>
       <p className="text-sm text-muted mb-4">{t('ads.intro')}</p>

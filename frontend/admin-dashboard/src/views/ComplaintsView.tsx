@@ -71,7 +71,7 @@ export function ComplaintsView() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.complaints')}</h1>
+      <h2 className="section-title">{t('nav.complaints')}</h2>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {['', 'critical', 'high', 'medium', 'low'].map((sv) => (

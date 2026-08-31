@@ -26,11 +26,22 @@ import { api } from './api';
    is a claim about how much work is waiting; inventing one to match a mockup is exactly
    the kind of decoration that makes an operator stop believing the other four.
 
-   ── One request for the whole shell ───────────────────────────────────────
+   ── One request for the whole shell, and NOT a billed one ─────────────────
 
-   `insights()` returns all four in a single response, so the sidebar costs one call
-   rather than one per badge. It lives in a provider because both the sidebar and any
-   page that wants the same figure should read the same fetch.
+   `counts()` returns all four in a single response, so the sidebar costs one call rather
+   than one per badge. It lives in a provider because both the sidebar and any page that
+   wants the same figure should read the same fetch.
+
+   This used to call `insights()`, and that was a real outage. `GET /admin/ai/insights`
+   runs a GPT completion for its `analysis` and `recommendations` — its own route comment
+   says «an admin holding down refresh is also spending money» — and it sits under
+   `throttle:sensitive`, 20 requests a minute. So four integers in the sidebar invoked a
+   language model on every full page load, and after twenty loads the limiter returned
+   429 to everything, including `auth.me()`. `AuthProvider` treated that as a dead
+   session and signed the operator out: clicking through the dashboard logged you out of
+   it. Found when a screenshot run bounced to /login on its twenty-fifth page.
+
+   `counts()` is the same three aggregate queries with no completion and no spend guard.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /** Keyed by nav `href`, so `nav.ts` stays the only place that knows the routes. */
@@ -49,7 +60,7 @@ export function BadgeProvider({ children }: { children: React.ReactNode }) {
 
     const load = async () => {
       try {
-        const { metrics } = await api.assistant.insights();
+        const { metrics } = await api.assistant.counts();
         if (!alive) return;
 
         setBadges({

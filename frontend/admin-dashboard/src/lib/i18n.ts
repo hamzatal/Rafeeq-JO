@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import { usePrefs } from './prefs';
 
 /**
@@ -235,10 +236,10 @@ const DICT: Dict = {
   // لوحة القيادة — the composition of screen 33 in docs/design/src/06-admin-1.html
   'home.kpi.dayRevenue': { ar: 'إيراد اليوم', en: 'Revenue today' },
   'home.kpi.completedTrips': { ar: 'رحلات مكتملة', en: 'Completed trips' },
-  'home.kpi.approvedCaptains': { ar: 'كباتن معتمدون', en: 'Approved captains' },
+  'home.kpi.onlineCaptains': { ar: 'كباتن متصلون', en: 'Captains online' },
   'home.kpi.pendingPayments': { ar: 'شحنات بانتظار المراجعة', en: 'Top-ups awaiting review' },
   'home.share.ofMonthTrips': { ar: 'من رحلات الشهر', en: 'of this month’s trips' },
-  'home.share.ofAllCaptains': { ar: 'من إجمالي الكباتن', en: 'of all captains' },
+  'home.share.onlineNow': { ar: 'من إجمالي الكباتن متصلون الآن', en: 'of all captains online now' },
   'home.noneToday': { ar: 'لا إيراد مُسجَّل اليوم', en: 'No revenue recorded today' },
   'home.noneThisMonth': { ar: 'لا رحلات هذا الشهر', en: 'No trips this month' },
   'home.needsReviewNow': { ar: 'تحتاج مراجعة الآن', en: 'Need review now' },
@@ -368,7 +369,7 @@ const DICT: Dict = {
     ar: 'اضبط محرّك تسعير الرحلات وعمولة المنصّة. تُطبّق القيم فوراً على تقديرات الأجرة الجديدة.',
     en: 'Tune the fare engine and platform commission. Changes apply immediately to new fare estimates.',
   },
-  'pricing.save': { ar: 'حفظ التسعير', en: 'Save pricing' },
+  'pricing.save': { ar: 'حفظ التغييرات', en: 'Save changes' },
   'pricing.saved': { ar: 'تم تحديث إعدادات التسعير.', en: 'Pricing settings updated.' },
   'pricing.reset': { ar: 'تراجع', en: 'Reset' },
   'pricing.groupCommission': { ar: 'العمولة والأجرة الافتراضية', en: 'Commission & default fare' },
@@ -792,12 +793,38 @@ const DICT: Dict = {
 
 export type Translate = (key: string, fallback?: string) => string;
 
+/**
+ * ── `t` is memoised, and that is not an optimisation ──────────────────────────
+ *
+ * This returned a freshly constructed `t` on every render. `t` is a translation lookup —
+ * two object reads — so the allocation itself never mattered. Its IDENTITY did:
+ *
+ *   const load = useCallback(() => { … }, [action, from, to, t]);
+ *   useEffect(() => { load(); }, [load]);
+ *
+ * That is the shape `react-hooks/exhaustive-deps` asks for, and with an unstable `t` it
+ * is an infinite request loop — a new `t` per render makes a new `load`, which re-runs the
+ * effect, which sets state, which renders. The audit trail did exactly this: the table
+ * never left its loading state, the screenshot run reported «still loading» after twelve
+ * seconds, and the server was being asked for the same 50 rows continuously.
+ *
+ * The lint rule was right; the hook was wrong. Depending on `t` has to be safe, because
+ * every screen does it and the alternative is a per-file suppression comment that stops
+ * being read. `t` now changes only when `locale` does — which is exactly when a component
+ * holding translated state SHOULD re-run.
+ */
 export function useT(): { t: Translate; locale: 'ar' | 'en' } {
   const { locale } = usePrefs();
-  const t: Translate = (key, fallback) => {
-    const entry = DICT[key];
-    if (!entry) return fallback ?? key;
-    return entry[locale] ?? entry.ar;
-  };
-  return { t, locale };
+
+  const t = useCallback<Translate>(
+    (key, fallback) => {
+      const entry = DICT[key];
+      if (!entry) return fallback ?? key;
+
+      return entry[locale] ?? entry.ar;
+    },
+    [locale],
+  );
+
+  return useMemo(() => ({ t, locale }), [t, locale]);
 }

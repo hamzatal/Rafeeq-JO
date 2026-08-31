@@ -13,7 +13,7 @@
    NOT a Pressable — a gate that fails on its own documentation gets deleted.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { localeMismatches, missingKeys, unreadKeys } from './lib/i18n-keys.mjs';
@@ -346,6 +346,41 @@ function gate(id, why, findings) {
   gate(
     'fetch-without-catch',
     'a rejected promise leaves the page on its EMPTY state, which asserts the data is empty. Add .catch(() => setLoadError(true)) and render <LoadError onRetry={load}/> before the length===0 branch.',
+    findings,
+  );
+}
+
+/* ── 6b. One <h1> per page: a tab body is not a page ─────────────────────────
+ *
+ * `TabbedPage` renders the destination's heading from `nav.ts`. Every one of the sixteen
+ * views it renders BELOW that heading also rendered its own `<h1>` — so each tabbed
+ * destination shipped two level-one headings, the second either repeating the first
+ * («الدعم» under «الدعم والشكاوى») or contradicting it («الأمان — المصادقة الثنائية»
+ * under «الأمان والتدقيق»).
+ *
+ * That is a WCAG 1.3.1 problem, not a styling one: heading level communicates document
+ * structure, a screen-reader user navigating by heading lands on a duplicate, and the
+ * two competed at the same visual weight so neither read as the page title. Views use
+ * `<h2 className="section-title">` now.
+ *
+ * Scoped to `src/views`, which is exactly the set of files rendered inside a shell that
+ * already owns the `<h1>`. Pages under `app/` legitimately have one.
+ * ─────────────────────────────────────────────────────────────────────────── */
+{
+  const findings = [];
+  const views = resolve(ROOT, 'admin-dashboard/src/views');
+  if (existsSync(views)) {
+    for (const file of walk(views)) {
+      const raw = readFileSync(file, 'utf8');
+      const src = code(raw);
+      for (const m of src.matchAll(/<h1[\s>]/g)) {
+        findings.push(`${relative(ROOT, file)}:${raw.slice(0, m.index).split('\n').length}`);
+      }
+    }
+  }
+  gate(
+    'view-owns-h1',
+    'a view rendered inside TabbedPage must not draw its own <h1> — the shell already did. Use <h2 className="section-title">.',
     findings,
   );
 }

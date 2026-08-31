@@ -132,7 +132,7 @@ export function ZonesView() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="page-title">{t('zones.title')}</h1>
+        <h2 className="section-title">{t('zones.title')}</h2>
         <button onClick={startCreate} className="btn-primary">{t('zones.new')}</button>
       </div>
 

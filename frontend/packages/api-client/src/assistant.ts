@@ -34,6 +34,21 @@ export class AssistantApi {
 
 
   // Admin
+  /**
+   * The metrics ALONE, for the sidebar badges.
+   *
+   * Separate from `insights()` because that one runs a GPT completion and sits under
+   * `throttle:sensitive` — using it for four sidebar integers billed a language model per
+   * page load and, after twenty loads, returned 429 to every request including
+   * `auth.me()`, which the dashboard read as a dead session and signed the operator out.
+   */
+  async counts(): Promise<Pick<AdminInsights, 'metrics'>> {
+    const { data } = await this.http.get<ApiSuccess<Pick<AdminInsights, 'metrics'>>>(
+      ENDPOINTS.assistant.adminCounts,
+    );
+    return unwrap(data);
+  }
+
   async insights(): Promise<AdminInsights> {
     const { data } = await this.http.get<ApiSuccess<AdminInsights>>(ENDPOINTS.assistant.adminInsights);
     return unwrap(data);

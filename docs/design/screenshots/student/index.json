@@ -45,13 +45,13 @@
     "slug": "10-home",
     "path": "/home",
     "title": "الرئيسية",
-    "bytes": 289944
+    "bytes": 408747
   },
   {
     "slug": "11-ride-request",
     "path": "/ride-request",
     "title": "طلب رحلة",
-    "bytes": 387548
+    "bytes": 448977
   },
   {
     "slug": "12-checkout",
@@ -63,13 +63,13 @@
     "slug": "13-trips",
     "path": "/trips",
     "title": "رحلاتي",
-    "bytes": 66157
+    "bytes": 48776
   },
   {
     "slug": "14-wallet",
     "path": "/wallet",
     "title": "المحفظة",
-    "bytes": 77468
+    "bytes": 92653
   },
   {
     "slug": "15-subscriptions",
@@ -87,7 +87,7 @@
     "slug": "17-notifications",
     "path": "/notifications",
     "title": "الإشعارات",
-    "bytes": 96627
+    "bytes": 96100
   },
   {
     "slug": "18-chat",
@@ -99,13 +99,13 @@
     "slug": "19-assistant",
     "path": "/assistant",
     "title": "المساعد الذكي",
-    "bytes": 69887
+    "bytes": 70120
   },
   {
     "slug": "20-support",
     "path": "/support",
     "title": "الدعم",
-    "bytes": 28837
+    "bytes": 42356
   },
   {
     "slug": "21-emergency",

@@ -344,6 +344,10 @@ async function shoot(cdp, dir, slug) {
  * "Not accepted" has causes that look identical from outside — never stored, stored
  * but not sent, or sent and refused. The cookie jar answers the first two.
  */
+/** A rolling window of non-2xx responses, filled by the `Network.responseReceived`
+    listener in `main()` and read by `diagnose()`. */
+const FAILED_RESPONSES = [];
+
 async function diagnose(cdp) {
   const lines = [];
   try {
@@ -361,6 +365,13 @@ async function diagnose(cdp) {
   } catch (e) {
     lines.push(`  localStorage: unreadable (${e.message})`);
   }
+
+  /* The whole diagnosis, usually — see the listener that fills this. */
+  lines.push(
+    FAILED_RESPONSES.length === 0
+      ? '  failed responses: none seen'
+      : `  failed responses (most recent last):\n${FAILED_RESPONSES.map((r) => `    ${r}`).join('\n')}`,
+  );
 
   return lines.join('\n');
 }
@@ -508,6 +519,32 @@ async function signInApp(cdp, target) {
   await goto(cdp, `${target.base}/`, target.settle);
 }
 
+/**
+ * Block until nothing on the page is still loading.
+ *
+ * `.animate-pulse` is `Skeleton`'s only class and «جارٍ التحميل» is the text the few
+ * skeleton-less tables use, so between them they cover every loading state in the three
+ * apps. Polls rather than sleeps: a fast page is captured at once, a slow one correctly.
+ */
+async function settled(cdp, timeout = 12000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const busy = await cdp.eval(
+      `!!document.querySelector('.animate-pulse') || document.body.innerText.includes('جارٍ التحميل')`,
+    );
+    if (!busy) {
+      await sleep(350);
+
+      return true;
+    }
+    await sleep(250);
+  }
+
+  console.warn('  ! still loading at capture time — the screenshot will show it');
+
+  return false;
+}
+
 async function captureTarget(cdp, target) {
   const dir = resolve(OUT_BASE, target.dir);
   mkdirSync(dir, { recursive: true });
@@ -524,6 +561,11 @@ async function captureTarget(cdp, target) {
      */
     const query = needs === 'corridor' ? await pricedCorridor(target.token) : '';
     await goto(cdp, `${target.base}${path}${query}`, target.settle);
+    /* Then wait for the DATA. `settle` is a stopwatch, and a page whose table waits on
+       two requests sometimes beats it and sometimes does not — which is how a committed
+       screenshot ends up showing grey placeholder bars where the audit trail should be,
+       with a «✓» in the log. See `settled()`. */
+    await settled(cdp);
 
     const landed = await cdp.eval('location.pathname');
     // A private page bounces when the session was not accepted. Without this the run
@@ -576,6 +618,27 @@ async function main() {
   await cdp.send('Page.enable');
   await cdp.send('Runtime.enable');
   await cdp.send('Network.enable');
+
+  /*
+   * ── Remember which requests failed ────────────────────────────────────────
+   *
+   * `diagnose()` reported the cookie jar and `localStorage` when a private page bounced
+   * to /login, and on a cookie-authenticated dashboard both are EMPTY by design — the
+   * credential is `httpOnly`. So the diagnosis for the one failure mode this script
+   * exists to catch was two lines that say nothing, and finding the actual cause meant
+   * probing endpoints by hand from outside the browser.
+   *
+   * A 401 anywhere makes the proxy delete the session cookie
+   * (`app/api/proxy/[...path]/route.ts`), so the request that killed the session is
+   * usually on the PREVIOUS page — its screenshot is captured before the redirect
+   * lands. Keeping a rolling window of non-2xx responses is what makes that visible.
+   */
+  cdp.on('Network.responseReceived', ({ response }) => {
+    if (response.status >= 400) {
+      FAILED_RESPONSES.push(`${response.status} ${response.url}`);
+      if (FAILED_RESPONSES.length > 12) FAILED_RESPONSES.shift();
+    }
+  });
 
   let total = 0;
   for (const t of targets) total += await captureTarget(cdp, t);

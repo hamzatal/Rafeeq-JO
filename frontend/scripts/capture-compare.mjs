@@ -68,7 +68,10 @@ const PAIRS = [
   { slug: '38-safety', sheet: '06-admin-2.html', nth: 2, live: '/safety', title: 'السلامة و SOS' },
   { slug: '39-pricing', sheet: '06-admin-3.html', nth: 0, live: '/pricing?tab=tariff', title: 'التسعير والخطط' },
   { slug: '40-support', sheet: '06-admin-3.html', nth: 1, live: '/support?tab=tickets', title: 'الدعم والشكاوى' },
-  { slug: '41-security', sheet: '06-admin-3.html', nth: 2, live: '/security?tab=sessions', title: 'الأمان والتدقيق' },
+  /* `?tab=audit`, not `?tab=sessions`: screen 41 IS the audit trail with its four cards
+     above it. Comparing the MFA tab against that sheet was comparing two different
+     screens and reporting the difference as a design failure. */
+  { slug: '41-security', sheet: '06-admin-3.html', nth: 2, live: '/security?tab=audit', title: 'الأمان والتدقيق' },
 ];
 
 class Cdp {
@@ -141,6 +144,34 @@ class Cdp {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Block until nothing on the page is still loading.
+ *
+ * `.animate-pulse` is `Skeleton`'s class and «جارٍ التحميل» is the text the few
+ * skeleton-less tables use, so between them they cover every loading state the
+ * dashboard has. Polls rather than sleeps, so a fast page is captured immediately and a
+ * slow one is still captured correctly.
+ */
+async function settled(cdp, timeout = 12000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const busy = await cdp.eval(
+      `!!document.querySelector('.animate-pulse') || document.body.innerText.includes('جارٍ التحميل')`,
+    );
+    if (!busy) {
+      /* One more frame so the rows that just replaced the skeleton have painted. */
+      await sleep(350);
+
+      return true;
+    }
+    await sleep(250);
+  }
+
+  console.warn('  ! still loading at capture time — the screenshot will show it');
+
+  return false;
+}
 
 async function goto(cdp, url, settle) {
   await cdp.send('Page.navigate', { url });
@@ -221,10 +252,26 @@ async function main() {
   if (outcome !== 200) throw new Error(`sign-in failed (${outcome})`);
 
   for (const pair of PAIRS) {
-    await goto(cdp, `${DASHBOARD}${pair.live}`, 2600);
+    await goto(cdp, `${DASHBOARD}${pair.live}`, 1200);
 
     const landed = await cdp.eval('location.pathname');
     if (landed === '/login') throw new Error(`${pair.live} bounced to /login`);
+
+    /*
+     * ── Wait for the DATA, not for a stopwatch ────────────────────────────────
+     *
+     * This slept a flat 2600ms. On a page whose table waits on two requests that was
+     * sometimes enough and sometimes not — the security screen shipped a committed
+     * screenshot of five grey placeholder bars where the audit trail should be, and the
+     * pair it belongs to is the artefact the whole comparison rests on. A timing race
+     * that resolves differently per run is worse than a slow capture: it makes the
+     * evidence unreliable in a way that is invisible in the log, which printed «✓».
+     *
+     * `Skeleton` is one component with one class, so its absence is a real readiness
+     * signal for every page here. The timeout still fires eventually, because a page
+     * that genuinely never loads must produce a screenshot showing that.
+     */
+    await settled(cdp);
 
     const { data } = await cdp.send('Page.captureScreenshot', { format: 'png' });
     const bytes = save(pair.slug, 'live', data);

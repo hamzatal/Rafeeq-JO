@@ -151,6 +151,29 @@ class AuthService extends BaseService
             : $this->users->findByPhone($identifier);
 
         if (! $user || ! $user->password || ! Hash::check($password, $user->password)) {
+            /*
+             * ── Failed logins are audited too ─────────────────────────────────────
+             *
+             * `auth.login`, `auth.login_mfa_challenge`, `auth.otp_verified` and
+             * `auth.password_reset` were all recorded; the FAILURE path threw straight
+             * out and left nothing behind. So the audit log could tell you every time
+             * someone got in and never once that a thousand people tried and failed —
+             * which is the only signal credential stuffing and brute force produce.
+             *
+             * `docs/design/src/06-admin-3.html` screen 41 leads with «محاولات دخول فاشلة
+             * (24س)» and «3 حسابات وصلت حدّ القفل». That card cannot be drawn from data
+             * that was never written, and the honest fix is to write it rather than to
+             * invent the number.
+             *
+             * The identifier is NOT stored. A failed attempt is frequently a real user
+             * mistyping their own password, and a table of «this phone tried to log in»
+             * is a table of who uses the platform. `user_id` is attached when the
+             * account exists — that is what makes «حسابات وصلت حدّ القفل» countable —
+             * and a probe for an account that does not exist records only that it
+             * happened, from which IP.
+             */
+            $this->audit->log('auth.login_failed', $user, $request, $user);
+
             throw new BusinessRuleException('بيانات الدخول غير صحيحة.', 'INVALID_CREDENTIALS');
         }
 

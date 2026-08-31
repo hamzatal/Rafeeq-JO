@@ -133,9 +133,21 @@ class RideRequestController extends Controller
     }
 
     /** Admin/ops: list ride requests (for monitoring & matching). */
+    /**
+     * The live request queue — `docs/design/src/06-admin-1.html` screen 34, «الطابور
+     * الذي يقرّر نجاح المنصّة يومياً».
+     *
+     * Its columns are «الطلب · الطالب · من · إلى · الفئة · الأجرة · منذ · الحالة», and
+     * three of those were unanswerable from what this returned: `student` and
+     * `university` were not loaded, so «الطالب» and «إلى» had no source, and the fare is
+     * not a column on the row — it lives in the (zone × university) price matrix.
+     *
+     * `student` and `university` are eager-loaded here rather than resolved per row: 50
+     * requests a page is 100 extra queries on the screen an operator refreshes hardest.
+     */
     public function index(Request $request): JsonResponse
     {
-        $query = RideRequest::query()->with('zone')->latest();
+        $query = RideRequest::query()->with(['zone', 'student:id,full_name,phone', 'university:id,name_ar'])->latest();
         if ($status = $request->query('status')) {
             $query->where('status', $status);
         }
@@ -143,6 +155,40 @@ class RideRequestController extends Controller
             $query->where('zone_id', $zoneId);
         }
 
-        return $this->ok(RideRequestResource::collection($query->paginate($this->perPage($request, 50))));
+        $page = $query->paginate($this->perPage($request, 50));
+
+        /*
+         * The «الأجرة» column, priced once per corridor.
+         *
+         * The figure is not stored on the row — it is the approved tariff for the
+         * (zone × university) pair, which is deliberate: a price change must apply to
+         * the queue, not only to requests made after it. Looking it up per row would be
+         * 50 lookups where there are rarely more than a handful of distinct corridors on
+         * a page, so distinct pairs are resolved once and mapped back.
+         *
+         * A corridor with no approved price yields null, and the dashboard renders «—».
+         * That case is real and must stay visible: `/estimate` returns
+         * `unpriced_corridor` for it rather than inventing a distance-based fare, and a
+         * queue that showed a number here would contradict what the student was told.
+         */
+        $fares = [];
+        foreach ($page->getCollection() as $rideRequest) {
+            if (! $rideRequest->zone_id) {
+                continue;
+            }
+
+            $key = $rideRequest->zone_id.'|'.$rideRequest->university_id.'|'.($rideRequest->is_solo ? 'solo' : 'seat');
+            $fares[$key] ??= $rideRequest->is_solo
+                ? $this->zonePricing->soloFareForZone($rideRequest->zone_id, $rideRequest->university_id)
+                : $this->zonePricing->fareForZone($rideRequest->zone_id, $rideRequest->university_id);
+
+            /* The express fee is charged on top of the seat, so it belongs in the number
+               the operator compares against what the rider will pay. */
+            $rideRequest->fare_fils = $fares[$key] === null
+                ? null
+                : $fares[$key] + (int) $rideRequest->express_fee_fils;
+        }
+
+        return $this->ok(RideRequestResource::collection($page));
     }
 }
