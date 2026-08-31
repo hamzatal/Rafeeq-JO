@@ -9,6 +9,8 @@ import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { Icon } from '../../../src/components/Icon';
 import { Phone } from '../../../src/components/Phone';
+import { Num } from '../../../src/components/Num';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 const TYPES = [
   { value: '', labelAr: 'الكل', labelEn: 'All' },
@@ -54,7 +56,10 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold surface-text mb-4">{t('nav.users')}</h1>
+      <NavPageHeader
+        href="/users"
+        stat={loading ? undefined : <><Num value={users.length} /> مستخدم</>}
+      />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         {TYPES.map((tp) => (

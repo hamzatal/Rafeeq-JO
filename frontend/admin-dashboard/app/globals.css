@@ -62,11 +62,17 @@ aside { scrollbar-color: rgba(18,47,107,0.22) transparent; }
 
   /* Tables — light header (surface-container-low), zebra rows */
   .data-table { @apply w-full text-sm text-right; }
-  .data-table thead { @apply bg-brand-50 border-b border-line; }
+  /*
+   * `neutral-50`, not `brand-50` — «رأس الجدول … إلى neutral-50» in
+   * docs/design/v2/06-admin-3. A brand-tinted header on twenty-four tables made the
+   * chrome compete with the one brand-coloured thing that matters on each row: the
+   * action. Grey lets the blue mean "do this".
+   */
+  .data-table thead { @apply bg-neutral-50 border-b border-line; }
   .data-table th { @apply py-3.5 px-4 font-semibold text-xs tracking-wider text-muted; }
   .data-table tbody tr { @apply border-t border-line even:bg-background/60 hover:bg-primary/5 transition-colors; }
   .data-table td { @apply py-3 px-4 text-ink; }
-  .table-head { @apply bg-brand-50 text-muted border-b border-line; }
+  .table-head { @apply bg-neutral-50 text-muted border-b border-line; }
   .row-line { @apply border-t border-line; }
 
   /*

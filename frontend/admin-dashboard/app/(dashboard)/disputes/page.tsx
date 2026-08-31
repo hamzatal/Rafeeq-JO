@@ -7,6 +7,8 @@ import { useT } from '../../../src/lib/i18n';
 import { Skeleton } from '../../../src/components/Skeleton';
 import { LoadError } from '../../../src/components/LoadError';
 import { Phone } from '../../../src/components/Phone';
+import { Num } from '../../../src/components/Num';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 const SEVERITY_CLASS: Record<string, string> = {
   low: 'bg-background text-muted',
@@ -90,7 +92,10 @@ export default function DisputesPage() {
 
   return (
     <div>
-      <h1 className="page-title mb-4">{t('disputes.title')}</h1>
+      <NavPageHeader
+        href="/disputes"
+        stat={loading ? undefined : <><Num value={items.length} /> نزاع</>}
+      />
 
       <div className="flex flex-wrap gap-2 mb-4">
         {[

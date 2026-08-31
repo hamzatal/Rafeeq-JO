@@ -47,6 +47,9 @@ export { alpha, brand, live, neutral, RETIRED, status } from './color';
 
 // The identity mark, as geometry both renderers draw from — see brand.ts.
 export { BRAND_MARK, BRAND_MARK_INK, brandMarkColors, brandMarkSvg } from './brand';
+
+// The splash road network, as data both renderers draw — see backdrop.ts.
+export { MAP_BACKDROP } from './backdrop';
 export type { BrandMarkOptions } from './brand';
 
 /* ── type ─────────────────────────────────────────────────────────────────── */

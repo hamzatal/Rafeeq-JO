@@ -3,174 +3,174 @@
     "slug": "login",
     "path": "/login",
     "title": "تسجيل الدخول",
-    "bytes": 1509361
+    "bytes": 121031
   },
   {
     "slug": "01-dashboard",
     "path": "/",
     "title": "لوحة القيادة",
-    "bytes": 112513
+    "bytes": 110657
   },
   {
     "slug": "02-ride-requests",
     "path": "/ride-requests",
     "title": "الطلبات الحيّة",
-    "bytes": 61578
+    "bytes": 68298
   },
   {
     "slug": "03-trips",
     "path": "/trips",
     "title": "الرحلات",
-    "bytes": 86324
+    "bytes": 91660
   },
   {
     "slug": "04-insights",
     "path": "/insights",
     "title": "الرؤى والتحليلات",
-    "bytes": 146494
+    "bytes": 147595
   },
   {
     "slug": "05-drivers",
     "path": "/drivers",
     "title": "الكباتن والتوثيق",
-    "bytes": 101889
+    "bytes": 109354
   },
   {
     "slug": "06-users",
     "path": "/users",
     "title": "المستخدمون",
-    "bytes": 154866
+    "bytes": 155396
   },
   {
     "slug": "07-geography-zones",
     "path": "/geography?tab=zones",
     "title": "الجغرافيا — المناطق",
-    "bytes": 129974
+    "bytes": 131846
   },
   {
     "slug": "08-geography-prices",
     "path": "/geography?tab=prices",
     "title": "الجغرافيا — أسعار المناطق",
-    "bytes": 159001
+    "bytes": 161474
   },
   {
     "slug": "09-geography-routes",
     "path": "/geography?tab=routes",
     "title": "الجغرافيا — المسارات",
-    "bytes": 82798
+    "bytes": 84767
   },
   {
     "slug": "10-geography-universities",
     "path": "/geography?tab=universities",
     "title": "الجغرافيا — الجامعات",
-    "bytes": 124198
+    "bytes": 126420
   },
   {
     "slug": "11-payments",
     "path": "/payments",
     "title": "المدفوعات",
-    "bytes": 63236
+    "bytes": 69583
   },
   {
     "slug": "12-withdrawals",
     "path": "/withdrawals",
     "title": "السحوبات",
-    "bytes": 64887
+    "bytes": 68725
   },
   {
     "slug": "13-pricing-tariff",
     "path": "/pricing?tab=tariff",
     "title": "التسعير — التعرفة والعمولة",
-    "bytes": 133648
+    "bytes": 135341
   },
   {
     "slug": "14-pricing-plans",
     "path": "/pricing?tab=plans",
     "title": "التسعير — الباقات",
-    "bytes": 105271
+    "bytes": 107200
   },
   {
     "slug": "15-pricing-subscriptions",
     "path": "/pricing?tab=subscriptions",
     "title": "التسعير — الاشتراكات",
-    "bytes": 113096
+    "bytes": 115165
   },
   {
     "slug": "16-pricing-coupons",
     "path": "/pricing?tab=coupons",
     "title": "التسعير — الكوبونات",
-    "bytes": 127104
+    "bytes": 129038
   },
   {
     "slug": "17-reports",
     "path": "/reports",
     "title": "التقارير المالية",
-    "bytes": 121857
+    "bytes": 122932
   },
   {
     "slug": "18-safety",
     "path": "/safety",
     "title": "السلامة و SOS",
-    "bytes": 69766
+    "bytes": 64681
   },
   {
     "slug": "19-support-tickets",
     "path": "/support?tab=tickets",
     "title": "الدعم — التذاكر",
-    "bytes": 70278
+    "bytes": 72201
   },
   {
     "slug": "20-support-complaints",
     "path": "/support?tab=complaints",
     "title": "الدعم — الشكاوى",
-    "bytes": 121679
+    "bytes": 121677
   },
   {
     "slug": "21-disputes",
     "path": "/disputes",
     "title": "التنازعات",
-    "bytes": 71204
+    "bytes": 69598
   },
   {
     "slug": "22-security-sessions",
     "path": "/security?tab=sessions",
     "title": "الأمان — الجلسات والمصادقة",
-    "bytes": 86672
+    "bytes": 86677
   },
   {
     "slug": "23-security-audit",
     "path": "/security?tab=audit",
     "title": "الأمان — سجلّ التدقيق",
-    "bytes": 96780
+    "bytes": 96848
   },
   {
     "slug": "24-settings-staff",
     "path": "/settings?tab=staff",
     "title": "الإعدادات — الموظفون والأدوار",
-    "bytes": 82006
+    "bytes": 82007
   },
   {
     "slug": "25-settings-cliq",
     "path": "/settings?tab=cliq",
     "title": "الإعدادات — إعداد CliQ",
-    "bytes": 90632
+    "bytes": 90640
   },
   {
     "slug": "26-settings-broadcast",
     "path": "/settings?tab=broadcast",
     "title": "الإعدادات — الإشعارات والبثّ",
-    "bytes": 127017
+    "bytes": 127022
   },
   {
     "slug": "27-settings-ads",
     "path": "/settings?tab=ads",
     "title": "الإعدادات — الإعلانات",
-    "bytes": 83059
+    "bytes": 85107
   },
   {
     "slug": "28-profile",
     "path": "/profile",
     "title": "ملفّي",
-    "bytes": 79741
+    "bytes": 84107
   }
 ]

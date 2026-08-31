@@ -6,6 +6,7 @@ import type { AdminInsights } from '@rafeeq/shared';
 import { api } from '../../../src/lib/api';
 import { useT } from '../../../src/lib/i18n';
 import { Icon } from '../../../src/components/Icon';
+import { NavPageHeader } from '../../../src/components/NavPageHeader';
 
 /*
  * Money goes through the shared formatter. It used to be:
@@ -53,19 +54,16 @@ export default function InsightsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap justify-between items-end gap-3">
-        <div>
-          <h1 className="page-title flex items-center gap-2">
-            <Icon name="brain" className="text-primary-dark" />
-            {t('nav.insights')}
-          </h1>
-          <p className="muted-text mt-1">{t('insights.subtitle')}</p>
-        </div>
+      <NavPageHeader
+        href="/insights"
+        stat={data ? new Date(data.generated_at).toLocaleString(locale) : undefined}
+        actions={
         <button onClick={load} className="btn-primary flex items-center gap-2" disabled={loading}>
           <Icon name="refresh-cw" size={18} />
           {t('insights.refresh')}
         </button>
-      </div>
+        }
+      />
 
       {error && <div className="rounded-lg border border-danger/30 bg-red-50 px-4 py-3 text-sm text-danger">{error}</div>}
 

@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState, Fragment } from 'react';
 import type { SupportTicket } from '@rafeeq/shared';
 import { api } from '../lib/api';
 import { LoadError } from '../components/LoadError';
+import { Icon } from '../components/Icon';
 
 const SENTIMENT: Record<string, string> = {
-  positive: '🙂 إيجابي',
-  neutral: '😐 محايد',
-  negative: '🙁 سلبي',
-  angry: '😠 غاضب',
+  positive: 'إيجابي',
+  neutral: 'محايد',
+  negative: 'سلبي',
+  angry: 'غاضب',
 };
 
 const STATUSES = [
@@ -101,7 +102,8 @@ export function TicketsView() {
                           className="ms-2 align-middle badge bg-primary/10 text-primary-dark border border-primary/30 text-[11px]"
                           title="فرز الذكاء الاصطناعي"
                         >
-                          ✨ AI {SENTIMENT[tk.ai_triage.sentiment] ?? tk.ai_triage.sentiment}
+                          <Icon name="sparkles" size={12} className="me-1 inline" />
+                          AI {SENTIMENT[tk.ai_triage.sentiment] ?? tk.ai_triage.sentiment}
                         </button>
                       )}
                     </td>
@@ -138,7 +140,10 @@ export function TicketsView() {
                           </div>
                           <div className="surface-text"><b>الملخّص:</b> {tk.ai_triage.summary}</div>
                           <div className="rounded-lg border border-line p-3 bg-surface">
-                            <div className="text-xs text-muted mb-1">رد مقترح (✨ AI):</div>
+                            <div className="text-xs text-muted mb-1 flex items-center gap-1">
+                              <Icon name="sparkles" size={12} />
+                              رد مقترح (AI):
+                            </div>
                             <div className="surface-text whitespace-pre-wrap">{tk.ai_triage.suggested_reply}</div>
                             <button
                               onClick={() => navigator.clipboard?.writeText(tk.ai_triage!.suggested_reply)}
