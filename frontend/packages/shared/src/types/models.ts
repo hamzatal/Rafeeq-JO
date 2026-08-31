@@ -87,6 +87,26 @@ export interface DriverDocument {
   uploaded_at: string | null;
 }
 
+/**
+ * Fleet-wide aggregates returned in `meta.stats` of the admin captain list.
+ *
+ * Counted over EVERY captain, deliberately independent of the page and the active
+ * status filter — the cards above the queue answer «how big is the backlog», and an
+ * aggregate that moves when you filter is not one.
+ */
+export interface DriverFleetStats {
+  total: number;
+  by_status: Record<DriverStatus, number>;
+  /** null — not 0 — when no captain has been rated yet. */
+  rating_avg: number | null;
+  /** The divisor behind the mean. 4.7 over two ratings is a different claim. */
+  rated_count: number;
+  /** Oldest still-unreviewed submission, for «أقدم طلب قبل N أيام». */
+  oldest_pending_at: string | null;
+  /** What «ناقص N» counts against. */
+  required_documents: number;
+}
+
 export interface DriverProfile {
   id: string;
   status: DriverStatus;

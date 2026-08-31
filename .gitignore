@@ -80,11 +80,25 @@ backend/database/*.sqlite
 stitch_*/
 stitch-ref/
 
-# ───────── Design mockups: intermediate HTML ─────────
-# `docs/design/src/gen-*.mjs` writes HTML next to itself, then `shoot.mjs` screenshots
-# it into `docs/design/v2` and `docs/design/readme`. The PNGs are the reviewed artefact
-# and are committed; the HTML is a build step. It only started landing in the repo once
-# the generators' output paths were fixed to resolve from their committed location —
-# before that they wrote into a phantom `src/Rafeeq-JO/` tree instead.
-docs/design/src/*.html
+# ───────── Design mockups ─────────
+# The APPROVED SHEETS — `docs/design/src/0X-*.html` — are the project's design
+# specification and are COMMITTED. They were ignored here as "intermediate build output"
+# while the PNG renders were kept as "the reviewed artefact", and that was backwards in
+# a way that cost the dashboard most of its design:
+#
+#   A PNG carries style — colour, radius, spacing, weight. It cannot carry structure:
+#   that a table has eight columns named «الطلب … الحالة», that a header pairs «تصدير
+#   CSV» with «دعوة كابتن», that four named cards sit above a queue. So "match the
+#   design" degraded into reading a picture and inferring, and `scripts/check-design-
+#   parity.mjs` measured the result at 31 of 103 required elements — while every other
+#   gate passed, because they all compared the code to itself.
+#
+# The sheets are text. Text can be diffed, grepped, reviewed in a PR, and gated in CI.
+# They stay in the repository.
+#
+# Only the throwaway render scaffolding is ignored: `r-*.html` are single-poster wrappers
+# that `gen-*.mjs` writes and `shoot.mjs` immediately screenshots, and `build/` holds the
+# marketing card intermediates.
+docs/design/src/r-*.html
+docs/design/src/build/
 docs/design/src/_mkt-index.json

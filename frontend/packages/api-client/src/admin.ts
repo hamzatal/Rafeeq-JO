@@ -4,6 +4,7 @@ import {
   type ApiSuccess,
   type Coupon,
   type DriverDocument,
+  type DriverFleetStats,
   type DriverProfile,
   type Route,
   type Subscription,
@@ -51,9 +52,11 @@ export class AdminApi {
     return { items: data.data, meta: data.meta };
   }
 
-  async listDrivers(params: ListParams = {}): Promise<{ items: DriverProfile[]; meta: ApiSuccess<DriverProfile[]>['meta'] }> {
+  async listDrivers(
+    params: ListParams = {},
+  ): Promise<{ items: DriverProfile[]; meta: ApiSuccess<DriverProfile[]>['meta']; stats?: DriverFleetStats }> {
     const { data } = await this.http.get<ApiSuccess<DriverProfile[]>>(ENDPOINTS.admin.drivers, { params });
-    return { items: data.data, meta: data.meta };
+    return { items: data.data, meta: data.meta, stats: data.meta?.stats as DriverFleetStats | undefined };
   }
 
   async getDriver(id: string): Promise<DriverProfile> {
